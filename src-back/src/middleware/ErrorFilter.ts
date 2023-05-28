@@ -10,15 +10,12 @@ export class ErrorFilter implements ExceptionFilter {
     let statusCode = 500;
     let message = 'Internal Server Error';
 
-    if (typeof exception === 'object' && exception.statusCode !== undefined) {
-      statusCode = exception.statusCode;
-      message = exception.message || message;
-    } else if (typeof exception === 'object' && exception.response.statusCode !== undefined) {
-      statusCode = exception.response.statusCode;
-      message = exception.response.message;
-    } else if (exception instanceof Error) {
-      message = exception.message || message;
-    } 
+    statusCode = exception?.response?.statusCode 
+      || exception?.status 
+      || statusCode;
+    message = exception?.response?.message 
+      || exception?.message 
+      || message;
 
     const errorResponse = new CommonResponse(false, ErrorResponse.createErrorFromObject(exception));
 

@@ -1,13 +1,13 @@
 import { Entity, Column } from "typeorm"
 import { BaseModel } from "./base.entity"
-import { Exclude } from "class-transformer";
+import { Exclude, classToPlain, instanceToPlain } from "class-transformer";
 import { ErrorResponse } from "src/dto/common.response.dto";
 
 @Entity({name: 'users'})
 export class User extends BaseModel {
   
   @Exclude()
-  private _email: string
+  _email: string
 
   get email(): string {
     return this._email;
@@ -38,5 +38,17 @@ export class User extends BaseModel {
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  toPlainObject() {
+    const plainUser = instanceToPlain(this);
+    return { ...plainUser, email: this.email };
+  }
+
+  toPlain() {
+    return {
+      ...this.toPlainObject(),
+      email: this.email,
+    };
   }
 }

@@ -16,20 +16,20 @@ export class ErrorResponse {
   static createErrorFromObject(obj: object | any): ErrorResponse {
     let err = new ErrorResponse();
 
-    if (obj.code) {
+    if (obj?.code) {
       err.statusCode = obj.code;
-    } else if (obj.status) {
+    } else if (obj?.status) {
       err.statusCode = obj.status;
-    } else if (obj.response.statusCode) {
+    } else if (obj?.response?.statusCode) {
       err.statusCode = obj.response.statusCode;
     } 
     else {
       err.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
-    if (obj.message) {
+    if (obj?.message) {
       err.message = obj.message;
-    } else if (obj.response.message) {
+    } else if (obj?.response?.message) {
       err.message = obj.response.message;
     } else {
       err.message = 'Unknown error';

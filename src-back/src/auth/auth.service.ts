@@ -30,6 +30,7 @@ export class AuthService {
       newUser.lastName = user.lastName;
 
       await newUser.save();
+
       return newUser;
     } catch (err) {
       if (err.code === '23505') {

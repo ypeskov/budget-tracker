@@ -14,7 +14,7 @@ import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
 import { SignInDTO } from './signInDTO';
 import { CreateUserDTO } from './createUser.DTO';
-import { CommonResponse, ErrorResponse } from 'src/dto/common.response.dto';
+import { CommonResponse } from 'src/dto/common.response.dto';
 import { plainToClass } from 'class-transformer';
 import { User } from 'src/models/user.entity';
 
@@ -38,7 +38,7 @@ export class AuthController {
   @Public()
   async createUser(@Body() user: CreateUserDTO): Promise<CommonResponse> {
     const createdUser = await this.authService.createUser(user);
-    const payload = plainToClass(User, createdUser);
+    const payload = createdUser.toPlain();
 
     return new CommonResponse(true, payload);
   }
