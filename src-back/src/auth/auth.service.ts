@@ -1,5 +1,5 @@
-import { Injectable, 
-  InternalServerErrorException, 
+import { ConflictException, 
+  Injectable, 
   UnauthorizedException } from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt'
@@ -8,6 +8,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/models/user.entity';
 import { CreateUserDTO } from './createUser.DTO';
+import { ErrorResponse } from 'src/dto/common.response.dto';
 
 
 const saltRounds = 10;
@@ -18,32 +19,25 @@ export class AuthService {
               private jwtService: JwtService
     ) {}
 
-  async createUser(user: CreateUserDTO): Promise<any> {
-    let passwordHash = '';
-
+  async createUser(user: CreateUserDTO): Promise<User> {
     try {
-      passwordHash = await bcrypt.hash(user.password, saltRounds);
-    } catch(err) {
-      throw err;
-    }
+      const passwordHash = await bcrypt.hash(user.password, saltRounds);
+      
+      const newUser = new User();
+      newUser.passwordHash = passwordHash;
+      newUser.email = user.email;
+      newUser.firstName = user.firstName;
+      newUser.lastName = user.lastName;
 
-    let newUser = new User();
-    newUser.passwordHash = passwordHash;
-    newUser.email = user.email;
-    newUser.firstName = user.firstName;
-    newUser.lastName = user.lastName;
-
-    try {
       await newUser.save();
-    } catch(err) {
+      return newUser;
+    } catch (err) {
       if (err.code === '23505') {
-        throw err;
+        throw new ConflictException('User already exists');
       } else {
-        throw new Error('Duplicate user');
+        throw err;
       }
     }
-    
-    return newUser;
   }
 
   async signIn(username: string, pass: string): Promise<any> {

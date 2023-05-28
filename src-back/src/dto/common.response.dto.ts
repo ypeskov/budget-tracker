@@ -1,14 +1,41 @@
+import { HttpStatus } from "@nestjs/common";
+
 export class ErrorResponse {
-  code: number
+  public statusCode: number
 
-  message: string
+  public message: string
 
-  meta: string | undefined
+  public meta: string | undefined
 
-  constructor(code: number, msg: string, meta='') {
-    this.code = code;
+  constructor(code: number=500, msg: string='', meta='') {
+    this.statusCode = code;
     this.message = msg;
     this.meta = meta;
+  }
+
+  static createErrorFromObject(obj: object | any): ErrorResponse {
+    let err = new ErrorResponse();
+
+    if (obj.code) {
+      err.statusCode = obj.code;
+    } else if (obj.status) {
+      err.statusCode = obj.status;
+    } else if (obj.response.statusCode) {
+      err.statusCode = obj.response.statusCode;
+    } 
+    else {
+      err.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+
+    if (obj.message) {
+      err.message = obj.message;
+    } else if (obj.response.message) {
+      err.message = obj.response.message;
+    } else {
+      err.message = 'Unknown error';
+    }
+
+    return err;
   }
 }
 
