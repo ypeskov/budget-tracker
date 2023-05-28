@@ -9,11 +9,13 @@ import {
   Request
 } from '@nestjs/common';
 
-// import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
 import { SignInDTO } from './signInDTO';
 import { CreateUserDTO } from './createUser.DTO';
+import { CommonResponse, ErrorResponse } from 'src/dto/common.response.dto';
+import { plainToClass } from 'class-transformer';
+import { User } from 'src/models/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -33,13 +35,18 @@ export class AuthController {
 
   @Post('/user')
   @Public()
-  async createUser(@Body() user: CreateUserDTO) {
+  async createUser(@Body() user: CreateUserDTO): Promise<CommonResponse> {
     try {
-      return await this.authService.createUser(user);
-    } catch(err: any) {
-      console.log(err.message);
-      return err.message;
+      const createdUser = await this.authService.createUser(user);
+      const payload = plainToClass(User, createdUser);
+
+      return new CommonResponse(true, payload);
+    } catch(err: Error | any) {
+      const response = new CommonResponse(false, new ErrorResponse(
+        HttpStatus.CONFLICT,
+        err.message
+      ));
+      return response;
     }
-    
   }
 }

@@ -30,6 +30,8 @@ export class AuthService {
     let newUser = new User();
     newUser.passwordHash = passwordHash;
     newUser.email = user.email;
+    newUser.firstName = user.firstName;
+    newUser.lastName = user.lastName;
 
     try {
       await newUser.save();

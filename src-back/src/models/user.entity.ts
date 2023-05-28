@@ -1,40 +1,41 @@
 import { Entity, Column } from "typeorm"
 import { BaseModel } from "./base.entity"
+import { Exclude } from "class-transformer";
 
 @Entity({name: 'users'})
 export class User extends BaseModel {
-    private _email: string
+  
+  @Exclude()
+  private _email: string
 
-    get email(): string {
-      return this._email;
+  get email(): string {
+    return this._email;
+  }
+
+  @Column({unique: true})
+  set email(email: string) {
+    if (!this.isValidEmail(email)) {
+      throw new Error('Incorrect email');
     }
-    
+    this._email = email;
+  }
 
-    @Column()
-    set email(email: string) {
-      console.log('p1')
-      console.log(email);
-      if (!this.isValidEmail(email)) {
-        throw new Error('Incorrect email');
-      }
-      this._email = email;
-    }
+  @Column({nullable: true})
+  firstName: string | null
 
-    @Column({nullable: true})
-    firstName: string | null
+  @Column({nullable: true})
+  lastName: string | null
 
-    @Column({nullable: true})
-    lastName: string | null
+  @Exclude()
+  @Column({default: ''})
+  passwordHash: string
 
-    @Column({default: ''})
-    passwordHash: string = ''
+  @Exclude()
+  @Column({default: true})
+  isActive: boolean = true
 
-    @Column({default: true})
-    isActive: boolean = true
-
-    private isValidEmail(email: string): boolean {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      console.log(emailRegex.test(email));
-      return emailRegex.test(email);
-    }
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
 }
