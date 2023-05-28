@@ -1,12 +1,48 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, 
+  InternalServerErrorException, 
+  UnauthorizedException } from '@nestjs/common';
+
+import * as bcrypt from 'bcrypt'
+
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/models/user.entity';
+import { CreateUserDTO } from './createUser.DTO';
+
+
+const saltRounds = 10;
 
 @Injectable()
 export class AuthService {
   constructor(private usersService: UsersService,
-                private jwtService: JwtService
+              private jwtService: JwtService
     ) {}
+
+  async createUser(user: CreateUserDTO): Promise<any> {
+    let passwordHash = '';
+
+    try {
+      passwordHash = await bcrypt.hash(user.password, saltRounds);
+    } catch(err) {
+      throw err;
+    }
+
+    let newUser = new User();
+    newUser.passwordHash = passwordHash;
+    newUser.email = user.email;
+
+    try {
+      await newUser.save();
+    } catch(err) {
+      if (err.code === '23505') {
+        throw err;
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
+    
+    return newUser;
+  }
 
   async signIn(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findOne(username);

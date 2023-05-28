@@ -1,10 +1,10 @@
 export class SignInDTO {
-    username: string
+    email: string
 
     password: string
 
     constructor(u: string, p: string) {
-        this.username = u;
+        this.email = u;
         this.password = p;
     }
 }
