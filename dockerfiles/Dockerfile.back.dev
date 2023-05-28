@@ -1,0 +1,14 @@
+FROM node:lts-hydrogen
+
+WORKDIR /app
+
+RUN npm install -g @nestjs/cli@8.0.0
+
+COPY . .
+
+RUN npm install
+
+EXPOSE 9000
+
+CMD ["npm", "run", "start:debug"]
+# CMD ["bash"]

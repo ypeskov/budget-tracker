@@ -1,0 +1,14 @@
+.DS_Store
+.env.local
+.env.dev
+.env.prod
+
+.idea/
+.vscode/
+node_modules/
+dist/
+build/
+tmp/
+temp/
+
+dbdata/
