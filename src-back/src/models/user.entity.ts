@@ -1,6 +1,7 @@
 import { Entity, Column } from "typeorm"
 import { BaseModel } from "./base.entity"
 import { Exclude } from "class-transformer";
+import { ErrorResponse } from "src/dto/common.response.dto";
 
 @Entity({name: 'users'})
 export class User extends BaseModel {
@@ -15,7 +16,7 @@ export class User extends BaseModel {
   @Column({unique: true})
   set email(email: string) {
     if (!this.isValidEmail(email)) {
-      throw new Error('Incorrect email');
+      throw new ErrorResponse(400, 'Incorrect Email');
     }
     this._email = email;
   }

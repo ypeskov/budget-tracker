@@ -1,5 +1,6 @@
 
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -36,17 +37,17 @@ export class AuthController {
   @Post('/user')
   @Public()
   async createUser(@Body() user: CreateUserDTO): Promise<CommonResponse> {
+    console.log(user);
     try {
       const createdUser = await this.authService.createUser(user);
       const payload = plainToClass(User, createdUser);
 
       return new CommonResponse(true, payload);
     } catch(err: Error | any) {
-      const response = new CommonResponse(false, new ErrorResponse(
-        HttpStatus.CONFLICT,
+      throw new BadRequestException(new CommonResponse(false, new ErrorResponse(
+        err.code,
         err.message
-      ));
-      return response;
+      )));
     }
   }
 }

@@ -39,7 +39,7 @@ export class AuthService {
       if (err.code === '23505') {
         throw err;
       } else {
-        throw new InternalServerErrorException();
+        throw new Error('Duplicate user');
       }
     }
     
