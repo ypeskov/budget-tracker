@@ -1,10 +1,11 @@
+import { IsNotEmpty, IsEmail, IsString } from "class-validator"
+
 export class SignInDTO {
+    @IsNotEmpty()
+    @IsEmail()
     email: string
 
+    @IsNotEmpty()
+    @IsString()
     password: string
-
-    constructor(u: string, p: string) {
-        this.email = u;
-        this.password = p;
-    }
 }

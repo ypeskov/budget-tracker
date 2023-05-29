@@ -9,24 +9,23 @@ import {
   Post,
   Request
 } from '@nestjs/common';
-
+ 
 import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
 import { SignInDTO } from './signInDTO';
 import { CreateUserDTO } from './createUser.DTO';
 import { CommonResponse } from 'src/dto/common.response.dto';
-import { plainToClass } from 'class-transformer';
-import { User } from 'src/models/user.entity';
 
-@Controller('auth')
+
+@Controller('auth') 
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @HttpCode(HttpStatus.OK)
   @Public()
   @Post('login')
-  signIn(@Body() signInDto: SignInDTO) {
-    return this.authService.signIn(signInDto.email, signInDto.password);
+  signIn(@Body() userSignIn: SignInDTO) {
+    return this.authService.signIn(userSignIn);
   }
 
   @Get('profile')

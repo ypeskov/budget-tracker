@@ -16,24 +16,17 @@ export class ErrorResponse {
   static createErrorFromObject(obj: object | any): ErrorResponse {
     let err = new ErrorResponse();
 
-    if (obj?.code) {
-      err.statusCode = obj.code;
-    } else if (obj?.status) {
-      err.statusCode = obj.status;
-    } else if (obj?.response?.statusCode) {
-      err.statusCode = obj.response.statusCode;
-    } 
-    else {
-      err.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-    }
+    console.log('+++')
+    console.log(obj)
+    console.log('---')
+    err.statusCode = obj?.code 
+      || obj?.response?.statusCode 
+      || obj?.statusCode 
+      || HttpStatus.INTERNAL_SERVER_ERROR;
 
-    if (obj?.message) {
-      err.message = obj.message;
-    } else if (obj?.response?.message) {
-      err.message = obj.response.message;
-    } else {
-      err.message = 'Unknown error';
-    }
+    err.message = obj?.response?.message 
+      || obj?.message 
+      || 'Unknown error';
 
     return err;
   }

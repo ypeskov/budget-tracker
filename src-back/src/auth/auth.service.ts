@@ -8,7 +8,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/models/user.entity';
 import { CreateUserDTO } from './createUser.DTO';
-import { ErrorResponse } from 'src/dto/common.response.dto';
+import { SignInDTO } from './signInDTO';
 
 
 const saltRounds = 10;
@@ -41,12 +41,13 @@ export class AuthService {
     }
   }
 
-  async signIn(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOne(username);
-    if (user?.password !== pass) {
+  async signIn(userSignIn: SignInDTO): Promise<any> {
+    const user = await this.usersService.findOneByEmail(userSignIn.email);
+
+    if (! await bcrypt.compare(userSignIn.password, user.passwordHash)) {
       throw new UnauthorizedException();
     }
-    const payload = { sub: user.userId, username: user.username };
+    const payload = {...user.toPlain()};
     
     return {
       access_token: await this.jwtService.signAsync(payload),
