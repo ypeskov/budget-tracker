@@ -16,9 +16,6 @@ export class ErrorResponse {
   static createErrorFromObject(obj: object | any): ErrorResponse {
     let err = new ErrorResponse();
 
-    console.log('+++')
-    console.log(obj)
-    console.log('---')
     err.statusCode = obj?.code 
       || obj?.response?.statusCode 
       || obj?.statusCode 
