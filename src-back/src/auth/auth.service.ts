@@ -47,7 +47,7 @@ export class AuthService {
     if (! await bcrypt.compare(userSignIn.password, user.passwordHash)) {
       throw new UnauthorizedException();
     }
-    const payload = {...user.toPlain()};
+    const payload = {...user.toPlainObject()};
     
     return {
       access_token: await this.jwtService.signAsync(payload),

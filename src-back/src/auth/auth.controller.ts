@@ -37,7 +37,7 @@ export class AuthController {
   @Public()
   async createUser(@Body() user: CreateUserDTO): Promise<CommonResponse> {
     const createdUser = await this.authService.createUser(user);
-    const payload = createdUser.toPlain();
+    const payload = createdUser.toPlainObject();
 
     return new CommonResponse(true, payload);
   }

@@ -44,11 +44,4 @@ export class User extends BaseModel {
     const plainUser = instanceToPlain(this);
     return { ...plainUser, email: this.email };
   }
-
-  toPlain() {
-    return {
-      ...this.toPlainObject(),
-      email: this.email,
-    };
-  }
 }
