@@ -3,6 +3,8 @@
 .env.dev
 .env.prod
 
+__pycache__/
+
 .idea/
 .vscode/
 node_modules/
@@ -10,5 +12,6 @@ dist/
 build/
 tmp/
 temp/
+venv/
 
 dbdata/
