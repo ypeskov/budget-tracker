@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
+    id: int | None
     email: str
 
     class Config:
