@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from fastapi import APIRouter, Depends, HTTPException
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
@@ -73,7 +75,9 @@ def create_access_token(data: dict, expires_delta: timedelta):
     """
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})
+
+    to_encode.update({"exp": expire, 'exp_human': expire.strftime("%Y-%m-%d %H:%M:%S")})
+
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
     return encoded_jwt
 

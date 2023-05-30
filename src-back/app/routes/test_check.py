@@ -1,14 +1,6 @@
 from pprint import pprint
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from passlib.context import CryptContext
-from datetime import datetime, timedelta
-import jwt
-from sqlalchemy.orm import Session
-
-from app.database import get_db
-from app.models.User import User
-from app.schemas.schemas import UserRegistration, UserLoginSchema, Token, UserResponse
+from fastapi import APIRouter, Depends, Request
 from app.dependencies.check_token import check_token
 
 
