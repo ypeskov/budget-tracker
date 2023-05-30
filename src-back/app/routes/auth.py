@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.User import User
-from app.schemas.schemas import UserRegistration, UserLogin, Token, UserResponse
+from app.schemas.schemas import UserRegistration, UserLoginSchema, Token, UserResponse
 
 router = APIRouter(prefix='/auth')
 
@@ -19,6 +19,7 @@ SECRET_KEY = "your-secret-key"
 
 # JWT expiration time (30 minutes in this example)
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 
 @router.post("/register", response_model=UserResponse)
 def register_user(user_request: UserRegistration, db: Session = Depends(get_db)):
@@ -40,12 +41,12 @@ def register_user(user_request: UserRegistration, db: Session = Depends(get_db))
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    pprint(UserResponse.from_orm(new_user))
 
     return UserResponse.from_orm(new_user)
 
+
 @router.post("/login", response_model=Token)
-def login_user(user_login: UserLogin, db: Session = Depends(get_db)):
+def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)):
     """
     Authenticate user and generate JWT.
     """
@@ -57,9 +58,10 @@ def login_user(user_login: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={**UserResponse.from_orm(user).dict()}, expires_delta=access_token_expires)
 
     return {"access_token": access_token, "token_type": "bearer"}
+
 
 def create_access_token(data: dict, expires_delta: timedelta):
     """
