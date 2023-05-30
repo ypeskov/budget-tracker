@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.User import User
-from app.schemas.schemas import UserRegistration, UserLoginSchema, Token, UserResponse
-from app.dependencies.check_token import check_token
+from app.schemas.user_schema import UserRegistration, UserLoginSchema, UserResponse
+from app.schemas.token_schema import Token
 
 
 router = APIRouter(
