@@ -1,24 +1,19 @@
-from sqlalchemy import Column, String, Boolean, Integer, DateTime, func, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, func, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.database import Base
 
-# from .Account import Account
 
-
-class User(Base):
-    __tablename__ = "users"
+class BaseCurrencyChangeHistory(Base):
+    __tablename__ = 'base_currency_change_history'
 
     id = Column(Integer, primary_key=True)
-
-    email = Column(String, unique=True, index=True, nullable=False)
-    first_name = Column(String, index=True)
-    last_name = Column(String, index=True)
-    password_hash = Column(String)
-    is_active = Column(Boolean)
+    user_id = Column(Integer, ForeignKey('users.id'))
     base_currency_id = Column(Integer, ForeignKey('currencies.id'))
+    change_date_time = Column(DateTime, default=func.now())
+
+    user = relationship("User")
     base_currency = relationship("Currency")
-    accounts = relationship("Account", order_by="Account.id", back_populates="user")
 
     is_deleted = Column(Boolean, default=False, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
