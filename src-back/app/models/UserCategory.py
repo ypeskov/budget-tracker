@@ -1,19 +1,19 @@
-from sqlalchemy import Column, Integer, DateTime, func, Boolean, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, func, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.database import Base
 
 
-class BaseCurrencyChangeHistory(Base):
-    __tablename__ = 'base_currency_change_history'
+class UserCategory(Base):
+    __tablename__ = 'user_categories'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    base_currency_id = Column(Integer, ForeignKey('currencies.id'))
-    change_date_time = Column(DateTime(timezone=True), index=True, default=func.now())
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
+    name = Column(String, nullable=False, index=True)
+    parent_id = Column(Integer, ForeignKey('user_categories.id'), nullable=True, index=True)
 
     user = relationship("User")
-    base_currency = relationship("Currency")
+    parent = relationship("UserCategory")
 
     is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

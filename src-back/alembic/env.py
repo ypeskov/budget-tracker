@@ -32,8 +32,8 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from app.database import Base
-from app.models import Account, AccountType, BaseCurrencyChangeHistory, Category, \
-    CreditAccountDetails, Currency, ExchangeRateHistory, Transaction
+from app.models import Account, AccountType, BaseCurrencyChangeHistory, DefaultCategory, \
+    UserCategory, CreditAccountDetails, Currency, ExchangeRateHistory, Transaction, User
 target_metadata = [Base.metadata]
 
 # other values from the config, defined by the needs of env.py,
