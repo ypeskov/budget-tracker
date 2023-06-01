@@ -1,24 +1,16 @@
 from pprint import pprint
 
-from fastapi import APIRouter, Depends, HTTPException
-from datetime import datetime, timedelta
-import jwt
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.User import User
 from app.schemas.user_schema import UserRegistration, UserLoginSchema, UserResponse
 from app.schemas.token_schema import Token
-from app.services.user.registration import create_user
-
+from app.services.user.auth import create_user, get_jwt_token
 
 router = APIRouter(
     prefix='/auth'
 )
-
-
-# JWT expiration time (30 minutes in this example)
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 @router.post("/register", response_model=UserResponse)
@@ -26,9 +18,7 @@ def register_user(user_request: UserRegistration, db: Session = Depends(get_db))
     """
     Register a new user route
     """
-    new_user = create_user(user_request, db)
-
-    return UserResponse.from_orm(new_user)
+    return UserResponse.from_orm(create_user(user_request, db))
 
 
 @router.post("/login", response_model=Token)
@@ -36,29 +26,4 @@ def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)):
     """
     Authenticate user and generate JWT.
     """
-    user = db.query(User).filter(User.email == user_login.email).first()
-    if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-
-    if not pwd_context.verify(user_login.password, user.password_hash):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={**UserResponse.from_orm(user).dict()}, expires_delta=access_token_expires)
-
-    return {"access_token": access_token, "token_type": "bearer"}
-
-
-def create_access_token(data: dict, expires_delta: timedelta):
-    """
-    Generate JWT access token.
-    """
-    to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
-
-    to_encode.update({"exp": expire, 'exp_human': expire.strftime("%Y-%m-%d %H:%M:%S")})
-
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
-    return encoded_jwt
-
-
+    return get_jwt_token(user_login, db)
