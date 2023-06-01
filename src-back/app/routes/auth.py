@@ -1,7 +1,6 @@
 from pprint import pprint
 
 from fastapi import APIRouter, Depends, HTTPException
-from passlib.context import CryptContext
 from datetime import datetime, timedelta
 import jwt
 from sqlalchemy.orm import Session
@@ -10,18 +9,13 @@ from app.database import get_db
 from app.models.User import User
 from app.schemas.user_schema import UserRegistration, UserLoginSchema, UserResponse
 from app.schemas.token_schema import Token
+from app.services.user.registration import create_user
 
 
 router = APIRouter(
     prefix='/auth'
 )
 
-
-# Password hashing configuration
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Secret key for JWT generation
-SECRET_KEY = "your-secret-key"
 
 # JWT expiration time (30 minutes in this example)
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -30,23 +24,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 @router.post("/register", response_model=UserResponse)
 def register_user(user_request: UserRegistration, db: Session = Depends(get_db)):
     """
-    Register a new user.
+    Register a new user route
     """
-    existing_user = db.query(User).filter(User.email == user_request.email).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="User with this email already exists")
-
-    hashed_password = pwd_context.hash(user_request.password)
-    new_user = User(
-        email=user_request.email,
-        first_name=user_request.first_name,
-        last_name=user_request.last_name,
-        password_hash=hashed_password,
-        is_active=True)
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    new_user = create_user(user_request, db)
 
     return UserResponse.from_orm(new_user)
 

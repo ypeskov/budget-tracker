@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship
 
 from app.database import Base
 
+from .AccountType import AccountType
+
 ACCOUNT_NAME_MAX_LENGTH = 100
 
 

@@ -1,9 +1,12 @@
 from sqlalchemy import Column, String, Boolean, Integer, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship
 
+from .Account import Account
+
 from app.database import Base
 
-# from .Account import Account
+
+DEFAULT_CURRENCY_CODE = 'USD'
 
 
 class User(Base):
@@ -17,8 +20,9 @@ class User(Base):
     password_hash = Column(String)
     is_active = Column(Boolean, server_default='t')
     base_currency_id = Column(Integer, ForeignKey('currencies.id'))
+
     base_currency = relationship("Currency")
-    accounts = relationship("Account", order_by="Account.id", back_populates="user_id")
+    accounts = relationship("Account", order_by="Account.id", back_populates="user")
 
     is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
