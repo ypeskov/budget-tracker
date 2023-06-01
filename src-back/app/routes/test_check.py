@@ -8,7 +8,6 @@ router = APIRouter(
     prefix='/test',
     dependencies=[Depends(check_token)]
 )
-pprint(router.dependencies)
 
 
 @router.get('/check', name='test_check')

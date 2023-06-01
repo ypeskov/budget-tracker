@@ -11,8 +11,9 @@ class DefaultCategory(Base):
 
     name = Column(String, index=True)
     parent_id = Column(Integer, ForeignKey('default_categories.id'))
+    is_income = Column(Boolean, default=False, server_default='f')
 
-    parent = relationship("Category")
+    parent = relationship("DefaultCategory")
 
     is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
