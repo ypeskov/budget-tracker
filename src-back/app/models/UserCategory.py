@@ -13,7 +13,7 @@ class UserCategory(Base):
     parent_id = Column(Integer, ForeignKey('user_categories.id'), nullable=True, index=True)
     is_income = Column(Boolean, default='f', server_default='f')
 
-    user = relationship("User")
+    user = relationship("User", back_populates="categories")
     parent = relationship("UserCategory")
 
     is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')

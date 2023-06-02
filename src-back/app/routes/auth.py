@@ -15,15 +15,9 @@ router = APIRouter(
 
 @router.post("/register", response_model=UserResponse)
 def register_user(user_request: UserRegistration, db: Session = Depends(get_db)):
-    """
-    Register a new user route
-    """
     return UserResponse.from_orm(create_user(user_request, db))
 
 
 @router.post("/login", response_model=Token)
 def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)):
-    """
-    Authenticate user and generate JWT.
-    """
     return get_jwt_token(user_login, db)

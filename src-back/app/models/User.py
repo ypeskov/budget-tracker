@@ -23,6 +23,7 @@ class User(Base):
 
     base_currency = relationship("Currency")
     accounts = relationship("Account", order_by="Account.id", back_populates="user")
+    categories = relationship("UserCategory", back_populates="user")
 
     is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
