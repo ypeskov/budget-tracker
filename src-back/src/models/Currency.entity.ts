@@ -6,9 +6,11 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
   } from 'typeorm';
+
+import { BaseModel } from "./base.entity"
   
 @Entity({ name: 'currencies' })
-export class Currency {
+export class Currency extends BaseModel {
   @PrimaryGeneratedColumn()
   id: number;
 

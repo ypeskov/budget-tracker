@@ -9,9 +9,11 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/models/User.entity';
 import { CreateUserDTO } from './createUser.DTO';
 import { SignInDTO } from './signInDTO';
+import { Currency } from 'src/models/Currency.entity';
 
 
 const saltRounds = 10;
+const DEFAULT_CURRENCY_CODE = 'USD';
 
 @Injectable()
 export class AuthService {
@@ -28,9 +30,18 @@ export class AuthService {
       newUser.email = user.email;
       newUser.firstName = user.firstName;
       newUser.lastName = user.lastName;
+      
+      let currency: Currency = await Currency.findOneByOrFail({code: 'USD'});
+  
+      if (currency) {
+        newUser.base_currency = currency;
+      } else {
+        console.log('Currency not found');
+      }
 
       await newUser.save();
-
+      const qq = newUser.toPlainObject();
+      console.log(qq)
       return newUser;
     } catch (err) {
       if (err.code === '23505') {

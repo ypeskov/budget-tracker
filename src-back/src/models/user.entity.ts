@@ -46,15 +46,14 @@ export class User extends BaseModel {
   lastName: string;
 
   @Column()
+  @Exclude()
   passwordHash: string;
 
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
 
-  @Column()
-  base_currency_id: number;
-
   @ManyToOne(() => Currency)
+  @Exclude()
   base_currency: Currency;
 
   @OneToMany(() => Account, (account) => account.user)
