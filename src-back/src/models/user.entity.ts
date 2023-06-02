@@ -1,11 +1,26 @@
-import { Entity, Column } from "typeorm"
-import { BaseModel } from "./base.entity"
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+  ManyToOne,
+} from 'typeorm';
 import { Exclude, classToPlain, instanceToPlain } from "class-transformer";
-import { ErrorResponse } from "src/dto/common.response.dto";
 
-@Entity({name: 'users'})
+import { BaseModel } from "./base.entity"
+import { Account } from './Account.entity';
+import { Currency } from './Currency.entity';
+import { UserCategory } from './UserCategory.entity';
+import { ErrorResponse } from "../dto/common.response.dto";
+
+@Entity({ name: 'users' })
 export class User extends BaseModel {
-  
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Exclude()
   _email: string
 
@@ -14,6 +29,7 @@ export class User extends BaseModel {
   }
 
   @Column({unique: true})
+  @Index()
   set email(email: string) {
     if (!this.isValidEmail(email)) {
       throw new ErrorResponse(400, 'Incorrect Email');
@@ -21,27 +37,48 @@ export class User extends BaseModel {
     this._email = email;
   }
 
-  @Column({nullable: true})
-  firstName: string | null
+  @Column()
+  @Index()
+  firstName: string;
 
-  @Column({nullable: true})
-  lastName: string | null
+  @Column()
+  @Index()
+  lastName: string;
 
-  @Exclude()
-  @Column({default: ''})
-  passwordHash: string
+  @Column()
+  passwordHash: string;
 
-  @Exclude()
-  @Column({default: true})
-  isActive: boolean = true
+  @Column({ type: 'boolean', default: true })
+  is_active: boolean;
 
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
+  @Column()
+  base_currency_id: number;
+
+  @ManyToOne(() => Currency)
+  base_currency: Currency;
+
+  @OneToMany(() => Account, (account) => account.user)
+  accounts: Account[];
+
+  @OneToMany(() => UserCategory, (category) => category.user)
+  categories: UserCategory[];
+
+  @Column({ type: 'boolean', nullable: true, default: false })
+  is_deleted: boolean;
+
+  @CreateDateColumn({ type: 'timestamp with time zone', nullable: false })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp with time zone', nullable: false })
+  updated_at: Date;
 
   toPlainObject() {
     const plainUser = instanceToPlain(this);
     return { ...plainUser, email: this.email };
+  }
+
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
 }
