@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: ccd31190b0de
+Revision ID: 00103dd42729
 Revises: 
-Create Date: 2023-05-31 19:44:58.036419
+Create Date: 2023-06-02 04:31:24.269160
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ccd31190b0de'
+revision = '00103dd42729'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -43,6 +43,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
     sa.Column('parent_id', sa.Integer(), nullable=True),
+    sa.Column('is_income', sa.Boolean(), server_default='f', nullable=True),
     sa.Column('is_deleted', sa.Boolean(), server_default='f', nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -121,6 +122,7 @@ def upgrade() -> None:
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('parent_id', sa.Integer(), nullable=True),
+    sa.Column('is_income', sa.Boolean(), server_default='f', nullable=True),
     sa.Column('is_deleted', sa.Boolean(), server_default='f', nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
