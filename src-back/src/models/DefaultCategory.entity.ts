@@ -7,35 +7,24 @@ import {
   UpdateDateColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 
-@Entity({ name: 'default_categories' })
-export class DefaultCategory {
-  @PrimaryGeneratedColumn()
-  id: number;
+import { BaseModel } from "./base.entity"
 
+@Entity({ name: 'default_categories' })
+export class DefaultCategory extends BaseModel {
   @Column()
   @Index()
-  name: string;
-
-  @Column({ nullable: true })
-  parent_id: number;
+  name?: string;
 
   @ManyToOne(() => DefaultCategory, (category) => category.children)
-  parent: DefaultCategory;
+  parent?: DefaultCategory;
 
   @OneToMany(() => DefaultCategory, (category) => category.parent)
-  children: DefaultCategory[];
+  children?: DefaultCategory[] = null;
 
-  @Column({ type: 'boolean', default: false })
-  is_income: boolean;
+  @Column({ type: 'boolean', default: false, nullable: true })
+  is_income: boolean = false;
 
-  @Column({ type: 'boolean', nullable: true, default: false })
-  is_deleted: boolean;
-
-  @CreateDateColumn({ type: 'timestamp with time zone', nullable: false })
-  created_at: Date;
-
-  @UpdateDateColumn({ type: 'timestamp with time zone', nullable: false })
-  updated_at: Date;
 }

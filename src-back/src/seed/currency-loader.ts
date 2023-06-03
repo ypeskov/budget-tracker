@@ -4,9 +4,7 @@ import { dataSourceOptions } from '../data-source';
 
 export async function loadDefaultCurrencies() {
   try {
-    const connectionOptions = dataSourceOptions;
-
-    const connection = await createConnection(connectionOptions);
+    const connection = await createConnection(dataSourceOptions);
     const currencyRepository = connection.getRepository(Currency);
 
     const defaultValues = [
@@ -32,5 +30,3 @@ export async function loadDefaultCurrencies() {
     console.error('Error while loading currencies:', error);
   }
 }
-
-loadDefaultCurrencies();

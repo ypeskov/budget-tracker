@@ -8,7 +8,7 @@ import {
   OneToMany,
   ManyToOne,
 } from 'typeorm';
-import { Exclude, classToPlain, instanceToPlain } from "class-transformer";
+import { Exclude, instanceToPlain } from "class-transformer";
 
 import { BaseModel } from "./base.entity"
 import { Account } from './Account.entity';
@@ -50,6 +50,7 @@ export class User extends BaseModel {
   passwordHash: string;
 
   @Column({ type: 'boolean', default: true })
+  @Exclude()
   is_active: boolean;
 
   @ManyToOne(() => Currency)
@@ -62,8 +63,7 @@ export class User extends BaseModel {
   @OneToMany(() => UserCategory, (category) => category.user)
   categories: UserCategory[];
 
-  @Column({ type: 'boolean', nullable: true, default: false })
-  is_deleted: boolean;
+
 
   @CreateDateColumn({ type: 'timestamp with time zone', nullable: false })
   created_at: Date;
