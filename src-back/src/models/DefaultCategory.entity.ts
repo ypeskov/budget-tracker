@@ -8,6 +8,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  PrimaryColumnCannotBeNullableError,
 } from 'typeorm';
 
 import { BaseModel } from "./base.entity"
@@ -18,11 +19,14 @@ export class DefaultCategory extends BaseModel {
   @Index()
   name?: string;
 
+  @Column({nullable: true})
+  parent_id: number = null;
+
   @ManyToOne(() => DefaultCategory, (category) => category.children)
-  parent?: DefaultCategory;
+  parent?: DefaultCategory = null;
 
   @OneToMany(() => DefaultCategory, (category) => category.parent)
-  children?: DefaultCategory[] = null;
+  children: DefaultCategory[];
 
   @Column({ type: 'boolean', default: false, nullable: true })
   is_income: boolean = false;

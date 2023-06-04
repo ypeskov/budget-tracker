@@ -8,7 +8,7 @@ export async function loadDefaultCategories() {
     const categoryRepository = connection.getRepository(DefaultCategory);
 
     const template: any = {
-      // children: undefined,
+      parent_id: null,
       is_income: undefined,
       is_deleted: undefined,
       created_at: new Date(),
@@ -38,14 +38,14 @@ export async function loadDefaultCategories() {
     try {
       await categoryRepository.save(defaultValues);
 
-      const parentAutomobile = await DefaultCategory.findOneByOrFail({id: 3});
+      const parentAutomobile = await DefaultCategory.findOneByOrFail({name: 'Automobile'});
       defaultValues = [
         { id: 12, name: 'Fuel', parent: parentAutomobile, ...template },
         { id: 13, name: 'Service', parent: parentAutomobile, ...template },
       ];
       await categoryRepository.save(defaultValues);
 
-      const transportAutomobile = await DefaultCategory.findOneByOrFail({id: 4});
+      const transportAutomobile = await DefaultCategory.findOneByOrFail({name: 'Transport'});
       defaultValues = [
         { id: 14, name: 'Taxi', parent: transportAutomobile, ...template },
         { id: 15, name: 'Food', parent: transportAutomobile, ...template },

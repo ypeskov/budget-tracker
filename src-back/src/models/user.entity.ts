@@ -1,12 +1,10 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   Index,
-  CreateDateColumn,
-  UpdateDateColumn,
   OneToMany,
   ManyToOne,
+  JoinColumn
 } from 'typeorm';
 import { Exclude, instanceToPlain } from "class-transformer";
 
@@ -18,9 +16,6 @@ import { ErrorResponse } from "../dto/common.response.dto";
 
 @Entity({ name: 'users' })
 export class User extends BaseModel {
-  @PrimaryGeneratedColumn()
-  id: number;
-
   @Exclude()
   _email: string
 
@@ -55,6 +50,7 @@ export class User extends BaseModel {
 
   @ManyToOne(() => Currency)
   @Exclude()
+  @JoinColumn({name: 'currency_id'})
   base_currency: Currency;
 
   @OneToMany(() => Account, (account) => account.user)
@@ -62,14 +58,6 @@ export class User extends BaseModel {
 
   @OneToMany(() => UserCategory, (category) => category.user)
   categories: UserCategory[];
-
-
-
-  @CreateDateColumn({ type: 'timestamp with time zone', nullable: false })
-  created_at: Date;
-
-  @UpdateDateColumn({ type: 'timestamp with time zone', nullable: false })
-  updated_at: Date;
 
   toPlainObject() {
     const plainUser = instanceToPlain(this);

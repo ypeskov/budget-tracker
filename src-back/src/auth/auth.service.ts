@@ -10,6 +10,9 @@ import { User } from 'src/models/User.entity';
 import { CreateUserDTO } from './createUser.DTO';
 import { SignInDTO } from './signInDTO';
 import { Currency } from 'src/models/Currency.entity';
+import { DefaultCategory } from 'src/models/DefaultCategory.entity';
+import { UserCategory } from 'src/models/UserCategory.entity';
+import { MongoNetworkTimeoutError } from 'typeorm';
 
 
 const saltRounds = 10;
@@ -40,13 +43,15 @@ export class AuthService {
       }
 
       await newUser.save();
-      const qq = newUser.toPlainObject();
-      console.log(qq)
+      this.copyAllCategories(newUser.id);
+      
       return newUser;
     } catch (err) {
       if (err.code === '23505') {
+        console.log(err);
         throw new ConflictException('User already exists');
       } else {
+        console.log(err);
         throw err;
       }
     }
@@ -63,5 +68,32 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
+  }
+
+  async copyCategories(defaultCategory: DefaultCategory, 
+                        userId: number, 
+                        parentId?: number): Promise<void> {
+    const newCategory = new UserCategory();
+    newCategory.name = defaultCategory.name;
+    newCategory.parent = {id: parentId} as UserCategory;
+    newCategory.is_income = defaultCategory.is_income;
+    newCategory.user = { id: userId } as User;
+    await newCategory.save()
+
+    if (defaultCategory.children) {
+      for (const child of defaultCategory.children) {
+        await this.copyCategories(child, userId, newCategory.id);
+      }
+    }
+  }
+
+  async copyAllCategories(userId: number): Promise<void> {
+    const rootCategories = await DefaultCategory.find({
+      where: { parent_id: null},
+      relations: ['children']
+    });
+    for (const rootCategory of rootCategories) {
+      await this.copyCategories(rootCategory, userId);
+    }
   }
 }
