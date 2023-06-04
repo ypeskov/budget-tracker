@@ -9,8 +9,8 @@ export async function loadDefaultCategories() {
 
     const template: any = {
       parent_id: null,
-      is_income: undefined,
-      is_deleted: undefined,
+      is_income: false,
+      is_deleted: false,
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -26,13 +26,13 @@ export async function loadDefaultCategories() {
       { id: 8, name: 'Entertainment', ...template},
       { id: 9, name: 'Finances', ...template},
       { id: 10, name: 'Other', ...template},
-      { id: 11, name: 'Parking', ...template },
-      { id: 16, name: 'Salary', ...template },
-      { id: 17, name: 'Deposit', ...template },
-      { id: 18, name: 'Present', ...template },
-      { id: 19, name: 'Rent', ...template },
-      { id: 20, name: 'Social', ...template },
-      { id: 21, name: 'Other', ...template },
+      
+      { id: 16, name: 'Salary', ...template, is_income: true },
+      { id: 17, name: 'Deposit', ...template, is_income: true },
+      { id: 18, name: 'Present', ...template, is_income: true },
+      { id: 19, name: 'Rent', ...template, is_income: true },
+      { id: 20, name: 'Social', ...template, is_income: true },
+      { id: 21, name: 'Other', ...template, is_income: true },
     ];
 
     try {
@@ -40,15 +40,16 @@ export async function loadDefaultCategories() {
 
       const parentAutomobile = await DefaultCategory.findOneByOrFail({name: 'Automobile'});
       defaultValues = [
-        { id: 12, name: 'Fuel', parent: parentAutomobile, ...template },
-        { id: 13, name: 'Service', parent: parentAutomobile, ...template },
+        { ...template, name: 'Parking', parent: parentAutomobile,},
+        { ...template, name: 'Fuel', parent: parentAutomobile,},
+        { ...template, name: 'Service', parent: parentAutomobile,},
       ];
       await categoryRepository.save(defaultValues);
 
       const transportAutomobile = await DefaultCategory.findOneByOrFail({name: 'Transport'});
       defaultValues = [
-        { id: 14, name: 'Taxi', parent: transportAutomobile, ...template },
-        { id: 15, name: 'Food', parent: transportAutomobile, ...template },
+        { ...template, name: 'Taxi', parent: transportAutomobile, },
+        { ...template, name: 'Airplane', parent: transportAutomobile, },
       ];
       await categoryRepository.save(defaultValues);
 
@@ -61,4 +62,8 @@ export async function loadDefaultCategories() {
   } catch (error) {
     console.error('Error while loading currencies:', error);
   }
+}
+
+if (require.main === module) {
+  loadDefaultCategories();
 }

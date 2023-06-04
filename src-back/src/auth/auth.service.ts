@@ -88,10 +88,10 @@ export class AuthService {
   }
 
   async copyAllCategories(userId: number): Promise<void> {
-    const rootCategories = await DefaultCategory.find({
-      where: { parent_id: null},
-      relations: ['children']
-    });
+    const rootCategories = await DefaultCategory.createQueryBuilder('category')
+      .where('category.parent IS NULL')
+      .leftJoinAndSelect('category.children', 'children')
+      .getMany();
     for (const rootCategory of rootCategories) {
       await this.copyCategories(rootCategory, userId);
     }

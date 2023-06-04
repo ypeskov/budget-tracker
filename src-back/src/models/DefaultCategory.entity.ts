@@ -19,10 +19,8 @@ export class DefaultCategory extends BaseModel {
   @Index()
   name?: string;
 
-  @Column({nullable: true})
-  parent_id: number = null;
-
   @ManyToOne(() => DefaultCategory, (category) => category.children)
+  @JoinColumn({name: 'parent_id'})
   parent?: DefaultCategory = null;
 
   @OneToMany(() => DefaultCategory, (category) => category.parent)
