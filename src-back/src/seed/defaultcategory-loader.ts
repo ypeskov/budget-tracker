@@ -1,11 +1,11 @@
-import { createConnection } from 'typeorm';
-import { dataSourceOptions } from '../data-source';
+import dataSource from '../data-source';
 import { DefaultCategory } from '../models/DefaultCategory.entity';
 
 export async function loadDefaultCategories() {
   try {
-    const connection = await createConnection(dataSourceOptions);
-    const categoryRepository = connection.getRepository(DefaultCategory);
+    await dataSource.initialize();    
+
+    const categoryRepository = dataSource.getRepository(DefaultCategory);
 
     const template: any = {
       parent_id: null,
@@ -58,7 +58,7 @@ export async function loadDefaultCategories() {
       console.error(error);
     }
 
-    await connection.destroy();
+    await dataSource.destroy();
   } catch (error) {
     console.error('Error while loading currencies:', error);
   }
