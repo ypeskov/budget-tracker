@@ -6,6 +6,7 @@ import { UsersModule } from './modules/users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './data-source';
+import { TransactionsModule } from './modules/transactions/transactions/transactions.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { dataSourceOptions } from './data-source';
       // autoLoadEntities: true
     }),
     AuthModule, 
-    UsersModule
+    UsersModule, 
+    TransactionsModule
   ],
   controllers: [AppController],
   providers: [AppService],

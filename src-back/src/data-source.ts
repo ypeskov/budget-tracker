@@ -7,6 +7,7 @@ import { Account } from "./models/Account.entity";
 import { AccountType } from "./models/AccountType.entity";
 import { UserCategory } from "./models/UserCategory.entity";
 import { DefaultCategory } from "./models/DefaultCategory.entity";
+import { Transaction } from "src/models/Transaction.entity";
 
 export const dataSourceOptions: DataSourceOptions = {
     type: 'postgres',
@@ -15,7 +16,13 @@ export const dataSourceOptions: DataSourceOptions = {
     username: 'postgres',
     password: 'budgeter',
     database: 'budgeter',
-    entities: [User, Currency, Account, AccountType, UserCategory, DefaultCategory],
+    entities: [User, 
+        Currency, 
+        Account, 
+        AccountType, 
+        UserCategory, 
+        Transaction,
+        DefaultCategory],
     migrations: ["build/migrations/*.js"],
     synchronize: true,
 }

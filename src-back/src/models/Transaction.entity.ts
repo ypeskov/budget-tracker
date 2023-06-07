@@ -6,23 +6,32 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Account } from './Account.entity';
 import { UserCategory } from './UserCategory.entity';
 import { Currency } from './Currency.entity';
 import { BaseModel } from './base.entity';
+import { User } from './User.entity';
 
 const SHORT_DESCRIPTION_MAX_LENGTH: number = 50
 
 @Entity({ name: 'transactions' })
 export class Transaction extends BaseModel {
   @ManyToOne(() => Account)
+  @JoinColumn({name: 'account_id'})
   account: Account;
 
+  @ManyToOne(() => User)
+  @JoinColumn({name: 'user_id'})
+  user: User;
+
   @ManyToOne(() => UserCategory)
+  @JoinColumn({name: 'category_id'})
   category: UserCategory;
 
   @ManyToOne(() => Currency)
+  @JoinColumn({name: 'currency_id'})
   currency: Currency;
 
   @Column({ type: 'numeric', nullable: true })
