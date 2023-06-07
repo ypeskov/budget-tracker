@@ -4,9 +4,9 @@ import {
     Injectable,
     UnauthorizedException,
   } from '@nestjs/common';
-  import { JwtService } from '@nestjs/jwt';
-  import { jwtConstants } from './constants';
-  import { Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from './constants';
+import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from './public.decorator';
   
@@ -29,22 +29,25 @@ import { IS_PUBLIC_KEY } from './public.decorator';
       if (!token) {
         throw new UnauthorizedException();
       }
+
       try {
         const payload = await this.jwtService.verifyAsync(token, {
           secret: jwtConstants.secret,
         });
-        // 💡 We're assigning the payload to the request object here
-        // so that we can access it in our route handlers
         request['user'] = payload;
-      } catch {
+      } catch(err) {
         throw new UnauthorizedException();
       }
       return true;
     }
   
     private extractTokenFromHeader(request: Request): string | undefined {
-      const [type, token] = request.headers.authorization?.split(' ') ?? [];
-      return type === 'Bearer' ? token : undefined;
+      let authHeader = request.headers['auth-token'] ?? '';
+      if (typeof authHeader === 'string') {
+        return authHeader;
+      } else {
+        return undefined;
+      }
     }
   }
   

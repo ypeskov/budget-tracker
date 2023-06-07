@@ -12,8 +12,8 @@ import {
  
 import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
-import { SignInDTO } from './signInDTO';
-import { CreateUserDTO } from './createUser.DTO';
+import { SignInDTO } from './DTO/signInDTO';
+import { CreateUserDTO } from './DTO/createUser.DTO';
 import { CommonResponse } from 'src/dto/common.response.dto';
 
 

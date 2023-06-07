@@ -4,15 +4,14 @@ import { ConflictException,
 
 import * as bcrypt from 'bcrypt'
 
-import { UsersService } from '../modules/users/users.service';
+import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/models/User.entity';
-import { CreateUserDTO } from './createUser.DTO';
-import { SignInDTO } from './signInDTO';
+import { CreateUserDTO } from './DTO/createUser.DTO';
+import { SignInDTO } from './DTO/signInDTO';
 import { Currency } from 'src/models/Currency.entity';
 import { DefaultCategory } from 'src/models/DefaultCategory.entity';
 import { UserCategory } from 'src/models/UserCategory.entity';
-import { MongoNetworkTimeoutError } from 'typeorm';
 
 
 const saltRounds = 10;
@@ -66,7 +65,7 @@ export class AuthService {
     const payload = {...user.toPlainObject()};
     
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: await this.jwtService.signAsync(payload, {expiresIn: '2h'}),
     };
   }
 

@@ -10,28 +10,17 @@ import {
 import { Account } from './Account.entity';
 import { UserCategory } from './UserCategory.entity';
 import { Currency } from './Currency.entity';
+import { BaseModel } from './base.entity';
 
 const SHORT_DESCRIPTION_MAX_LENGTH: number = 50
 
 @Entity({ name: 'transactions' })
-export class Transaction {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
-  account_id: number;
-
+export class Transaction extends BaseModel {
   @ManyToOne(() => Account)
   account: Account;
 
-  @Column()
-  category_id: number;
-
   @ManyToOne(() => UserCategory)
   category: UserCategory;
-
-  @Column()
-  currency_id: number;
 
   @ManyToOne(() => Currency)
   currency: Currency;
@@ -52,13 +41,4 @@ export class Transaction {
 
   @Column({ type: 'numeric', nullable: true })
   exchange_rate: number;
-
-  @Column({ type: 'boolean', nullable: true, default: false })
-  is_deleted: boolean;
-
-  @CreateDateColumn({ type: 'timestamp with time zone', nullable: false })
-  created_at: Date;
-
-  @UpdateDateColumn({ type: 'timestamp with time zone', nullable: false })
-  updated_at: Date;
 }
