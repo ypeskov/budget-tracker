@@ -1,40 +1,30 @@
 import {
     Entity,
-    PrimaryGeneratedColumn,
     Column,
     Index,
-    CreateDateColumn,
-    UpdateDateColumn,
     ManyToOne,
-    RelationId,
+    JoinColumn,
   } from 'typeorm';
-  import { AccountType } from './AccountType.entity';
-  import { Currency } from './Currency.entity';
-  import { User } from './User.entity';
+import { Exclude, instanceToPlain } from "class-transformer";
+import { AccountType } from './AccountType.entity';
+import { Currency } from './Currency.entity';
+import { User } from './User.entity';
+import { BaseModel } from './base.entity';
   
 const ACCOUNT_NAME_MAX_LENGTH: number = 100;
 
 @Entity({ name: 'accounts' })
-export class Account {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
-  user_id: number;
-
+export class Account extends BaseModel {
   @ManyToOne(() => User, (user) => user.accounts)
+  @JoinColumn({name: 'user_id'})
   user: User;
 
-  @Column()
-  account_type_id: number;
-
   @ManyToOne(() => AccountType)
+  @JoinColumn({name: 'account_type_id'})
   account_type: AccountType;
 
-  @Column()
-  currency_id: number;
-
   @ManyToOne(() => Currency)
+  @JoinColumn({name: 'currency_id'})
   currency: Currency;
 
   @Column({ type: 'numeric', nullable: true })
@@ -44,11 +34,11 @@ export class Account {
   @Index()
   name: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   opening_date: Date;
 
   @Column({ type: 'numeric', nullable: true })
-  initial_balance_in_currency: number;
+  initial_balance: number;
 
   @Column({ type: 'numeric', nullable: true })
   opening_exchange_rate: number;
@@ -56,15 +46,10 @@ export class Account {
   @Column({ nullable: true })
   comment: string;
 
-  @Column({ type: 'boolean', default: true })
-  show_in_transactions: boolean;
+  toPlainObject() {
+    const plainUser = instanceToPlain(this);
+    plainUser.user.email = this.user.email;
 
-  @Column({ type: 'boolean', nullable: true, default: false })
-  is_deleted: boolean;
-
-  @CreateDateColumn({ type: 'timestamp with time zone', nullable: false })
-  created_at: Date;
-
-  @UpdateDateColumn({ type: 'timestamp with time zone', nullable: false })
-  updated_at: Date;
+    return plainUser;
+  }
 }

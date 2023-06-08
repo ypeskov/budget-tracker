@@ -4,7 +4,7 @@ import { Controller,
   Request } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CommonResponse } from 'src/dto/common.response.dto';
-import { CreateTransactionDTO } from '../DTO/CreateTransaction.dto';
+import { CreateTransactionDTO } from './DTO/CreateTransaction.dto';
 
 @Controller('transactions')
 export class TransactionsController {

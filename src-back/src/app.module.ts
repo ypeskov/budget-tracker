@@ -6,7 +6,8 @@ import { UsersModule } from './modules/users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './data-source';
-import { TransactionsModule } from './modules/transactions/transactions/transactions.module';
+import { TransactionsModule } from './modules/transactions/transactions.module';
+import { AccountsModule } from './modules/accounts/accounts.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { TransactionsModule } from './modules/transactions/transactions/transact
     }),
     AuthModule, 
     UsersModule, 
-    TransactionsModule
+    TransactionsModule, 
+    AccountsModule
   ],
   controllers: [AppController],
   providers: [AppService],

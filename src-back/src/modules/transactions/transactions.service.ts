@@ -1,11 +1,10 @@
-import { Injectable,
-  Request } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { Transaction } from 'src/models/Transaction.entity';
 import { Currency } from 'src/models/Currency.entity';
 import { UserCategory } from 'src/models/UserCategory.entity';
 import { User } from 'src/models/User.entity';
-import { CreateTransactionDTO } from '../DTO/CreateTransaction.dto';
+import { CreateTransactionDTO } from './DTO/CreateTransaction.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -21,7 +20,7 @@ export class TransactionsService {
     const user: User = await User.findOneByOrFail({id: request['user'].id})
     transaction.user = user;
 
-    transaction.amount = 100;
+    transaction.amount = newTransaction.amount;
 
     transaction.short_description = newTransaction.short_description;
     transaction.long_description = newTransaction.long_description;
