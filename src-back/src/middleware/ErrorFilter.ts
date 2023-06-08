@@ -6,7 +6,7 @@ export class ErrorFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
-    
+
     let statusCode = 500;
     let message = 'Internal Server Error';
 

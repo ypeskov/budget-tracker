@@ -35,7 +35,7 @@ export class Transaction extends BaseModel {
   currency: Currency;
 
   @Column({ type: 'numeric', nullable: true })
-  amount_in_currency: number;
+  amount: number;
 
   @Column({ length: SHORT_DESCRIPTION_MAX_LENGTH })
   @Index()

@@ -1,11 +1,12 @@
-import { createConnection } from 'typeorm';
+import dataSource from '../data-source';
 import { Currency } from '../models/Currency.entity';
-import { dataSourceOptions } from '../data-source';
+
 
 export async function loadDefaultCurrencies() {
   try {
-    const connection = await createConnection(dataSourceOptions);
-    const currencyRepository = connection.getRepository(Currency);
+    await dataSource.initialize();
+
+    const currencyRepository = dataSource.getRepository(Currency);
 
     const defaultValues = [
       { id: 1, code: 'USD', name: 'United States Dollar' },
@@ -24,7 +25,7 @@ export async function loadDefaultCurrencies() {
 
     await currencyRepository.save(currencies);
 
-    await connection.destroy();
+    await dataSource.destroy();
     console.log('Default currencies are loaded in DB');
   } catch (error) {
     console.error('Error while loading currencies:', error);
