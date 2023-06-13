@@ -18,4 +18,8 @@ export class CreateTransactionDTO {
     @IsNotEmpty()
     @IsNumber()
     currency_id: number
+
+    @IsNotEmpty()
+    @IsNumber()
+    account_id: number
 }

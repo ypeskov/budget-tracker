@@ -52,4 +52,9 @@ export class Account extends BaseModel {
 
     return plainUser;
   }
+
+  async updateBalance(amount: number) {
+    this.balance = this.balance + amount;
+    this.save();
+  }
 }
