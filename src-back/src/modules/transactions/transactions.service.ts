@@ -44,10 +44,10 @@ export class TransactionsService {
     try {
       await queryRunner.manager.save(transaction.account);
       await queryRunner.manager.save(transaction);
-
       await queryRunner.commitTransaction();
     } catch(err) {
       await queryRunner.rollbackTransaction();
+      throw err;
     } finally {
       await queryRunner.release();
     }
