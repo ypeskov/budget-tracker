@@ -16,21 +16,21 @@ services:
     depends_on:
       - db
 
-  # front:
-  #   container_name: "front"
-  #   build: 
-  #     context: "./src-front"
-  #     dockerfile: "../dockerfiles/Dockerfile.front.dev"
-  #   ports:
-  #     - 3000:3000
-  #   tty: true
-  #   volumes:
-  #     - ./src-front:/app
-  #     - /app/node_modules
-  #   environment:
-  #     REACT_APP_API_URL: ${REACT_APP_API_URL}
-  #   depends_on:
-  #     - back
+  front:
+    container_name: "front"
+    build: 
+      context: "./src-front"
+      dockerfile: "../dockerfiles/Dockerfile.front.dev"
+    ports:
+      - 3000:3000
+    tty: true
+    volumes:
+      - ./src-front:/app
+      - /app/node_modules
+    environment:
+      REACT_APP_API_URL: ${REACT_APP_API_URL}
+    depends_on:
+      - back
   
   db:
     image: postgres:15.3-bullseye
