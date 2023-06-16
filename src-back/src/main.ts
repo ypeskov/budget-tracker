@@ -8,6 +8,11 @@ async function bootstrap() {
 
   app.useGlobalFilters(new ErrorFilter());
 
+  app.enableCors({
+    'origin': '*',
+    'methods': 'POST',
+  });
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,

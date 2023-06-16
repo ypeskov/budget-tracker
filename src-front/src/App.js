@@ -20,8 +20,8 @@ function App() {
       </Row>
 
       <Row>
-        <Col>
-          <Login />
+        <Col sm={1}>
+          +++++
         </Col>
         <Col>
           <Login />
