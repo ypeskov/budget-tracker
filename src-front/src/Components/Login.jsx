@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -8,7 +8,7 @@ import { UserContext } from '../Context/AppContext';
 const apiDomain = `${process.env.REACT_APP_API_URL}`;
 
 function Login() {
-  const {user, updateUser} = useContext(UserContext);
+  const {user} = useContext(UserContext);
 
   async function tryLogin(event) {
     event.preventDefault();

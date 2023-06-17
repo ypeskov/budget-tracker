@@ -2,16 +2,20 @@ import React, {useState} from 'react';
 
 const UserContext = React.createContext();
 
+const defaultUserInfo = {
+  id: null,
+  email: '',
+  firstName: '',
+  lastName: '',
+};
+
 const AppProvider = ({children}) => {
   const userInit = {
-    id: 1,
-    email: 'user1@example.com',
-    firstName: 'Yura',
-    lastName: 'Peskov',
+    userInfo: defaultUserInfo,
     isLoggedIn: false,
   };
 
-  const [user, setUser] = useState(userInit);
+  const [user] = useState(userInit);
   const updateUser = () => {console.log('Update user is called')}
 
   return (
