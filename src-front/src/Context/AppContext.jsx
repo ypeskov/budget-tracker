@@ -17,10 +17,9 @@ const AppProvider = ({children}) => {
 
   const [user, setUser] = useState(userInit);
   const updateUser = (userData) => {
-    console.log(userData)
     setUser(prevUser => ({
       ...prevUser,
-      userInfo: userData,
+      isLoggedIn: userData.isLoggedIn,
     }));
   }
 

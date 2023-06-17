@@ -11,7 +11,6 @@ import './App.css';
 import { UserContext } from '../../Context/AppContext';
 
 export function loader() {
-  console.log('App loader function');
   return [];
 }
 
@@ -19,7 +18,6 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const {user} = useContext(UserContext);
-  console.log(user);
 
   useEffect(() => {
     if ( user.isLoggedIn ) {
@@ -42,9 +40,9 @@ function App() {
 
       <Row>
         <Col sm={1}>
-          <Row><Link>Dashboard</Link></Row>
+          <Row><Link to='dashboard'>Dashboard</Link></Row>
           <Row><Link>Budgets</Link></Row>
-          <Row><Link>Accounts</Link></Row>
+          <Row><Link to='/accounts'>Accounts</Link></Row>
         </Col>
         <Col>
           <Outlet />

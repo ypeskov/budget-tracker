@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import { useNavigate, } from 'react-router-dom';
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -9,6 +10,7 @@ const apiDomain = `${process.env.REACT_APP_API_URL}`;
 
 function Login() {
   const {user, updateUser} = useContext(UserContext);
+  const navigate = useNavigate();
 
   async function tryLogin(event) {
     event.preventDefault();
@@ -28,7 +30,6 @@ function Login() {
         })
       });
       const data = await response.json();
-      console.log(data);
       if (data.access_token) {
         updateUser({
           isLoggedIn: true,
@@ -40,7 +41,7 @@ function Login() {
           },
         });
         const profile = await user.json();
-        console.log(profile);
+        navigate('/dashboard');
       }
     } catch(err) {
       console.log(err);
