@@ -8,7 +8,7 @@ import { UserContext } from '../Context/AppContext';
 const apiDomain = `${process.env.REACT_APP_API_URL}`;
 
 function Login() {
-  const {user} = useContext(UserContext);
+  const {user, updateUser} = useContext(UserContext);
 
   async function tryLogin(event) {
     event.preventDefault();
@@ -29,6 +29,19 @@ function Login() {
       });
       const data = await response.json();
       console.log(data);
+      if (data.access_token) {
+        updateUser({
+          isLoggedIn: true,
+        });
+
+        const user = await fetch(`${apiDomain}/auth/profile`, {
+          headers: {
+            "auth-token": data.access_token
+          },
+        });
+        const profile = await user.json();
+        console.log(profile);
+      }
     } catch(err) {
       console.log(err);
     }

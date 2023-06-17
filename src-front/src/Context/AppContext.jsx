@@ -15,8 +15,14 @@ const AppProvider = ({children}) => {
     isLoggedIn: false,
   };
 
-  const [user] = useState(userInit);
-  const updateUser = () => {console.log('Update user is called')}
+  const [user, setUser] = useState(userInit);
+  const updateUser = (userData) => {
+    console.log(userData)
+    setUser(prevUser => ({
+      ...prevUser,
+      userInfo: userData,
+    }));
+  }
 
   return (
     <UserContext.Provider value={{user, updateUser}}>

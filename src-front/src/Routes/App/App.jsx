@@ -19,6 +19,7 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const {user} = useContext(UserContext);
+  console.log(user);
 
   useEffect(() => {
     if ( user.isLoggedIn ) {
@@ -26,7 +27,7 @@ function App() {
     } else {
       navigate('/login');
     }
-  }, []);
+  }, [user.isLoggedIn]);
 
   return (
     <div className="App">
