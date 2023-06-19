@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate, } from 'react-router-dom';
 
 import Button from 'react-bootstrap/Button';
@@ -9,14 +9,11 @@ import { UserContext } from '../Context/AppContext';
 const apiDomain = `${process.env.REACT_APP_API_URL}`;
 
 function Login() {
-  const {user, updateUser} = useContext(UserContext);
+  const {updateUser} = useContext(UserContext);
   const navigate = useNavigate();
 
   async function tryLogin(event) {
     event.preventDefault();
-
-    const emailLogin = 'user1@example.com';
-    const passwordLogin = 'qqqqqq';
 
     try {
       const response = await fetch(`${apiDomain}/auth/login`, {
@@ -25,22 +22,17 @@ function Login() {
           "Content-Type": "application/json"
         },
         'body': JSON.stringify({
-          email: emailLogin,
-          password: passwordLogin,
+          email: email,
+          password: password,
         })
       });
       const data = await response.json();
       if (data.access_token) {
         updateUser({
           isLoggedIn: true,
+          accessToken: data.access_token,
         });
 
-        const user = await fetch(`${apiDomain}/auth/profile`, {
-          headers: {
-            "auth-token": data.access_token
-          },
-        });
-        const profile = await user.json();
         navigate('/dashboard');
       }
     } catch(err) {
@@ -48,35 +40,45 @@ function Login() {
     }
   };
 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const processEmailChange = (event) => {
+    setEmail(event.target.value);
+  }
+
+  const processPasswordChange = (event) => {
+    setPassword(event.target.value);
+  }
+
   return (
     <div>
-      { user.isLoggedIn ? 
-      (
-        <span>{JSON.stringify(user, null, 4)}</span>
-      ) :
-      (
-        <Form onSubmit={tryLogin}>
-          <Form.Group className="mb-3" controlId="formBasicEmail">
-            <Form.Label>Email address</Form.Label>
-            <Form.Control type="email" placeholder="Enter email" />
-            <Form.Text className="text-muted">
-              Enter your registered email
-            </Form.Text>
-          </Form.Group>
-    
-          <Form.Group className="mb-3" controlId="formBasicPassword">
-            <Form.Label>Password</Form.Label>
-            <Form.Control type="password" placeholder="Password" />
-          </Form.Group>
-          {/* <Form.Group className="mb-3" controlId="formBasicCheckbox">
-            <Form.Check type="checkbox" label="Check me out" />
-          </Form.Group> */}
-          <Button variant="primary" type="submit">
-            Login
-          </Button>
-        </Form>
-      )
-    }
+      <Form onSubmit={tryLogin}>
+        <Form.Group className="mb-3" controlId="formBasicEmail">
+          <Form.Label>Email address</Form.Label>
+          <Form.Control type="email" 
+                        placeholder="Enter email" 
+                        value={email} 
+                        onChange={processEmailChange} />
+          <Form.Text className="text-muted">
+            Enter your registered email
+          </Form.Text>
+        </Form.Group>
+  
+        <Form.Group className="mb-3" controlId="formBasicPassword">
+          <Form.Label>Password</Form.Label>
+          <Form.Control type="password" 
+                        placeholder="Password" 
+                        value={password}
+                        onChange={processPasswordChange} />
+        </Form.Group>
+        {/* <Form.Group className="mb-3" controlId="formBasicCheckbox">
+          <Form.Check type="checkbox" label="Check me out" />
+        </Form.Group> */}
+        <Button variant="primary" type="submit">
+          Login
+        </Button>
+      </Form>
     </div>
   );
 }

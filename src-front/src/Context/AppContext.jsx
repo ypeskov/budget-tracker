@@ -11,16 +11,27 @@ const defaultUserInfo = {
 
 const AppProvider = ({children}) => {
   const userInit = {
-    userInfo: defaultUserInfo,
+    ...defaultUserInfo,
     isLoggedIn: false,
   };
 
   const [user, setUser] = useState(userInit);
+
   const updateUser = (userData) => {
-    setUser(prevUser => ({
-      ...prevUser,
-      isLoggedIn: userData.isLoggedIn,
-    }));
+    let tmp = {};
+    if (userData.isLoggedIn) { tmp.isLoggedIn = userData.isLoggedIn; }
+    if (userData.accessToken) { tmp.accessToken = userData.accessToken; }
+    if (userData.email) { tmp.email = userData.email; }
+    if (userData.firstName) { tmp.firstName = userData.firstName; }
+    if (userData.lastName) { tmp.lastName = userData.lastName; }
+    if (userData.id) { tmp.id = userData.id; }
+
+    setUser(prevUser => {
+      return  {
+        ...prevUser,
+        ...tmp,
+      }
+    });
   }
 
   return (
