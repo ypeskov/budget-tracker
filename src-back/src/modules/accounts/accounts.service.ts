@@ -24,4 +24,10 @@ export class AccountsService {
 
     return account;
   }
+ 
+  async getAccounts(user: User) {
+    const accounts = await Account.find({where: {user: {id: user.id }}});
+
+    return accounts;
+  }
 }

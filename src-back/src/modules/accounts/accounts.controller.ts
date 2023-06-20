@@ -1,4 +1,4 @@
-import { Controller, Post, Request, Body } from '@nestjs/common';
+import { Controller, Post, Request, Body, Get } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDTO } from './DTO/CreateAccount.dto';
 
@@ -11,5 +11,12 @@ export class AccountsController {
     const account = await this.accService.createAccount(newAccount, request['user']);
 
     return account.toPlainObject();
+  }
+
+  @Get('/')
+  async getAccounts(@Request() request): Promise<any> {
+    const accounts = await this.accService.getAccounts(request['user']);
+    
+    return accounts;
   }
 }
