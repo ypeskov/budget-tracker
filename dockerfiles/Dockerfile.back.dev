@@ -4,11 +4,11 @@ WORKDIR /app
 
 RUN npm install -g @nestjs/cli@8.0.0
 
-COPY . .
+COPY . /app
 
 RUN npm install
 
 EXPOSE 9000
 
-CMD ["npm", "run", "start:debug"]
+CMD ["npm", "run", "start"]
 # CMD ["bash"]

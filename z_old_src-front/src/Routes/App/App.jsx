@@ -17,9 +17,14 @@ export function loader() {
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const {user} = useContext(UserContext);
+  const {user, updateUser} = useContext(UserContext);
 
   useEffect(() => {
+    const storageUser = JSON.parse(localStorage.getItem('user'));
+    if (storageUser) {
+      updateUser(storageUser);
+    }
+
     if ( user.isLoggedIn ) {
       navigate(location.pathname);
     } else {
@@ -30,25 +35,25 @@ function App() {
   return (
     <div className="App">
       <Container>
-      <Row>
-        <Col>
-        <header className="App-header">
-          Header
-        </header>
-        </Col>
-      </Row>
+        <Row>
+          <Col>
+          <header className="App-header">
+            Header
+          </header>
+          </Col>
+        </Row>
 
-      <Row>
-        <Col sm={1}>
-          <Row><Link to='dashboard'>Dashboard</Link></Row>
-          <Row><Link>Budgets</Link></Row>
-          <Row><Link to='/accounts'>Accounts</Link></Row>
-        </Col>
-        <Col>
-          <Outlet />
-        </Col>
-      </Row>
-    </Container>
+        <Row>
+          <Col sm={1}>
+            <Row><Link to='dashboard'>Dashboard</Link></Row>
+            <Row><Link>Budgets</Link></Row>
+            <Row><Link to='/accounts'>Accounts</Link></Row>
+          </Col>
+          <Col>
+            <Outlet />
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 }

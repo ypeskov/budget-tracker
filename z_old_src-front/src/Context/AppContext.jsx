@@ -27,11 +27,14 @@ const AppProvider = ({children}) => {
     if (userData.id) { tmp.id = userData.id; }
 
     setUser(prevUser => {
-      return  {
+      const updatedUser = {
         ...prevUser,
         ...tmp,
-      }
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
     });
+    
   }
 
   return (
