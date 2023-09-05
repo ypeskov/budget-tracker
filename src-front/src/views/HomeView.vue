@@ -3,7 +3,13 @@
 </script>
 
 <template>
-  <main>
-
-  </main>
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <main>
+          This is Home Page.
+        </main>
+      </div>
+    </div>
+  </div>
 </template>
