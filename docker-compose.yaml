@@ -22,7 +22,7 @@ services:
       context: "./src-front"
       dockerfile: "../dockerfiles/Dockerfile.front.dev"
     ports:
-      - 3000:3000
+      - 5173:5173
     tty: true
     volumes:
       - ./src-front:/app
