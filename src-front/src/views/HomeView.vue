@@ -1,18 +1,24 @@
 <script setup>
-import { useBudgetStore } from '../stores/budget';
+import { RouterLink } from 'vue-router'
+import { useUserStore } from '../stores/user';
+const userStore = useUserStore();
 
-const budgetStore = useBudgetStore();
 
 </script>
 
 <template>
-  <div class="container">
-    <div class="row">
-      <div class="col">
-        <main>
-          This is Home Page.
-        </main>
+  <main>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <div v-if="userStore.id">
+            Welcome, {{ userStore.firstName }} {{ userStore.lastName }}
+          </div>
+          <div v-else>
+            <RouterLink to="/login">Login</RouterLink>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  </main>
 </template>

@@ -1,5 +1,10 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router';
+import { useUserStore } from './stores/user';
+
+const userStore = useUserStore();
+console.log(userStore.id == null)
+
 </script>
 
 <template>
@@ -12,9 +17,21 @@ import { RouterLink, RouterView } from 'vue-router'
         <header>
           <div class="wrapper">
             <nav>
-              <RouterLink to="/">Home</RouterLink>
-              <RouterLink to="/about">About</RouterLink>
-              <RouterLink to="/login">Login</RouterLink>
+              <span>
+                <RouterLink to="/">Home</RouterLink>
+              </span>
+              
+              <span>
+                <RouterLink to="/about">About</RouterLink>
+              </span>
+              
+              <span v-if="userStore.id == null">
+                <RouterLink to="/login">Login</RouterLink>
+              </span>
+              <span v-else>
+                <RouterLink to="/logout">Logout</RouterLink>
+              </span>
+              
             </nav>
           </div>
         </header>

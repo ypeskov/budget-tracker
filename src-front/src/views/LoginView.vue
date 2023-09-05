@@ -1,13 +1,13 @@
 <script setup>
 import { ref } from 'vue';
-import { useBudgetStore } from '../stores/budget';
+import { useUserStore } from '../stores/user';
 
 const loginEmail = ref('');
 const loginPassword = ref('');
-const budgetStore = useBudgetStore();
+const userStore = useUserStore();
 
-const loginPath = 'http://localhost:9000/auth/login';
 async function submitLogin() {
+  const loginPath = 'http://localhost:9000/auth/login';
   const requestBody = {
     email: loginEmail.value,
     password: loginPassword.value
@@ -23,13 +23,27 @@ async function submitLogin() {
 
     const data = await response.json();
     if (data.access_token) {
-      budgetStore.email = requestBody.email;
-      budgetStore.accessToken = data.access_token;
+      userStore.email = requestBody.email;
+      userStore.accessToken = data.access_token;
+
+      const profileEndpoint = 'http://localhost:9000/auth/profile';
+      const response = await fetch(profileEndpoint, {
+        'headers': {
+          'auth-token': userStore.accessToken,
+          'Content-Type': 'application/json'
+        }
+      });
+      const profile = await response.json();
+      userStore.id = profile.id;
+      userStore.firstName = profile.firstName;
+      userStore.lastName = profile.lastName;
+      userStore.iat = profile.iat;
+      userStore.exp = profile.exp;
     } else {
       alert('Ahctung!');
     }
   }
-  catch(e) {
+  catch (e) {
     console.log(e);
   }
 }
