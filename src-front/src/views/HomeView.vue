@@ -1,4 +1,7 @@
 <script setup>
+import { useBudgetStore } from '../stores/budget';
+
+const budgetStore = useBudgetStore();
 
 </script>
 

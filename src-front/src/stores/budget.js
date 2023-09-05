@@ -2,11 +2,8 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useBudgetStore = defineStore('budget', () => {
-  const count = ref(0)
-  const doubleCount = computed(() => count.value * 2)
-  function increment() {
-    count.value++
-  }
+  const email = ref('');
+  const accessToken = ref('');
 
-  return { doubleCount, increment }
+  return { email, accessToken }
 })
