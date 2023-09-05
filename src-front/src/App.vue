@@ -9,7 +9,7 @@ const userStore = useUserStore();
 onBeforeMount(() => {
   const localStorageUser = localStorage.getItem('user');
   if (localStorageUser) {
-    userStore.setUser(JSON.parse(localStorageUser));
+    userStore.setUser(JSON.parse(localStorageUser), true);
   }
 });
 

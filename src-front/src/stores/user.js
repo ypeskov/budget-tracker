@@ -13,6 +13,7 @@ export const useUserStore = defineStore('user', () => {
   const user = reactive(userTemplate);
   
   const authToken = ref(null);
+  const isLoggedIn = ref(false);
   
 
   async function loginUser(loginEmail, password) {
@@ -54,13 +55,13 @@ export const useUserStore = defineStore('user', () => {
         }
       })
       const userProfile = await response.json();
-      setUser(userProfile);
+      setUser(userProfile, true);
     } catch (e) {
       console.log(e);
     }
   }
 
-  function setUser(userProfile) {
+  function setUser(userProfile, updateLocalStorage=false) {
     user.id = userProfile.id;
     user.firstName = userProfile.firstName;
     user.lastName = userProfile.lastName;
@@ -68,8 +69,11 @@ export const useUserStore = defineStore('user', () => {
     user.iat = userProfile.iat;
     user.exp = userProfile.exp;
 
-    localStorage.setItem('user', JSON.stringify(user));
+    if (updateLocalStorage) {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+    
   }
 
-  return { user, loginUser, getUserProfile, setUser, authToken }
+  return { user, loginUser, getUserProfile, setUser, authToken, isLoggedIn }
 })
