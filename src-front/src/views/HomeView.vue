@@ -11,8 +11,8 @@ const userStore = useUserStore();
     <div class="container">
       <div class="row">
         <div class="col">
-          <div v-if="userStore.id">
-            Welcome, {{ userStore.firstName }} {{ userStore.lastName }}
+          <div v-if="userStore.user.id">
+            Welcome, {{ userStore.user.firstName }} {{ userStore.user.lastName }}
           </div>
           <div v-else>
             <RouterLink to="/login">Login</RouterLink>

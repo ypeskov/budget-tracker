@@ -67,7 +67,9 @@ export const useUserStore = defineStore('user', () => {
     user.email = userProfile.email;
     user.iat = userProfile.iat;
     user.exp = userProfile.exp;
+
+    localStorage.setItem('user', JSON.stringify(user));
   }
 
-  return { user, loginUser, getUserProfile, authToken }
+  return { user, loginUser, getUserProfile, setUser, authToken }
 })

@@ -1,9 +1,18 @@
 <script setup>
+import { onBeforeMount } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
+
 import { useUserStore } from './stores/user';
 
 const userStore = useUserStore();
-console.log(userStore.id == null)
+
+onBeforeMount(() => {
+  const localStorageUser = localStorage.getItem('user');
+  if (localStorageUser) {
+    userStore.setUser(JSON.parse(localStorageUser));
+  }
+});
+
 
 </script>
 
@@ -25,7 +34,7 @@ console.log(userStore.id == null)
                 <RouterLink to="/about">About</RouterLink>
               </span>
               
-              <span v-if="userStore.id == null">
+              <span v-if="userStore.user.id == null">
                 <RouterLink to="/login">Login</RouterLink>
               </span>
               <span v-else>
