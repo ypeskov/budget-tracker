@@ -1,23 +1,20 @@
 <script setup>
-import { onBeforeMount } from 'vue';
-import { useUserStore } from '../stores/user';
-const userStore = useUserStore();
-const accessToken = userStore.accessToken;
+import { onBeforeMount, reactive } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
+import {AccountService} from '../services/accounts';
 
-async function getAccounts() {
-  const accountsUrl = 'http://localhost:9000/accounts';
-  const requestHeaders = {
-    'Content-Type': 'application/json',
-    'auth-token': accessToken
-  };
-
-  const response = await fetch(accountsUrl, {headers: requestHeaders});
-  const data = await response.json();
-  console.log(data);
-}
+let accounts = reactive([]);
+const accService = new AccountService();
+const router = useRouter();
 
 onBeforeMount(async () => {
-  await getAccounts();
+  try {
+    accounts.length = 0;
+    accounts.push(...await accService.getAllUserAccounts()); 
+  } catch(e) {
+    console.log(e.message);
+    router.push({name: 'login'})
+  }  
 });
 </script>
 
@@ -29,11 +26,19 @@ onBeforeMount(async () => {
           <h3>Your accounts</h3>
         </div>
       </div>
-      <div class="row">
-        <div class="col">
-
+        <div v-for="acc in accounts" :key="acc.id" class="list-item">
+          <RouterLink :to="{name: 'accountDetails', params: {id: acc.id}}">
+            <div class="row">
+              <div class="col">
+              {{ acc.name }}
+              </div>
+              <div class="col">
+                {{ acc.balance }}
+              </div>
+            </div>
+          </RouterLink>
+          
         </div>
-      </div>
     </div>
   </main>
 </template>

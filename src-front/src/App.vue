@@ -3,8 +3,10 @@ import { onBeforeMount } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
 
 import { useUserStore } from './stores/user';
+import { UserService } from './services/users';
 
 const userStore = useUserStore();
+const userService = new UserService();
 
 onBeforeMount(() => {
   let localStorageUser, isLoggedIn, accessToken;
@@ -13,17 +15,15 @@ onBeforeMount(() => {
     isLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn'));
     accessToken = localStorage.getItem('accessToken');
   } catch(e) {
-    userStore.logOutUser();
+    userService.logOutUser();
   }
   
   if (isLoggedIn) {
     userStore.isLoggedIn = isLoggedIn;
     useUserStore.accessToken = accessToken;
-    userStore.setUser(localStorageUser, isLoggedIn, accessToken);
+    userService.setUser(localStorageUser, isLoggedIn, accessToken);
   }
 });
-
-
 </script>
 
 <template>
