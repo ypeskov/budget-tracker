@@ -37,18 +37,18 @@ onBeforeMount(() => {
           <div class="wrapper">
             <nav>
               <span>
-                <RouterLink to="/">Home</RouterLink>
+                <RouterLink :to="{name: 'home'}">Home</RouterLink>
               </span>
               
-              <span>
-                <RouterLink to="/accounts">Accounts</RouterLink>
+              <span v-if="userStore.isLoggedIn">
+                <RouterLink :to="{name: 'accounts'}">Accounts</RouterLink>
               </span>
               
-              <span v-if="userStore.user.id == null">
-                <RouterLink to="/login">Login</RouterLink>
+              <span v-if="!userStore.isLoggedIn">
+                <RouterLink :to="{name: 'login'}">Login</RouterLink>
               </span>
               <span v-else>
-                <RouterLink to="/logout">Logout</RouterLink>
+                <RouterLink :to="{name: 'logout'}">Logout</RouterLink>
               </span>
               
             </nav>

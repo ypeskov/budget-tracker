@@ -15,7 +15,7 @@ const userStore = useUserStore();
             Welcome, {{ userStore.user.firstName }} {{ userStore.user.lastName }}
           </div>
           <div v-else>
-            <RouterLink to="/login">Login</RouterLink>
+            <RouterLink :to="{name: 'login'}">Login</RouterLink>
           </div>
         </div>
       </div>

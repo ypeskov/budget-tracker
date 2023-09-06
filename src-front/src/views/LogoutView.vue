@@ -10,7 +10,7 @@ userStore.authToken = '';
 userStore.logOutUser();
 
 const router = useRouter();
-router.push('/');
+router.push('/login');
 
 </script>
 

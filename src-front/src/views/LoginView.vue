@@ -4,11 +4,14 @@ import {useRouter} from 'vue-router';
 
 import { useUserStore } from '../stores/user';
 
-const loginEmail = ref('');
-const loginPassword = ref('');
+let loginEmail = ref('');
+let loginPassword = ref('');
 const userStore = useUserStore();
 const router = useRouter();
 
+function updateEmail(event) {
+  loginEmail.value = event.target.value;
+}
 
 async function submitLogin() {
   await userStore.loginUser(loginEmail.value, loginPassword.value);
@@ -21,10 +24,10 @@ async function submitLogin() {
 <template>
   <div class="container">
     <main>
-      <form @submit.prevent="submitLogin">
+      <form @submit.prevent="submitLogin" autocomplete="on">
         <div class="row">
           <div class="col">
-            <input type="email" v-model="loginEmail" />
+            <input type="email" :value="loginEmail" @change="updateEmail" />
           </div>
         </div>
         <div class="row">
@@ -34,7 +37,7 @@ async function submitLogin() {
         </div>
         <div class="row">
           <div class="col">
-            <button>Login</button>
+            <button type="submit">Login</button>
           </div>
         </div>
       </form>
