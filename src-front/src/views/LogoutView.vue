@@ -3,17 +3,11 @@ import {useRouter} from 'vue-router';
 import { useUserStore } from '../stores/user';
 
 const userStore = useUserStore();
-userStore.setUser({
-  id: null,
-  firstName: null,
-  lastName: null,
-  email: null,
-  iat: null,
-  exp: null
-}, true);
+
 
 userStore.isLoggedIn = false;
-userStore.authToken = null;
+userStore.authToken = '';
+userStore.logOutUser();
 
 const router = useRouter();
 router.push('/');

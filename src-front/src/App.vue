@@ -7,9 +7,19 @@ import { useUserStore } from './stores/user';
 const userStore = useUserStore();
 
 onBeforeMount(() => {
-  const localStorageUser = localStorage.getItem('user');
-  if (localStorageUser) {
-    userStore.setUser(JSON.parse(localStorageUser), true);
+  let localStorageUser, isLoggedIn, accessToken;
+  try {
+    localStorageUser = JSON.parse(localStorage.getItem('user'));
+    isLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn'));
+    accessToken = localStorage.getItem('accessToken');
+  } catch(e) {
+    userStore.logOutUser();
+  }
+  
+  if (isLoggedIn) {
+    userStore.isLoggedIn = isLoggedIn;
+    useUserStore.accessToken = accessToken;
+    userStore.setUser(localStorageUser, isLoggedIn, accessToken);
   }
 });
 
@@ -31,7 +41,7 @@ onBeforeMount(() => {
               </span>
               
               <span>
-                <RouterLink to="/about">About</RouterLink>
+                <RouterLink to="/accounts">Accounts</RouterLink>
               </span>
               
               <span v-if="userStore.user.id == null">

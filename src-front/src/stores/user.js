@@ -1,5 +1,5 @@
-import { ref, reactive, toRefs } from 'vue'
-import { defineStore } from 'pinia'
+import { ref, reactive, toRefs } from 'vue';
+import { defineStore } from 'pinia';
 
 export const useUserStore = defineStore('user', () => {
   const userTemplate = {
@@ -8,60 +8,59 @@ export const useUserStore = defineStore('user', () => {
     lastName: null,
     email: null,
     iat: null,
-    exp: null
+    exp: null,
   };
   const user = reactive(userTemplate);
-  
-  const authToken = ref(null);
+
+  const accessToken = ref(null);
   const isLoggedIn = ref(false);
-  
 
   async function loginUser(loginEmail, password) {
-    const loginPath = 'http://localhost:9000/auth/login'
+    const loginPath = 'http://localhost:9000/auth/login';
     const requestHeaders = {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    };
     const requestBody = {
       email: loginEmail,
-      password
-    }
+      password,
+    };
     try {
       const response = await fetch(loginPath, {
         method: 'POST',
         headers: requestHeaders,
-        body: JSON.stringify(requestBody)
-      })
+        body: JSON.stringify(requestBody),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.access_token) {
         user.email = requestBody.email;
-        authToken.value = data.access_token;
-        getUserProfile(authToken.value);
+        accessToken.value = data.access_token;
+        getUserProfile(accessToken.value);
       } else {
-        alert('Ahctung!')
+        alert('Ahctung!');
       }
     } catch (e) {
       console.log(e);
     }
   }
 
-  async function getUserProfile(authToken) {
+  async function getUserProfile(accessToken) {
     try {
-      const profileEndpoint = 'http://localhost:9000/auth/profile'
+      const profileEndpoint = 'http://localhost:9000/auth/profile';
       const response = await fetch(profileEndpoint, {
         headers: {
-          'auth-token': authToken,
-          'Content-Type': 'application/json'
-        }
-      })
+          'auth-token': accessToken,
+          'Content-Type': 'application/json',
+        },
+      });
       const userProfile = await response.json();
-      setUser(userProfile, true);
+      setUser(userProfile, true, accessToken);
     } catch (e) {
       console.log(e);
     }
   }
 
-  function setUser(userProfile, updateLocalStorage=false) {
+  function setUser(userProfile, externalIsLoggedIn=false, externalAccessToken='') {
     user.id = userProfile.id;
     user.firstName = userProfile.firstName;
     user.lastName = userProfile.lastName;
@@ -69,11 +68,36 @@ export const useUserStore = defineStore('user', () => {
     user.iat = userProfile.iat;
     user.exp = userProfile.exp;
 
-    if (updateLocalStorage) {
-      localStorage.setItem('user', JSON.stringify(user));
-    }
-    
+    isLoggedIn.value = externalIsLoggedIn;
+    accessToken.value = externalAccessToken
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('isLoggedIn', isLoggedIn.value);
+    localStorage.setItem('accessToken', accessToken.value);
   }
 
-  return { user, loginUser, getUserProfile, setUser, authToken, isLoggedIn }
-})
+  function logOutUser() {
+    isLoggedIn.value = false;
+    accessToken.value = '';
+    setUser({
+        id: null,
+        firstName: null,
+        lastName: null,
+        email: null,
+        iat: null,
+        exp: null,
+      },
+      false,
+      ''
+    );
+  }
+
+  return {
+    user,
+    loginUser,
+    getUserProfile,
+    setUser,
+    accessToken,
+    isLoggedIn,
+    logOutUser,
+  };
+});

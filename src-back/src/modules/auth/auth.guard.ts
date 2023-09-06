@@ -23,7 +23,7 @@ import { IS_PUBLIC_KEY } from './public.decorator';
         // 💡 See this condition
         return true;
       }
-  
+      
       const request = context.switchToHttp().getRequest();
       const token = this.extractTokenFromHeader(request);
       if (!token) {
