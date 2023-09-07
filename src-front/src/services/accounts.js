@@ -1,7 +1,6 @@
-import { useUserStore } from '../stores/user';
-import { useAccountStore } from '../stores/account';
 import { UserService } from './users';
 import { request } from './requests';
+import { HttpError } from '../errors/HttpError';
 
 export class AccountService {
   userStore;
@@ -30,7 +29,21 @@ export class AccountService {
       }
     } else if (response.status === 401) {
       this.userService.logOutUser();
-      throw new Error('Unauthorized');
+      throw new HttpError('Unauthorized', 401);
+    }
+    return [];
+  }
+
+  async getAccountDetails(accountId) {
+    const accDetailsUrl = 'http://localhost:9000/accounts/' + accountId;
+    const response = await request(accDetailsUrl);
+    if (response.ok) {
+      const details = await response.json();
+      return details;
+    } else if (response.status === 401) {
+      throw new HttpError('Unauthorized', 401);
+    } else {
+      console.log('Some error happened');
     }
     return [];
   }

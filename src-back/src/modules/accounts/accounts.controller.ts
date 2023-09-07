@@ -8,14 +8,14 @@ export class AccountsController {
   constructor(private accService: AccountsService) {}
 
   @Post('/')
-  async addAccount(@Request() request, @Body() newAccount: CreateAccountDTO): Promise<any> {
+  async addAccount(@Request() request, @Body() newAccount: CreateAccountDTO): Promise<Account> {
     const account = await this.accService.createAccount(newAccount, request['user']);
 
-    return account.toPlainObject();
+    return account;
   }
 
   @Get('/')
-  async getAccounts(@Request() request): Promise<any> {
+  async getAccounts(@Request() request): Promise<Account[]> {
     const accounts = await this.accService.getAccounts(request['user']);
     
     return accounts;
