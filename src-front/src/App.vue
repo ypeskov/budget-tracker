@@ -1,12 +1,12 @@
 <script setup>
-import { onBeforeMount } from 'vue';
+import { onBeforeMount, useSSRContext } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
 
 import { useUserStore } from './stores/user';
 import { UserService } from './services/users';
 
 const userStore = useUserStore();
-const userService = new UserService();
+const userService = new UserService(userStore);
 
 onBeforeMount(() => {
   let localStorageUser, isLoggedIn, accessToken;

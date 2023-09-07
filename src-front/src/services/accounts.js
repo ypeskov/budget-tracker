@@ -1,14 +1,18 @@
 import { useUserStore } from '../stores/user';
 import { useAccountStore } from '../stores/account';
+import { UserService } from './users';
 import { request } from './requests';
 
 export class AccountService {
   userStore;
   accountStore;
 
-  constructor() {
-    this.userStore = useUserStore();
-    this.accountStore = useAccountStore();
+  userService;
+
+  constructor(userStore, accountStore) {
+    this.userStore = userStore;
+    this.accountStore = accountStore;
+    this.userService = new UserService(userStore);
   }
 
   async getAllUserAccounts() {
@@ -25,7 +29,7 @@ export class AccountService {
         console.log(e);
       }
     } else if (response.status === 401) {
-      this.userStore.logOutUser();
+      this.userService.logOutUser();
       throw new Error('Unauthorized');
     }
     return [];

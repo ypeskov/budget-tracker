@@ -1,16 +1,21 @@
 <script setup>
 import { onBeforeMount, reactive } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
+
+import { useUserStore } from '../stores/user';
+import { useAccountStore } from '../stores/account';
 import {AccountService} from '../services/accounts';
 
 let accounts = reactive([]);
-const accService = new AccountService();
+const userStore = useUserStore();
+const accountStore = useAccountStore();
+const accountService = new AccountService(userStore, accountStore);
 const router = useRouter();
 
 onBeforeMount(async () => {
   try {
     accounts.length = 0;
-    accounts.push(...await accService.getAllUserAccounts()); 
+    accounts.push(...await accountService.getAllUserAccounts()); 
   } catch(e) {
     console.log(e.message);
     router.push({name: 'login'})

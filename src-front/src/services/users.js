@@ -1,11 +1,11 @@
-import { useUserStore } from '../stores/user';
+// import { useUserStore } from '../stores/user';
 import { request } from './requests';
 
 export class UserService {
   userStore;
 
-  constructor() {
-    this.userStore = useUserStore();
+  constructor(userStore) {
+    this.userStore = userStore;
   }
 
   async loginUser(loginEmail, password) {

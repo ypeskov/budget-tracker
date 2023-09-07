@@ -8,7 +8,7 @@ import { UserService } from '../services/users';
 let loginEmail = ref('');
 let loginPassword = ref('');
 const userStore = useUserStore();
-const userService = new UserService();
+const userService = new UserService(userStore);
 const router = useRouter();
 
 function updateEmail(event) {
