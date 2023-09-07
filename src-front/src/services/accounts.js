@@ -15,7 +15,7 @@ export class AccountService {
   }
 
   async getAllUserAccounts() {
-    const accountsUrl = 'http://localhost:9000/accounts';
+    const accountsUrl = '/accounts';
     const response = await request(accountsUrl);
 
     if (response.status === 200) {
@@ -35,7 +35,7 @@ export class AccountService {
   }
 
   async getAccountDetails(accountId) {
-    const accDetailsUrl = 'http://localhost:9000/accounts/' + accountId;
+    const accDetailsUrl = '/accounts/' + accountId;
     const response = await request(accDetailsUrl);
     if (response.ok) {
       const details = await response.json();
