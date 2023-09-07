@@ -19,8 +19,6 @@ onBeforeMount(() => {
   }
   
   if (isLoggedIn) {
-    userStore.isLoggedIn = isLoggedIn;
-    useUserStore.accessToken = accessToken;
     userService.setUser(localStorageUser, isLoggedIn, accessToken);
   }
 });

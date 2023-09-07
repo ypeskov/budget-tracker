@@ -30,4 +30,9 @@ export class AccountsService {
 
     return accounts;
   }
+
+  async getAccountDetails(accountId: string): Promise<Account> {
+    const account = await Account.findOneByOrFail({id: parseInt(accountId)});
+    return account;
+  }
 }
