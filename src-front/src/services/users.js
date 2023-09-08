@@ -43,12 +43,9 @@ export class UserService {
   }
 
   setUser(userProfile, isLoggedIn = false, accessToken = '') {
-    this.userStore.user.id = userProfile.id;
-    this.userStore.user.firstName = userProfile.firstName;
-    this.userStore.user.lastName = userProfile.lastName;
-    this.userStore.user.email = userProfile.email;
-    this.userStore.user.iat = userProfile.iat;
-    this.userStore.user.exp = userProfile.exp;
+    // need to make deep copying to avoid cycling errors
+    const clonedUserProfile = JSON.parse(JSON.stringify(userProfile));
+    this.userStore.user = Object.assign(this.userStore.user, clonedUserProfile);
 
     this.userStore.isLoggedIn = isLoggedIn;
     this.userStore.accessToken = accessToken;
