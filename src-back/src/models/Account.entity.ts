@@ -5,7 +5,7 @@ import {
     ManyToOne,
     JoinColumn,
   } from 'typeorm';
-import { Exclude, instanceToPlain } from "class-transformer";
+import { instanceToPlain } from "class-transformer";
 import { AccountType } from './AccountType.entity';
 import { Currency } from './Currency.entity';
 import { User } from './User.entity';
@@ -34,7 +34,7 @@ export class Account extends BaseModel {
   @Index()
   name: string;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   opening_date: Date;
 
   @Column({ type: 'numeric', nullable: true })

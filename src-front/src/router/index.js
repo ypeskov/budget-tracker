@@ -63,6 +63,24 @@ const router = createRouter({
       },
       component: () => import('../views/AccountsListView.vue'),
     },
+    {
+      path: '/transactions',
+      name: 'transactions',
+      meta: {
+        requiresAuth: true,
+        requiresUnAuth: false,
+      },
+      component: () => import('../views/TransactionsListView.vue'),
+    },
+    {
+      path: '/transactions/:id',
+      name: 'transactionDetails',
+      meta: {
+        requiresAuth: true,
+        requiresUnAuth: false,
+      },
+      component: () => import('../views/TransactionDetailsView.vue'),
+    },
   ],
 });
 

@@ -11,27 +11,38 @@ import { Account } from 'src/models/Account.entity';
 @Injectable()
 export class TransactionsService {
 
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
+
+  async getTransactions(request: Request): Promise<Transaction[]> {
+    const transactions = await Transaction.find({ where: { user: { id: request['user'].id } } });
+
+    return transactions;
+  }
+
+  async getTransactionDetails(id: string): Promise<Transaction> {
+    const transaction = await Transaction.findOneByOrFail({id: parseInt(id)});
+    return transaction;
+  }
 
   async createTransaction(request: Request, newTransaction: CreateTransactionDTO) {
     const queryRunner = this.dataSource.createQueryRunner();
 
     let transaction = new Transaction();
 
-    const currency: Currency = await Currency.findOneByOrFail({id: newTransaction.currency_id});
+    const currency: Currency = await Currency.findOneByOrFail({ id: newTransaction.currency_id });
     transaction.currency = currency;
 
-    const category: UserCategory = await UserCategory.findOneByOrFail({id: newTransaction.category_id});
+    const category: UserCategory = await UserCategory.findOneByOrFail({ id: newTransaction.category_id });
     transaction.category = category;
 
     transaction.amount = newTransaction.amount;
 
-    const account: Account = await Account.findOneByOrFail({id: newTransaction.account_id});
+    const account: Account = await Account.findOneByOrFail({ id: newTransaction.account_id });
     account.balance = Number(account.balance);
     transaction.account = account;
     transaction.account.balance += transaction.amount;
 
-    const user: User = await User.findOneByOrFail({id: request['user'].id})
+    const user: User = await User.findOneByOrFail({ id: request['user'].id });
     transaction.user = user;
 
     transaction.short_description = newTransaction.short_description;
@@ -45,7 +56,7 @@ export class TransactionsService {
       await queryRunner.manager.save(transaction.account);
       await queryRunner.manager.save(transaction);
       await queryRunner.commitTransaction();
-    } catch(err) {
+    } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
     } finally {
