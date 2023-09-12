@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './data-source';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { AccountsModule } from './modules/accounts/accounts.module';
     AuthModule, 
     UsersModule, 
     TransactionsModule, 
-    AccountsModule
+    AccountsModule, 
+    CategoriesModule
   ],
   controllers: [AppController],
   providers: [AppService],

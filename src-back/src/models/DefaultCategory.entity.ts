@@ -28,5 +28,4 @@ export class DefaultCategory extends BaseModel {
 
   @Column({ type: 'boolean', default: false, nullable: true })
   is_income: boolean = false;
-
 }

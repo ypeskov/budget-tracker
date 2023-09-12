@@ -26,6 +26,6 @@ export class UserCategory extends BaseModel{
   subcategories: UserCategory[];
 
   @Column({ type: 'boolean', default: false })
-  is_income: boolean;
+  is_income: boolean;  
 }
   

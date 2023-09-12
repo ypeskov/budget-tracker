@@ -9,7 +9,6 @@ import {
 import { TransactionsService } from './transactions.service';
 import { CommonResponse } from 'src/dto/common.response.dto';
 import { CreateTransactionDTO } from './DTO/CreateTransaction.dto';
-import { Transaction } from 'typeorm';
 
 @Controller('transactions')
 export class TransactionsController {

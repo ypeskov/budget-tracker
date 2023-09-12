@@ -3,6 +3,8 @@
   "semi": true,
   "tabWidth": 2,
   "singleQuote": true,
-  "printWidth": 100,
-  "trailingComma": "es5"
+  "printWidth": 80,
+  "trailingComma": "es5",
+  "bracketSameLine": true,
+  "htmlWhitespaceSensitivity": "ignore"
 }

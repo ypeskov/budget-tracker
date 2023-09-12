@@ -47,4 +47,7 @@ export class Transaction extends BaseModel {
 
   @Column({ type: 'numeric', nullable: true })
   exchange_rate: number;
+
+  @Column({type: 'boolean', default: false})
+  is_transfer: boolean; 
 }

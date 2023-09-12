@@ -1,23 +1,33 @@
 <script setup>
-import { onBeforeMount, reactive } from 'vue';
+import { onBeforeMount, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useUserStore } from '../stores/user';
 import { useAccountStore } from '../stores/account';
 import { AccountService } from '../services/accounts';
+import { CategoriesService } from '../services/categories';
+import TransactionTypeTabs from '../components/transactions/TransactionTypeTabs.vue';
+import TransactionLabel from '../components/transactions/TransactionLabel.vue';
+import TransactionAmount from '../components/transactions/TransactionAmount.vue';
 
-
+const router = useRouter();
 const userStore = useUserStore();
 const accountStore = useAccountStore();
 const accountService = new AccountService(userStore, accountStore);
-const router = useRouter();
+const categoriesService = new CategoriesService(userStore);
 
 const accounts = reactive([]);
-const currentAccount = reactive({});
+const currentAccount = ref({});
 const transaction = reactive({});
+const categories = ref([]);
+const currentCategory = ref({});
 
 function changeAccount($event) {
   currentAccount.value = accounts[$event.target.value];
+}
+
+function changeCategory($event) {
+  currentCategory.value = categories[$event.target.value];
 }
 
 onBeforeMount(async () => {
@@ -25,6 +35,9 @@ onBeforeMount(async () => {
     accounts.length = 0;
     accounts.push(...await accountService.getAllUserAccounts());
     currentAccount.value = accounts[0];
+
+    const cats = await categoriesService.getUserCategories();
+    categories.value = cats;
   } catch (e) {
     console.log(e.message);
     router.push({ name: 'login' })
@@ -42,31 +55,29 @@ function changeNotes($event) {
       <div class="row">
         <div class="col">
           <form @submit.prevent>
-            <div class="mb-3">
-              <label for="short_description" class="form-label">Label</label>
-              <input type="email" class="form-control" id="short_description" aria-describedby="emailHelp">
-            </div>
 
-            <div class="mb-3">
-              <div class="row">
-                <div class="col-10">
-                  <label for="amount" class="form-label">Amount</label>
-                  <input type="number" class="form-control" id="amount">
-                </div>
-                <div class="col-2 currency">{{ currentAccount.value?.currency?.code }}</div>
-              </div>
-            </div>
-            
+            <TransactionTypeTabs :transaction="transaction" />
+
+            <TransactionLabel :transaction="transaction" />
+
+            <TransactionAmount :transaction="transaction" :current-account="currentAccount" />
+
+            <select v-if="!transaction.is_transfer" class="form-select bottom-space" @change="changeCategory">
+              <option v-for="cat, index in categories" :key="cat.id" :value="index">{{ cat.name }}</option>
+            </select>
+
             <select class="form-select bottom-space" @change="changeAccount">
+              <option v-for="acc, index in accounts" :key="acc.id" :value="index">{{ acc.name }}</option>
+            </select>
+
+            <select v-if="transaction.is_transfer" class="form-select bottom-space" @change="changeAccount">
               <option v-for="acc, index in accounts" :key="acc.id" :value="index">{{ acc.name }}</option>
             </select>
 
             <div class="mb-3">
               <label for="notes" class="form-label">Notes</label>
-              <textarea @change="changeNotes" 
-                        class="form-control"
-                        id="notes"
-                        rows="3">{{ transaction?.long_description }}</textarea>
+              <textarea @keyup="changeNotes" class="form-control" id="notes"
+                rows="3">{{ transaction?.long_description }}</textarea>
             </div>
 
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -82,7 +93,7 @@ function changeNotes($event) {
   margin-bottom: 1rem;
 }
 
-.currency {
-  align-self: flex-end;
+.top-space {
+  margin-top: 1rem;
 }
 </style>
