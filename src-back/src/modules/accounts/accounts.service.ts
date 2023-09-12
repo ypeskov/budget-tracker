@@ -29,10 +29,13 @@ export class AccountsService {
     const foundUser = await User.findOne({
       where: { id: user.id },
       relations: ['accounts', 'accounts.currency'],
+
     });
 
     if (foundUser) {
-      const accounts = foundUser.accounts;
+      const accounts = foundUser.accounts.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+      });
       return accounts;
     } else {
       return [];

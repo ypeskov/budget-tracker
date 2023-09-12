@@ -1,10 +1,7 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   Index,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
@@ -44,7 +41,7 @@ export class Transaction extends BaseModel {
   @Column({ nullable: true })
   long_description: string;
 
-  @Column({ type: 'timestamp with time zone', nullable: false })
+  @Column({ type: 'timestamp with time zone', nullable: true })
   @Index()
   datetime: Date;
 
