@@ -19,8 +19,12 @@ export class TransactionsService {
     return transactions;
   }
 
-  async getTransactionDetails(id: string): Promise<Transaction> {
-    const transaction = await Transaction.findOneByOrFail({id: parseInt(id)});
+  async getTransactionDetails(id: string): Promise<Transaction | undefined> {
+    const transaction = await Transaction.findOne({
+      where: { id: parseInt(id) },
+      relations: ['currency', 'category', 'account'],
+    });
+
     return transaction;
   }
 

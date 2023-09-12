@@ -14,10 +14,10 @@ onBeforeMount(() => {
     localStorageUser = JSON.parse(localStorage.getItem('user'));
     isLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn'));
     accessToken = localStorage.getItem('accessToken');
-  } catch(e) {
+  } catch (e) {
     userService.logOutUser();
   }
-  
+
   if (isLoggedIn) {
     userService.setUser(localStorageUser, isLoggedIn, accessToken);
   }
@@ -34,34 +34,37 @@ onBeforeMount(() => {
         <header>
           <div class="wrapper">
             <nav>
-              <span>
-                <RouterLink :to="{name: 'home'}">Home</RouterLink>
+              <span v-if="userStore.isLoggedIn">
+                <RouterLink class="btn btn-primary" :to="{ name: 'transactionNew' }">New</RouterLink>
               </span>
-              
+              <span>
+                <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+              </span>
+
               <span v-if="userStore.isLoggedIn">
                 <span>
-                  <RouterLink :to="{name: 'accounts'}">Accounts</RouterLink>
+                  <RouterLink :to="{ name: 'accounts' }">Accounts</RouterLink>
                 </span>
                 <span>
-                  <RouterLink :to="{name: 'transactions'}">Transactions</RouterLink>
+                  <RouterLink :to="{ name: 'transactions' }">Transactions</RouterLink>
                 </span>
               </span>
-              
-              
+
+
               <span v-if="!userStore.isLoggedIn">
-                <RouterLink :to="{name: 'login'}">Login</RouterLink>
+                <RouterLink :to="{ name: 'login' }">Login</RouterLink>
               </span>
               <span v-else>
-                <RouterLink :to="{name: 'logout'}">Logout</RouterLink>
+                <RouterLink :to="{ name: 'logout' }">Logout</RouterLink>
               </span>
-              
+
             </nav>
           </div>
         </header>
       </div>
     </div>
   </div>
-  
+
 
   <RouterView />
 </template>

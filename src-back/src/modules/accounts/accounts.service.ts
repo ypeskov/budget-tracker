@@ -11,9 +11,9 @@ export class AccountsService {
     const account = new Account();
 
     account.name = newAcc.name;
-    account.currency = await Currency.findOneByOrFail({id: newAcc.currencyId});
-    account.user = await User.findOneByOrFail({id: user.id});
-    account.account_type = await AccountType.findOneByOrFail({id: newAcc.accountTypeId});
+    account.currency = await Currency.findOneByOrFail({ id: newAcc.currencyId });
+    account.user = await User.findOneByOrFail({ id: user.id });
+    account.account_type = await AccountType.findOneByOrFail({ id: newAcc.accountTypeId });
     account.initial_balance = newAcc.initialBalance ?? 0;
     account.balance = account.initial_balance;
     account.opening_date = newAcc.openingDate ? new Date(newAcc.openingDate) : (new Date());
@@ -24,15 +24,23 @@ export class AccountsService {
 
     return account;
   }
- 
-  async getAccounts(user: User) {
-    const accounts = await Account.find({where: {user: {id: user.id }}});
 
-    return accounts;
+  async getAccounts(user: User) {
+    const foundUser = await User.findOne({
+      where: { id: user.id },
+      relations: ['accounts', 'accounts.currency'],
+    });
+
+    if (foundUser) {
+      const accounts = foundUser.accounts;
+      return accounts;
+    } else {
+      return [];
+    }
   }
 
   async getAccountDetails(accountId: string): Promise<Account> {
-    const account = await Account.findOneByOrFail({id: parseInt(accountId)});
+    const account = await Account.findOneByOrFail({ id: parseInt(accountId) });
     return account;
   }
 }
