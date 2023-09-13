@@ -12,7 +12,10 @@ function changeAccount($event) {
   } else {
     props.transaction.target_account_id = accountId;
   }
-  emit('accountChanged', acc);
+  emit('accountChanged', {
+    acountType: props.accountType,
+    account: acc
+  });
 }
 
 const accLabel = computed(() => {

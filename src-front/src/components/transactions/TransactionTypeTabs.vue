@@ -8,12 +8,6 @@ const emit = defineEmits(['typeChanged']);
 function changeItemType($event) {
   currentItem.value = $event.target.getAttribute('data-itemtype');
   emit('typeChanged', currentItem.value);
-
-  if (currentItem.value === 'transfer') {
-    props.transaction.is_transfer = true;
-  } else {
-    props.transaction.is_transfer = false;
-  }
 }
 </script>
 

@@ -45,4 +45,9 @@ export class TransactionsService {
     }
     return [];
   }
+
+  async addTransaction(transactionDetails) {
+    const transactionDetailsUrl = `/transactions`;
+    console.log(transactionDetails);
+  }
 }
