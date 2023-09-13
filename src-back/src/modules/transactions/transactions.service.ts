@@ -10,11 +10,12 @@ import { Account } from 'src/models/Account.entity';
 
 @Injectable()
 export class TransactionsService {
-
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 
   async getTransactions(request: Request): Promise<Transaction[]> {
-    const transactions = await Transaction.find({ where: { user: { id: request['user'].id } } });
+    const transactions = await Transaction.find({
+      where: { user: { id: request['user'].id } },
+    });
 
     return transactions;
   }
@@ -22,26 +23,35 @@ export class TransactionsService {
   async getTransactionDetails(id: string): Promise<Transaction | undefined> {
     const transaction = await Transaction.findOne({
       where: { id: parseInt(id) },
-      relations: ['currency', 'category', 'account'],
+      relations: ['currency', 'category', 'account', 'target_account'],
     });
 
     return transaction;
   }
 
-  async createTransaction(request: Request, newTransaction: CreateTransactionDTO) {
+  async createTransaction(
+    request: Request,
+    newTransaction: CreateTransactionDTO,
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
 
     let transaction = new Transaction();
 
-    const currency: Currency = await Currency.findOneByOrFail({ id: newTransaction.currency_id });
+    const currency: Currency = await Currency.findOneByOrFail({
+      id: newTransaction.currency_id,
+    });
     transaction.currency = currency;
 
-    const category: UserCategory = await UserCategory.findOneByOrFail({ id: newTransaction.category_id });
+    const category: UserCategory = await UserCategory.findOneByOrFail({
+      id: newTransaction.category_id,
+    });
     transaction.category = category;
 
     transaction.amount = newTransaction.amount;
 
-    const account: Account = await Account.findOneByOrFail({ id: newTransaction.account_id });
+    const account: Account = await Account.findOneByOrFail({
+      id: newTransaction.account_id,
+    });
     account.balance = Number(account.balance);
     transaction.account = account;
     transaction.account.balance += transaction.amount;

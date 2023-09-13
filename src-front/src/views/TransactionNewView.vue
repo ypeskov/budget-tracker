@@ -9,6 +9,8 @@ import { CategoriesService } from '../services/categories';
 import TransactionTypeTabs from '../components/transactions/TransactionTypeTabs.vue';
 import TransactionLabel from '../components/transactions/TransactionLabel.vue';
 import TransactionAmount from '../components/transactions/TransactionAmount.vue';
+import Category from '../components/transactions/Category.vue';
+import Account from '../components/transactions/Account.vue';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -20,32 +22,31 @@ const accounts = reactive([]);
 const currentAccount = ref({});
 const transaction = reactive({});
 const categories = ref([]);
-const currentCategory = ref({});
 
-function changeAccount($event) {
-  currentAccount.value = accounts[$event.target.value];
-}
+const itemType = ref('expense');
+transaction.is_transfer = itemType.value === 'transfer';
 
-function changeCategory($event) {
-  currentCategory.value = categories[$event.target.value];
+function changeAccount(account) {
+  currentAccount.value = account;
 }
 
 onBeforeMount(async () => {
   try {
     accounts.length = 0;
-    accounts.push(...await accountService.getAllUserAccounts());
-    currentAccount.value = accounts[0];
-
-    const cats = await categoriesService.getUserCategories();
-    categories.value = cats;
+    accounts.push(...(await accountService.getAllUserAccounts()));
+    categories.value = await categoriesService.getUserCategories();
   } catch (e) {
     console.log(e.message);
-    router.push({ name: 'login' })
+    router.push({ name: 'login' });
   }
 });
 
 function changeNotes($event) {
   transaction.long_description = $event.target.value;
+}
+
+function changeItemType(type) {
+  itemType.value = type;
 }
 </script>
 
@@ -55,24 +56,19 @@ function changeNotes($event) {
       <div class="row">
         <div class="col">
           <form @submit.prevent>
-
-            <TransactionTypeTabs :transaction="transaction" />
+            <TransactionTypeTabs @type-changed="changeItemType" :transaction="transaction" :item-type="itemType" />
 
             <TransactionLabel :transaction="transaction" />
 
             <TransactionAmount :transaction="transaction" :current-account="currentAccount" />
 
-            <select v-if="!transaction.is_transfer" class="form-select bottom-space" @change="changeCategory">
-              <option v-for="cat, index in categories" :key="cat.id" :value="index">{{ cat.name }}</option>
-            </select>
+            <Category v-if="!transaction.is_transfer" :item-type="itemType" :transaction="transaction"
+              :categories="categories" />
 
-            <select class="form-select bottom-space" @change="changeAccount">
-              <option v-for="acc, index in accounts" :key="acc.id" :value="index">{{ acc.name }}</option>
-            </select>
+            <Account :transaction="transaction" @account-changed="changeAccount" account-type="src" :accounts="accounts" />
 
-            <select v-if="transaction.is_transfer" class="form-select bottom-space" @change="changeAccount">
-              <option v-for="acc, index in accounts" :key="acc.id" :value="index">{{ acc.name }}</option>
-            </select>
+            <Account v-if="transaction.is_transfer === true" account-type="target" :transaction="transaction"
+              :accounts="accounts" />
 
             <div class="mb-3">
               <label for="notes" class="form-label">Notes</label>
@@ -87,13 +83,3 @@ function changeNotes($event) {
     </div>
   </main>
 </template>
-
-<style scoped>
-.bottom-space {
-  margin-bottom: 1rem;
-}
-
-.top-space {
-  margin-top: 1rem;
-}
-</style>

@@ -19,6 +19,10 @@ export class Transaction extends BaseModel {
   @JoinColumn({name: 'account_id'})
   account: Account;
 
+  @ManyToOne(() => Account)
+  @JoinColumn({name: 'target_account_id'})
+  target_account: Account;
+
   @ManyToOne(() => User)
   @JoinColumn({name: 'user_id'})
   user: User;
@@ -49,5 +53,7 @@ export class Transaction extends BaseModel {
   exchange_rate: number;
 
   @Column({type: 'boolean', default: false})
-  is_transfer: boolean; 
+  is_transfer: boolean;
+
+
 }

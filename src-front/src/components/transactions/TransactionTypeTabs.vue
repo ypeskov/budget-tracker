@@ -1,11 +1,19 @@
 <script setup>
 import { ref } from 'vue';
 
-const props = defineProps(['transaction']);
-const currentItem = ref('expense');
+const props = defineProps(['transaction', 'itemType']);
+const currentItem = ref(props.itemType);
+const emit = defineEmits(['typeChanged']);
 
 function changeItemType($event) {
   currentItem.value = $event.target.getAttribute('data-itemtype');
+  emit('typeChanged', currentItem.value);
+
+  if (currentItem.value === 'transfer') {
+    props.transaction.is_transfer = true;
+  } else {
+    props.transaction.is_transfer = false;
+  }
 }
 </script>
 
@@ -14,13 +22,11 @@ function changeItemType($event) {
     <li class="nav-item">
       <a
         id="expense-item"
-        data-qwer="1111"
-        data-rrr="777"
         class="nav-link"
         :class="{ active: currentItem === 'expense' }"
         data-itemtype="expense"
         href="#">
-        Active
+        Expense
       </a>
     </li>
     <li class="nav-item">
@@ -30,7 +36,7 @@ function changeItemType($event) {
         :class="{ active: currentItem === 'income' }"
         data-itemtype="income"
         href="#">
-        Link
+        Income
       </a>
     </li>
     <li class="nav-item">
@@ -40,7 +46,7 @@ function changeItemType($event) {
         :class="currentItem == 'transfer' ? 'active' : ''"
         data-itemtype="transfer"
         href="#">
-        Link
+        Transfer
       </a>
     </li>
   </ul>
