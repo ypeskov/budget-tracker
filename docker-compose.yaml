@@ -1,18 +1,39 @@
 services:
+  # Nestjs back API is not used
+  # back:
+  #   container_name: "back"
+  #   build: 
+  #     context: "./src-back"
+  #     dockerfile: "../dockerfiles/Dockerfile.back.dev"
+  #   ports:
+  #     - 9000:9000
+  #     - 9229:9229
+  #   tty: true
+  #   volumes:
+  #     - ./src-back:/app
+  #     - /app/node_modules
+  #   environment:
+  #     - NODE_ENV=development
+  #   depends_on:
+  #     - db
+
   back:
     container_name: "back"
     build: 
-      context: "./src-back"
-      dockerfile: "../dockerfiles/Dockerfile.back.dev"
+      context: "./back-fastapi"
+      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
     ports:
-      - 9000:9000
-      - 9229:9229
+      - 8000:8000
+      - 5678:5678
     tty: true
     volumes:
-      - ./src-back:/app
-      - /app/node_modules
+      - ./back-fastapi:/app
+    restart: always
+    # command: ["sh", "-c", "python -m debugpy --wait-for-client --listen 0.0.0.0:5678 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
     environment:
-      - NODE_ENV=development
+      - DEBUG=True
+      - DB_HOST=db
+      - DB_PORT=5432
     depends_on:
       - db
 
