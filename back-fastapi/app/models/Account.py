@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Integer, DateTime, func, Boolean, \
-    ForeignKey, Numeric, Date
+    ForeignKey, Numeric
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -19,7 +19,7 @@ class Account(Base):
     currency_id = Column(Integer, ForeignKey('currencies.id'))
     balance = Column(Numeric, default=0)
     name = Column(String(ACCOUNT_NAME_MAX_LENGTH), index=True)
-    opening_date = Column(Date, nullable=True)
+    opening_date = Column(DateTime(timezone=True), nullable=True)
     comment = Column(String)
     show_in_operations = Column(Boolean, default=True)
 

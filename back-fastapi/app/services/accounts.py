@@ -10,7 +10,8 @@ from app.models.User import User
 from app.schemas.account_schema import AccountSchema
 
 
-def create_account(account_dto: AccountSchema, user: dict, db: Session = None):
+def create_account(account_dto: AccountSchema, user: dict,
+                   db: Session = None) -> Account:
     existing_user = db.query(User).filter(
         User.id == int(user['id'])).first()  # type: ignore
     if not user:
@@ -31,3 +32,5 @@ def create_account(account_dto: AccountSchema, user: dict, db: Session = None):
     db.add(new_account)
     db.commit()
     db.refresh(new_account)
+
+    return new_account
