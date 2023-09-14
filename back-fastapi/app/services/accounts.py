@@ -4,19 +4,30 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.Account import Account
+from app.models.AccountType import AccountType
+from app.models.Currency import Currency
 from app.models.User import User
 from app.schemas.account_schema import AccountSchema
 
 
-import logging
-logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
-
 def create_account(account_dto: AccountSchema, user: dict, db: Session = None):
-    existing_user = db.query(User).filter(User.id == int(user['id'])).first()  # type: ignore
-    pp(existing_user.email)
+    pp(account_dto)
+    existing_user = db.query(User).filter(
+        User.id == int(user['id'])).first()  # type: ignore
     if not user:
         raise HTTPException(status_code=422, detail="Invalid user")
+    currency = db.query(Currency).filter_by(id=account_dto.currency_id).first()
+    if not currency:
+        raise HTTPException(status_code=422, detail="Invalid currency")
+    account_type = db.query(AccountType).filter_by(
+        id=account_dto.account_type_id).first()
+    if not account_type:
+        raise HTTPException(status_code=422, detail="Invalid account type")
 
-    new_account = Account(user=existing_user)
+    new_account = Account(user=existing_user, account_type=account_type,
+                          currency=currency, balance=account_dto.balance,
+                          name=account_dto.name, comment=account_dto.comment)
+    db.add(new_account)
+    db.commit()
+    db.refresh(new_account)
+    pp(new_account.__dict__)
