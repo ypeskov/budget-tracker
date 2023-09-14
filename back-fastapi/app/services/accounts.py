@@ -11,7 +11,6 @@ from app.schemas.account_schema import AccountSchema
 
 
 def create_account(account_dto: AccountSchema, user: dict, db: Session = None):
-    pp(account_dto)
     existing_user = db.query(User).filter(
         User.id == int(user['id'])).first()  # type: ignore
     if not user:
@@ -26,8 +25,9 @@ def create_account(account_dto: AccountSchema, user: dict, db: Session = None):
 
     new_account = Account(user=existing_user, account_type=account_type,
                           currency=currency, balance=account_dto.balance,
+                          opening_date=account_dto.opening_date,
+                          show_in_operations=account_dto.show_in_operations,
                           name=account_dto.name, comment=account_dto.comment)
     db.add(new_account)
     db.commit()
     db.refresh(new_account)
-    pp(new_account.__dict__)
