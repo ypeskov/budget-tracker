@@ -12,3 +12,5 @@ tmp/
 temp/
 
 dbdata/
+
+__pycache__/**
