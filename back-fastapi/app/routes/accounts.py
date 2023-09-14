@@ -19,7 +19,7 @@ router = APIRouter(
 def add_account(account_dto: AccountSchema,
                 request: Request,
                 db: Session = Depends(get_db)):
-    return create_account(account_dto, request.state.user, db)
+    return create_account(account_dto, request.state.user['id'], db)
 
 
 @router.get('/', response_model=list[AccountSchema])

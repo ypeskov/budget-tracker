@@ -10,11 +10,11 @@ from app.models.User import User
 from app.schemas.account_schema import AccountSchema
 
 
-def create_account(account_dto: AccountSchema, user: dict,
+def create_account(account_dto: AccountSchema, user_id: int,
                    db: Session = None) -> Account:
     existing_user = db.query(User).filter(
-        User.id == int(user['id'])).first()  # type: ignore
-    if not user:
+        User.id == user_id).first()  # type: ignore
+    if not existing_user:
         raise HTTPException(status_code=422, detail="Invalid user")
     currency = db.query(Currency).filter_by(id=account_dto.currency_id).first()
     if not currency:
@@ -27,10 +27,16 @@ def create_account(account_dto: AccountSchema, user: dict,
     new_account = Account(user=existing_user, account_type=account_type,
                           currency=currency, balance=account_dto.balance,
                           opening_date=account_dto.opening_date,
-                          show_in_operations=account_dto.show_in_operations,
+                          is_hidden=account_dto.is_hidden,
                           name=account_dto.name, comment=account_dto.comment)
     db.add(new_account)
     db.commit()
     db.refresh(new_account)
 
     return new_account
+
+
+def get_user_accounts(user_id: int, db: Session = None,
+                      include_deleted: bool = False,
+                      include_hidden: bool = False) -> list[Account]:
+    accounts = db.query(Account).filter_by(user_id=user_id).all()

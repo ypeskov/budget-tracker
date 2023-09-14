@@ -13,7 +13,7 @@ class AccountSchema(BaseModel):
     name: str
     opening_date: datetime | None
     comment: str | None
-    show_in_operations: bool = True
+    is_hidden: bool = True
 
     class Config:
         orm_mode = True

@@ -21,7 +21,7 @@ class Account(Base):
     name = Column(String(ACCOUNT_NAME_MAX_LENGTH), index=True)
     opening_date = Column(DateTime(timezone=True), nullable=True)
     comment = Column(String)
-    show_in_operations = Column(Boolean, default=True)
+    is_hidden = Column(Boolean, default=True)
 
     user = relationship("User", back_populates="accounts")
     account_type = relationship(AccountType)
