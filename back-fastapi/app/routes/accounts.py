@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.account_schema import AccountSchema
 from app.dependencies.check_token import check_token
-from app.services.accounts import create_account
+from app.services.accounts import create_account, get_user_accounts
 
 router = APIRouter(
     prefix='/accounts',
@@ -22,6 +22,6 @@ def add_account(account_dto: AccountSchema,
     return create_account(account_dto, request.state.user['id'], db)
 
 
-@router.get('/', response_model=list[AccountSchema])
-def get_user_accounts():
-    pass
+@router.get('/', response_model=list[AccountSchema] | None)
+def get_accounts(request: Request, db: Session = Depends(get_db)):
+    return get_user_accounts(request.state.user['id'], db)

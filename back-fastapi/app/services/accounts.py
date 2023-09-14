@@ -1,4 +1,5 @@
 from pprint import pp
+from typing import Type
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -36,7 +37,16 @@ def create_account(account_dto: AccountSchema, user_id: int,
     return new_account
 
 
-def get_user_accounts(user_id: int, db: Session = None,
+def get_user_accounts(user_id: int,
+                      db: Session = None,
                       include_deleted: bool = False,
-                      include_hidden: bool = False) -> list[Account]:
-    accounts = db.query(Account).filter_by(user_id=user_id).all()
+                      include_hidden: bool = False) -> list[Type[Account]]:
+    query = db.query(Account).filter_by(user_id=user_id)
+
+    if not include_deleted:
+        query = query.filter(Account.is_deleted == False)
+    if not include_hidden:
+        query = query.filter(Account.is_hidden == False)
+
+    accounts = query.all()
+    return accounts
