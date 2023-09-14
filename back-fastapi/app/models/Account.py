@@ -25,7 +25,7 @@ class Account(Base):
     show_in_transactions = Column(Boolean, default=True)
 
     user = relationship("User", back_populates="accounts")
-    account_type = relationship("AccountType")
+    account_type = relationship(AccountType)
     currency = relationship("Currency")
 
     is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')
