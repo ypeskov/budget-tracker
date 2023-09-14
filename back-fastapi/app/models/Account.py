@@ -20,10 +20,6 @@ class Account(Base):
     balance = Column(Numeric, default=0)
     name = Column(String(ACCOUNT_NAME_MAX_LENGTH), index=True)
     opening_date = Column(Date, nullable=True)
-    initial_balance = Column(Numeric,
-                             comment='balance at the moment of account opening')
-    opening_exchange_rate = Column(Numeric,
-                                   comment='Account currency to base currency')
     comment = Column(String)
     show_in_operations = Column(Boolean, default=True)
 
