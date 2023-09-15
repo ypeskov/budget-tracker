@@ -61,8 +61,8 @@ export class UserService {
     this.setUser(
       {
         id: null,
-        firstName: null,
-        lastName: null,
+        first_name: null,
+        last_name: null,
         email: null,
         iat: null,
         exp: null,

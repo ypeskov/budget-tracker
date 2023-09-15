@@ -3,23 +3,28 @@ from sqlalchemy.orm import relationship
 
 from app.database import Base
 
-SHORT_DESCRIPTION_MAX_LENGTH = 50
+LABEL_MAX_LENGTH = 50
 
 
 class Transaction(Base):
     __tablename__ = 'transactions'
 
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), index=True)
     account_id = Column(Integer, ForeignKey('accounts.id'), index=True)
+    target_account_id = Column(Integer, ForeignKey('accounts.id'), index=True)
     category_id = Column(Integer, ForeignKey('user_categories.id'), index=True)
     currency_id = Column(Integer, ForeignKey('currencies.id'), index=True)
-    amount_in_currency = Column(Numeric)
-    short_description = Column(String(SHORT_DESCRIPTION_MAX_LENGTH), index=True)
-    long_description = Column(String)
+    amount = Column(Numeric)
+    label = Column(String(LABEL_MAX_LENGTH), index=True)
+    notes = Column(String)
     datetime = Column(DateTime(timezone=True), index=True)
     exchange_rate = Column(Numeric)
+    is_transfer = Column(Boolean, nullable=False)
 
+    user = relationship("User", back_populates="transactions")
     account = relationship("Account")
+    target_account = relationship("Account")
     category = relationship("UserCategory")
     currency = relationship("Currency")
 

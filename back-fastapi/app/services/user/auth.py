@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime
 from pprint import pprint
+from typing import Type
 
 import jwt
 from fastapi import HTTPException
@@ -10,7 +11,8 @@ from app.models.User import User, DEFAULT_CURRENCY_CODE
 from app.models.Currency import Currency
 from app.models.DefaultCategory import DefaultCategory
 from app.models.UserCategory import UserCategory
-from app.schemas.user_schema import UserRegistration, UserResponse, UserLoginSchema
+from app.schemas.user_schema import UserRegistration, UserResponse, \
+    UserLoginSchema
 
 # Password hashing configuration
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -42,15 +44,18 @@ def copy_categories(default_category: DefaultCategory,
 
 
 def copy_all_categories(user_id: int, db: Session = None):
-    root_categories = db.query(DefaultCategory).filter(DefaultCategory.parent_id == None).all()
+    root_categories = db.query(DefaultCategory).filter(
+        DefaultCategory.parent_id == None).all()
     for root_category in root_categories:
         copy_categories(root_category, user_id, None, db)
 
 
 def create_user(user_request: UserRegistration, db: Session):
-    existing_user = db.query(User).filter(User.email == user_request.email).first()  # type: ignore
+    existing_user = db.query(User).filter(
+        User.email == user_request.email).first()  # type: ignore
     if existing_user:
-        raise HTTPException(status_code=400, detail="User with this email already exists")
+        raise HTTPException(status_code=400,
+                            detail="User with this email already exists")
 
     currency = db.query(Currency).filter_by(code=DEFAULT_CURRENCY_CODE).one()
 
@@ -76,15 +81,20 @@ def get_jwt_token(user_login: UserLoginSchema, db: Session):
     """
     Authenticate user and generate JWT.
     """
-    user = db.query(User).filter(User.email == user_login.email).first()  # type: ignore
+    user = db.query(User).filter(
+        User.email == user_login.email).first()  # type: ignore
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise HTTPException(status_code=400,
+                            detail="Incorrect email or password")
 
     if not pwd_context.verify(user_login.password, user.password_hash):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise HTTPException(status_code=400,
+                            detail="Incorrect email or password")
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={**UserResponse.from_orm(user).dict()}, expires_delta=access_token_expires)
+    access_token = create_access_token(
+        data={**UserResponse.from_orm(user).dict()},
+        expires_delta=access_token_expires)
 
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -96,7 +106,8 @@ def create_access_token(data: dict, expires_delta: timedelta):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
 
-    to_encode.update({"exp": expire, 'exp_human': expire.strftime("%Y-%m-%d %H:%M:%S")})
+    to_encode.update(
+        {"exp": expire, 'exp_human': expire.strftime("%Y-%m-%d %H:%M:%S")})
 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
     return encoded_jwt

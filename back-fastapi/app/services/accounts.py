@@ -3,6 +3,7 @@ from typing import Type
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import NoResultFound
 
 from app.models.Account import Account
 from app.models.AccountType import AccountType
@@ -50,3 +51,14 @@ def get_user_accounts(user_id: int,
 
     accounts = query.all()
     return accounts
+
+
+def get_account_details(account_id: int, user_id: int, db: Session = None) -> \
+        Type[Account]:
+    try:
+        account = db.query(Account).filter_by(id=account_id).one()
+    except NoResultFound:
+        raise HTTPException(404)
+    if account.user_id != user_id:
+        raise HTTPException(403, 'Forbidden')
+    return account
