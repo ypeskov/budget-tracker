@@ -11,7 +11,6 @@ class UserCategory(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
     name = Column(String, nullable=False, index=True)
     parent_id = Column(Integer, ForeignKey('user_categories.id'), nullable=True, index=True)
-    is_income = Column(Boolean, default='f', server_default='f')
 
     user = relationship("User", back_populates="categories")
     parent = relationship("UserCategory")
