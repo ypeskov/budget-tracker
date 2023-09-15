@@ -21,5 +21,4 @@ def add_account(transaction_dto: CreateTransactionSchema,
                 db: Session = Depends(get_db)):
     transaction = create_transaction(transaction_dto, request.state.user['id'],
                                      db)
-    pp(transaction.__dict__)
     return transaction.__dict__

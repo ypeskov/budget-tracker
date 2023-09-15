@@ -6,10 +6,6 @@ from app.routes.auth import router as auth_router
 from app.routes.accounts import router as accounts_router
 from app.routes.transations import router as transaction_router
 
-# import logging
-# logging.basicConfig()
-# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
 
 app = FastAPI()
 
