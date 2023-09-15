@@ -23,11 +23,15 @@ class Transaction(Base):
     datetime = Column(DateTime(timezone=True), index=True)
     exchange_rate = Column(Numeric)
     is_transfer = Column(Boolean, nullable=False)
-    is_income = Column(Boolean, default='f', server_default='f')
+    is_income = Column(Boolean, default=False)
 
-    user = relationship("User", back_populates="transactions")
-    account = relationship("Account")
-    target_account = relationship("Account")
+    user = relationship("User", back_populates='transactions')
+
+    account = relationship("Account", foreign_keys="Transaction.account_id")
+
+    target_account = relationship("Account",
+                                  foreign_keys="Transaction.target_account_id")
+
     category = relationship("UserCategory")
     currency = relationship("Currency")
 

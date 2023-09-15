@@ -26,6 +26,11 @@ class Account(Base):
     user = relationship("User", back_populates="accounts")
     account_type = relationship(AccountType)
     currency = relationship("Currency")
+    transactions = relationship('Transaction', back_populates='account',
+                                foreign_keys='Transaction.account_id')
+    target_transactions = relationship('Transaction',
+                                       back_populates='target_account',
+                                       foreign_keys='[Transaction.target_account_id]')
 
     is_deleted = Column(Boolean, default=False, nullable=True,
                         server_default='f')

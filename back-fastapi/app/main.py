@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.auth import router as auth_router
 from app.routes.accounts import router as accounts_router
-# from app.routes.test_check import router as test_router
+from app.routes.transations import router as transaction_router
 
 # import logging
 # logging.basicConfig()
@@ -23,7 +23,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-# app.include_router(test_router)
+app.include_router(transaction_router)
 app.include_router(accounts_router)
 
 if __name__ == "__main__":

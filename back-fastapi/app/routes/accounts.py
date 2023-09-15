@@ -1,5 +1,4 @@
 from pprint import pp
-from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
