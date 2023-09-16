@@ -18,42 +18,30 @@ class Transaction(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), index=True)
-    account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'),
-                                            index=True)
-    target_account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'),
-                                                   index=True,
-                                                   nullable=True, default=None)
-    category_id: Mapped[int] = mapped_column(ForeignKey('user_categories.id'),
-                                             index=True)
-    currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'),
-                                             index=True)
+    account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'), index=True)
+    target_account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'), index=True, nullable=True, default=None)
+    category_id: Mapped[int] = mapped_column(ForeignKey('user_categories.id'), index=True)
+    currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'), index=True)
     amount: Mapped[Decimal] = mapped_column()
     label: Mapped[str] = mapped_column(String(LABEL_MAX_LENGTH), index=True)
     notes: Mapped[str] = mapped_column()
-    datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                               index=True)
+    datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     exchange_rate: Mapped[Decimal] = mapped_column()
     is_transfer: Mapped[bool] = mapped_column(nullable=False)
     is_income: Mapped[bool] = mapped_column(default=False)
 
     user: Mapped[User] = relationship(back_populates='transactions')
 
-    account: Mapped[Account] = relationship(
-        foreign_keys="Transaction.account_id")
+    account: Mapped[Account] = relationship(foreign_keys="Transaction.account_id")
 
-    target_account: Mapped[Account] = relationship(
-        foreign_keys="Transaction.target_account_id")
+    target_account: Mapped[Account] = relationship(foreign_keys="Transaction.target_account_id")
 
     category: Mapped[UserCategory] = relationship()
     currency: Mapped[Currency] = relationship()
 
-    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True,
-                                             server_default='f')
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                                 server_default=func.now(),
-                                                 nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                                 server_default=func.now(),
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
                                                  onupdate=func.now(),
                                                  nullable=False)
 
@@ -63,10 +51,8 @@ class Transaction(Base):
     #         f' account:{self.account.name}'
 
     def __repr__(self):
-        return f'Transaction(id={self.id}, user_id={self.user_id}), ' + \
-            f'account_id={self.account_id}, target_account_id={self.target_account_id}, ' + \
-            f'category_id={self.category_id}, amount={self.amount}, ' + \
-            f'label={self.label}, notes={self.notes}, datetime={self.datetime}, ' + \
-            f'exchange_rate={self.exchange_rate}, is_transfer={self.is_transfer}, ' + \
-            f'is_income={self.is_income}, is_deleted={self.is_deleted}, ' + \
+        return f'Transaction(id={self.id}, user_id={self.user_id}), account_id={self.account_id}, ' + \
+            f'target_account_id={self.target_account_id}, category_id={self.category_id}, amount={self.amount}, ' + \
+            f'label={self.label}, notes={self.notes}, datetime={self.datetime}, exchange_rate={self.exchange_rate}, ' + \
+            f'is_transfer={self.is_transfer}, is_income={self.is_income}, is_deleted={self.is_deleted}, ' + \
             f'created_at={self.created_at}, updated_at={self.updated_at}'
