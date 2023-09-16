@@ -18,7 +18,6 @@ LABEL_MAX_LENGTH = 50
 
 
 class Transaction(Base):
-    # from app.models.Account import Account
     __tablename__ = 'transactions'
 
     id: Mapped[int] = mapped_column(primary_key=True)

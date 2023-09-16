@@ -33,7 +33,7 @@ onBeforeMount(async () => {
           <RouterLink :to="{name: 'transactionDetails', params: {id: transaction.id}}">
             <div class="row">
               <div class="col">
-              {{ transaction.short_description }}
+              {{ transaction.label }}
               </div>
               <div class="col">
                 {{ transaction.amount }}

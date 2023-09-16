@@ -26,6 +26,7 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int,
 
     # We have almost all required fields in the request
     transaction = Transaction(**transaction_dto.dict())
+
     # but two more have to be added additionally to the transaction
     transaction.user_id = user_id
     transaction.currency = account.currency
@@ -42,5 +43,12 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int,
     db.add(transaction)
     db.add(account)
     db.commit()
+    db.refresh(transaction)
 
     return transaction
+
+
+def get_transactions(user_id: int, db: Session = None):
+    transactions = db.query(Transaction).filter_by(user_id=user_id).all()
+
+    return transactions

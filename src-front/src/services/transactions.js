@@ -16,8 +16,8 @@ export class TransactionsService {
     if (response.status === 200) {
       try {
         const transactions = await response.json();
-        // console.log(transactions.payload);
-        return transactions.payload;
+        // console.log(transactions);
+        return transactions;
       } catch (e) {
         console.log(e);
       }
