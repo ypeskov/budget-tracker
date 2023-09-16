@@ -31,5 +31,5 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int,
     db.add(transaction)
     db.commit()
     db.refresh(transaction)
-    print(transaction)
+
     return transaction
