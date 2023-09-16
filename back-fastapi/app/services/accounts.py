@@ -33,7 +33,6 @@ def create_account(account_dto: AccountSchema, user_id: int,
                           name=account_dto.name, comment=account_dto.comment)
     db.add(new_account)
     db.commit()
-    db.refresh(new_account)
 
     return new_account
 

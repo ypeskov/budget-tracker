@@ -24,12 +24,23 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int,
     if category.user_id != user_id:
         raise HTTPException(403, 'Forbidden')
 
+    # We have almost all required fields in the request
     transaction = Transaction(**transaction_dto.dict())
+    # but two more have to be added additionally to the transaction
     transaction.user_id = user_id
     transaction.currency = account.currency
 
+    if not transaction.is_transfer:
+        if transaction.is_income:
+            account.balance += transaction.amount
+        else:
+            account.balance -= transaction.amount
+    else:
+        # Implement logic of transfer from account to account
+        pass
+
     db.add(transaction)
+    db.add(account)
     db.commit()
-    db.refresh(transaction)
 
     return transaction

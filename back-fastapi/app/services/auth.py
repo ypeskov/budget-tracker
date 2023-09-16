@@ -68,7 +68,6 @@ def create_user(user_request: UserRegistration, db: Session):
 
     db.add(new_user)
     db.commit()
-    db.refresh(new_user)
 
     copy_all_categories(new_user.id, db)
 

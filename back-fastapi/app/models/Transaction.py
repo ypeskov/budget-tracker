@@ -1,19 +1,24 @@
 from decimal import Decimal
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
-from app.models.Account import Account
 from app.models.Currency import Currency
 from app.models.User import User
 from app.models.UserCategory import UserCategory
+
+
+if TYPE_CHECKING:
+    from app.models.Account import Account
 
 LABEL_MAX_LENGTH = 50
 
 
 class Transaction(Base):
+    # from app.models.Account import Account
     __tablename__ = 'transactions'
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -32,9 +37,9 @@ class Transaction(Base):
 
     user: Mapped[User] = relationship(back_populates='transactions')
 
-    account: Mapped[Account] = relationship(foreign_keys="Transaction.account_id")
+    account: Mapped['Account'] = relationship('Account', foreign_keys="Transaction.account_id")
 
-    target_account: Mapped[Account] = relationship(foreign_keys="Transaction.target_account_id")
+    target_account: Mapped['Account'] = relationship('Account', foreign_keys="Transaction.target_account_id")
 
     category: Mapped[UserCategory] = relationship()
     currency: Mapped[Currency] = relationship()
@@ -54,5 +59,5 @@ class Transaction(Base):
         return f'Transaction(id={self.id}, user_id={self.user_id}), account_id={self.account_id}, ' + \
             f'target_account_id={self.target_account_id}, category_id={self.category_id}, amount={self.amount}, ' + \
             f'label={self.label}, notes={self.notes}, datetime={self.datetime}, exchange_rate={self.exchange_rate}, ' + \
-            f'is_transfer={self.is_transfer}, is_income={self.is_income}, is_deleted={self.is_deleted}, ' + \
-            f'created_at={self.created_at}, updated_at={self.updated_at}'
+            f'is_transfer={self.is_transfer}, is_income = {self.is_income}, is_deleted = {self.is_deleted}, ' + \
+            f'created_at = {self.created_at}, updated_at = {self.updated_at}'

@@ -1,6 +1,4 @@
-from pprint import pp
-
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -8,7 +6,7 @@ from app.schemas.user_schema import UserRegistration, UserLoginSchema, \
     UserResponse
 from app.schemas.token_schema import Token
 from app.dependencies.check_token import check_token
-from app.services.user.auth import create_user, get_jwt_token
+from app.services.auth import create_user, get_jwt_token
 
 router = APIRouter(
     prefix='/auth'

@@ -1,5 +1,6 @@
 from decimal import Decimal
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship, mapped_column, Mapped
@@ -9,7 +10,9 @@ from app.database import Base
 from .AccountType import AccountType
 from .User import User
 from .Currency import Currency
-from .Transaction import Transaction
+
+if TYPE_CHECKING:
+    from .Transaction import Transaction
 
 ACCOUNT_NAME_MAX_LENGTH = 100
 
@@ -30,13 +33,14 @@ class Account(Base):
     user: Mapped[User] = relationship(back_populates="accounts")
     account_type: Mapped[AccountType] = relationship()
     currency: Mapped[Currency] = relationship()
-    transactions: Mapped[Transaction] = relationship(back_populates='account', foreign_keys='Transaction.account_id')
-    target_transactions: Mapped[Transaction] = relationship(back_populates='target_account',
-                                                            foreign_keys='[Transaction.target_account_id]')
+    transactions: Mapped['Transaction'] = relationship(back_populates='account', foreign_keys='Transaction.account_id')
+    target_transactions: Mapped['Transaction'] = relationship(back_populates='target_account',
+                                                              foreign_keys='[Transaction.target_account_id]')
 
-    is_deleted = mapped_column(default=False, nullable=True, server_default='f')
-    created_at = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                 onupdate=func.now(), nullable=False)
 
     def __repr__(self):
         return f'Account(id={self.id}, user_id={self.user_id}, account_type_id={self.account_type_id}) ' + \
