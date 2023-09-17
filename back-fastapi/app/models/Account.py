@@ -27,8 +27,8 @@ class Account(Base):
     balance: Mapped[Decimal] = mapped_column(default=0)
     name: Mapped[str] = mapped_column(String(ACCOUNT_NAME_MAX_LENGTH), index=True)
     opening_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
-    comment: Mapped[str] = mapped_column()
-    is_hidden: Mapped[bool] = mapped_column(default=True)
+    comment: Mapped[str] = mapped_column(nullable=True)
+    is_hidden: Mapped[bool] = mapped_column(default=False)
 
     user: Mapped[User] = relationship(back_populates="accounts")
     account_type: Mapped[AccountType] = relationship()
