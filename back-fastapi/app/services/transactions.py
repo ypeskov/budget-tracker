@@ -21,16 +21,14 @@ def process_transfer_type(transaction: Transaction, user_id: int, db: Session):
         raise HTTPException(403, 'Forbidden')
 
     transaction.target_account = target_account
-    currency_processor = CurrencyProcessor(transaction, db)
-    currency_processor.calculate_exchange_rate()
-    # amount: Decimal = transaction_dto.amount
-    # if account.currency_id != target_account.currency_id and transaction_dto.exchange_rate is None:
-    #     raise HTTPException(422, 'Transfer currencies are not convertable')
-    # elif account.currency_id != target_account.currency_id:
-    #     amount = amount * transaction_dto.exchange_rate
+    if transaction.account.currency_id != transaction.target_account.currency_id:
+        currency_processor = CurrencyProcessor(transaction, db)
+        transaction = currency_processor.calculate_exchange_rate()
+    else:
+        transaction.target_amount = transaction.amount
 
-    # account.balance -= transaction_dto.amount
-    # target_account.balance += amount
+    transaction.account.balance -= transaction.amount
+    transaction.target_account.balance += transaction.target_amount
 
     return transaction
 
@@ -69,12 +67,14 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
 
     if transaction_dto.is_transfer:
         transaction = process_transfer_type(transaction, user_id, db)
+        print(transaction.target_account)
+        db.add(transaction.account)
         db.add(transaction.target_account)
     else:
         account = process_non_transfer_type(transaction_dto, account, user_id, transaction, db)
+        db.add(account)
 
     db.add(transaction)
-    db.add(account)
     db.commit()
     db.refresh(transaction)
 

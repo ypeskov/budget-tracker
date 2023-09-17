@@ -9,6 +9,7 @@ class CreateTransactionSchema(BaseModel):
     target_account_id: int | None
     category_id: int | None
     amount: Decimal
+    target_amount: Decimal | None
     label: str = ''
     notes: str = ''
     datetime: datetime | None
