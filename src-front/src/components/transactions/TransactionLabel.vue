@@ -1,17 +1,17 @@
 <script setup>
 const props = defineProps(['transaction']);
 
-props.transaction.short_description = '';
+props.transaction.label = '';
 
 function labelChanged($event) {
-  props.transaction.short_description = $event.target.value;
+  props.transaction.label = $event.target.value;
 }
 </script>
 
 <template>
   <div class="mb-3">
     <label
-      for="short_description"
+      for="label"
       class="form-label">
       Label
     </label>
@@ -19,6 +19,6 @@ function labelChanged($event) {
       type="text"
       class="form-control"
       @keyup="labelChanged"
-      id="short_description" />
+      id="label" />
   </div>
 </template>

@@ -38,7 +38,10 @@ onBeforeMount(async () => {
               {{ transaction.label }}
               </div>
               <div class="col">
-                {{ transaction.amount }}
+              {{ transaction.account.name }}
+              </div>
+              <div class="col">
+                {{ transaction.amount }} {{ transaction.currency.code }}
               </div>
             </div>
           </RouterLink> 

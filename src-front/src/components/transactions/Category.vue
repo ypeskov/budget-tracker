@@ -19,7 +19,7 @@ function changeCategory($event) {
 </script>
 
 <template>
-  <label for="short_description" class="form-label">
+  <label for="label" class="form-label">
     Category
   </label>
   <select class="form-select bottom-space" @change="changeCategory">

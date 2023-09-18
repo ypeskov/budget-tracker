@@ -25,7 +25,7 @@ onBeforeMount(async () => {
   <main>
     <div class="container">
       <div class="row">
-        <div class="col"><strong>{{ transaction.short_description }}</strong></div>
+        <div class="col"><strong>{{ transaction.label }}</strong></div>
       </div>
       <div class="row">
         <div class="col"><strong>Amount:</strong> {{ transaction.amount }}{{ transaction.currency ?
@@ -35,7 +35,7 @@ onBeforeMount(async () => {
         <div class="col"><strong>Date and time:</strong> {{ transaction.datetime }}</div>
       </div>
       <div class="row">
-        <div class="col"><strong>Notes:</strong> {{ transaction.long_description }}</div>
+        <div class="col"><strong>Notes:</strong> {{ transaction.notes }}</div>
       </div>
     </div>
   </main>

@@ -20,7 +20,7 @@ export class CategoriesService {
     if (response.status === 200) {
       try {
         const data = await response.json();
-        return data.payload;
+        return data;
       } catch (e) {
         console.log(e);
       }

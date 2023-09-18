@@ -30,7 +30,7 @@ onBeforeMount(() => { });
 </script>
 
 <template>
-  <label for="short_description" class="form-label">
+  <label for="label" class="form-label">
     {{ accLabel }}
   </label>
   <select class="form-select bottom-space" @change="changeAccount">

@@ -26,7 +26,7 @@ const accounts = reactive([]);
 const currentAccount = ref({});
 const targetAccount = ref({});
 const transaction = reactive({
-  long_description: ''
+  notes: ''
 });
 const categories = ref([]);
 let filteredCategories = ref([]);
@@ -77,7 +77,7 @@ function updateTransactionProperties(type) {
 }
 
 function changeNotes($event) {
-  transaction.long_description = $event.target.value;
+  transaction.notes = $event.target.value;
 }
 
 function changeItemType(type) {
@@ -87,7 +87,7 @@ function changeItemType(type) {
 }
 
 function submitNewTransaction() {
-  console.log({ ...transaction });
+  transactionsService.addTransaction(transaction);
 }
 </script>
 
@@ -115,7 +115,7 @@ function submitNewTransaction() {
             <div class="mb-3">
               <label for="notes" class="form-label">Notes</label>
               <textarea @keyup="changeNotes" class="form-control" id="notes"
-                rows="3">{{ transaction?.long_description }}</textarea>
+                rows="3">{{ transaction?.notes }}</textarea>
             </div>
 
             <button type="submit" class="btn btn-primary">Submit</button>

@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import NoResultFound
 
 from app.models.Account import Account
@@ -79,5 +79,9 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
 
 
 def get_transactions(user_id: int, db: Session = None):
-    transactions = db.query(Transaction).filter_by(user_id=user_id).all()
+    transactions = db.query(Transaction).options(joinedload(Transaction.account),
+                                                 joinedload(Transaction.target_account),
+                                                 joinedload(Transaction.category),
+                                                 joinedload(Transaction.currency)).filter_by(
+        user_id=user_id).all()
     return transactions
