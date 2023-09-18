@@ -1,8 +1,16 @@
-from sqlalchemy import Column, String, Boolean, Integer, DateTime, func, \
-    ForeignKey
-from sqlalchemy.orm import relationship
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import DateTime, func, ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
+from app.models.Currency import Currency
+from app.models.UserCategory import UserCategory
+
+if TYPE_CHECKING:
+    from app.models.Account import Account
+    from app.models.Transaction import Transaction
 
 DEFAULT_CURRENCY_CODE = 'USD'
 
@@ -10,24 +18,20 @@ DEFAULT_CURRENCY_CODE = 'USD'
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
+    first_name: Mapped[str] = mapped_column(index=True, nullable=True)
+    last_name: Mapped[str] = mapped_column(index=True, nullable=True)
+    password_hash: Mapped[str] = mapped_column()
+    is_active: Mapped[str] = mapped_column(server_default='t', default=True)
+    base_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'))
 
-    email = Column(String, unique=True, index=True, nullable=False)
-    first_name = Column(String, index=True)
-    last_name = Column(String, index=True)
-    password_hash = Column(String)
-    is_active = Column(Boolean, server_default='t')
-    base_currency_id = Column(Integer, ForeignKey('currencies.id'))
+    base_currency: Mapped[Currency] = relationship()
+    accounts: Mapped[list['Account']] = relationship(order_by="Account.id", back_populates="user")
+    categories: Mapped[list[UserCategory]] = relationship(back_populates="user")
+    transactions: Mapped[list['Transaction']] = relationship(back_populates='user')
 
-    base_currency = relationship("Currency")
-    accounts = relationship("Account", order_by="Account.id",
-                            back_populates="user")
-    categories = relationship("UserCategory", back_populates="user")
-    transactions = relationship('Transaction', back_populates='user')
-
-    is_deleted = Column(Boolean, default=False, nullable=True,
-                        server_default='f')
-    created_at = Column(DateTime(timezone=True), server_default=func.now(),
-                        nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(),
-                        onupdate=func.now(), nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                 onupdate=func.now(), nullable=False)
