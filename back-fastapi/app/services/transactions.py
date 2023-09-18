@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import NoResultFound
@@ -62,6 +64,10 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
     transaction.account = account
     transaction.user_id = user_id
     transaction.currency = account.currency
+
+    if transaction_dto.datetime is None:
+        transaction.datetime = datetime.utcnow()
+        ic(transaction)
 
     if transaction_dto.is_transfer:
         transaction = process_transfer_type(transaction, user_id, db)

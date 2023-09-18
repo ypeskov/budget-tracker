@@ -31,6 +31,7 @@ onBeforeMount(async () => {
           <h3>Your transactions</h3>
         </div>
       </div>
+      <div v-if="transactions.length > 0">
         <div v-for="transaction in transactions" :key="transaction.id" class="list-item">
           <RouterLink :to="{name: 'transactionDetails', params: {id: transaction.id}}">
             <div class="row">
@@ -43,9 +44,16 @@ onBeforeMount(async () => {
               <div class="col">
                 {{ transaction.amount }} {{ transaction.currency.code }}
               </div>
+              <div class="col">
+                {{ transaction.datetime }}
+              </div>
             </div>
           </RouterLink> 
         </div>
+      </div>
+      <div v-else>
+        No transactions found
+      </div>
     </div>
   </main>
 </template>
