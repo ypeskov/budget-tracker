@@ -5,6 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routes.auth import router as auth_router
 from app.routes.accounts import router as accounts_router
 from app.routes.transations import router as transaction_router
+from app.routes.categories import router as category_router
+
+from icecream import install
+install()
 
 
 app = FastAPI()
@@ -21,6 +25,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(transaction_router)
 app.include_router(accounts_router)
+app.include_router(category_router)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

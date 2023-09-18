@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
@@ -22,7 +20,7 @@ def process_transfer_type(transaction: Transaction, user_id: int, db: Session):
 
     transaction.target_account = target_account
     if transaction.account.currency_id != transaction.target_account.currency_id:
-        currency_processor = CurrencyProcessor(transaction, db)
+        currency_processor: CurrencyProcessor = CurrencyProcessor(transaction, db)
         transaction = currency_processor.calculate_exchange_rate()
     else:
         transaction.target_amount = transaction.amount
@@ -67,11 +65,10 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
 
     if transaction_dto.is_transfer:
         transaction = process_transfer_type(transaction, user_id, db)
-        print(transaction.target_account)
         db.add(transaction.account)
         db.add(transaction.target_account)
     else:
-        account = process_non_transfer_type(transaction_dto, account, user_id, transaction, db)
+        account: Account = process_non_transfer_type(transaction_dto, account, user_id, transaction, db)
         db.add(account)
 
     db.add(transaction)
@@ -83,5 +80,4 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
 
 def get_transactions(user_id: int, db: Session = None):
     transactions = db.query(Transaction).filter_by(user_id=user_id).all()
-
     return transactions

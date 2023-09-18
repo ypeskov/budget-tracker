@@ -22,3 +22,6 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     id: int
     user_id: int
     currency_id: int | None
+
+    class Config:
+        orm_mode = True
