@@ -1,22 +1,4 @@
 services:
-  # Nestjs back API is not used
-  # back:
-  #   container_name: "back"
-  #   build: 
-  #     context: "./src-back"
-  #     dockerfile: "../dockerfiles/Dockerfile.back.dev"
-  #   ports:
-  #     - 9000:9000
-  #     - 9229:9229
-  #   tty: true
-  #   volumes:
-  #     - ./src-back:/app
-  #     - /app/node_modules
-  #   environment:
-  #     - NODE_ENV=development
-  #   depends_on:
-  #     - db
-
   back:
     container_name: "back"
     build: 
