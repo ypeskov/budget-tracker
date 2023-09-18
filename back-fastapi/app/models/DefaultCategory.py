@@ -1,5 +1,7 @@
-from sqlalchemy import Column, String, Integer, DateTime, func, Boolean, ForeignKey
-from sqlalchemy.orm import relationship, backref
+from datetime import datetime
+
+from sqlalchemy import DateTime, func, ForeignKey
+from sqlalchemy.orm import relationship, backref, Mapped, mapped_column
 
 from app.database import Base
 
@@ -7,14 +9,15 @@ from app.database import Base
 class DefaultCategory(Base):
     __tablename__ = 'default_categories'
 
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(index=True)
+    parent_id: Mapped[int] = mapped_column(ForeignKey('default_categories.id'), nullable=True, default=None,
+                                           server_default=None)
+    is_income: Mapped[bool] = mapped_column(default=False, server_default='f')
 
-    name = Column(String, index=True)
-    parent_id = Column(Integer, ForeignKey('default_categories.id'))
-    is_income = Column(Boolean, default=False, server_default='f')
+    parent: Mapped['DefaultCategory'] = relationship("DefaultCategory", backref=backref("children"))
 
-    parent = relationship("DefaultCategory", backref=backref("children"), remote_side=[id])
-
-    is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                 onupdate=func.now(), nullable=False)

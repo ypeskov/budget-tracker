@@ -1,5 +1,7 @@
-from sqlalchemy import Column, String, Integer, DateTime, func, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
+from datetime import datetime
+
+from sqlalchemy import DateTime, func, ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
 
@@ -7,15 +9,15 @@ from app.database import Base
 class UserCategory(Base):
     __tablename__ = 'user_categories'
 
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
-    name = Column(String, nullable=False, index=True)
-    parent_id = Column(Integer, ForeignKey('user_categories.id'), nullable=True, index=True)
-    is_income = Column(Boolean, default=False, server_default='f')
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(nullable=False, index=True)
+    parent_id: Mapped[int] = mapped_column(ForeignKey('user_categories.id'), nullable=True, index=True)
+    is_income: Mapped[bool] = mapped_column(default=False, server_default='f')
 
     user = relationship("User", back_populates="categories")
-    parent = relationship("UserCategory")
+    parent: Mapped['UserCategory'] = relationship("UserCategory")
 
-    is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

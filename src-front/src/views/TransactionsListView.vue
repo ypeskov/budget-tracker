@@ -3,12 +3,14 @@ import { onBeforeMount, reactive } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import { useUserStore } from '../stores/user';
+import { UserService } from '../services/users';
 import { TransactionsService } from '../services/transactions';
 
 let transactions = reactive([]);
 const userStore = useUserStore();
+const userService = new UserService(userStore);
 const router = useRouter();
-const transactionsService = new TransactionsService(userStore);
+const transactionsService = new TransactionsService(userService);
 
 onBeforeMount(async () => {
   try {

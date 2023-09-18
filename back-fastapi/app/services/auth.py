@@ -31,7 +31,8 @@ def copy_categories(default_category: DefaultCategory,
     new_category = UserCategory(
         user_id=user_id,
         name=default_category.name,
-        parent_id=parent_id
+        parent_id=parent_id,
+        is_income=default_category.is_income
     )
 
     db.add(new_category)
