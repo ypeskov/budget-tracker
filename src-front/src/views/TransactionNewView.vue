@@ -25,9 +25,7 @@ const transactionsService = new TransactionsService(userService);
 const accounts = reactive([]);
 const currentAccount = ref({});
 const targetAccount = ref({});
-const transaction = reactive({
-  notes: ''
-});
+const transaction = reactive({});
 const categories = ref([]);
 let filteredCategories = ref([]);
 
@@ -69,10 +67,12 @@ function updateTransactionProperties(type) {
     transaction.category_id = null;
     transaction.is_transfer = true;
     transaction.target_account_id = targetAccount.value.id;
+    transaction.is_income = false;
   } else {
     transaction.target_account_id = null;
     transaction.is_transfer = false;
     transaction.category_id = filteredCategories.value[0].id;
+    transaction.is_income = itemType.value === 'income';
   }
 }
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
@@ -66,8 +66,7 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
     transaction.currency = account.currency
 
     if transaction_dto.datetime is None:
-        transaction.datetime = datetime.utcnow()
-        ic(transaction)
+        transaction.datetime = datetime.now(timezone.utc)
 
     if transaction_dto.is_transfer:
         transaction = process_transfer_type(transaction, user_id, db)

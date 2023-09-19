@@ -34,7 +34,7 @@ export class TransactionsService {
     if (response.status === 200) {
       try {
         const transactionDetails = await response.json();
-        return transactionDetails.payload;
+        return transactionDetails;
       } catch (e) {
         console.log(e);
       }
@@ -47,6 +47,26 @@ export class TransactionsService {
 
   async addTransaction(transactionDetails) {
     const transactionDetailsUrl = `/transactions`;
-    console.log(transactionDetails);
+
+    try {
+      const response = await request(transactionDetailsUrl, {
+        method: 'POST',
+        body: JSON.stringify(transactionDetails)
+      });
+
+      if (response.status === 200) {
+        try {
+          const createdTransaction = response.json();
+          console.log(createdTransaction);
+        } catch(e) {
+          console.log(e);
+        }
+      }
+    } catch(e) {
+      console.log(e);
+    }
+    
+
+    
   }
 }
