@@ -7,7 +7,6 @@ class Currency(Base):
     __tablename__ = 'currencies'
 
     id = Column(Integer, primary_key=True)
-
     code = Column(String, index=True)
     name = Column(String, index=True)
 

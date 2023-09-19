@@ -27,3 +27,6 @@ class UserLoginSchema(UserBase):
 class UserResponse(UserBase):
     first_name: str | None
     last_name: str | None
+
+    class Config:
+        orm_mode = True

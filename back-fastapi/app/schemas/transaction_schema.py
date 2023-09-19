@@ -1,6 +1,9 @@
 from decimal import Decimal
 from datetime import datetime
 
+from app.schemas.account_schema import AccountSchema
+from app.schemas.currency_schema import CurrencyResponseSchema
+from app.schemas.user_schema import UserResponse
 from pydantic import BaseModel
 
 
@@ -22,6 +25,10 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     id: int
     user_id: int
     currency_id: int | None
+    user: UserResponse
+    account: AccountSchema
+    target_account: AccountSchema | None
+    currency: CurrencyResponseSchema
 
     class Config:
         orm_mode = True
