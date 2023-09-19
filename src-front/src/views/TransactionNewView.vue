@@ -33,7 +33,7 @@ const itemType = ref('expense');
 transaction.is_transfer = itemType.value === 'transfer';
 
 function changeAccount({ accountType, account }) {
-  if (accountType==='src') {
+  if (accountType === 'src') {
     currentAccount.value = account;
   } else {
     targetAccount.value = account;
@@ -86,8 +86,12 @@ function changeItemType(type) {
   updateTransactionProperties(type);
 }
 
-function submitNewTransaction() {
-  transactionsService.addTransaction(transaction);
+async function submitNewTransaction() {
+  const createdTransaction = await transactionsService.addTransaction(transaction);
+  for (const key in transaction) {
+    transaction[key] = null;
+  }
+  router.push({ name: 'transactions' });
 }
 </script>
 
@@ -114,8 +118,8 @@ function submitNewTransaction() {
 
             <div class="mb-3">
               <label for="notes" class="form-label">Notes</label>
-              <textarea @keyup="changeNotes" class="form-control" id="notes"
-                rows="3">{{ transaction?.notes }}</textarea>
+              <textarea @keyup="changeNotes" class="form-control" id="notes" v-model="transaction.notes"
+                rows="3"></textarea>
             </div>
 
             <button type="submit" class="btn btn-primary">Submit</button>

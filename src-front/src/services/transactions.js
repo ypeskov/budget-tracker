@@ -23,6 +23,8 @@ export class TransactionsService {
     } else if (response.status === 401) {
       this.userService.logOutUser();
       throw new HttpError('Unauthorized', 401);
+    } else {
+      console.log(response);
     }
     return [];
   }
@@ -41,6 +43,8 @@ export class TransactionsService {
     } else if (response.status === 401) {
       this.userService.logOutUser();
       throw new HttpError('Unauthorized', 401);
+    } else {
+      console.log(response);
     }
     return [];
   }
@@ -51,22 +55,25 @@ export class TransactionsService {
     try {
       const response = await request(transactionDetailsUrl, {
         method: 'POST',
-        body: JSON.stringify(transactionDetails)
+        body: JSON.stringify(transactionDetails),
       });
 
       if (response.status === 200) {
         try {
           const createdTransaction = response.json();
-          console.log(createdTransaction);
-        } catch(e) {
+          return createdTransaction;
+        } catch (e) {
           console.log(e);
         }
+      } else if (response.status === 401) {
+        this.userService.logOutUser();
+        throw new HttpError('Unauthorized', 401);
+      } else {
+        console.log(response);
       }
-    } catch(e) {
+      return null;
+    } catch (e) {
       console.log(e);
     }
-    
-
-    
   }
 }
