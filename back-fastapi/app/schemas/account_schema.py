@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class AccountSchema(BaseModel):
+class AccountResponseSchema(BaseModel):
     id: int | None
     user_id: int | None
     account_type_id: int

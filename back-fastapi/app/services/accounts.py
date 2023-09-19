@@ -9,10 +9,10 @@ from app.models.Account import Account
 from app.models.AccountType import AccountType
 from app.models.Currency import Currency
 from app.models.User import User
-from app.schemas.account_schema import AccountSchema
+from app.schemas.account_schema import AccountResponseSchema
 
 
-def create_account(account_dto: AccountSchema, user_id: int,
+def create_account(account_dto: AccountResponseSchema, user_id: int,
                    db: Session = None) -> Account:
     existing_user = db.query(User).filter(
         User.id == user_id).first()  # type: ignore

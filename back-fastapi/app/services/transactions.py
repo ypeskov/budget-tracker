@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import NoResultFound
 
@@ -90,3 +90,15 @@ def get_transactions(user_id: int, db: Session = None):
                                                  joinedload(Transaction.currency)).filter_by(
         user_id=user_id).all()
     return transactions
+
+
+def get_transaction_details(transaction_id: int, user_id: int, db: Session) -> Transaction:
+    try:
+        transaction = db.query(Transaction).filter_by(id=transaction_id).one()
+    except NoResultFound:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Transaction not found')
+
+    if user_id != transaction.user_id:
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+    return transaction
