@@ -20,8 +20,8 @@ class Transaction(Base):
     __tablename__ = 'transactions'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), index=True)
-    account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
+    account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id', ondelete='CASCADE'), index=True)
     target_account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id', ondelete='CASCADE'), index=True,
                                                    nullable=True, default=None)
     category_id: Mapped[int] = mapped_column(ForeignKey('user_categories.id', ondelete='CASCADE'), index=True,
@@ -37,9 +37,7 @@ class Transaction(Base):
     is_income: Mapped[bool] = mapped_column(default=False)
 
     user: Mapped[User] = relationship(back_populates='transactions')
-
     account: Mapped['Account'] = relationship('Account', foreign_keys="Transaction.account_id")
-
     target_account: Mapped['Account'] = relationship('Account', foreign_keys="Transaction.target_account_id")
 
     category: Mapped[UserCategory] = relationship()

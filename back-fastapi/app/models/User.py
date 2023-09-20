@@ -6,7 +6,6 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
 
-
 if TYPE_CHECKING:
     from app.models.UserCategory import UserCategory
     from app.models.Account import Account
@@ -28,7 +27,8 @@ class User(Base):
     base_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
 
     base_currency: Mapped['Currency'] = relationship()
-    accounts: Mapped[list['Account']] = relationship('Account', order_by="Account.id", back_populates="user")
+    accounts: Mapped[list['Account']] = relationship('Account', order_by="Account.id", back_populates="user",
+                                                     passive_deletes=True)
     categories: Mapped[list['UserCategory']] = relationship(back_populates="user", passive_deletes=True)
     transactions: Mapped[list['Transaction']] = relationship(back_populates='user', passive_deletes=True)
 

@@ -1,9 +1,9 @@
 from collections import namedtuple
 
-from app.models.User import User
 from icecream import ic
 
 from app.database import get_db
+from app.models.User import User
 from app.services.auth import create_users
 
 
@@ -32,7 +32,9 @@ def generate_test_users():
 
 def clear_test_users():
     try:
-        db.query(User).delete()
+        users = db.query(User).all()
+        for u in users:
+            db.delete(u)
         db.commit()
     except Exception as e:
         ic(e)

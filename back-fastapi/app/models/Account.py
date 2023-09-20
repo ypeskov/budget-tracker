@@ -30,7 +30,7 @@ class Account(Base):
     comment: Mapped[str] = mapped_column(nullable=True)
     is_hidden: Mapped[bool] = mapped_column(default=False)
 
-    user: Mapped[User] = relationship(back_populates="accounts")
+    user: Mapped[User] = relationship(back_populates="accounts", passive_deletes=True)
     account_type: Mapped[AccountType] = relationship()
     currency: Mapped[Currency] = relationship()
     transactions: Mapped['Transaction'] = relationship(back_populates='account', foreign_keys='Transaction.account_id')
