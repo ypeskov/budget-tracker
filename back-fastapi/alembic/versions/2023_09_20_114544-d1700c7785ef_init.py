@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 1a42c555f3ee
+Revision ID: d1700c7785ef
 Revises: 
-Create Date: 2023-09-20 11:14:50.820599
+Create Date: 2023-09-20 11:45:44.431837
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1a42c555f3ee'
+revision = 'd1700c7785ef'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -76,7 +76,7 @@ def upgrade() -> None:
     sa.Column('is_deleted', sa.Boolean(), server_default='f', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['base_currency_id'], ['currencies.id'], ),
+    sa.ForeignKeyConstraint(['base_currency_id'], ['currencies.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
@@ -124,7 +124,7 @@ def upgrade() -> None:
     sa.Column('is_deleted', sa.Boolean(), server_default='f', nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['parent_id'], ['user_categories.id'], ),
+    sa.ForeignKeyConstraint(['parent_id'], ['user_categories.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -161,9 +161,9 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ),
-    sa.ForeignKeyConstraint(['category_id'], ['user_categories.id'], ),
-    sa.ForeignKeyConstraint(['currency_id'], ['currencies.id'], ),
-    sa.ForeignKeyConstraint(['target_account_id'], ['accounts.id'], ),
+    sa.ForeignKeyConstraint(['category_id'], ['user_categories.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['currency_id'], ['currencies.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['target_account_id'], ['accounts.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

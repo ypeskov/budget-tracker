@@ -32,8 +32,7 @@ def generate_test_users():
 
 def clear_test_users():
     try:
-        user = db.query(User).filter_by(email='user1@example.com').one()
-        db.delete(user)
+        db.query(User).delete()
         db.commit()
     except Exception as e:
         ic(e)

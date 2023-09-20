@@ -22,9 +22,11 @@ class Transaction(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), index=True)
     account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'), index=True)
-    target_account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'), index=True, nullable=True, default=None)
-    category_id: Mapped[int] = mapped_column(ForeignKey('user_categories.id'), index=True, nullable=True)
-    currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'), index=True, nullable=True)
+    target_account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id', ondelete='CASCADE'), index=True,
+                                                   nullable=True, default=None)
+    category_id: Mapped[int] = mapped_column(ForeignKey('user_categories.id', ondelete='CASCADE'), index=True,
+                                             nullable=True)
+    currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'), index=True, nullable=True)
     amount: Mapped[Decimal] = mapped_column()
     target_amount: Mapped[Decimal] = mapped_column(nullable=True, default=None, server_default=None)
     label: Mapped[str] = mapped_column(String(LABEL_MAX_LENGTH), index=True, nullable=True)

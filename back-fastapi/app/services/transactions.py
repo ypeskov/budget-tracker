@@ -79,6 +79,11 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
     db.add(transaction)
     db.commit()
     db.refresh(transaction)
+    db.refresh(transaction.account)
+    db.refresh(transaction.user)
+    db.refresh(transaction.currency)
+    if transaction.target_account is not None:
+        db.refresh(transaction.currency)
 
     return transaction
 
