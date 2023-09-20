@@ -1,28 +1,43 @@
+from collections import namedtuple
+
+from app.models.User import User
 from icecream import ic
 
 from app.database import get_db
-from app.models.User import User
+from app.services.auth import create_users
 
 
 db = next(get_db())
 
 
-def generate_test_users():
-    default_values = [
-        User(email='user1@example.com', first_name='Yura1', last_name='Peskov1', password='qqq'),
-        User(email='user2@example.com', first_name='Yura2', last_name='Peskov2', password='qqq'),
-        User(email='user3@example.com', first_name='Yura3', last_name='Peskov3', password='qqq'),
-        User(email='user4@example.com', first_name='Yura4', last_name='Peskov4', password='qqq'),
-    ]
+UserModel = namedtuple('UserModel', 'email first_name last_name password')
+default_values = [
+    UserModel(email='user1@example.com', first_name='Yura1', last_name='Peskov1', password='qqq'),
+    UserModel(email='user2@example.com', first_name='Yura2', last_name='Peskov2', password='qqq'),
+    UserModel(email='user3@example.com', first_name='Yura3', last_name='Peskov3', password='qqq'),
+    UserModel(email='user4@example.com', first_name='Yura4', last_name='Peskov4', password='qqq'),
+]
 
+
+def generate_test_users():
     try:
-        db.bulk_save_objects(default_values)
-        db.commit()
-        print('test users are uploaded into DB')
+        for user in default_values:
+            create_users(user, db)
+            print(f'{user.first_name} is created')
+
+        print('All test users are uploaded into DB')
     except Exception as e:
         ic(e)
-        ic(e.args)
+
+
+def clear_test_users():
+    try:
+        user = db.query(User).filter_by(email='user1@example.com').one()
+        db.delete(user)
+        db.commit()
+    except Exception as e:
+        ic(e)
 
 
 if __name__ == '__main__':
-    load_default_account_types()
+    generate_test_users()

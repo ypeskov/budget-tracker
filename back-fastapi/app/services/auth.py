@@ -49,7 +49,7 @@ def copy_all_categories(user_id: int, db: Session = None):
         copy_categories(root_category, user_id, None, db)
 
 
-def create_user(user_request: UserRegistration, db: Session):
+def create_users(user_request: UserRegistration, db: Session):
     existing_user = db.query(User).filter(
         User.email == user_request.email).first()  # type: ignore
     if existing_user:

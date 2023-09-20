@@ -10,7 +10,7 @@ class CreditAccountDetails(Base):
     __tablename__ = 'credit_account_details'
 
     id = Column(Integer, primary_key=True)
-    account_id = Column(Integer, ForeignKey('accounts.id'))
+    account_id = Column(Integer, ForeignKey('accounts.id', ondelete='CASCADE'))
     own_balance = Column(Numeric)
     credit_balance = Column(Numeric)
 

@@ -11,12 +11,13 @@ class DefaultCategory(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(index=True)
-    parent_id: Mapped[int] = mapped_column(ForeignKey('default_categories.id'), nullable=True, default=None,
-                                           server_default=None)
+    parent_id: Mapped[int] = mapped_column(ForeignKey('default_categories.id', ondelete='CASCADE'), nullable=True,
+                                           default=None, server_default=None)
     is_income: Mapped[bool] = mapped_column(default=False, server_default='f')
 
-    parent: Mapped['DefaultCategory'] = relationship()
+    parent: Mapped['DefaultCategory'] = relationship(backref='children', remote_side='DefaultCategory.id')
 
     is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                 onupdate=func.now())

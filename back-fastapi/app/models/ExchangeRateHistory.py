@@ -1,5 +1,8 @@
-from sqlalchemy import Column, String, Integer, DateTime, func, Boolean, ForeignKey, Numeric
-from sqlalchemy.orm import relationship
+from datetime import datetime
+from decimal import Decimal
+
+from sqlalchemy import Integer, DateTime, func, Boolean, ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
 
@@ -7,15 +10,16 @@ from app.database import Base
 class ExchangeRateHistory(Base):
     __tablename__ = 'exchange_rates'
 
-    id = Column(Integer, primary_key=True)
-    from_currency_id = Column(Integer, ForeignKey('currencies.id'))
-    to_currency_id = Column(Integer, ForeignKey('currencies.id'))
-    rate = Column(Numeric)
-    datetime = Column(DateTime(timezone=True), index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    from_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
+    to_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
+    rate: Mapped[Decimal] = mapped_column()
+    datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
-    from_currency = relationship("Currency", foreign_keys=[from_currency_id])
-    to_currency = relationship("Currency", foreign_keys=[to_currency_id])
+    from_currency = relationship(foreign_keys=[from_currency_id])
+    to_currency = relationship(foreign_keys=[to_currency_id])
 
-    is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                 onupdate=func.now(), nullable=False)

@@ -5,12 +5,13 @@ from sqlalchemy import DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
-from app.models.Currency import Currency
-from app.models.UserCategory import UserCategory
+
 
 if TYPE_CHECKING:
+    from app.models.UserCategory import UserCategory
     from app.models.Account import Account
     from app.models.Transaction import Transaction
+    from app.models.Currency import Currency
 
 DEFAULT_CURRENCY_CODE = 'USD'
 
@@ -26,9 +27,9 @@ class User(Base):
     is_active: Mapped[str] = mapped_column(server_default='t', default=True)
     base_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'))
 
-    base_currency: Mapped[Currency] = relationship()
-    accounts: Mapped[list['Account']] = relationship(order_by="Account.id", back_populates="user")
-    categories: Mapped[list[UserCategory]] = relationship(back_populates="user")
+    base_currency: Mapped['Currency'] = relationship('Currency')
+    accounts: Mapped[list['Account']] = relationship('Account', order_by="Account.id", back_populates="user")
+    categories: Mapped[list['UserCategory']] = relationship(back_populates="user")
     transactions: Mapped[list['Transaction']] = relationship(back_populates='user')
 
     is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')

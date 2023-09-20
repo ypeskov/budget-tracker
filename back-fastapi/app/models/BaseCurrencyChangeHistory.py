@@ -9,7 +9,7 @@ class BaseCurrencyChangeHistory(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    base_currency_id = Column(Integer, ForeignKey('currencies.id'))
+    base_currency_id = Column(Integer, ForeignKey('currencies.id', ondelete='CASCADE'))
     change_date_time = Column(DateTime(timezone=True), index=True, default=func.now())
 
     user = relationship("User")

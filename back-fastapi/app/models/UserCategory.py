@@ -14,7 +14,7 @@ class UserCategory(Base):
     __tablename__ = 'user_categories'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     name: Mapped[str] = mapped_column(nullable=False, index=True)
     parent_id: Mapped[int] = mapped_column(ForeignKey('user_categories.id'), nullable=True, index=True)
     is_income: Mapped[bool] = mapped_column(default=False, server_default='f')

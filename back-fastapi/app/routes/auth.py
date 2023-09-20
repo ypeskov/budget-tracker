@@ -6,7 +6,7 @@ from app.schemas.user_schema import UserRegistration, UserLoginSchema, \
     UserResponse
 from app.schemas.token_schema import Token
 from app.dependencies.check_token import check_token
-from app.services.auth import create_user, get_jwt_token
+from app.services.auth import create_users, get_jwt_token
 
 router = APIRouter(
     prefix='/auth'
@@ -16,7 +16,7 @@ router = APIRouter(
 @router.post("/register", response_model=UserResponse)
 def register_user(user_request: UserRegistration,
                   db: Session = Depends(get_db)):
-    return UserResponse.from_orm(create_user(user_request, db))
+    return UserResponse.from_orm(create_users(user_request, db))
 
 
 @router.post("/login", response_model=Token)
