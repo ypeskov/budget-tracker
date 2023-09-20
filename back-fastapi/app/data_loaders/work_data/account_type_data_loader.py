@@ -1,7 +1,5 @@
-from pprint import pprint
-
-from ..database import get_db
-from ..models.AccountType import AccountType
+from app.database import get_db
+from app.models.AccountType import AccountType
 
 db = next(get_db())
 

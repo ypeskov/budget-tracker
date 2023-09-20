@@ -1,7 +1,7 @@
 from pprint import pprint
 
-from ..database import get_db
-from ..models.Currency import Currency
+from app.database import get_db
+from app.models.Currency import Currency
 
 db = next(get_db())
 

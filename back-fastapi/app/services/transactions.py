@@ -94,7 +94,10 @@ def get_transactions(user_id: int, db: Session = None):
 
 def get_transaction_details(transaction_id: int, user_id: int, db: Session) -> Transaction:
     try:
-        transaction = db.query(Transaction).filter_by(id=transaction_id).one()
+        transaction = db.query(Transaction).filter_by(id=transaction_id).options(joinedload(Transaction.user),
+                                                                                 joinedload(Transaction.account),
+                                                                                 joinedload(Transaction.target_account),
+                                                                                 joinedload(Transaction.currency)).one()
     except NoResultFound:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Transaction not found')
 
