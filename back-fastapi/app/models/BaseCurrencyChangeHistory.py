@@ -1,20 +1,28 @@
-from sqlalchemy import Column, Integer, DateTime, func, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Integer, DateTime, func, Boolean, ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
+
+
+if TYPE_CHECKING:
+    from app.models.User import User
+    from app.models.Currency import Currency
 
 
 class BaseCurrencyChangeHistory(Base):
     __tablename__ = 'base_currency_change_history'
 
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    base_currency_id = Column(Integer, ForeignKey('currencies.id', ondelete='CASCADE'))
-    change_date_time = Column(DateTime(timezone=True), index=True, default=func.now())
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    base_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
+    change_date_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True, default=func.now())
 
-    user = relationship("User")
-    base_currency = relationship("Currency")
+    user: Mapped['User'] = relationship()
+    base_currency: Mapped['Currency'] = relationship()
 
-    is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

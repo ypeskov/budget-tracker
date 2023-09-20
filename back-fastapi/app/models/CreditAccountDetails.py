@@ -1,7 +1,14 @@
-from sqlalchemy import Column, String, Integer, DateTime, func, Boolean, ForeignKey, Numeric
-from sqlalchemy.orm import relationship
+from datetime import datetime
+from decimal import Decimal
+from typing import TYPE_CHECKING
+
+from sqlalchemy import DateTime, func, ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.Account import Account
 
 CR_ACCOUNT_NAME_MAX_LENGTH = 100
 
@@ -9,13 +16,13 @@ CR_ACCOUNT_NAME_MAX_LENGTH = 100
 class CreditAccountDetails(Base):
     __tablename__ = 'credit_account_details'
 
-    id = Column(Integer, primary_key=True)
-    account_id = Column(Integer, ForeignKey('accounts.id', ondelete='CASCADE'))
-    own_balance = Column(Numeric)
-    credit_balance = Column(Numeric)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id', ondelete='CASCADE'))
+    own_balance: Mapped[Decimal] = mapped_column()
+    credit_balance: Mapped[Decimal] = mapped_column()
 
-    account = relationship("Account")
+    account: Mapped['Account'] = relationship()
 
-    is_deleted = Column(Boolean, default=False, nullable=True, server_default='f')
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

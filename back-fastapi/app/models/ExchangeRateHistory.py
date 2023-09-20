@@ -1,10 +1,15 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Integer, DateTime, func, Boolean, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
+
+
+if TYPE_CHECKING:
+    from app.models.Currency import Currency
 
 
 class ExchangeRateHistory(Base):
@@ -16,8 +21,8 @@ class ExchangeRateHistory(Base):
     rate: Mapped[Decimal] = mapped_column()
     datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
-    from_currency = relationship(foreign_keys=[from_currency_id])
-    to_currency = relationship(foreign_keys=[to_currency_id])
+    from_currency: Mapped['Currency'] = relationship(foreign_keys=[from_currency_id])
+    to_currency: Mapped['Currency'] = relationship(foreign_keys=[to_currency_id])
 
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True, server_default='f')
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
