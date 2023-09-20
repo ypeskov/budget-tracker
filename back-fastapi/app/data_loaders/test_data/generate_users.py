@@ -14,8 +14,6 @@ UserModel = namedtuple('UserModel', 'email first_name last_name password')
 default_values = [
     UserModel(email='user1@example.com', first_name='Yura1', last_name='Peskov1', password='qqq'),
     UserModel(email='user2@example.com', first_name='Yura2', last_name='Peskov2', password='qqq'),
-    UserModel(email='user3@example.com', first_name='Yura3', last_name='Peskov3', password='qqq'),
-    UserModel(email='user4@example.com', first_name='Yura4', last_name='Peskov4', password='qqq'),
 ]
 
 
@@ -25,7 +23,7 @@ def generate_test_users():
             create_users(user, db)
             print(f'{user.first_name} is created')
 
-        print('All test users are uploaded into DB')
+        print('All test users were generated')
     except Exception as e:
         ic(e)
 

@@ -32,7 +32,7 @@ onBeforeMount(async () => {
         </div>
       </div>
       <div class="row">
-        <div class="col">Balance: {{ accountDetails.balance }}</div>
+        <div class="col">Balance: {{ accountDetails.balance }} {{ accountDetails?.currency?.code }}</div>
       </div>
       <div class="row">
         <div class="col">Open Date: {{ accountDetails.opening_date }}</div>
