@@ -88,12 +88,13 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
     return transaction
 
 
-def get_transactions(user_id: int, db: Session = None):
-    transactions = db.query(Transaction).options(joinedload(Transaction.account),
-                                                 joinedload(Transaction.target_account),
-                                                 joinedload(Transaction.category),
-                                                 joinedload(Transaction.currency)).filter_by(
-        user_id=user_id).all()
+def get_transactions(user_id: int, db: Session = None, page: int = 1, per_page: int = 20):
+    offset = (page - 1) * per_page
+    transactions = (db.query(Transaction).options(joinedload(Transaction.account),
+                                                  joinedload(Transaction.target_account),
+                                                  joinedload(Transaction.category),
+                                                  joinedload(Transaction.currency)).filter_by(user_id=user_id)
+                    .offset(offset).limit(per_page).all())
     return transactions
 
 

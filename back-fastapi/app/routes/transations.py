@@ -20,8 +20,8 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
 
 
 @router.get('/', response_model=list[ResponseTransactionSchema])
-def get_user_transactions(request: Request, db: Session = Depends(get_db)):
-    return get_transactions(request.state.user['id'], db)
+def get_user_transactions(request: Request, page: int = 1, per_page: int = 20, db: Session = Depends(get_db)):
+    return get_transactions(request.state.user['id'], db, page, per_page)
 
 
 @router.get('/{transaction_id}', response_model=ResponseTransactionSchema)
