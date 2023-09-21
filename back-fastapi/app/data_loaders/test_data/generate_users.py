@@ -1,9 +1,11 @@
 from collections import namedtuple
 
+from sqlalchemy import text
 from icecream import ic
 
 from app.database import get_db
 from app.models.User import User
+from app.models.UserCategory import UserCategory
 from app.services.auth import create_users
 
 
@@ -18,6 +20,10 @@ default_values = [
 
 
 def generate_test_users():
+    # set autoincrement for categories to 1
+    sql_query = text(f"ALTER SEQUENCE user_categories_id_seq RESTART WITH 1;")
+    db.execute(sql_query)
+    
     try:
         for user in default_values:
             create_users(user, db)

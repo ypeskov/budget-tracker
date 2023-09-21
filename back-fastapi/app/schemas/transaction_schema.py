@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 
 class CreateTransactionSchema(BaseModel):
+    id: int | None
     account_id: int
     target_account_id: int | None
     category_id: int | None
