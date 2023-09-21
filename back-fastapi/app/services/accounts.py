@@ -31,6 +31,8 @@ def create_account(account_dto: AccountResponseSchema, user_id: int,
                           opening_date=account_dto.opening_date,
                           is_hidden=account_dto.is_hidden,
                           name=account_dto.name, comment=account_dto.comment)
+    if account_dto.id is not None:
+        new_account.id = account_dto.id
     db.add(new_account)
     db.commit()
 
