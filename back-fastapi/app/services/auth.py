@@ -66,7 +66,8 @@ def create_users(user_request: UserRegistration, db: Session):
         password_hash=hashed_password,
         base_currency=currency,
         is_active=True)
-
+    if user_request.id is not None:
+        new_user.id = user_request.id
     db.add(new_user)
     db.commit()
 

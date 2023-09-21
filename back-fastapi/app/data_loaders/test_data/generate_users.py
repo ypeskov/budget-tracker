@@ -10,10 +10,10 @@ from app.services.auth import create_users
 db = next(get_db())
 
 
-UserModel = namedtuple('UserModel', 'email first_name last_name password')
+UserModel = namedtuple('UserModel', 'id email first_name last_name password')
 default_values = [
-    UserModel(email='user1@example.com', first_name='Yura1', last_name='Peskov1', password='qqq'),
-    UserModel(email='user2@example.com', first_name='Yura2', last_name='Peskov2', password='qqq'),
+    UserModel(id=1, email='user1@example.com', first_name='Yura1', last_name='Peskov1', password='qqq'),
+    UserModel(id=2, email='user2@example.com', first_name='Yura2', last_name='Peskov2', password='qqq'),
 ]
 
 

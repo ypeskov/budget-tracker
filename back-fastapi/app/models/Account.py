@@ -43,7 +43,7 @@ class Account(Base):
                                                  onupdate=func.now(), nullable=False)
 
     def __repr__(self):
-        return f'Account(id={self.id}, user_id={self.user_id}, account_type_id={self.account_type_id}) ' + \
+        return f'Account(id={self.id}, user_id={self.user_id}, account_type_id={self.account_type_id} ' + \
             f'currency_id={self.currency_id}, balance={self.balance}, name="{self.name}", ' + \
             f'opening_date={self.opening_date}, comment="{self.comment}", is_hidden={self.is_hidden}, ' + \
-            f'is_deleted={self.is_deleted}, created_at={self.created_at}, updated_at={self.updated_at}'
+            f'is_deleted={self.is_deleted}, created_at={self.created_at}, updated_at={self.updated_at})'

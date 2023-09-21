@@ -1,7 +1,5 @@
-from pprint import pp
-from typing import Type
-
 from fastapi import HTTPException
+from sqlalchemy import asc
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 
@@ -42,8 +40,8 @@ def create_account(account_dto: AccountResponseSchema, user_id: int,
 def get_user_accounts(user_id: int,
                       db: Session = None,
                       include_deleted: bool = False,
-                      include_hidden: bool = False) -> list[Type[Account]]:
-    query = db.query(Account).filter_by(user_id=user_id)
+                      include_hidden: bool = False) -> list[Account]:
+    query = db.query(Account).filter_by(user_id=user_id).order_by(asc(Account.id))
 
     if not include_deleted:
         query = query.filter(Account.is_deleted == False)
@@ -54,8 +52,7 @@ def get_user_accounts(user_id: int,
     return accounts
 
 
-def get_account_details(account_id: int, user_id: int, db: Session = None) -> \
-        Type[Account]:
+def get_account_details(account_id: int, user_id: int, db: Session = None) -> Account:
     try:
         account = db.query(Account).filter_by(id=account_id).one()
     except NoResultFound:
