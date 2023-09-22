@@ -4,8 +4,6 @@ import { computed } from 'vue';
 const props = defineProps(['transaction', 'currentAccount', 'label', 'type']);
 const emit = defineEmits(['amountChanged']);
 
-props.transaction.amount = 0;
-
 const amount = computed(() => {
   if (type === 'src') {
     return transaction.amount;
@@ -29,7 +27,7 @@ function changeAmount($value) {
         <label for="amount" class="form-label">
           {{ label }}
         </label>
-        <input type="number" @change="changeAmount" class="form-control" id="amount" step="0.01" />
+        <input type="number" @keyup="changeAmount" class="form-control" id="amount" step="0.01" />
       </div>
       <div class="col-2 currency">{{ currentAccount?.currency?.code }}</div>
     </div>

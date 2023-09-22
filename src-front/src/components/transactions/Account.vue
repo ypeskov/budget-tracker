@@ -35,7 +35,7 @@ onBeforeMount(() => { });
   </label>
   <select class="form-select bottom-space" @change="changeAccount">
     <option v-for="(acc, index) in accounts" :key="acc.id" :value="index">
-      {{ acc.name }}
+      {{ acc.name }} ({{ acc.balance }} {{ acc.currency.code }})
     </option>
   </select>
 </template>

@@ -40,18 +40,19 @@ onBeforeMount(async () => {
         </div>
       </div>
       <div v-if="transactions.length > 0">
-        <div v-for="transaction, idx in transactions" :key="transaction.id" class="list-item row">
-          <div class="col-4 transaction-element">
-            <RouterLink :to="{ name: 'transactionDetails', params: { id: transaction.id } }">
-              {{ transaction.label }}
-            </RouterLink>
-          </div>
-          <div class="col-4 amount-container">
-            {{ transaction.amount }} {{ transaction.currency.code }}
-          </div>
-          <div class="col-4">
-            {{ DateTime.fromISO(transaction.datetime).toLocaleString() }}
-          </div>
+        <div v-for="transaction, idx in transactions" :key="transaction.id" class="list-item">
+          <RouterLink class="row" :to="{ name: 'transactionDetails', params: { id: transaction.id } }">
+            <div class="col-7">
+              <div class="transaction-element">
+                {{ transaction.label }}
+              </div>
+              <div class="transaction-element">{{ transaction.notes }}</div>
+            </div>
+            <div class="col-5 amount-container">
+              <div>{{ transaction.amount }} {{ transaction.currency.code }}</div>
+              <div>{{ DateTime.fromISO(transaction.datetime).toLocaleString() }}</div>
+            </div>
+          </RouterLink>
         </div>
       </div>
       <div v-else>
@@ -66,11 +67,19 @@ onBeforeMount(async () => {
   display: inline-block;
   width: 2rem;
 }
+.list-item {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+}
+.list-item > a {
+  text-decoration: none;
+}
 .transaction-element {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
 .amount-container {
   text-align: right;
 }

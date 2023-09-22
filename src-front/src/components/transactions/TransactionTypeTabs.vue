@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 
-const props = defineProps(['transaction', 'itemType']);
+const props = defineProps(['itemType']);
 const currentItem = ref(props.itemType);
 const emit = defineEmits(['typeChanged']);
 

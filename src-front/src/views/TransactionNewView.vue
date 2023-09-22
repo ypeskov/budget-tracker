@@ -92,7 +92,6 @@ function changeNotes($event) {
 function changeItemType(type) {
   itemType.value = type;
   filterCategories();
-  updateTransactionProperties(type);
 }
 
 async function submitNewTransaction() {
@@ -114,23 +113,24 @@ async function submitNewTransaction() {
 
             <TransactionLabel :transaction="transaction" />
 
+            <Account :transaction="transaction" @account-changed="changeAccount" account-type="src"
+              :accounts="accounts" />
+
             <TransactionAmount label="Amount" type="src" :transaction="transaction" @amount-changed="amountChanged"
               :current-account="currentAccount" />
+
+            <Account v-if="transaction.is_transfer === true" @account-changed="changeAccount" account-type="target"
+              :transaction="transaction" :accounts="accounts" />
 
             <TransactionAmount v-if="itemType === 'transfer'" type="target" label="Target Amount"
               @amount-changed="amountChanged" :transaction="transaction" :current-account="targetAccount" />
 
-            <ExchangeRate v-if="itemType === 'transfer'" :amount="transaction.amount"
+            <ExchangeRate v-if="itemType === 'transfer'" :amount-src="transaction.amount"
+              :currency-src="currentAccount.currency.code" :currency-target="targetAccount.currency.code"
               :target-amount="transaction.target_amount" />
 
             <Category v-if="!transaction.is_transfer" :item-type="itemType" :transaction="transaction"
               :categories="filteredCategories" />
-
-            <Account :transaction="transaction" @account-changed="changeAccount" account-type="src"
-              :accounts="accounts" />
-
-            <Account v-if="transaction.is_transfer === true" @account-changed="changeAccount" account-type="target"
-              :transaction="transaction" :accounts="accounts" />
 
             <div class="mb-3">
               <label for="notes" class="form-label">Notes</label>
