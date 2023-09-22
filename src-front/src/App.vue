@@ -29,48 +29,47 @@ onBeforeMount(() => {
     <div class="row">
       <div class="col">Another Budgeter</div>
     </div>
-    <div class="row">
-      <div class="col">
-        <header>
-          <div class="wrapper">
-            <nav>
-              <span v-if="userStore.isLoggedIn">
-                <RouterLink class="btn btn-primary" :to="{ name: 'transactionNew' }">New</RouterLink>
+    <header>
+      <div class="row nav-row">
+        <div class="col">
+          <nav>
+            <span>
+              <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+            </span>
+            <span v-if="userStore.isLoggedIn">
+              <span>
+                <RouterLink :to="{ name: 'accounts' }">Accounts</RouterLink>
               </span>
               <span>
-                <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+                <RouterLink :to="{ name: 'transactions' }">Transactions</RouterLink>
               </span>
-
-              <span v-if="userStore.isLoggedIn">
-                <span>
-                  <RouterLink :to="{ name: 'accounts' }">Accounts</RouterLink>
-                </span>
-                <span>
-                  <RouterLink :to="{ name: 'transactions' }">Transactions</RouterLink>
-                </span>
-              </span>
-
-
-              <span v-if="!userStore.isLoggedIn">
-                <RouterLink :to="{ name: 'login' }">Login</RouterLink>
-              </span>
-              <span v-else>
-                <RouterLink :to="{ name: 'logout' }">Logout</RouterLink>
-              </span>
-
-            </nav>
-          </div>
-        </header>
+            </span>
+            <span v-if="!userStore.isLoggedIn">
+              <RouterLink :to="{ name: 'login' }">Login</RouterLink>
+            </span>
+            <span v-else>
+              <RouterLink :to="{ name: 'logout' }">Logout</RouterLink>
+            </span>
+          </nav>
+        </div>
       </div>
-    </div>
+      <div class="row">
+        <div class="col">
+          <span v-if="userStore.isLoggedIn">
+            <RouterLink class="btn btn-primary" :to="{ name: 'transactionNew' }">New</RouterLink>
+          </span>
+        </div>
+      </div>
+    </header>
   </div>
-
-
   <RouterView />
 </template>
 
 <style scoped>
 nav a {
   margin: 0 0.2rem;
+}
+.nav-row {
+  margin-bottom: 0.5rem;
 }
 </style>

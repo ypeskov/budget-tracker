@@ -40,14 +40,11 @@ onBeforeMount(async () => {
         </div>
       </div>
       <div v-if="transactions.length > 0">
-        <div v-for="transaction in transactions" :key="transaction.id" class="list-item row">
-          <div class="col-4 transaction-element">
+        <div v-for="transaction, idx in transactions" :key="transaction.id" class="list-item row">
+          <div class="col-5 transaction-element">
             <RouterLink :to="{ name: 'transactionDetails', params: { id: transaction.id } }">
               {{ transaction.label }}
             </RouterLink>
-          </div>
-          <div class="col">
-            {{ transaction.account.name }}
           </div>
           <div class="col">
             {{ transaction.amount }} {{ transaction.currency.code }}
@@ -65,6 +62,10 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
+.order {
+  display: inline-block;
+  width: 2rem;
+}
 .transaction-element {
   overflow-wrap: break-word;
 }

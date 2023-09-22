@@ -10,7 +10,7 @@ props.transaction.amount = 0;
         <label for="amount" class="form-label">
           Amount
         </label>
-        <input type="number" v-model="transaction.amount" class="form-control" id="amount" />
+        <input type="number" v-model="transaction.amount" class="form-control" id="amount" step="0.01" />
       </div>
       <div class="col-2 currency">{{ currentAccount?.currency?.code }}</div>
     </div>
