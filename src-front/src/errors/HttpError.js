@@ -1,5 +1,5 @@
 export class HttpError extends Error {
-  /** string */
+  /** number */
   statusCode;
   
   constructor(message, statusCode=500) {

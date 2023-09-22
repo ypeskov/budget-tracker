@@ -5,6 +5,7 @@ import { RouterLink, useRouter } from 'vue-router';
 import { useUserStore } from '../stores/user';
 import { useAccountStore } from '../stores/account';
 import {AccountService} from '../services/accounts';
+import { HttpError } from '../errors/HttpError';
 
 let accounts = reactive([]);
 const userStore = useUserStore();
@@ -17,8 +18,14 @@ onBeforeMount(async () => {
     accounts.length = 0;
     accounts.push(...await accountService.getAllUserAccounts()); 
   } catch(e) {
-    console.log(e.message);
-    router.push({name: 'login'})
+    if (e instanceof HttpError && e.statusCode === 401) {
+      console.log(e.message);
+      router.push({ name: 'login' });
+      return;
+    } else {
+      console.log(e);
+    }
+    router.push({ name: 'home' });
   }  
 });
 </script>

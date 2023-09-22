@@ -1,10 +1,12 @@
 <script setup>
 import { onBeforeMount, reactive } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { UserService } from '../services/users';
 import { useUserStore } from '../stores/user';
 import { TransactionsService } from '../services/transactions';
+import { HttpError } from '../errors/HttpError';
 
+const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const transactionsService = new TransactionsService(new UserService(userStore));
@@ -16,7 +18,14 @@ onBeforeMount(async () => {
     const details = await transactionsService.getTransactionDetails(route.params.id);
     transaction = Object.assign(transaction, details);
   } catch (e) {
-    console.log(e);
+    if (e instanceof HttpError && e.statusCode === 401) {
+      console.log(e.message);
+      router.push({ name: 'login' });
+      return;
+    } else {
+      console.log(e);
+    }
+    router.push({ name: 'home' });
   }
 });
 </script>
