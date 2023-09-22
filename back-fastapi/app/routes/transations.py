@@ -16,7 +16,7 @@ router = APIRouter(
 def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Request, db: Session = Depends(get_db)):
     transaction = create_transaction(transaction_dto, request.state.user['id'], db)
 
-    return transaction.__dict__
+    return transaction
 
 
 @router.get('/', response_model=list[ResponseTransactionSchema])

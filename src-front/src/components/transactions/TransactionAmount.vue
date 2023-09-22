@@ -1,6 +1,25 @@
 <script setup>
-const props = defineProps(['transaction', 'currentAccount']);
+import { computed } from 'vue';
+
+const props = defineProps(['transaction', 'currentAccount', 'label', 'type']);
+const emit = defineEmits(['amountChanged']);
+
 props.transaction.amount = 0;
+
+const amount = computed(() => {
+  if (type === 'src') {
+    return transaction.amount;
+  } else if (type === 'target') {
+    return transaction.target_amount;
+  }
+})
+
+function changeAmount($value) {
+  emit('amountChanged', {
+    amountType: props.type,
+    amount: parseFloat($value.target.value)
+  });
+}
 </script>
 
 <template>
@@ -8,9 +27,9 @@ props.transaction.amount = 0;
     <div class="row">
       <div class="col-10">
         <label for="amount" class="form-label">
-          Amount
+          {{ label }}
         </label>
-        <input type="number" v-model="transaction.amount" class="form-control" id="amount" step="0.01" />
+        <input type="number" @change="changeAmount" class="form-control" id="amount" step="0.01" />
       </div>
       <div class="col-2 currency">{{ currentAccount?.currency?.code }}</div>
     </div>

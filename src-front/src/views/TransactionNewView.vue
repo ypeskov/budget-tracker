@@ -13,6 +13,7 @@ import TransactionLabel from '../components/transactions/TransactionLabel.vue';
 import TransactionAmount from '../components/transactions/TransactionAmount.vue';
 import Category from '../components/transactions/Category.vue';
 import Account from '../components/transactions/Account.vue';
+import ExchangeRate from '../components/transactions/ExchangeRate.vue'
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -35,8 +36,16 @@ transaction.is_transfer = itemType.value === 'transfer';
 function changeAccount({ accountType, account }) {
   if (accountType === 'src') {
     currentAccount.value = account;
-  } else {
+  } else if (accountType === 'target') {
     targetAccount.value = account;
+  }
+}
+
+function amountChanged({ amountType, amount }) {
+  if (amountType === 'src') {
+    transaction.amount = amount;
+  } else {
+    transaction.target_amount = amount;
   }
 }
 
@@ -105,7 +114,14 @@ async function submitNewTransaction() {
 
             <TransactionLabel :transaction="transaction" />
 
-            <TransactionAmount :transaction="transaction" :current-account="currentAccount" />
+            <TransactionAmount label="Amount" type="src" :transaction="transaction" @amount-changed="amountChanged"
+              :current-account="currentAccount" />
+
+            <TransactionAmount v-if="itemType === 'transfer'" type="target" label="Target Amount"
+              @amount-changed="amountChanged" :transaction="transaction" :current-account="targetAccount" />
+
+            <ExchangeRate v-if="itemType === 'transfer'" :amount="transaction.amount"
+              :target-amount="transaction.target_amount" />
 
             <Category v-if="!transaction.is_transfer" :item-type="itemType" :transaction="transaction"
               :categories="filteredCategories" />
@@ -113,8 +129,8 @@ async function submitNewTransaction() {
             <Account :transaction="transaction" @account-changed="changeAccount" account-type="src"
               :accounts="accounts" />
 
-            <Account v-if="transaction.is_transfer === true" account-type="target" :transaction="transaction"
-              :accounts="accounts" />
+            <Account v-if="transaction.is_transfer === true" @account-changed="changeAccount" account-type="target"
+              :transaction="transaction" :accounts="accounts" />
 
             <div class="mb-3">
               <label for="notes" class="form-label">Notes</label>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount } from 'vue';
 
 const props = defineProps(['transaction', 'accounts', 'accountType']);
 const emit = defineEmits(['accountChanged']);
@@ -13,7 +13,7 @@ function changeAccount($event) {
     props.transaction.target_account_id = accountId;
   }
   emit('accountChanged', {
-    acountType: props.accountType,
+    accountType: props.accountType,
     account: acc
   });
 }
