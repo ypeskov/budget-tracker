@@ -43,13 +43,11 @@ onBeforeMount(async () => {
         <div v-for="transaction, idx in transactions" :key="transaction.id" class="list-item">
           <RouterLink class="row" :to="{ name: 'transactionDetails', params: { id: transaction.id } }">
             <div class="col-7">
-              <div class="transaction-element">
-                {{ transaction.label }}
-              </div>
+              <div class="transaction-element"><b>{{ transaction.label }}</b></div>
               <div class="transaction-element">{{ transaction.notes }}</div>
             </div>
             <div class="col-5 amount-container">
-              <div>{{ transaction.amount }} {{ transaction.currency.code }}</div>
+              <div><b>{{ transaction.amount.toFixed(2) }} {{ transaction.currency.code }}</b></div>
               <div>{{ DateTime.fromISO(transaction.datetime).toLocaleString() }}</div>
             </div>
           </RouterLink>
@@ -63,17 +61,16 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
-.order {
-  display: inline-block;
-  width: 2rem;
-}
 .list-item {
   margin-bottom: 0.5rem;
   padding: 0.5rem;
 }
-.list-item > a {
+
+.list-item>a {
   text-decoration: none;
+  color: black;
 }
+
 .transaction-element {
   overflow: hidden;
   white-space: nowrap;
