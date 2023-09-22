@@ -5,7 +5,6 @@ from icecream import ic
 
 from app.database import get_db
 from app.models.User import User
-from app.models.UserCategory import UserCategory
 from app.services.auth import create_users
 
 
