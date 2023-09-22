@@ -41,15 +41,15 @@ onBeforeMount(async () => {
       </div>
       <div v-if="transactions.length > 0">
         <div v-for="transaction, idx in transactions" :key="transaction.id" class="list-item row">
-          <div class="col-5 transaction-element">
+          <div class="col-4 transaction-element">
             <RouterLink :to="{ name: 'transactionDetails', params: { id: transaction.id } }">
               {{ transaction.label }}
             </RouterLink>
           </div>
-          <div class="col">
+          <div class="col-4 amount-container">
             {{ transaction.amount }} {{ transaction.currency.code }}
           </div>
-          <div class="col">
+          <div class="col-4">
             {{ DateTime.fromISO(transaction.datetime).toLocaleString() }}
           </div>
         </div>
@@ -67,6 +67,11 @@ onBeforeMount(async () => {
   width: 2rem;
 }
 .transaction-element {
-  overflow-wrap: break-word;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.amount-container {
+  text-align: right;
 }
 </style>
