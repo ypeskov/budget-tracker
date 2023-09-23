@@ -7,6 +7,7 @@ from app.dependencies.check_token import check_token
 from app.services.transactions import create_transaction, get_transactions, get_transaction_details
 
 router = APIRouter(
+    tags=['Transactions'],
     prefix='/transactions',
     dependencies=[Depends(check_token)]
 )

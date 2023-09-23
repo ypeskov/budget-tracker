@@ -10,7 +10,7 @@ export class TransactionsService {
   }
 
   async getUserTransactions() {
-    const transactionsUrl = '/transactions';
+    const transactionsUrl = '/transactions/?per_page=1000';
     const response = await request(transactionsUrl);
 
     if (response.status === 200) {

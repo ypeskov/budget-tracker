@@ -23,8 +23,8 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-app.include_router(transaction_router)
 app.include_router(accounts_router)
+app.include_router(transaction_router)
 app.include_router(category_router)
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ from app.dependencies.check_token import check_token
 from app.services.auth import create_users, get_jwt_token
 
 router = APIRouter(
+    tags=['Auth'],
     prefix='/auth'
 )
 

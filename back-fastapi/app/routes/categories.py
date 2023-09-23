@@ -10,6 +10,7 @@ from app.schemas.category_schema import ResponseCategorySchema
 from app.services.categories import get_user_categories
 
 router = APIRouter(
+    tags=['Categories'],
     prefix='/categories',
     dependencies=[Depends(check_token)]
 )

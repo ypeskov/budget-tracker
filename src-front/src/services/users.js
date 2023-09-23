@@ -8,7 +8,7 @@ export class UserService {
   }
 
   async loginUser(loginEmail, password) {
-    const loginPath = '/auth/login';
+    const loginPath = '/auth/login/';
     const requestBody = {
       email: loginEmail,
       password,
@@ -33,7 +33,7 @@ export class UserService {
 
   async getUserProfile(accessToken) {
     try {
-      const profileEndpoint = '/auth/profile';
+      const profileEndpoint = '/auth/profile/';
       const response = await request(profileEndpoint);
       const userProfile = await response.json();
       this.setUser(userProfile, true, accessToken);

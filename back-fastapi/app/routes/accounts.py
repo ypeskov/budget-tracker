@@ -10,6 +10,7 @@ from app.services.accounts import create_account, get_user_accounts, \
     get_account_details
 
 router = APIRouter(
+    tags=['Accounts'],
     prefix='/accounts',
     dependencies=[Depends(check_token)]
 )

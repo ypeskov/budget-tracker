@@ -9,7 +9,7 @@ export class CategoriesService {
   }
 
   async getUserCategories() {
-    const categoriesUrl = '/categories';
+    const categoriesUrl = '/categories/';
     let response;
     try {
       response = await request(categoriesUrl);

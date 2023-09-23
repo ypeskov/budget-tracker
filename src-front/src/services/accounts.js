@@ -15,7 +15,7 @@ export class AccountService {
   }
 
   async getAllUserAccounts() {
-    const accountsUrl = '/accounts';
+    const accountsUrl = '/accounts/';
     const response = await request(accountsUrl);
 
     if (response.status === 200) {
