@@ -14,18 +14,18 @@ router = APIRouter(
 )
 
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register/", response_model=UserResponse)
 def register_user(user_request: UserRegistration,
                   db: Session = Depends(get_db)):
     return UserResponse.from_orm(create_users(user_request, db))
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login/", response_model=Token)
 def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)):
     return get_jwt_token(user_login, db)
 
 
-@router.get('/profile')
+@router.get('/profile/')
 def get_profile(user=Depends(check_token),
                 db: Session = Depends(get_db)) -> dict:
     return user

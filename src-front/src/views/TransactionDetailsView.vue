@@ -1,6 +1,8 @@
 <script setup>
 import { onBeforeMount, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { DateTime } from 'luxon';
+
 import { UserService } from '../services/users';
 import { useUserStore } from '../stores/user';
 import { TransactionsService } from '../services/transactions';
@@ -41,7 +43,7 @@ onBeforeMount(async () => {
           transaction.currency.code : '' }}</div>
       </div>
       <div class="row">
-        <div class="col"><strong>Date and time:</strong> {{ transaction.datetime }}</div>
+        <div class="col"><strong>Date and time:</strong> {{ DateTime.fromISO(transaction.datetime).toFormat('dd/MM/yyyy HH:mm') }}</div>
       </div>
       <div class="row">
         <div class="col"><strong>Notes:</strong> {{ transaction.notes }}</div>
