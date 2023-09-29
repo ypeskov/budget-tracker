@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.transaction_schema import CreateTransactionSchema, ResponseTransactionSchema
 from app.dependencies.check_token import check_token
 from app.services.transactions import create_transaction, get_transactions, get_transaction_details
+from app.utils.sanitize_transaction_filters import prepare_filters
 
 router = APIRouter(
     tags=['Transactions'],
@@ -21,8 +22,11 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
 
 
 @router.get('/', response_model=list[ResponseTransactionSchema])
-def get_user_transactions(request: Request, page: int = 1, per_page: int = 20, db: Session = Depends(get_db)):
-    return get_transactions(request.state.user['id'], db, page, per_page)
+def get_user_transactions(request: Request, db: Session = Depends(get_db)):
+    params = dict(request.query_params)
+    prepare_filters(params)
+
+    return get_transactions(request.state.user['id'], db, dict(params))
 
 
 @router.get('/{transaction_id}', response_model=ResponseTransactionSchema)

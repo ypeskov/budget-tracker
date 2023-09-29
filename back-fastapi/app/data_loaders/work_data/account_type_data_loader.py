@@ -18,7 +18,7 @@ def load_default_account_types():
         db.commit()
         print('Default account types are loaded in DB')
     except Exception as e:
-        pprint(e.args)
+        print(e.args)
 
 
 if __name__ == '__main__':
