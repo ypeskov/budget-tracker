@@ -1,5 +1,5 @@
-# from pydantic import BaseSettings
-from pydantic_settings import BaseSettings
+from pydantic_settings import SettingsConfigDict, BaseSettings
+
 
 class Settings(BaseSettings):
     db_user: str = 'username'
@@ -7,6 +7,4 @@ class Settings(BaseSettings):
     db_host: str = 'db'
     db_name: str = 'dbname'
 
-    class Config:
-        # `.env.prod` takes priority over `.env`
-        env_file = '.env', '.env.local', '.env.prod'
+    model_config = SettingsConfigDict(env_file=('.env', '.env.local', '.env.prod'))

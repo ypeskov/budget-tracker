@@ -31,7 +31,7 @@ class Transaction(Base):
     target_amount: Mapped[Decimal] = mapped_column(nullable=True, default=None, server_default=None)
     label: Mapped[str] = mapped_column(String(LABEL_MAX_LENGTH), index=True, nullable=True)
     notes: Mapped[str] = mapped_column(nullable=True)
-    datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True, nullable=True)
+    date_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True, nullable=True)
     exchange_rate: Mapped[Decimal] = mapped_column(nullable=True)
     is_transfer: Mapped[bool] = mapped_column(nullable=False)
     is_income: Mapped[bool] = mapped_column(default=False)
@@ -52,6 +52,6 @@ class Transaction(Base):
     def __repr__(self):
         return f'Transaction(id={self.id}, user_id={self.user_id}, account_id={self.account_id}, ' + \
             f'target_account_id={self.target_account_id}, category_id={self.category_id}, amount={self.amount}, ' + \
-            f'label="{self.label}", notes="{self.notes}", datetime={self.datetime}, ' + \
+            f'label="{self.label}", notes="{self.notes}", date_time={self.date_time}, ' + \
             f'exchange_rate={self.exchange_rate}, is_transfer={self.is_transfer}, is_income = {self.is_income}, ' + \
             f'is_deleted = {self.is_deleted}, created_at = {self.created_at}, updated_at = {self.updated_at})'

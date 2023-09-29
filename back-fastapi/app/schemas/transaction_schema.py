@@ -4,20 +4,20 @@ from datetime import datetime
 from app.schemas.account_schema import AccountResponseSchema
 from app.schemas.currency_schema import CurrencyResponseSchema
 from app.schemas.user_schema import UserResponse
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 
 
 class CreateTransactionSchema(BaseModel):
-    id: int | None
+    id: int | None = None
     account_id: int
-    target_account_id: int | None
-    category_id: int | None
+    target_account_id: int | None = None
+    category_id: int | None = None
     amount: Decimal
-    target_amount: Decimal | None
+    target_amount: Decimal | None = None
     label: str = ''
     notes: str = ''
-    datetime: datetime | None
-    exchange_rate: Decimal | None
+    date_time: datetime | None = None
+    exchange_rate: Decimal | None = None
     is_transfer: bool
     is_income: bool
 
@@ -25,11 +25,10 @@ class CreateTransactionSchema(BaseModel):
 class ResponseTransactionSchema(CreateTransactionSchema):
     id: int
     user_id: int
-    currency_id: int | None
+    currency_id: int | None = None
     user: UserResponse
     account: AccountResponseSchema
-    target_account: AccountResponseSchema | None
+    target_account: AccountResponseSchema | None = None
     currency: CurrencyResponseSchema
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

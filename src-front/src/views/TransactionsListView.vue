@@ -20,7 +20,6 @@ onBeforeMount(async () => {
     transactions.push(...await transactionsService.getUserTransactions());
   } catch (e) {
     if (e instanceof HttpError && e.statusCode === 401) {
-      console.log(e.message);
       router.push({ name: 'login' });
       return;
     } else {
@@ -47,8 +46,8 @@ onBeforeMount(async () => {
               <div class="transaction-element">{{ transaction.notes }}</div>
             </div>
             <div class="col-5 amount-container">
-              <div><b>{{ transaction.amount.toFixed(2) }} {{ transaction.currency.code }}</b></div>
-              <div>{{ DateTime.fromISO(transaction.datetime).toLocaleString() }}</div>
+              <div><b>{{ parseFloat(transaction.amount).toFixed(2) }} {{ transaction.currency.code }}</b></div>
+              <div>{{ DateTime.fromISO(transaction.date_time).toLocaleString() }}</div>
             </div>
           </RouterLink>
         </div>

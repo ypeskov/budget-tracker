@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import ConfigDict, BaseModel, EmailStr, Field
 
 
 PASSWORD_MIN_LENGTH = 1 # TODO:  change back to 8
@@ -7,11 +7,9 @@ password_field: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_
 
 
 class UserBase(BaseModel):
-    id: int | None
+    id: int | None = None
     email: EmailStr
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserRegistration(UserBase):
@@ -25,8 +23,6 @@ class UserLoginSchema(UserBase):
 
 
 class UserResponse(UserBase):
-    first_name: str | None
-    last_name: str | None
-
-    class Config:
-        orm_mode = True
+    first_name: str | None = None
+    last_name: str | None = None
+    model_config = ConfigDict(from_attributes=True)
