@@ -29,6 +29,8 @@ filter_functions = {
     'per_page': to_int,
     'is_income': to_bool,
     'currencies': to_int_list,
+    'categories': to_int_list,
+    'accounts': to_int_list,
 }
 
 

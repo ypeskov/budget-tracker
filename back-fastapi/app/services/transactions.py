@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
-from fastapi import HTTPException, status, Depends
+from fastapi import HTTPException, status
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import NoResultFound
 
@@ -89,7 +90,7 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
 
 
 def get_transactions(user_id: int, db: Session, params=None):
-    # ic(params)
+    ic(params)
     stmt = (db.query(Transaction).options(joinedload(Transaction.account),
                                           joinedload(Transaction.target_account),
                                           joinedload(Transaction.category),
@@ -98,19 +99,27 @@ def get_transactions(user_id: int, db: Session, params=None):
             .order_by(Transaction.date_time.desc()))
 
     if 'is_income' in params:
-        stmt = stmt.filter(Transaction.is_income==params['is_income'])
+        stmt = stmt.filter(Transaction.is_income == params['is_income'])
 
     if 'currencies' in params:
         stmt = stmt.filter(Transaction.currency_id.in_(params['currencies']))
 
-    page = 1
-    per_page = 30
-    if 'page' in params:
-        page = int(params['page'])
-    if 'per_page' in params:
-        per_page = int(params['per_page'])
-    offset = (page - 1) * per_page
-    transactions = stmt.offset(offset).limit(per_page).all()
+    if 'categories' in params:
+        stmt = stmt.filter(Transaction.category_id.in_(params['categories']))
+
+    if 'accounts' in params:
+        stmt = stmt.filter(
+            or_(Transaction.account_id.in_(params['accounts']),
+                (Transaction.target_account_id.in_(params['accounts']))))
+
+        page = 1
+        per_page = 30
+        if 'page' in params:
+            page = int(params['page'])
+        if 'per_page' in params:
+            per_page = int(params['per_page'])
+        offset = (page - 1) * per_page
+        transactions = stmt.offset(offset).limit(per_page).all()
 
     return transactions
 
