@@ -89,21 +89,29 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
 
 
 def get_transactions(user_id: int, db: Session, params=None):
+    # ic(params)
+    stmt = (db.query(Transaction).options(joinedload(Transaction.account),
+                                          joinedload(Transaction.target_account),
+                                          joinedload(Transaction.category),
+                                          joinedload(Transaction.currency))
+            .filter_by(user_id=user_id)
+            .order_by(Transaction.date_time.desc()))
+
+    if 'is_income' in params:
+        stmt = stmt.filter(Transaction.is_income==params['is_income'])
+
+    if 'currencies' in params:
+        stmt = stmt.filter(Transaction.currency_id.in_(params['currencies']))
+
     page = 1
     per_page = 30
     if 'page' in params:
         page = int(params['page'])
     if 'per_page' in params:
         per_page = int(params['per_page'])
-
     offset = (page - 1) * per_page
-    transactions = (db.query(Transaction).options(joinedload(Transaction.account),
-                                                  joinedload(Transaction.target_account),
-                                                  joinedload(Transaction.category),
-                                                  joinedload(Transaction.currency))
-                    .filter_by(user_id=user_id)
-                    .order_by(Transaction.date_time.desc())
-                    .offset(offset).limit(per_page).all())
+    transactions = stmt.offset(offset).limit(per_page).all()
+
     return transactions
 
 

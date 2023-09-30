@@ -8,13 +8,27 @@ transaction_filters = (
 def to_int(val: str) -> int | None:
     try:
         return int(val)
-    except ValueError as e:
+    except ValueError:
+        return None
+
+
+def to_bool(val: str) -> bool:
+    false_values = ('', '0', 'false', 'False', None)
+    return val not in false_values
+
+
+def to_int_list(val: str) -> list | None:
+    try:
+        return [int(item) for item in map(str.strip, val.split(','))]
+    except ValueError:
         return None
 
 
 filter_functions = {
     'page': to_int,
     'per_page': to_int,
+    'is_income': to_bool,
+    'currencies': to_int_list,
 }
 
 
