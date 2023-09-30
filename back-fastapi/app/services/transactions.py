@@ -112,14 +112,14 @@ def get_transactions(user_id: int, db: Session, params=None):
             or_(Transaction.account_id.in_(params['accounts']),
                 (Transaction.target_account_id.in_(params['accounts']))))
 
-        page = 1
-        per_page = 30
-        if 'page' in params:
-            page = int(params['page'])
-        if 'per_page' in params:
-            per_page = int(params['per_page'])
-        offset = (page - 1) * per_page
-        transactions = stmt.offset(offset).limit(per_page).all()
+    page = 1
+    if 'page' in params:
+        page = int(params['page'])
+    per_page = 30
+    if 'per_page' in params:
+        per_page = int(params['per_page'])
+    offset = (page - 1) * per_page
+    transactions = stmt.offset(offset).limit(per_page).all()
 
     return transactions
 
