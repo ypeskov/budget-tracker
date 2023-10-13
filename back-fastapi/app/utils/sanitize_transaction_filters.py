@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 
 
 transaction_filters = (
-    'page', 'per_page', 'is_income', 'categories', 'is_transfer', 'accounts', 'currencies', 'from_date', 'to_date')
+    'page', 'per_page', 'types', 'categories', 'accounts', 'currencies', 'from_date', 'to_date')
 
 
 def to_int(val: str) -> int | None:
@@ -24,10 +24,14 @@ def to_int_list(val: str) -> list | None:
         return None
 
 
+def to_str_list(val: str) -> list | None:
+    return [transfer_type for transfer_type in map(str.strip, val.split(','))]
+
+
 filter_functions = {
     'page': to_int,
     'per_page': to_int,
-    'is_income': to_bool,
+    'types': to_str_list,
     'currencies': to_int_list,
     'categories': to_int_list,
     'accounts': to_int_list,

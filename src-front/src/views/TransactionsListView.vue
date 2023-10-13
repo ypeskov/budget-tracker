@@ -7,6 +7,7 @@ import { useUserStore } from '../stores/user';
 import { UserService } from '../services/users';
 import { TransactionsService } from '../services/transactions';
 import { HttpError } from '../errors/HttpError';
+import TransactionType from '../components/filter/TransactionType.vue'
 
 let transactions = reactive([]);
 const userStore = useUserStore();
@@ -34,6 +35,15 @@ onBeforeMount(async () => {
   <main>
     <div class="container">
       <div class="row">
+        <div class="col transactions-menu"><a href="" class="btn btn-secondary">Filter</a></div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <TransactionType />
+        </div>
+      </div>
+      
+      <div class="row">
         <div class="col">
           <h3>Your transactions</h3>
         </div>
@@ -60,6 +70,10 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
+.transactions-menu {
+  display: flex;
+  justify-content: end;
+}
 .list-item {
   margin-bottom: 0.5rem;
   padding: 0.5rem;

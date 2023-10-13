@@ -33,16 +33,17 @@ onBeforeMount(() => {
       <div class="row nav-row">
         <div class="col">
           <nav>
+            <span v-if="userStore.isLoggedIn">
+              <RouterLink class="btn btn-primary d-inline" :to="{ name: 'transactionNew' }">New</RouterLink>
+            </span>
             <span>
               <RouterLink :to="{ name: 'home' }">Home</RouterLink>
             </span>
             <span v-if="userStore.isLoggedIn">
-              <span>
-                <RouterLink :to="{ name: 'accounts' }">Accounts</RouterLink>
-              </span>
-              <span>
-                <RouterLink :to="{ name: 'transactions' }">Transactions</RouterLink>
-              </span>
+              <RouterLink :to="{ name: 'accounts' }">Accounts</RouterLink>
+            </span>
+            <span v-if="userStore.isLoggedIn">
+              <RouterLink :to="{ name: 'transactions' }">Transactions</RouterLink>
             </span>
             <span v-if="!userStore.isLoggedIn">
               <RouterLink :to="{ name: 'login' }">Login</RouterLink>
@@ -55,9 +56,7 @@ onBeforeMount(() => {
       </div>
       <div class="row">
         <div class="col">
-          <span v-if="userStore.isLoggedIn">
-            <RouterLink class="btn btn-primary" :to="{ name: 'transactionNew' }">New</RouterLink>
-          </span>
+
         </div>
       </div>
     </header>

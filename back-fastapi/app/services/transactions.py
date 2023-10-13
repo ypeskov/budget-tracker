@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import NoResultFound
 
@@ -66,8 +66,8 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
     transaction.user_id = user_id
     transaction.currency = account.currency
 
-    if transaction_dto.datetime is None:
-        transaction.datetime = datetime.now(timezone.utc)
+    if transaction_dto.date_time is None:
+        transaction.date_time = datetime.now(timezone.utc)
 
     if transaction_dto.is_transfer:
         transaction = process_transfer_type(transaction, user_id, db)
@@ -98,14 +98,24 @@ def get_transactions(user_id: int, db: Session, params=None):
             .filter_by(user_id=user_id)
             .order_by(Transaction.date_time.desc()))
 
-    if 'is_income' in params:
-        stmt = stmt.filter(Transaction.is_income == params['is_income'])
+    if 'types' in params:
+        type_filters = []
+        expense_or_income = []
+        if 'expense' in params['types']:
+            expense_or_income.append(Transaction.is_income == False)
+        if 'income' in params['types']:
+            expense_or_income.append(Transaction.is_income == True)
+        if len(expense_or_income) > 0:
+            type_filters.append(and_(or_(*expense_or_income), Transaction.category_id.in_(params['categories'])))
+
+        if 'transfer' in params['types']:
+            type_filters.append(Transaction.is_transfer == True)
+
+        if type_filters:
+            stmt = stmt.filter(or_(*type_filters))
 
     if 'currencies' in params:
         stmt = stmt.filter(Transaction.currency_id.in_(params['currencies']))
-
-    if 'categories' in params:
-        stmt = stmt.filter(Transaction.category_id.in_(params['categories']))
 
     if 'accounts' in params:
         stmt = stmt.filter(
@@ -120,6 +130,7 @@ def get_transactions(user_id: int, db: Session, params=None):
         per_page = int(params['per_page'])
     offset = (page - 1) * per_page
     transactions = stmt.offset(offset).limit(per_page).all()
+    ic(len(transactions))
 
     return transactions
 

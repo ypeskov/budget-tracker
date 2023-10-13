@@ -23,7 +23,7 @@ function changeCategory($event) {
     Category
   </label>
   <select class="form-select bottom-space" @change="changeCategory">
-    <option v-for="(cat, index) in categories" :key="cat.id" :selected="index===0" :value="index">
+    <option v-for="(cat, index) in categories" :key="cat.id"  :value="index">
       {{ cat.name }}
     </option>
   </select>
