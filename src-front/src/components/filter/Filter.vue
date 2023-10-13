@@ -30,12 +30,12 @@ function updateFilteredTransactions() {
 function filterByType(transTypes) {
   return props['transactions'].filter(trans => {
     if (transTypes.expense === true) {
-      if (trans.is_income === false) {
+      if (trans.is_income === false && trans.is_transfer === false) {
         return true;
       }
     }
     if (transTypes.income === true) {
-      if (trans.is_income === true) {
+      if (trans.is_income === true && trans.is_transfer === false) {
         return true;
       }
     }
