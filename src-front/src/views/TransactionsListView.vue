@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive } from 'vue';
+import { onBeforeMount, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 
@@ -7,18 +7,22 @@ import { useUserStore } from '../stores/user';
 import { UserService } from '../services/users';
 import { TransactionsService } from '../services/transactions';
 import { HttpError } from '../errors/HttpError';
-import TransactionType from '../components/filter/TransactionType.vue'
+import Filter from '../components/filter/Filter.vue';
 
 let transactions = reactive([]);
+let filteredTransactions = reactive([]);
 const userStore = useUserStore();
 const userService = new UserService(userStore);
 const router = useRouter();
 const transactionsService = new TransactionsService(userService);
+const showFilter = ref(false);
 
 onBeforeMount(async () => {
   try {
     transactions.length = 0;
-    transactions.push(...await transactionsService.getUserTransactions());
+    const allTransactions = await transactionsService.getUserTransactions();
+    transactions.push(...allTransactions);
+    filteredTransactions.push(...allTransactions);
   } catch (e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       router.push({ name: 'login' });
@@ -29,27 +33,40 @@ onBeforeMount(async () => {
     router.push({ name: 'home' });
   }
 });
+
+function toggleFilter(event) {
+  event.preventDefault();
+  showFilter.value = !showFilter.value;
+}
+
+function filterApplied(filteredItems) {
+  filteredTransactions.length = 0;
+  filteredTransactions.push(...filteredItems);
+}
 </script>
 
 <template>
   <main>
     <div class="container">
       <div class="row">
-        <div class="col transactions-menu"><a href="" class="btn btn-secondary">Filter</a></div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <TransactionType />
+        <div class="col transactions-menu">
+          <a href="" class="btn btn-secondary">Reload</a>
+          <a href="" class="btn btn-secondary" @click="toggleFilter">Filter</a>
         </div>
       </div>
-      
+      <div class="row">
+        <div class="col" v-show="showFilter">
+          <Filter @filter-applied="filterApplied" :transactions="transactions" />
+        </div>
+      </div>
+
       <div class="row">
         <div class="col">
           <h3>Your transactions</h3>
         </div>
       </div>
       <div v-if="transactions.length > 0">
-        <div v-for="transaction, idx in transactions" :key="transaction.id" class="list-item">
+        <div v-for="transaction, idx in filteredTransactions" :key="transaction.id" class="list-item">
           <RouterLink class="row" :to="{ name: 'transactionDetails', params: { id: transaction.id } }">
             <div class="col-7">
               <div class="transaction-element"><b>{{ transaction.label }}</b></div>
@@ -74,6 +91,11 @@ onBeforeMount(async () => {
   display: flex;
   justify-content: end;
 }
+
+.transactions-menu a {
+  margin: 0.1rem 0.2rem;
+}
+
 .list-item {
   margin-bottom: 0.5rem;
   padding: 0.5rem;
