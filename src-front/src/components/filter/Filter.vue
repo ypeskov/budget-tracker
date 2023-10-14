@@ -1,16 +1,36 @@
 <script setup>
+import { watch, reactive } from 'vue';
 import TransactionType from './TransactionType.vue';
 
-const props = defineProps(['transactions']);
+const props = defineProps(['transactions', 'resetstatus']);
 const emit = defineEmits(['filterApplied']);
 
 const possibleFilters = ['transactionTypes', 'categories', 'currencies', 'accounts',];
-const filtersApplied = {};
+let filtersApplied = {};
 
-function transactionTypeChanged({transactionTypes}) {
-  const {expense, income, transfer} = transactionTypes;
+const transactionTypes = reactive({
+  'expense': false,
+  'income': false,
+  'transfer': false,
+});
+
+watch(() => props['resetstatus'], (newReset) => {
+  if (newReset) {
+    filtersApplied = {};
+    for(const prop in transactionTypes) {
+      transactionTypes[prop] = false;
+    }
+    updateFilteredTransactions();
+  }
+});
+
+function transactionTypeChanged({newTransactionTypes}) {
+  const {expense, income, transfer} = newTransactionTypes;
+  transactionTypes.expense = expense;
+  transactionTypes.income = income;
+  transactionTypes.transfer = transfer;
   if (expense || income || transfer) {
-    filtersApplied.transactionTypes = transactionTypes;
+    filtersApplied.transactionTypes = newTransactionTypes;
   } else {
     filtersApplied.transactionTypes = null;
   }
@@ -18,13 +38,18 @@ function transactionTypeChanged({transactionTypes}) {
   updateFilteredTransactions();
 }
 
+
+
 function updateFilteredTransactions() {
   let filteredTransactions = [...props['transactions']];
   if (filtersApplied.transactionTypes) {
     filteredTransactions = filterByType(filtersApplied.transactionTypes);
   }
 
-  emit('filterApplied', filteredTransactions);
+  emit('filterApplied', {
+    'filteredTransactions': filteredTransactions,
+    'resetStatus': false,
+  });
 }
 
 function filterByType(transTypes) {
@@ -50,7 +75,7 @@ function filterByType(transTypes) {
 
 <template>
   <div class="filter-container">
-    <TransactionType @transaction-type-changed="transactionTypeChanged" />
+    <TransactionType @transaction-type-changed="transactionTypeChanged" :types="transactionTypes" />
   </div>
 </template>
 

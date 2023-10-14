@@ -1,20 +1,17 @@
 <script setup>
 import { reactive } from 'vue';
 
+const props = defineProps(['types']);
 const emit = defineEmits(['transactionTypeChanged']);
 
-const types = reactive({
-  'expense': false,
-  'income': false,
-  'transfer': false,
-});
+const types = {...props.types};
 
 function transactionTypeChanged(event) {
   const status = event.target.checked;
   const transType = event.target.value;
   types[transType] = status;
   emit('transactionTypeChanged', {
-    'transactionTypes': {...types},
+    'newTransactionTypes': types,
   });
 }
 </script>
@@ -23,17 +20,17 @@ function transactionTypeChanged(event) {
   <div class="checkboxes-container">
     <span class="one-checkbox-container">
       <input class="form-check-input" type="checkbox" value="expense" id="expense-check"
-             @click="transactionTypeChanged" :checked="types.expense">
+             @click="transactionTypeChanged" :checked="props.types.expense">
       <label class="form-check-label" for="expense-check">Expense</label>
     </span>
     <span class="one-checkbox-container">
       <input class="form-check-input" type="checkbox" value="income" id="income-check" 
-             @click="transactionTypeChanged" :checked="types.income">
+             @click="transactionTypeChanged" :checked="props.types.income">
       <label class="form-check-label" for="income-check">Income</label>
     </span>
     <span class="one-checkbox-container">
       <input class="form-check-input" type="checkbox" value="transfer" id="transfer-check"
-             @click="transactionTypeChanged" :checked="types.transfer">
+             @click="transactionTypeChanged" :checked="props.types.transfer">
       <label class="form-check-label" for="transfer-check">Transfer</label>
     </span>
   </div>

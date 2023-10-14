@@ -16,6 +16,7 @@ const userService = new UserService(userStore);
 const router = useRouter();
 const transactionsService = new TransactionsService(userService);
 const showFilter = ref(false);
+const reset = ref(false);
 
 onBeforeMount(async () => {
   try {
@@ -34,14 +35,25 @@ onBeforeMount(async () => {
   }
 });
 
+async function reloadTransactions(event) {
+  event.preventDefault();
+  const allTransactions = await transactionsService.getUserTransactions();
+  transactions.length = 0;
+  transactions.push(...allTransactions);
+  filteredTransactions.length = 0;
+  filteredTransactions.push(...allTransactions);
+  reset.value = true;
+}
+
 function toggleFilter(event) {
   event.preventDefault();
   showFilter.value = !showFilter.value;
 }
 
-function filterApplied(filteredItems) {
+function filterApplied(payload) {
   filteredTransactions.length = 0;
-  filteredTransactions.push(...filteredItems);
+  filteredTransactions.push(...payload.filteredTransactions);
+  reset.value = payload.resetStatus;
 }
 </script>
 
@@ -50,13 +62,13 @@ function filterApplied(filteredItems) {
     <div class="container">
       <div class="row">
         <div class="col transactions-menu">
-          <a href="" class="btn btn-secondary">Reload</a>
+          <a href="" class="btn btn-secondary" @click="reloadTransactions">Reload</a>
           <a href="" class="btn btn-secondary" @click="toggleFilter">Filter</a>
         </div>
       </div>
       <div class="row">
         <div class="col" v-show="showFilter">
-          <Filter @filter-applied="filterApplied" :transactions="transactions" />
+          <Filter @filter-applied="filterApplied" :transactions="transactions" :resetstatus="reset" />
         </div>
       </div>
 
