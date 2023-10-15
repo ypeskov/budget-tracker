@@ -26,7 +26,7 @@ watch(() => props['resetstatus'], (newReset) => {
       transactionTypes[prop] = false;
     }
 
-    checkedAccounts.length = 0; //remove all selected accounts
+    checkedAccounts.splice(0); //remove all selected accounts
 
     updateFilteredTransactions();
   }
@@ -47,7 +47,7 @@ function transactionTypeChanged({newTransactionTypes}) {
 function selectedAccountsUpdated({selectedAccounts}) {
   if (selectedAccounts.length > 0) {
     filtersApplied.accounts = selectedAccounts;
-    checkedAccounts.length = 0;
+    checkedAccounts.splice(0);
     checkedAccounts.push(...selectedAccounts);
   } else {
     filtersApplied.accounts = [];
