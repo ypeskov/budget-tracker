@@ -19,9 +19,15 @@ onBeforeMount(async () => {
     accounts.push(...(await accountService.getAllUserAccounts()));
     console.log(accounts);
   } catch (e) {
-    console.log(e.message);
-    router.push({ name: 'login' });
+    if (e instanceof HttpError && e.statusCode === 401) {
+      router.push({ name: 'login' });
+      return;
+    } else {
+      console.log(e);
+    }
+    router.push({ name: 'home' });
   }
+
 });
 
 </script>

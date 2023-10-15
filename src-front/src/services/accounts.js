@@ -1,3 +1,5 @@
+import {DateTime} from 'luxon';
+
 import { UserService } from './users';
 import { request } from './requests';
 import { HttpError } from '../errors/HttpError';
@@ -5,8 +7,9 @@ import { HttpError } from '../errors/HttpError';
 export class AccountService {
   userStore;
   accountStore;
-
   userService;
+
+  timeToCacheAccountsList = 600000; // miliseconds aka 10 minutes
 
   constructor(userStore, accountStore) {
     this.userStore = userStore;
@@ -15,6 +18,13 @@ export class AccountService {
   }
 
   async getAllUserAccounts() {
+    // need to make more clever logic of account list update from server
+    const currentTime = DateTime.now();
+    const deltaFromLastUpdate = currentTime - this.accountStore.lastUpdated;
+    if (this.accountStore.accounts.length > 0 && deltaFromLastUpdate < this.timeToCacheAccountsList) {
+      return this.accountStore.accounts;
+    }
+    
     const accountsUrl = '/accounts/';
     const response = await request(accountsUrl);
 
@@ -23,6 +33,7 @@ export class AccountService {
         const accs = await response.json();
         this.accountStore.accounts.length = 0;
         this.accountStore.accounts.push(...accs);
+        this.accountStore.lastUpdated = DateTime.now();
         return this.accountStore.accounts;
       } catch (e) {
         console.log(e);
