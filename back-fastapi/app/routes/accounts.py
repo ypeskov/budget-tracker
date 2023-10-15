@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.schemas.account_schema import AccountResponseSchema
+from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema
 from app.dependencies.check_token import check_token
 from app.services.accounts import create_account, get_user_accounts, \
     get_account_details
@@ -17,7 +17,7 @@ router = APIRouter(
 
 
 @router.post("/", response_model=AccountResponseSchema | None)
-def add_account(account_dto: AccountResponseSchema,
+def add_account(account_dto: CreateAccountSchema,
                 request: Request,
                 db: Session = Depends(get_db)):
     return create_account(account_dto, request.state.user['id'], db)

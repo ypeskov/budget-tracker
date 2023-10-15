@@ -66,7 +66,7 @@ export class AccountService {
     this.accountStore.shouldUpdate = shouldUpdate;
   }
 
-  addAccount(accountDetails) {
+  createAccount(accountDetails) {
     const accountsUrl = '/accounts/';
     const response = request(accountsUrl, {
       method: 'POST',
