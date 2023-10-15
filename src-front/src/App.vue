@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, useSSRContext } from 'vue';
+import { onBeforeMount } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
 
 import { useUserStore } from './stores/user';

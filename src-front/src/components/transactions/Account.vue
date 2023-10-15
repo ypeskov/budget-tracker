@@ -25,8 +25,6 @@ const accLabel = computed(() => {
     return 'Target Account';
   }
 });
-
-onBeforeMount(() => { });
 </script>
 
 <template>

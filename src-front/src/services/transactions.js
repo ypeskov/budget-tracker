@@ -1,12 +1,13 @@
-import { UserService } from './users';
 import { request } from './requests';
 import { HttpError } from '../errors/HttpError';
 
 export class TransactionsService {
   userService;
+  accountService
 
-  constructor(userService) {
+  constructor(userService, accountService) {
     this.userService = userService;
+    this.accountService = accountService;
   }
 
   async getUserTransactions() {
@@ -61,6 +62,7 @@ export class TransactionsService {
       if (response.status === 200) {
         try {
           const createdTransaction = response.json();
+          this.accountService.setShouldUpdateAccountsList(true);
           return createdTransaction;
         } catch (e) {
           console.log(e);

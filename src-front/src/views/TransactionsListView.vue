@@ -20,7 +20,7 @@ const reset = ref(false);
 
 onBeforeMount(async () => {
   try {
-    transactions.length = 0;
+    transactions.splice(0);
     const allTransactions = await transactionsService.getUserTransactions();
     transactions.push(...allTransactions);
     filteredTransactions.push(...allTransactions);
@@ -38,9 +38,9 @@ onBeforeMount(async () => {
 async function reloadTransactions(event) {
   event.preventDefault();
   const allTransactions = await transactionsService.getUserTransactions();
-  transactions.length = 0;
+  transactions.splice(0);
   transactions.push(...allTransactions);
-  filteredTransactions.length = 0;
+  filteredTransactions.splice(0);
   filteredTransactions.push(...allTransactions);
   reset.value = true;
 }
@@ -51,9 +51,10 @@ function toggleFilter(event) {
 }
 
 function filterApplied(payload) {
-  filteredTransactions.length = 0;
+  filteredTransactions.splice(0);
   filteredTransactions.push(...payload.filteredTransactions);
   reset.value = payload.resetStatus;
+  showFilter.value = false;
 }
 </script>
 
