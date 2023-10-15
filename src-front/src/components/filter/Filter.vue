@@ -8,8 +8,8 @@ import AccountsList from './AccountsList.vue';
 const props = defineProps(['transactions', 'resetstatus']);
 const emit = defineEmits(['filterApplied']);
 
-// const possibleFilters = ['transactionTypes', 'categories', 'currencies', 'accounts',];
 let filtersApplied = {};
+const checkedAccounts = reactive([]);
 
 const transactionTypes = reactive({
   'expense': false,
@@ -19,10 +19,15 @@ const transactionTypes = reactive({
 
 watch(() => props['resetstatus'], (newReset) => {
   if (newReset) {
-    filtersApplied = {};
+    filtersApplied = {}; //remove all filters
+
+    //disable all transaction types
     for(const prop in transactionTypes) {
       transactionTypes[prop] = false;
     }
+
+    checkedAccounts.length = 0; //remove all selected accounts
+
     updateFilteredTransactions();
   }
 });
@@ -39,6 +44,16 @@ function transactionTypeChanged({newTransactionTypes}) {
   }
 }
 
+function selectedAccountsUpdated({selectedAccounts}) {
+  if (selectedAccounts.length > 0) {
+    filtersApplied.accounts = selectedAccounts;
+    checkedAccounts.length = 0;
+    checkedAccounts.push(...selectedAccounts);
+  } else {
+    filtersApplied.accounts = [];
+  }
+}
+
 function applyFilter(event) {
   event.preventDefault();
   updateFilteredTransactions();
@@ -46,13 +61,26 @@ function applyFilter(event) {
 
 function updateFilteredTransactions() {
   let filteredTransactions = [...props['transactions']];
+
   if (filtersApplied.transactionTypes) {
     filteredTransactions = filterByType(filtersApplied.transactionTypes);
+  }
+
+  if (filtersApplied?.accounts?.length > 0) {
+    filteredTransactions = filterByAccounts(filteredTransactions);
   }
 
   emit('filterApplied', {
     'filteredTransactions': filteredTransactions,
     'resetStatus': false,
+  });
+}
+
+function filterByAccounts(TransactionsToFilter) {
+  return TransactionsToFilter.filter(transaction => {
+    if (filtersApplied.accounts.includes(transaction.account.id)) {
+      return true;
+    }
   });
 }
 
@@ -84,14 +112,14 @@ function filterByType(transTypes) {
         <TransactionType @transaction-type-changed="transactionTypeChanged" :types="transactionTypes" />
       </div>
     </div>
-    
+
     <div class="row">
       <div class="col"><CustomHr text="Accounts" /></div>
     </div>
     
     <div class="row">
       <div class="col">
-        <AccountsList />
+        <AccountsList @selected-accounts-updated="selectedAccountsUpdated" :selected-accounts="checkedAccounts" />
       </div>
     </div>
     <div class="row filter-bottom-menu-row">
