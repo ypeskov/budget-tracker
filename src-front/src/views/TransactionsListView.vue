@@ -3,7 +3,6 @@ import { onBeforeMount, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 
-import '../assets/common.scss';
 import { useUserStore } from '../stores/user';
 import { UserService } from '../services/users';
 import { TransactionsService } from '../services/transactions';
@@ -63,7 +62,7 @@ function filterApplied(payload) {
   <main>
     <div class="container">
       <div class="row">
-        <div class="col transactions-menu">
+        <div class="col sub-menu">
           <a href="" class="btn btn-secondary" @click="reloadTransactions">Reload</a>
           <a href="" class="btn btn-secondary" @click="toggleFilter">Filter</a>
         </div>
@@ -101,25 +100,7 @@ function filterApplied(payload) {
 </template>
 
 <style scoped>
-.transactions-menu {
-  display: flex;
-  justify-content: end;
-  margin-bottom: 1vh;
-}
-
-.transactions-menu a {
-  margin-left: 1vw;
-  margin: 0.1rem 0.2rem;
-
-}
-
-.list-item {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid #ccc;
-}
-
+@import '../assets/main.scss';
 .list-item>a {
   text-decoration: none;
   color: black;
