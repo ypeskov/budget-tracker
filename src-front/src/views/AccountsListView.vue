@@ -40,14 +40,14 @@ onBeforeMount(async () => {
       </div>
         <div v-for="acc in accounts" :key="acc.id" class="list-item">
           <RouterLink :to="{name: 'accountDetails', params: {id: acc.id}}">
-            <div class="row">
-              <div class="col">
+            <div class="row account-item">
+              <div class="col-4">
               {{ acc.name }}
               </div>
-              <div class="col">
+              <div class="col-2">
                 {{ acc.account_type.type_name }}
               </div>
-              <div class="col">
+              <div class="col account-balance">
                 {{ acc.balance }} {{ acc.currency.code }}
               </div>
             </div>
@@ -57,3 +57,15 @@ onBeforeMount(async () => {
     </div>
   </main>
 </template>
+
+<style scoped>
+.account-item {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.account-balance {
+  text-align: right;
+}
+</style>

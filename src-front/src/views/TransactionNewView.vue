@@ -21,11 +21,11 @@ const accountStore = useAccountStore();
 const userService = new UserService(userStore);
 const accountService = new AccountService(userStore, accountStore);
 const categoriesService = new CategoriesService(userStore);
-const transactionsService = new TransactionsService(userService);
+const transactionsService = new TransactionsService(userService, accountService);
 
 const accounts = reactive([]);
-const currentAccount = ref({});
-const targetAccount = ref({});
+const currentAccount = ref(accounts[0]);
+const targetAccount = ref(accounts[0]);
 const transaction = reactive({});
 const categories = ref([]);
 let filteredCategories = ref([]);

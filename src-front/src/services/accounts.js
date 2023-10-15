@@ -21,7 +21,9 @@ export class AccountService {
     // need to make more clever logic of account list update from server
     const currentTime = DateTime.now();
     const deltaFromLastUpdate = currentTime - this.accountStore.lastUpdated;
-    if (this.accountStore.accounts.length > 0 && deltaFromLastUpdate < this.timeToCacheAccountsList) {
+
+    if (!this.accountStore.shouldUpdate 
+      && (this.accountStore.accounts.length > 0 && deltaFromLastUpdate < this.timeToCacheAccountsList)) {
       return this.accountStore.accounts;
     }
     
@@ -34,6 +36,7 @@ export class AccountService {
         this.accountStore.accounts.length = 0;
         this.accountStore.accounts.push(...accs);
         this.accountStore.lastUpdated = DateTime.now();
+        this.setShouldUpdateAccountsList(false);
         return this.accountStore.accounts;
       } catch (e) {
         console.log(e);
@@ -57,5 +60,32 @@ export class AccountService {
       console.log('Some error happened');
     }
     return [];
+  }
+
+  setShouldUpdateAccountsList(shouldUpdate) {
+    this.accountStore.shouldUpdate = shouldUpdate;
+  }
+
+  addAccount(accountDetails) {
+    const accountsUrl = '/accounts/';
+    const response = request(accountsUrl, {
+      method: 'POST',
+      body: JSON.stringify(accountDetails),
+    });
+
+    if (response.status === 200) {
+      try {
+        const createdAccount = response.json();
+        this.setShouldUpdateAccountsList(true);
+        return createdAccount;
+      } catch (e) {
+        console.log(e);
+      }
+    } else if (response.status === 401) {
+      this.userService.logOutUser();
+      throw new HttpError('Unauthorized', 401);
+    } else {
+      console.log(response);
+    }
   }
 }
