@@ -66,13 +66,13 @@ export class AccountService {
     this.accountStore.shouldUpdate = shouldUpdate;
   }
 
-  createAccount(accountDetails) {
+  async createAccount(accountDetails) {
     const accountsUrl = '/accounts/';
-    const response = request(accountsUrl, {
+    const response = await request(accountsUrl, {
       method: 'POST',
       body: JSON.stringify(accountDetails),
     });
-
+    console.log(response.status)
     if (response.status === 200) {
       try {
         const createdAccount = response.json();
