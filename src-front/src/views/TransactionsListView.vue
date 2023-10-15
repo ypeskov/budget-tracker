@@ -3,6 +3,7 @@ import { onBeforeMount, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 
+import '../assets/common.scss';
 import { useUserStore } from '../stores/user';
 import { UserService } from '../services/users';
 import { TransactionsService } from '../services/transactions';
@@ -103,15 +104,20 @@ function filterApplied(payload) {
 .transactions-menu {
   display: flex;
   justify-content: end;
+  margin-bottom: 1vh;
 }
 
 .transactions-menu a {
+  margin-left: 1vw;
   margin: 0.1rem 0.2rem;
+
 }
 
 .list-item {
   margin-bottom: 0.5rem;
   padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
 }
 
 .list-item>a {

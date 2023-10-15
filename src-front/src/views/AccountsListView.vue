@@ -59,7 +59,7 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
-.account-item {
+.list-item {
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 0.5rem;

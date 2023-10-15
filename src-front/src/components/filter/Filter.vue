@@ -1,6 +1,7 @@
 <script setup>
 import { watch, reactive } from 'vue';
 
+import './Filter.scss';
 import CustomHr from '../utilities/CustomHr.vue';
 import TransactionType from './TransactionType.vue';
 import AccountsList from './AccountsList.vue';
@@ -132,11 +133,6 @@ function filterByType(transTypes) {
 </template>
 
 <style scoped>
-.filter-container {
-  margin-bottom: 1vh;
-  background-color: rgb(237, 240, 237);
-  padding: 0.5rem;
-}
 .filter-bottom-menu-row {
   margin-top: 1vh;
 }
