@@ -54,6 +54,7 @@ function filterApplied(payload) {
   filteredTransactions.length = 0;
   filteredTransactions.push(...payload.filteredTransactions);
   reset.value = payload.resetStatus;
+  showFilter.value = false;
 }
 </script>
 

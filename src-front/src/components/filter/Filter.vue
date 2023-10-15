@@ -1,11 +1,14 @@
 <script setup>
 import { watch, reactive } from 'vue';
+
+import CustomHr from '../utilities/CustomHr.vue';
 import TransactionType from './TransactionType.vue';
+import AccountsList from './AccountsList.vue';
 
 const props = defineProps(['transactions', 'resetstatus']);
 const emit = defineEmits(['filterApplied']);
 
-const possibleFilters = ['transactionTypes', 'categories', 'currencies', 'accounts',];
+// const possibleFilters = ['transactionTypes', 'categories', 'currencies', 'accounts',];
 let filtersApplied = {};
 
 const transactionTypes = reactive({
@@ -34,11 +37,12 @@ function transactionTypeChanged({newTransactionTypes}) {
   } else {
     filtersApplied.transactionTypes = null;
   }
-  
-  updateFilteredTransactions();
 }
 
-
+function applyFilter(event) {
+  event.preventDefault();
+  updateFilteredTransactions();
+}
 
 function updateFilteredTransactions() {
   let filteredTransactions = [...props['transactions']];
@@ -74,13 +78,42 @@ function filterByType(transTypes) {
 </script>
 
 <template>
-  <div class="filter-container">
-    <TransactionType @transaction-type-changed="transactionTypeChanged" :types="transactionTypes" />
+  <div class="container filter-container">
+    <div class="row">
+      <div class="col">
+        <TransactionType @transaction-type-changed="transactionTypeChanged" :types="transactionTypes" />
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col"><CustomHr text="Accounts" /></div>
+    </div>
+    
+    <div class="row">
+      <div class="col">
+        <AccountsList />
+      </div>
+    </div>
+    <div class="row filter-bottom-menu-row">
+      <div class="col bottom-menu-container">
+        <a href="#" class="btn btn-secondary" @click="applyFilter">Apply</a>
+      </div>
+    </div>
   </div>
+
 </template>
 
 <style scoped>
 .filter-container {
   margin-bottom: 1vh;
+  background-color: rgb(237, 240, 237);
+  padding: 0.5rem;
+}
+.filter-bottom-menu-row {
+  margin-top: 1vh;
+}
+.bottom-menu-container {
+  display: flex;
+  justify-content: start;
 }
 </style>
