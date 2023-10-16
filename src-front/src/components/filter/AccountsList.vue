@@ -2,6 +2,7 @@
 import { onBeforeMount, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { HttpError } from '../../errors/HttpError';
 import { Services } from '../../services/servicesConfig';
 
 const props = defineProps(['selectedAccounts',])
@@ -16,7 +17,6 @@ watch(props['selectedAccounts'], (newSelectedAccounts) => {
     selectedAccounts.length = 0;
   }
 });
-
 
 onBeforeMount(async () => {
   try {

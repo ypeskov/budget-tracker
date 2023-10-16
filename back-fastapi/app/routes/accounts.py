@@ -1,13 +1,11 @@
-from pprint import pp
-
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema
+from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema, AccountTypeResponseSchema
 from app.dependencies.check_token import check_token
 from app.services.accounts import create_account, get_user_accounts, \
-    get_account_details
+    get_account_details, get_account_types as get_types
 
 router = APIRouter(
     tags=['Accounts'],
@@ -26,6 +24,11 @@ def add_account(account_dto: CreateAccountSchema,
 @router.get('/', response_model=list[AccountResponseSchema] | None)
 def get_accounts(request: Request, db: Session = Depends(get_db)):
     return get_user_accounts(request.state.user['id'], db)
+
+
+@router.get('/types/', response_model=list[AccountTypeResponseSchema] | None)
+def get_account_types(db: Session = Depends(get_db)):
+    return get_types(db)
 
 
 @router.get('/{account_id}', response_model=AccountResponseSchema | None)

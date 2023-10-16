@@ -18,7 +18,7 @@ const reset = ref(false);
 onBeforeMount(async () => {
   try {
     transactions.splice(0);
-    const allTransactions = await Services.transactionService.getUserTransactions();
+    const allTransactions = await Services.transactionsService.getUserTransactions();
     transactions.push(...allTransactions);
     filteredTransactions.push(...allTransactions);
   } catch (e) {

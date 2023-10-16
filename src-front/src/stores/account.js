@@ -6,9 +6,12 @@ export const useAccountStore = defineStore('account', () => {
   const accounts = reactive([]);
   const lastUpdated = DateTime.now();
   const shouldUpdate = ref(true);
+  const accountTypes = reactive([]);
+
   return {
     accounts,
     lastUpdated,
     shouldUpdate,
+    accountTypes,
   };
 });

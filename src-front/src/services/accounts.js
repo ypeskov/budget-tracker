@@ -69,7 +69,7 @@ export class AccountService {
       method: 'POST',
       body: JSON.stringify(accountDetails),
     });
-    console.log(response.status)
+
     if (response.status === 200) {
       try {
         const createdAccount = response.json();
@@ -84,5 +84,21 @@ export class AccountService {
     } else {
       console.log(response);
     }
+  }
+
+  async getAccountTypes() {
+    const accTypesUrl = '/accounts/types/';
+    const response = await request(accTypesUrl);
+    if (response.ok) {
+      const types = await response.json();
+      this.accountStore.accountTypes.length = 0;
+      this.accountStore.accountTypes.push(...types);
+      return this.accountStore.accountTypes;
+    } else if (response.status === 401) {
+      throw new HttpError('Unauthorized', 401);
+    } else {
+      console.log('Some error happened');
+    }
+    return [];
   }
 }

@@ -1,5 +1,6 @@
 from pydantic import ConfigDict, BaseModel
 
+
 class CurrencyResponseSchema(BaseModel):
     id: int
     code: str

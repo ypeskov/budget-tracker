@@ -3,8 +3,19 @@ import { request } from './requests';
 export class UserService {
   userStore;
 
+  accountsService;
+  transactionsService;
+  categoriesService;
+  currenciesService;
+
   constructor(userStore) {
     this.userStore = userStore;
+  }
+
+  injectServices(services={}) {
+    for (const [serviceName, service] of Object.entries(services)) {
+      this[serviceName] = service;
+    }
   }
 
   async loginUser(loginEmail, password) {
@@ -23,6 +34,7 @@ export class UserService {
       if (data.access_token) {
         this.userStore.accessToken = data.access_token;
         this.getUserProfile(this.userStore.accessToken);
+        this.accountsService.getAllUserAccounts();
       } else {
         alert('Something went wrong!');
       }
