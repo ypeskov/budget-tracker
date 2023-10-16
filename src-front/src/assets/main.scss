@@ -3,13 +3,17 @@
 .list-item:hover {
   background-color: $main-background-selection;
 }
-
 .list-item {
   margin-bottom: 0.5rem;
   padding: 0.5rem;
   border-radius: 0.5rem;
   border: 1px solid #ccc;
 }
+.list-item>a {
+  text-decoration: none;
+  color: black;
+}
+
 
 .router-link-active,
 .router-link-exact-active {

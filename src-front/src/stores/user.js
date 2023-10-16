@@ -6,9 +6,14 @@ export const useUserStore = defineStore('user', () => {
   const accessToken = ref(null);
   const isLoggedIn = ref(false);
 
+  const currencies = reactive([]);
+  const categories = reactive([]);
+
   return {
     user,
     accessToken,
     isLoggedIn,
+    currencies,
+    categories,
   };
 });

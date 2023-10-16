@@ -101,10 +101,6 @@ function filterApplied(payload) {
 
 <style scoped>
 @import '../assets/main.scss';
-.list-item>a {
-  text-decoration: none;
-  color: black;
-}
 
 .transaction-element {
   overflow: hidden;
