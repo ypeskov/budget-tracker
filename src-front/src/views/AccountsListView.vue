@@ -2,16 +2,12 @@
 import { onBeforeMount, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
-import { useUserStore } from '../stores/user';
-import { useAccountStore } from '../stores/account';
-import { AccountService } from '../services/accounts';
+import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
 import newAccount from '../components/account/newAccount.vue';
 
 let accounts = reactive([]);
-const userStore = useUserStore();
-const accountStore = useAccountStore();
-const accountService = new AccountService(userStore, accountStore);
+
 const router = useRouter();
 
 const showNewAccForm = ref(false);
@@ -19,7 +15,7 @@ const showNewAccForm = ref(false);
 onBeforeMount(async () => {
   try {
     accounts.splice(0);
-    accounts.push(...await accountService.getAllUserAccounts()); 
+    accounts.push(...await Services.accountsService.getAllUserAccounts()); 
   } catch(e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       console.log(e.message);
@@ -34,10 +30,10 @@ onBeforeMount(async () => {
 
 async function updateAccuntsList(event) {
   event.preventDefault();
-  accountService.setShouldUpdateAccountsList(true);
+  Services.accountsService.setShouldUpdateAccountsList(true);
   try {
     accounts.splice(0);
-    accounts.push(...await accountService.getAllUserAccounts()); 
+    accounts.push(...await Services.accountsService.getAllUserAccounts()); 
   } catch(e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       console.log(e.message);

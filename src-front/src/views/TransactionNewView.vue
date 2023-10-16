@@ -2,12 +2,8 @@
 import { onBeforeMount, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { useUserStore } from '../stores/user';
-import { useAccountStore } from '../stores/account';
-import { AccountService } from '../services/accounts';
-import { CategoriesService } from '../services/categories';
-import { TransactionsService } from '../services/transactions';
-import { UserService } from '../services/users';
+import { Services } from '../services/servicesConfig';
+
 import TransactionTypeTabs from '../components/transactions/TransactionTypeTabs.vue';
 import TransactionLabel from '../components/transactions/TransactionLabel.vue';
 import TransactionAmount from '../components/transactions/TransactionAmount.vue';
@@ -16,12 +12,6 @@ import Account from '../components/transactions/Account.vue';
 import ExchangeRate from '../components/transactions/ExchangeRate.vue'
 
 const router = useRouter();
-const userStore = useUserStore();
-const accountStore = useAccountStore();
-const userService = new UserService(userStore);
-const accountService = new AccountService(userStore, accountStore);
-const categoriesService = new CategoriesService(userStore);
-const transactionsService = new TransactionsService(userService, accountService);
 
 const accounts = reactive([]);
 const currentAccount = ref(accounts[0]);
@@ -52,12 +42,12 @@ function amountChanged({ amountType, amount }) {
 onBeforeMount(async () => {
   try {
     accounts.length = 0;
-    accounts.push(...(await accountService.getAllUserAccounts()));
+    accounts.push(...(await Services.accountsService.getAllUserAccounts()));
     currentAccount.value = accounts[0];
     targetAccount.value = accounts[0];
     transaction.account_id = currentAccount.value.id;
     transaction.target_account_id = targetAccount.value.id;
-    categories.value = await categoriesService.getUserCategories();
+    categories.value = await Services.categoriesService.getUserCategories();
     filterCategories();
   } catch (e) {
     console.log(e.message);
@@ -95,7 +85,7 @@ function changeItemType(type) {
 }
 
 async function submitNewTransaction() {
-  const createdTransaction = await transactionsService.addTransaction(transaction);
+  const createdTransaction = await Services.transactionService.addTransaction(transaction);
   for (const key in transaction) {
     transaction[key] = null;
   }

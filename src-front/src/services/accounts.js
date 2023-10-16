@@ -1,20 +1,17 @@
 import {DateTime} from 'luxon';
 
-import { UserService } from './users';
 import { request } from './requests';
 import { HttpError } from '../errors/HttpError';
 
 export class AccountService {
-  userStore;
   accountStore;
   userService;
 
   timeToCacheAccountsList = 600000; // miliseconds aka 10 minutes
 
-  constructor(userStore, accountStore) {
-    this.userStore = userStore;
+  constructor(accountStore, userService) {
     this.accountStore = accountStore;
-    this.userService = new UserService(userStore);
+    this.userService = userService;
   }
 
   async getAllUserAccounts() {

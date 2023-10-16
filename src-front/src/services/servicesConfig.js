@@ -2,7 +2,6 @@ import { AccountService } from './accounts';
 import { UserService } from './users';
 import { CategoriesService } from './categories';
 import { TransactionsService } from './transactions';
-// import { CurrencyService } from './currencyService';
 
 import { useUserStore } from '../stores/user';
 import { useAccountStore } from '../stores/account';
@@ -10,11 +9,15 @@ import { useAccountStore } from '../stores/account';
 const userStore = useUserStore();
 const accountStore = useAccountStore();
 
+const userService = new UserService(userStore);
+const accountService = new AccountService(accountStore, userService);
+const categoriesService = new CategoriesService(userStore);
+const transactionsService = new TransactionsService(userService, accountService);
+
 export const Services = {
-  accountsService: new AccountService(accountStore),
-  userService: new UserService(userStore),
-  categoriesService: new CategoriesService(),
-  transactionService: new TransactionsService(),
-  // currencyService: new CurrencyService(),
+  userService: userService,
+  accountsService: accountService,
+  categoriesService: categoriesService,
+  transactionService: transactionsService,
 };
 

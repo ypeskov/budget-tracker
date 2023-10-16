@@ -2,17 +2,11 @@
 import { onBeforeMount, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { useUserStore } from '../../stores/user';
-import { useAccountStore } from '../../stores/account';
-import { AccountService } from '../../services/accounts';
+import { Services } from '../../services/servicesConfig';
 
 const props = defineProps(['selectedAccounts',])
 const emit = defineEmits(['selectedAccountsUpdated',]);
-
 const router = useRouter();
-const userStore = useUserStore();
-const accountStore = useAccountStore();
-const accountService = new AccountService(userStore, accountStore);
 
 const accounts = reactive([]);
 
@@ -27,7 +21,7 @@ watch(props['selectedAccounts'], (newSelectedAccounts) => {
 onBeforeMount(async () => {
   try {
     accounts.length = 0;
-    accounts.push(...(await accountService.getAllUserAccounts()));
+    accounts.push(...(await Services.accountsService.getAllUserAccounts()));
   } catch (e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       router.push({ name: 'login' });

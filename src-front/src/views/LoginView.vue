@@ -2,13 +2,11 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { useUserStore } from '../stores/user';
-import { UserService } from '../services/users';
+import { Services } from '../services/servicesConfig';
 
 let loginEmail = ref('');
 let loginPassword = ref('');
-const userStore = useUserStore();
-const userService = new UserService(userStore);
+
 const router = useRouter();
 
 function updateEmail(event) {
@@ -16,7 +14,7 @@ function updateEmail(event) {
 }
 
 async function submitLogin() {
-  await userService.loginUser(loginEmail.value, loginPassword.value);
+  await Services.userService.loginUser(loginEmail.value, loginPassword.value);
   loginEmail.value = '';
   loginPassword.value = '';
   router.push('/');

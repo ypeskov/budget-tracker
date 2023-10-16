@@ -1,3 +1,45 @@
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+import { Services } from '../../services/servicesConfig';
+import { HttpError } from '../../errors/HttpError';
+
+const router = useRouter();
+
+const accountType = ref(2);
+const currency = ref(2);
+const name = ref('');
+const balance = ref(1000);
+const openingDate = ref('');
+const comment = ref('');
+const isHidden = ref(false);
+
+async function createAccount() {
+  const newAccount = {
+    account_type_id: accountType.value,
+    currency_id: currency.value,
+    name: name.value,
+    balance: balance.value,
+    opening_date: openingDate.value,
+    comment: comment.value,
+    is_hidden: isHidden.value
+  };
+  try {
+    await Services.accountsService.createAccount(newAccount);
+  } catch(e) {
+    if (e instanceof HttpError && e.statusCode === 401) {
+      console.log(e.message);
+      router.push({ name: 'login' });
+      return;
+    } else {
+      console.log(e);
+    }
+    router.push({ name: 'home' });
+  }
+}
+</script>
+
 <template>
   <div class="container">
     <form @submit.prevent="createAccount" class="form">
@@ -33,53 +75,6 @@
     </form>
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-
-import { useUserStore } from '../../stores/user';
-import { useAccountStore } from '../../stores/account';
-import { AccountService } from '../../services/accounts';
-import { HttpError } from '../../errors/HttpError';
-
-const userStore = useUserStore();
-const accountStore = useAccountStore();
-const accountService = new AccountService(userStore, accountStore);
-const router = useRouter();
-
-const accountType = ref(2);
-const currency = ref(2);
-const name = ref('');
-const balance = ref(1000);
-const openingDate = ref('');
-const comment = ref('');
-const isHidden = ref(false);
-
-function createAccount() {
-  const newAccount = {
-    account_type_id: accountType.value,
-    currency_id: currency.value,
-    name: name.value,
-    balance: balance.value,
-    opening_date: openingDate.value,
-    comment: comment.value,
-    is_hidden: isHidden.value
-  };
-  try {
-    accountService.createAccount(newAccount);
-  } catch(e) {
-    if (e instanceof HttpError && e.statusCode === 401) {
-      console.log(e.message);
-      router.push({ name: 'login' });
-      return;
-    } else {
-      console.log(e);
-    }
-    router.push({ name: 'home' });
-  }
-}
-</script>
 
 <style scoped>
   .container {

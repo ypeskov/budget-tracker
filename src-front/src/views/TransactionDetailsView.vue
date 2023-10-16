@@ -3,21 +3,17 @@ import { onBeforeMount, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 
-import { UserService } from '../services/users';
-import { useUserStore } from '../stores/user';
-import { TransactionsService } from '../services/transactions';
+import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
 
 const router = useRouter();
 const route = useRoute();
-const userStore = useUserStore();
-const transactionsService = new TransactionsService(new UserService(userStore));
 
 let transaction = reactive({});
 
 onBeforeMount(async () => {
   try {
-    const details = await transactionsService.getTransactionDetails(route.params.id);
+    const details = await Services.transactionsService.getTransactionDetails(route.params.id);
     transaction = Object.assign(transaction, details);
   } catch (e) {
     if (e instanceof HttpError && e.statusCode === 401) {

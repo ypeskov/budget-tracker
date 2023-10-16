@@ -4,13 +4,13 @@ import { computed } from 'vue';
 const props = defineProps(['transaction', 'currentAccount', 'label', 'type']);
 const emit = defineEmits(['amountChanged']);
 
-const amount = computed(() => {
-  if (type === 'src') {
-    return transaction.amount;
-  } else if (type === 'target') {
-    return transaction.target_amount;
-  }
-})
+// const amount = computed(() => {
+//   if (type === 'src') {
+//     return transaction.amount;
+//   } else if (type === 'target') {
+//     return transaction.target_amount;
+//   }
+// })
 
 function changeAmount($value) {
   emit('amountChanged', {

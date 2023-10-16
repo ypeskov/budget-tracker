@@ -3,25 +3,22 @@ import { onBeforeMount, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 
-import { useUserStore } from '../stores/user';
-import { UserService } from '../services/users';
-import { TransactionsService } from '../services/transactions';
+import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
 import Filter from '../components/filter/Filter.vue';
 
 let transactions = reactive([]);
 let filteredTransactions = reactive([]);
-const userStore = useUserStore();
-const userService = new UserService(userStore);
+
 const router = useRouter();
-const transactionsService = new TransactionsService(userService);
+
 const showFilter = ref(false);
 const reset = ref(false);
 
 onBeforeMount(async () => {
   try {
     transactions.splice(0);
-    const allTransactions = await transactionsService.getUserTransactions();
+    const allTransactions = await Services.transactionService.getUserTransactions();
     transactions.push(...allTransactions);
     filteredTransactions.push(...allTransactions);
   } catch (e) {
@@ -37,7 +34,7 @@ onBeforeMount(async () => {
 
 async function reloadTransactions(event) {
   event.preventDefault();
-  const allTransactions = await transactionsService.getUserTransactions();
+  const allTransactions = await Services.transactionService.getUserTransactions();
   transactions.splice(0);
   transactions.push(...allTransactions);
   filteredTransactions.splice(0);
