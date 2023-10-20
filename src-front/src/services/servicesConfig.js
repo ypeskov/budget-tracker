@@ -12,7 +12,7 @@ const accountStore = useAccountStore();
 
 const userService = new UserService(userStore);
 const accountsService = new AccountService(accountStore, userService);
-const categoriesService = new CategoriesService(userStore);
+const categoriesService = new CategoriesService(userService);
 const transactionsService = new TransactionsService(userService, accountsService);
 const currenciesService = new CurrenciesService(userService);
 

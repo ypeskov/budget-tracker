@@ -25,38 +25,17 @@ export class AccountService {
     }
     
     const accountsUrl = '/accounts/';
-    const response = await request(accountsUrl);
-
-    if (response.status === 200) {
-      try {
-        const accs = await response.json();
-        this.accountStore.accounts.length = 0;
-        this.accountStore.accounts.push(...accs);
-        this.accountStore.lastUpdated = DateTime.now();
-        this.setShouldUpdateAccountsList(false);
-        return this.accountStore.accounts;
-      } catch (e) {
-        console.log(e);
-      }
-    } else if (response.status === 401) {
-      this.userService.logOutUser();
-      throw new HttpError('Unauthorized', 401);
-    }
-    return [];
+    const accs = await request(accountsUrl, {}, {userService: this.userService});
+    this.accountStore.accounts.length = 0;
+    this.accountStore.accounts.push(...accs);
+    this.accountStore.lastUpdated = DateTime.now();
+    this.setShouldUpdateAccountsList(false);
+    return this.accountStore.accounts;
   }
 
   async getAccountDetails(accountId) {
     const accDetailsUrl = '/accounts/' + accountId;
-    const response = await request(accDetailsUrl);
-    if (response.ok) {
-      const details = await response.json();
-      return details;
-    } else if (response.status === 401) {
-      throw new HttpError('Unauthorized', 401);
-    } else {
-      console.log('Some error happened');
-    }
-    return [];
+    return await request(accDetailsUrl, {}, {userService: this.userService});
   }
 
   setShouldUpdateAccountsList(shouldUpdate) {
@@ -65,40 +44,20 @@ export class AccountService {
 
   async createAccount(accountDetails) {
     const accountsUrl = '/accounts/';
-    const response = await request(accountsUrl, {
-      method: 'POST',
-      body: JSON.stringify(accountDetails),
-    });
-
-    if (response.status === 200) {
-      try {
-        const createdAccount = response.json();
-        this.setShouldUpdateAccountsList(true);
-        return createdAccount;
-      } catch (e) {
-        console.log(e);
-      }
-    } else if (response.status === 401) {
-      this.userService.logOutUser();
-      throw new HttpError('Unauthorized', 401);
-    } else {
-      console.log(response);
-    }
+    const createdAccount = await request(accountsUrl, {
+                                          method: 'POST',
+                                          body: JSON.stringify(accountDetails),
+                                        }, 
+                                        {userService: this.userService});
+    this.setShouldUpdateAccountsList(true);
+    return createdAccount;
   }
 
   async getAccountTypes() {
     const accTypesUrl = '/accounts/types/';
-    const response = await request(accTypesUrl);
-    if (response.ok) {
-      const types = await response.json();
-      this.accountStore.accountTypes.length = 0;
-      this.accountStore.accountTypes.push(...types);
-      return this.accountStore.accountTypes;
-    } else if (response.status === 401) {
-      throw new HttpError('Unauthorized', 401);
-    } else {
-      console.log('Some error happened');
-    }
-    return [];
+    const types = await request(accTypesUrl, {}, {userService: this.userService});
+    this.accountStore.accountTypes.length = 0;
+    this.accountStore.accountTypes.push(...types);
+    return this.accountStore.accountTypes;
   }
 }

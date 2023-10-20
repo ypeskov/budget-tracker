@@ -1,5 +1,4 @@
 import { request } from './requests';
-import { HttpError } from '../errors/HttpError';
 
 export class TransactionsService {
   userService;
@@ -23,32 +22,11 @@ export class TransactionsService {
   async addTransaction(transactionDetails) {
     const transactionDetailsUrl = `/transactions`;
     const createdTransaction = await request(transactionDetailsUrl, {
-      method: 'POST',
-      body: JSON.stringify(transactionDetails),
-    });
+                                        method: 'POST',
+                                        body: JSON.stringify(transactionDetails),
+                                      }, 
+                                      {userService: this.userService});
     this.accountService.setShouldUpdateAccountsList(true);
     return createdTransaction;
-
-  //   try {
-      
-
-  //     if (response.status === 200) {
-  //       try {
-  //         const createdTransaction = response.json();
-  //         this.accountService.setShouldUpdateAccountsList(true);
-  //         return createdTransaction;
-  //       } catch (e) {
-  //         console.log(e);
-  //       }
-  //     } else if (response.status === 401) {
-  //       this.userService.logOutUser();
-  //       throw new HttpError('Unauthorized', 401);
-  //     } else {
-  //       console.log(response);
-  //     }
-  //     return null;
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
   }
 }

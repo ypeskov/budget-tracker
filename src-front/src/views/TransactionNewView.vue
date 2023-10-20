@@ -85,7 +85,7 @@ function changeItemType(type) {
 }
 
 async function submitNewTransaction() {
-  const createdTransaction = await Services.transactionService.addTransaction(transaction);
+  await Services.transactionsService.addTransaction(transaction);
   for (const key in transaction) {
     transaction[key] = null;
   }
