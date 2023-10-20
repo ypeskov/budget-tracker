@@ -5,3 +5,10 @@
   background-color: $section-background-color;
   padding: 0.5rem;
 }
+.filter-bottom-menu-row {
+  margin-top: 1vh;
+}
+.bottom-menu-container {
+  display: flex;
+  justify-content: start;
+}

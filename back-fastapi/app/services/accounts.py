@@ -60,3 +60,7 @@ def get_account_details(account_id: int, user_id: int, db: Session = None) -> Ac
     if account.user_id != user_id:
         raise HTTPException(403, 'Forbidden')
     return account
+
+
+def get_account_types(db: Session = None) -> list[AccountType]:
+    return db.query(AccountType).all()

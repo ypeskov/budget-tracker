@@ -1,22 +1,18 @@
 <script setup>
 import { onBeforeMount, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '../stores/user';
-import { useAccountStore } from '../stores/account';
-import { AccountService } from '../services/accounts';
+
+import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
 
 const route = useRoute();
 const router = useRouter();
-const accountStore = useAccountStore();
-const userStore = useUserStore();
-const accountService = new AccountService(userStore, accountStore);
 
 let accountDetails = reactive({});
 
 onBeforeMount(async () => {
   try {
-    const details = await accountService.getAccountDetails(route.params.id);
+    const details = await Services.accountsService.getAccountDetails(route.params.id);
     accountDetails = Object.assign(accountDetails, details);
   } catch(e) {
     if (e instanceof HttpError && e.statusCode === 401) {

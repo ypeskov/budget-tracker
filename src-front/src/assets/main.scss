@@ -3,6 +3,17 @@
 .list-item:hover {
   background-color: $main-background-selection;
 }
+.list-item {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+}
+.list-item>a {
+  text-decoration: none;
+  color: black;
+}
+
 
 .router-link-active,
 .router-link-exact-active {
@@ -17,4 +28,15 @@
 
 .top-space {
   margin-top: 1rem;
+}
+
+.sub-menu {
+  display: flex;
+  justify-content: end;
+  margin-bottom: 1vh;
+}
+
+.sub-menu a {
+  margin-left: 1vw;
+  margin: 0.1rem 0.2rem;
 }

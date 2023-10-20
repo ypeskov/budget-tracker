@@ -3,26 +3,24 @@ import { onBeforeMount, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 
-import '../assets/common.scss';
-import { useUserStore } from '../stores/user';
-import { UserService } from '../services/users';
-import { TransactionsService } from '../services/transactions';
+import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
+import { useUserStore } from '../stores/user';
 import Filter from '../components/filter/Filter.vue';
 
+const userStore = useUserStore();
 let transactions = reactive([]);
 let filteredTransactions = reactive([]);
-const userStore = useUserStore();
-const userService = new UserService(userStore);
+
 const router = useRouter();
-const transactionsService = new TransactionsService(userService);
+
 const showFilter = ref(false);
 const reset = ref(false);
 
 onBeforeMount(async () => {
   try {
     transactions.splice(0);
-    const allTransactions = await transactionsService.getUserTransactions();
+    const allTransactions = await Services.transactionsService.getUserTransactions();
     transactions.push(...allTransactions);
     filteredTransactions.push(...allTransactions);
   } catch (e) {
@@ -38,7 +36,7 @@ onBeforeMount(async () => {
 
 async function reloadTransactions(event) {
   event.preventDefault();
-  const allTransactions = await transactionsService.getUserTransactions();
+  const allTransactions = await Services.transactionService.getUserTransactions();
   transactions.splice(0);
   transactions.push(...allTransactions);
   filteredTransactions.splice(0);
@@ -63,9 +61,16 @@ function filterApplied(payload) {
   <main>
     <div class="container">
       <div class="row">
-        <div class="col transactions-menu">
-          <a href="" class="btn btn-secondary" @click="reloadTransactions">Reload</a>
-          <a href="" class="btn btn-secondary" @click="toggleFilter">Filter</a>
+        <div class="col sub-menu">
+          <span v-if="userStore.isLoggedIn">
+            <RouterLink class="btn btn-primary" :to="{ name: 'transactionNew' }">New</RouterLink>
+          </span>
+          <span>
+            <a href="" class="btn btn-secondary" @click="reloadTransactions">Reload</a>
+          </span>
+          <span>
+            <a href="" class="btn btn-secondary" @click="toggleFilter">Filter</a>
+          </span>
         </div>
       </div>
       <div class="row">
@@ -81,7 +86,11 @@ function filterApplied(payload) {
       </div>
       <div v-if="transactions.length > 0">
         <div v-for="transaction, idx in filteredTransactions" :key="transaction.id" class="list-item">
-          <RouterLink class="row" :to="{ name: 'transactionDetails', params: { id: transaction.id } }">
+          <RouterLink class="row" 
+                      :to="{ name: 'transactionDetails', 
+                            params: { 
+                              id: transaction.id,
+                            } }">
             <div class="col-7">
               <div class="transaction-element"><b>{{ transaction.label }}</b></div>
               <div class="transaction-element">{{ transaction.notes }}</div>
@@ -101,29 +110,7 @@ function filterApplied(payload) {
 </template>
 
 <style scoped>
-.transactions-menu {
-  display: flex;
-  justify-content: end;
-  margin-bottom: 1vh;
-}
-
-.transactions-menu a {
-  margin-left: 1vw;
-  margin: 0.1rem 0.2rem;
-
-}
-
-.list-item {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid #ccc;
-}
-
-.list-item>a {
-  text-decoration: none;
-  color: black;
-}
+@import '../assets/main.scss';
 
 .transaction-element {
   overflow: hidden;

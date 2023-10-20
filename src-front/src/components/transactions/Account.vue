@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeMount } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps(['transaction', 'accounts', 'accountType']);
 const emit = defineEmits(['accountChanged']);

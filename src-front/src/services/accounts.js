@@ -1,20 +1,17 @@
 import {DateTime} from 'luxon';
 
-import { UserService } from './users';
 import { request } from './requests';
 import { HttpError } from '../errors/HttpError';
 
 export class AccountService {
-  userStore;
   accountStore;
   userService;
 
   timeToCacheAccountsList = 600000; // miliseconds aka 10 minutes
 
-  constructor(userStore, accountStore) {
-    this.userStore = userStore;
+  constructor(accountStore, userService) {
     this.accountStore = accountStore;
-    this.userService = new UserService(userStore);
+    this.userService = userService;
   }
 
   async getAllUserAccounts() {
@@ -28,64 +25,39 @@ export class AccountService {
     }
     
     const accountsUrl = '/accounts/';
-    const response = await request(accountsUrl);
-
-    if (response.status === 200) {
-      try {
-        const accs = await response.json();
-        this.accountStore.accounts.length = 0;
-        this.accountStore.accounts.push(...accs);
-        this.accountStore.lastUpdated = DateTime.now();
-        this.setShouldUpdateAccountsList(false);
-        return this.accountStore.accounts;
-      } catch (e) {
-        console.log(e);
-      }
-    } else if (response.status === 401) {
-      this.userService.logOutUser();
-      throw new HttpError('Unauthorized', 401);
-    }
-    return [];
+    const accs = await request(accountsUrl, {}, {userService: this.userService});
+    this.accountStore.accounts.length = 0;
+    this.accountStore.accounts.push(...accs);
+    this.accountStore.lastUpdated = DateTime.now();
+    this.setShouldUpdateAccountsList(false);
+    return this.accountStore.accounts;
   }
 
   async getAccountDetails(accountId) {
     const accDetailsUrl = '/accounts/' + accountId;
-    const response = await request(accDetailsUrl);
-    if (response.ok) {
-      const details = await response.json();
-      return details;
-    } else if (response.status === 401) {
-      throw new HttpError('Unauthorized', 401);
-    } else {
-      console.log('Some error happened');
-    }
-    return [];
+    return await request(accDetailsUrl, {}, {userService: this.userService});
   }
 
   setShouldUpdateAccountsList(shouldUpdate) {
     this.accountStore.shouldUpdate = shouldUpdate;
   }
 
-  addAccount(accountDetails) {
+  async createAccount(accountDetails) {
     const accountsUrl = '/accounts/';
-    const response = request(accountsUrl, {
-      method: 'POST',
-      body: JSON.stringify(accountDetails),
-    });
+    const createdAccount = await request(accountsUrl, {
+                                          method: 'POST',
+                                          body: JSON.stringify(accountDetails),
+                                        }, 
+                                        {userService: this.userService});
+    this.setShouldUpdateAccountsList(true);
+    return createdAccount;
+  }
 
-    if (response.status === 200) {
-      try {
-        const createdAccount = response.json();
-        this.setShouldUpdateAccountsList(true);
-        return createdAccount;
-      } catch (e) {
-        console.log(e);
-      }
-    } else if (response.status === 401) {
-      this.userService.logOutUser();
-      throw new HttpError('Unauthorized', 401);
-    } else {
-      console.log(response);
-    }
+  async getAccountTypes() {
+    const accTypesUrl = '/accounts/types/';
+    const types = await request(accTypesUrl, {}, {userService: this.userService});
+    this.accountStore.accountTypes.length = 0;
+    this.accountStore.accountTypes.push(...types);
+    return this.accountStore.accountTypes;
   }
 }

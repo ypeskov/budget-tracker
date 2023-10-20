@@ -1,12 +1,10 @@
 <script setup>
 import {useRouter} from 'vue-router';
-import { useUserStore } from '../stores/user';
-import { UserService } from '../services/users';
 
-const userStore = useUserStore();
-const userService = new UserService(userStore);
+import { Services } from '../services/servicesConfig';
 
-userService.logOutUser();
+
+Services.userService.logOutUser();
 
 const router = useRouter();
 router.push({name: 'login'});
