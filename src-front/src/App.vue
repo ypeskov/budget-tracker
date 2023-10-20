@@ -33,9 +33,6 @@ onBeforeMount(() => {
       <div class="row nav-row">
         <div class="col">
           <nav>
-            <span v-if="userStore.isLoggedIn">
-              <RouterLink class="btn btn-primary d-inline" :to="{ name: 'transactionNew' }">New</RouterLink>
-            </span>
             <span>
               <RouterLink :to="{ name: 'home' }">Home</RouterLink>
             </span>

@@ -5,8 +5,10 @@ import { DateTime } from 'luxon';
 
 import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
+import { useUserStore } from '../stores/user';
 import Filter from '../components/filter/Filter.vue';
 
+const userStore = useUserStore();
 let transactions = reactive([]);
 let filteredTransactions = reactive([]);
 
@@ -60,8 +62,15 @@ function filterApplied(payload) {
     <div class="container">
       <div class="row">
         <div class="col sub-menu">
-          <a href="" class="btn btn-secondary" @click="reloadTransactions">Reload</a>
-          <a href="" class="btn btn-secondary" @click="toggleFilter">Filter</a>
+          <span v-if="userStore.isLoggedIn">
+            <RouterLink class="btn btn-primary" :to="{ name: 'transactionNew' }">New</RouterLink>
+          </span>
+          <span>
+            <a href="" class="btn btn-secondary" @click="reloadTransactions">Reload</a>
+          </span>
+          <span>
+            <a href="" class="btn btn-secondary" @click="toggleFilter">Filter</a>
+          </span>
         </div>
       </div>
       <div class="row">
