@@ -18,6 +18,14 @@ function changeAccount($event) {
   });
 }
 
+const accountIdx = computed(() => {
+  if (props.accountType === 'src') {
+    return props.accounts.findIndex((item) => item.id === props.transaction.account_id);
+  } else {
+    return props.accounts.findIndex((item) => item.id === props.transaction.target_account_id);
+  }
+});
+
 const accLabel = computed(() => {
   if (props.accountType === 'src') {
     return 'Account';
@@ -31,7 +39,7 @@ const accLabel = computed(() => {
   <label for="label" class="form-label">
     {{ accLabel }}
   </label>
-  <select class="form-select bottom-space" @change="changeAccount">
+  <select class="form-select bottom-space" @change="changeAccount" :value="accountIdx">
     <option v-for="(acc, index) in accounts" :key="acc.id" :value="index">
       {{ acc.name }} ({{ acc.balance }} {{ acc.currency.code }})
     </option>
