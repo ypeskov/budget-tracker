@@ -164,27 +164,27 @@ def update(transaction_id: int, transaction_details: ResponseTransactionSchema, 
         try:
             account = db.query(Account).filter_by(id=transaction_details.account_id).one()
         except NoResultFound:
-            raise HTTPException(422, 'Invalid account')
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid account')
         if account.user_id != user_id:
-            raise HTTPException(403, 'Forbidden')
+            raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
         transaction.account = account
 
     if transaction_details.target_account_id is not None:
         try:
             target_account = db.query(Account).filter_by(id=transaction_details.target_account_id).one()
         except NoResultFound:
-            raise HTTPException(422, 'Invalid target account')
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid target account')
         if target_account.user_id != user_id:
-            raise HTTPException(403, 'Forbidden')
+            raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
         transaction.target_account = target_account
 
     if transaction_details.category_id is not None:
         try:
             category = db.query(UserCategory).filter_by(id=transaction_details.category_id).one()
         except NoResultFound:
-            raise HTTPException(422, 'Invalid category')
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid category')
         if category.user_id != user_id:
-            raise HTTPException(403, 'Forbidden')
+            raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
         transaction.category = category
 
     if transaction_details.date_time is not None:
