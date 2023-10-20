@@ -67,7 +67,10 @@ const router = createRouter({
         requiresAuth: true,
         requiresUnAuth: false,
       },
-      component: () => import('../views/TransactionDetailsView.vue'),
+      props: {
+        isEdit: true,
+      },
+      component: () => import('../views/TransactionNewView.vue'),
     },
     {
       path: '/transactions/new',

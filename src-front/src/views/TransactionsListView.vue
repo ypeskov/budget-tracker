@@ -86,7 +86,11 @@ function filterApplied(payload) {
       </div>
       <div v-if="transactions.length > 0">
         <div v-for="transaction, idx in filteredTransactions" :key="transaction.id" class="list-item">
-          <RouterLink class="row" :to="{ name: 'transactionDetails', params: { id: transaction.id } }">
+          <RouterLink class="row" 
+                      :to="{ name: 'transactionDetails', 
+                            params: { 
+                              id: transaction.id,
+                            } }">
             <div class="col-7">
               <div class="transaction-element"><b>{{ transaction.label }}</b></div>
               <div class="transaction-element">{{ transaction.notes }}</div>

@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeMount, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 import { Services } from '../services/servicesConfig';
 
@@ -11,12 +11,14 @@ import Category from '../components/transactions/Category.vue';
 import Account from '../components/transactions/Account.vue';
 import ExchangeRate from '../components/transactions/ExchangeRate.vue'
 
+const props = defineProps(['isEdit']);
 const router = useRouter();
+const route = useRoute();
 
 const accounts = reactive([]);
 const currentAccount = ref(accounts[0]);
 const targetAccount = ref(accounts[0]);
-const transaction = reactive({});
+let transaction = reactive({});
 const categories = ref([]);
 let filteredCategories = ref([]);
 
@@ -48,10 +50,19 @@ onBeforeMount(async () => {
     transaction.account_id = currentAccount.value.id;
     transaction.target_account_id = targetAccount.value.id;
     categories.value = await Services.categoriesService.getUserCategories();
+    
+    if (props.isEdit) {
+      const details = await Services.transactionsService.getTransactionDetails(route.params.id);
+      transaction = Object.assign(transaction, details);
+      itemType.value = transaction.is_transfer ? 'transfer' : transaction.is_income ? 'income' : 'expense';
+      currentAccount.value = accounts.find((item) => item.id === transaction.account_id);
+      targetAccount.value = accounts.find((item) => item.id === transaction.target_account_id);
+    }
+
     filterCategories();
   } catch (e) {
-    console.log(e.message);
-    router.push({ name: 'login' });
+    console.log(e)
+    router.push({ name: 'home' });
   }
 });
 
@@ -63,14 +74,14 @@ function filterCategories() {
 
 function updateTransactionProperties(type) {
   if (type === 'transfer') {
-    transaction.category_id = null;
+    transaction.category_id = transaction.category_id || null;
     transaction.is_transfer = true;
     transaction.target_account_id = targetAccount.value.id;
     transaction.is_income = false;
   } else {
     transaction.target_account_id = null;
     transaction.is_transfer = false;
-    transaction.category_id = filteredCategories.value[0].id;
+    transaction.category_id = transaction.category_id || filteredCategories.value[0].id;
     transaction.is_income = itemType.value === 'income';
   }
 }
@@ -84,12 +95,22 @@ function changeItemType(type) {
   filterCategories();
 }
 
-async function submitNewTransaction() {
-  await Services.transactionsService.addTransaction(transaction);
+async function submitTransaction() {
+  try {
+    if (props.isEdit) {
+      await Services.transactionsService.updateTransaction(transaction);
+    } else {
+      await Services.transactionsService.addTransaction(transaction);
+  }
   for (const key in transaction) {
     transaction[key] = null;
   }
   router.push({ name: 'transactions' });
+  } catch (e) {
+    console.log(e)
+    router.push({ name: 'home' });
+  }
+
 }
 </script>
 
@@ -98,7 +119,7 @@ async function submitNewTransaction() {
     <div class="container">
       <div class="row">
         <div class="col">
-          <form @submit.prevent="submitNewTransaction">
+          <form @submit.prevent="submitTransaction">
             <TransactionTypeTabs @type-changed="changeItemType" :transaction="transaction" :item-type="itemType" />
 
             <TransactionLabel :transaction="transaction" />

@@ -4,13 +4,13 @@ import { computed } from 'vue';
 const props = defineProps(['transaction', 'currentAccount', 'label', 'type']);
 const emit = defineEmits(['amountChanged']);
 
-// const amount = computed(() => {
-//   if (type === 'src') {
-//     return transaction.amount;
-//   } else if (type === 'target') {
-//     return transaction.target_amount;
-//   }
-// })
+const amount = computed(() => {
+  if (props.type === 'src') {
+    return props.transaction.amount;
+  } else if (props.type === 'target') {
+    return props.transaction.target_amount;
+  }
+})
 
 function changeAmount($value) {
   emit('amountChanged', {
@@ -27,7 +27,7 @@ function changeAmount($value) {
         <label for="amount" class="form-label">
           {{ label }}
         </label>
-        <input type="number" @keyup="changeAmount" class="form-control" id="amount" step="0.01" />
+        <input type="number" @keyup="changeAmount" :value="amount" class="form-control" id="amount" step="0.01" />
       </div>
       <div class="col-2 currency">{{ currentAccount?.currency?.code }}</div>
     </div>

@@ -1,8 +1,8 @@
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps(['itemType']);
-const currentItem = ref(props.itemType);
+const currentItem = computed(() => props.itemType);
 const emit = defineEmits(['typeChanged']);
 
 function changeItemType($event) {

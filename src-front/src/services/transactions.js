@@ -29,4 +29,15 @@ export class TransactionsService {
     this.accountService.setShouldUpdateAccountsList(true);
     return createdTransaction;
   }
+
+  async updateTransaction(transactionDetails) {
+    const transactionDetailsUrl = `/transactions/${transactionDetails.id}`;
+    const updatedTransaction = await request(transactionDetailsUrl, {
+                                        method: 'PUT',
+                                        body: JSON.stringify(transactionDetails),
+                                      }, 
+                                      {userService: this.userService});
+    this.accountService.setShouldUpdateAccountsList(true);
+    return updatedTransaction;
+  }
 }
