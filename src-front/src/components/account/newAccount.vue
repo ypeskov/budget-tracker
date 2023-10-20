@@ -101,7 +101,7 @@ async function createAccount() {
       </div>
       <div class="form-group">
         <label for="opening_date">Opening Date:</label>
-        <input type="datetime-local" id="opening_date" v-model="openingDate" required>
+        <input type="datetime-local" id="opening_date" v-model="openingDate" >
       </div>
       <div class="form-group">
         <label for="comment">Comment:</label>

@@ -25,12 +25,11 @@ export class UserService {
       password,
     };
     try {
-      const response = await request(loginPath, {
-        method: 'POST',
-        body: JSON.stringify(requestBody),
-      });
-
-      const data = await response.json();
+      const data = await request(loginPath, {
+                                        method: 'POST',
+                                        body: JSON.stringify(requestBody),
+                                      }, 
+                                      {userService: this});
       if (data.access_token) {
         this.userStore.accessToken = data.access_token;
         this.getUserProfile(this.userStore.accessToken);
@@ -46,8 +45,7 @@ export class UserService {
   async getUserProfile(accessToken) {
     try {
       const profileEndpoint = '/auth/profile/';
-      const response = await request(profileEndpoint);
-      const userProfile = await response.json();
+      const userProfile = await request(profileEndpoint);
       this.setUser(userProfile, true, accessToken);
     } catch (e) {
       console.log(e);
