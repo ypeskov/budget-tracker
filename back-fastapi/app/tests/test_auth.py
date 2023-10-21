@@ -1,14 +1,10 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.tests.db_test_cfg import override_get_db
-from app.data_loaders.work_data.load_all import load_all_data
+
 
 import icecream
 icecream.install()
-
-db = next(override_get_db())
-load_all_data(db)
 
 client = TestClient(app)
 
