@@ -1,11 +1,10 @@
 from datetime import timedelta, datetime
-from pprint import pprint
-from typing import Type
 
 import jwt
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
+from icecream import ic
 
 from app.models.User import User, DEFAULT_CURRENCY_CODE
 from app.models.Currency import Currency
@@ -73,7 +72,7 @@ def create_users(user_request: UserRegistration, db: Session):
 
     copy_all_categories(new_user.id, db)
 
-    return UserResponse.from_orm(new_user)
+    return new_user
 
 
 def get_jwt_token(user_login: UserLoginSchema, db: Session):
@@ -92,7 +91,11 @@ def get_jwt_token(user_login: UserLoginSchema, db: Session):
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={**UserResponse.from_orm(user).dict()},
+        data={
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+        },
         expires_delta=access_token_expires)
 
     return {"access_token": access_token, "token_type": "bearer"}

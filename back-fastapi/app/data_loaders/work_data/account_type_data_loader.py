@@ -1,10 +1,18 @@
+from icecream import ic
+from sqlalchemy.orm import Session
+
 from app.database import get_db
 from app.models.AccountType import AccountType
 
-db = next(get_db())
+default_db = next(get_db())
 
 
-def load_default_account_types():
+def load_default_account_types(db: Session = None):
+    if db is None:
+        db = default_db
+    db.query(AccountType).delete()
+    db.commit()
+
     default_values = [
         AccountType(id=1, type_name='cash', is_credit=False),
         AccountType(id=2, type_name='regular_bank', is_credit=False),
@@ -18,7 +26,7 @@ def load_default_account_types():
         db.commit()
         print('Default account types are loaded in DB')
     except Exception as e:
-        print(e.args)
+        ic(e)
 
 
 if __name__ == '__main__':

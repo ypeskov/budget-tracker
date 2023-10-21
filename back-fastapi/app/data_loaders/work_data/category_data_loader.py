@@ -1,12 +1,18 @@
-from pprint import pprint
+from icecream import ic
+from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.DefaultCategory import DefaultCategory
 
-db = next(get_db())
+default_db = next(get_db())
 
 
-def load_default_categories():
+def load_default_categories(db: Session = None):
+    if db is None:
+        db = default_db
+    db.query(DefaultCategory).delete()
+    db.commit()
+
     default_values = [
         DefaultCategory(id=1, name='Life', parent_id=None),
         DefaultCategory(id=2, name='Food', parent_id=None),
@@ -38,7 +44,7 @@ def load_default_categories():
         db.commit()
         print('Default categories are loaded in DB')
     except Exception as e:
-        pprint(e.args)
+        ic(e.args)
 
 
 if __name__ == '__main__':

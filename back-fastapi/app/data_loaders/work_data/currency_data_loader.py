@@ -1,12 +1,18 @@
-from pprint import pprint
+from icecream import ic
+from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.Currency import Currency
 
-db = next(get_db())
+default_db = next(get_db())
 
 
-def load_default_currencies():
+def load_default_currencies(db: Session = None):
+    if db is None:
+        db = default_db
+    db.query(Currency).delete()
+    db.commit()
+
     default_values = [
         Currency(id=1, code='USD', name='United States Dollar'),
         Currency(id=2, code='UAH', name='Ukrainian Hryvna'),
@@ -19,7 +25,7 @@ def load_default_currencies():
         db.commit()
         print('Default currencies are loaded in DB')
     except Exception as e:
-        pprint(e.args)
+        ic(e.args)
 
 
 if __name__ == '__main__':
