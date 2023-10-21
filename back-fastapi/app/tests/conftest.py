@@ -1,5 +1,7 @@
 from icecream import ic
 
+import pytest
+
 from app.main import app
 from app.database import get_db
 from app.data_loaders.work_data.load_all import load_all_data
@@ -17,6 +19,7 @@ app.dependency_overrides[get_db] = override_get_db
 db = next(override_get_db())
 load_all_data(db)
 
+
 def pytest_unconfigure(config):
     db.query(User).delete()
     db.query(Currency).delete()
@@ -26,3 +29,23 @@ def pytest_unconfigure(config):
     db.commit()
 
     print("\n\n------- DB is cleared -------\n\n")
+
+
+# @pytest.fixture(scope="session")
+# def qqqq():
+#     return [
+#         {
+#             'id': 1,
+#             "email": "user1@example.com",
+#             "first_name": "Yura",
+#             "last_name": "Peskov",
+#             "password": "q",
+#         },
+#         {
+#             'id': 2,
+#             "email": "user2@example.com",
+#             "first_name": "Yura",
+#             "last_name": "Peskov",
+#             "password": "q",
+#         },
+#     ]
