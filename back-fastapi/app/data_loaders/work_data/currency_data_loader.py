@@ -23,7 +23,7 @@ def load_default_currencies(db: Session = None):
     try:
         db.bulk_save_objects(default_values)
         db.commit()
-        print('Default currencies are loaded in DB')
+        print(f'Default currencies are loaded in the table [{Currency.__tablename__}]')
     except Exception as e:
         ic(e.args)
 

@@ -24,7 +24,7 @@ def load_default_account_types(db: Session = None):
     try:
         db.bulk_save_objects(default_values)
         db.commit()
-        print('Default account types are loaded in DB')
+        print(f'Default account types are loaded in the table [{AccountType.__tablename__}]')
     except Exception as e:
         ic(e)
 

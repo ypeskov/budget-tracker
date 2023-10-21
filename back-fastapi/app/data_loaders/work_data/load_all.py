@@ -7,10 +7,11 @@ from .account_type_data_loader import load_default_account_types
 
 
 def load_all_data(db: Session = None):
+    print('\n\n---- Loading default data ----')
     load_default_categories(db)
     load_default_currencies(db)
     load_default_account_types(db)
-    pass
+    print('---- Default data is loaded ----\n\n')
 
 
 if __name__ == "__main__":

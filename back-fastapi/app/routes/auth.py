@@ -16,7 +16,8 @@ router = APIRouter(
 @router.post("/register/", response_model=UserResponse)
 def register_user(user_request: UserRegistration,
                   db: Session = Depends(get_db)):
-    return create_users(user_request, db)
+    user = create_users(user_request, db)
+    return user
 
 
 @router.post("/login/", response_model=Token)
@@ -25,6 +26,5 @@ def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)):
 
 
 @router.get('/profile/')
-def get_profile(user=Depends(check_token),
-                db: Session = Depends(get_db)) -> dict:
+def get_profile(user=Depends(check_token)) -> dict:
     return user

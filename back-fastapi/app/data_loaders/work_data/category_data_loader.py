@@ -42,7 +42,7 @@ def load_default_categories(db: Session = None):
     try:
         db.bulk_save_objects(default_values)
         db.commit()
-        print('Default categories are loaded in DB')
+        print(f'Default categories are loaded in the table [{DefaultCategory.__tablename__}]')
     except Exception as e:
         ic(e.args)
 
