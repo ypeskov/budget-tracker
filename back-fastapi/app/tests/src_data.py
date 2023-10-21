@@ -11,6 +11,6 @@ test_users = [
         "email": "user2@example.com",
         "first_name": "Yura",
         "last_name": "Peskov",
-        "password": "q",
+        "password": "qq",
     },
 ]

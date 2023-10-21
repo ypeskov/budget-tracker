@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.tests.test_data import test_users
+from app.tests.src_data import test_users
 
 import icecream
 icecream.install()
@@ -22,19 +22,15 @@ def test_create_user(test_user):
     assert data['last_name'] == test_user['last_name']
 
 
-def test_login_user():
-    response = client.post(
-        "/auth/login/",
-        json={"email": "user1@example.com", "password": "q"},
-    )
+@pytest.mark.parametrize("test_user", test_users)
+def test_login_user(test_user):
+    response = client.post("/auth/login/", json=test_user)
     assert response.status_code == 200
     login_info = response.json()
-
     assert "access_token" in login_info
     assert login_info["token_type"] == "bearer"
 
     response = client.get("/auth/profile", headers={'auth-token': login_info["access_token"]})
     assert response.status_code == 200
     profile = response.json()
-    assert profile["email"] == "user1@example.com"
-
+    assert profile["email"] == test_user["email"]
