@@ -11,3 +11,10 @@ test-auth:
 
 test-accounts:
 	pytest -v --disable-warnings test_accounts_api.py
+
+cov-missing:
+	#pytest --cov
+	pytest --cov=app --cov-report=term-missing
+
+cov-skip:
+	pytest --cov-report term-missing:skip-covered --cov=app
