@@ -35,4 +35,4 @@ def test_add_get_account(test_account, token):
     assert account_details['balance'] == test_account['balance']
     assert 'opening_date' in account_details
     assert account_details['opening_date'] is not None
-    
+
