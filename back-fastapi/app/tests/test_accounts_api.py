@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.tests.conftest import accounts_path_prefix
+from app.tests.data.accounts_data import test_accounts
 from app.main import app
 
 import icecream
@@ -11,19 +12,16 @@ icecream.install()
 client = TestClient(app)
 
 
-def test_add_account(token):
+@pytest.mark.parametrize("test_account", test_accounts)
+def test_add_account(test_account, token):
     response = client.post(f'{accounts_path_prefix}/',
-                           json={
-                               "name": "test_account",
-                               "currency_id": 1,
-                               "account_type_id": 1,
-                               "balance": 0
-                           },
+                           json=test_account,
                            headers={'auth-token': token})
     assert response.status_code == 200
     account_details = response.json()
-    assert account_details["name"] == "test_account"
-    assert account_details["currency_id"] == 1
-    assert account_details["account_type_id"] == 1
-    assert account_details["balance"] == 0
-    assert "id" in account_details
+    assert 'id' in account_details
+    assert account_details['name'] == test_account['name']
+    assert account_details['currency_id'] == test_account['currency_id']
+    assert account_details['account_type_id'] == test_account['account_type_id']
+    assert account_details['balance'] == test_account['balance']
+
