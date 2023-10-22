@@ -1,4 +1,6 @@
-from fastapi import HTTPException
+from datetime import datetime
+
+from fastapi import HTTPException, status
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
@@ -10,29 +12,32 @@ from app.models.User import User
 from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema
 
 
-def create_account(account_dto: AccountResponseSchema, user_id: int,
+def create_account(account_dto: CreateAccountSchema, user_id: int,
                    db: Session = None) -> Account:
-    existing_user = db.query(User).filter(
-        User.id == user_id).first()  # type: ignore
+    """Create new account for user with user_id"""
+    existing_user = db.query(User).filter(User.id == user_id).first()  # type: ignore
     if not existing_user:
-        raise HTTPException(status_code=422, detail="Invalid user")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid user")
+
     currency = db.query(Currency).filter_by(id=account_dto.currency_id).first()
     if not currency:
-        raise HTTPException(status_code=422, detail="Invalid currency")
-    account_type = db.query(AccountType).filter_by(
-        id=account_dto.account_type_id).first()
-    if not account_type:
-        raise HTTPException(status_code=422, detail="Invalid account type")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid currency")
 
-    new_account = Account(user=existing_user, account_type=account_type,
-                          currency=currency, balance=account_dto.balance,
-                          opening_date=account_dto.opening_date,
-                          is_hidden=account_dto.is_hidden,
-                          name=account_dto.name, comment=account_dto.comment)
+    account_type = db.query(AccountType).filter_by(id=account_dto.account_type_id).first()
+    if not account_type:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account type")
+
+    if account_dto.opening_date is None:
+        account_dto.opening_date = datetime.utcnow()
+
+    new_account = Account(user=existing_user, account_type=account_type, currency=currency, balance=account_dto.balance,
+                          opening_date=account_dto.opening_date, is_hidden=account_dto.is_hidden, name=account_dto.name,
+                          comment=account_dto.comment)
     if account_dto.id is not None:
         new_account.id = account_dto.id
     db.add(new_account)
     db.commit()
+    db.refresh(new_account)
 
     return new_account
 

@@ -10,8 +10,7 @@ from app.models.User import User, DEFAULT_CURRENCY_CODE
 from app.models.Currency import Currency
 from app.models.DefaultCategory import DefaultCategory
 from app.models.UserCategory import UserCategory
-from app.schemas.user_schema import UserRegistration, UserResponse, \
-    UserLoginSchema
+from app.schemas.user_schema import UserRegistration, UserResponse, UserLoginSchema
 
 # Password hashing configuration
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
