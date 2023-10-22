@@ -7,7 +7,7 @@ from app.models.DefaultCategory import DefaultCategory
 default_db = next(get_db())
 
 
-def load_default_categories(db: Session = None):
+def load_default_categories(db: Session | None = None):
     if db is None:
         db = default_db
     db.query(DefaultCategory).delete()

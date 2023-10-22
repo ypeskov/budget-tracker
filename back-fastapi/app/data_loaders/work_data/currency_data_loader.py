@@ -7,7 +7,7 @@ from app.models.Currency import Currency
 default_db = next(get_db())
 
 
-def load_default_currencies(db: Session = None):
+def load_default_currencies(db: Session | None = None):
     if db is None:
         db = default_db
     db.query(Currency).delete()

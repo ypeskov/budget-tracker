@@ -7,7 +7,7 @@ from app.models.AccountType import AccountType
 default_db = next(get_db())
 
 
-def load_default_account_types(db: Session = None):
+def load_default_account_types(db: Session | None = None):
     if db is None:
         db = default_db
     db.query(AccountType).delete()

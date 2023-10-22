@@ -35,7 +35,7 @@ def process_transfer_type(transaction: Transaction, user_id: int, db: Session):
 
 
 def process_non_transfer_type(transaction_dto: CreateTransactionSchema, account: Account, user_id: int,
-                              transaction: Transaction, db: Session = None):
+                              transaction: Transaction, db: Session):
     """If the transaction is not transfer from one account to another then this function processes it"""
     try:
         category = db.query(UserCategory).filter_by(id=transaction_dto.category_id).one()
@@ -74,7 +74,7 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
         db.add(transaction.account)
         db.add(transaction.target_account)
     else:
-        account: Account = process_non_transfer_type(transaction_dto, account, user_id, transaction, db)
+        account = process_non_transfer_type(transaction_dto, account, user_id, transaction, db)
         db.add(account)
 
     db.add(transaction)

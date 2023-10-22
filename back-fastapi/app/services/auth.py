@@ -24,8 +24,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def copy_categories(default_category: DefaultCategory,
                     user_id: int,
-                    parent_id: int = None,
-                    db: Session = None):
+                    db: Session,
+                    parent_id: int | None = None
+                    ):
     new_category = UserCategory(
         user_id=user_id,
         name=default_category.name,
@@ -37,14 +38,14 @@ def copy_categories(default_category: DefaultCategory,
     db.commit()
 
     for child in default_category.children:
-        copy_categories(child, user_id, new_category.id, db)
+        copy_categories(child, user_id, db, new_category.id)
 
 
-def copy_all_categories(user_id: int, db: Session = None):
+def copy_all_categories(user_id: int, db: Session):
     root_categories = db.query(DefaultCategory).filter(
         DefaultCategory.parent_id == None).all()
     for root_category in root_categories:
-        copy_categories(root_category, user_id, None, db)
+        copy_categories(root_category, user_id, db, None)
 
 
 def create_users(user_request: UserRegistration, db: Session):

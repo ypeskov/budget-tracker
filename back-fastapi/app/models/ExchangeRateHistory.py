@@ -25,6 +25,6 @@ class ExchangeRateHistory(Base):
     to_currency: Mapped['Currency'] = relationship(foreign_keys=[to_currency_id])
 
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True, server_default='f')
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
                                                  onupdate=func.now(), nullable=False)

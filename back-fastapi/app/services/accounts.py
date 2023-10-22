@@ -12,7 +12,7 @@ from app.models.User import User
 from app.schemas.account_schema import CreateAccountSchema
 
 
-def create_account(account_dto: CreateAccountSchema, user_id: int, db: Session = None) -> Account:
+def create_account(account_dto: CreateAccountSchema, user_id: int, db: Session) -> Account:
     """Create new account for user with user_id"""
     existing_user = db.query(User).filter(User.id == user_id).first()  # type: ignore
     if not existing_user:
@@ -42,7 +42,7 @@ def create_account(account_dto: CreateAccountSchema, user_id: int, db: Session =
 
 
 def get_user_accounts(user_id: int,
-                      db: Session = None,
+                      db: Session,
                       include_deleted: bool = False,
                       include_hidden: bool = False) -> list[Account]:
     query = db.query(Account).filter_by(user_id=user_id).order_by(asc(Account.id))
@@ -56,7 +56,7 @@ def get_user_accounts(user_id: int,
     return accounts
 
 
-def get_account_details(account_id: int, user_id: int, db: Session = None) -> Account:
+def get_account_details(account_id: int, user_id: int, db: Session) -> Account:
     try:
         account = db.query(Account).filter_by(id=account_id).one()
     except NoResultFound:
@@ -66,5 +66,5 @@ def get_account_details(account_id: int, user_id: int, db: Session = None) -> Ac
     return account
 
 
-def get_account_types(db: Session = None) -> list[AccountType]:
+def get_account_types(db: Session) -> list[AccountType]:
     return db.query(AccountType).all()

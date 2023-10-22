@@ -7,7 +7,7 @@ from fastapi import Header, Request, HTTPException, status
 SECRET_KEY = "your-secret-key"
 
 
-async def check_token(request: Request, auth_token: Annotated[str, Header()] = None) -> dict:
+async def check_token(request: Request, auth_token: Annotated[str, Header()]) -> dict:
     try:
         payload = jwt.decode(auth_token, SECRET_KEY, algorithms=["HS256"])
         request.state.user = payload

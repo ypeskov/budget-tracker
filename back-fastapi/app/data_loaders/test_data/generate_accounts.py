@@ -11,7 +11,7 @@ from app.services.accounts import create_account
 
 db = next(get_db())
 
-AccountData = namedtuple('AccData',
+AccountData = namedtuple('AccountData',
                          'id user_id account_type_id currency_id balance name opening_date is_hidden comment')
 
 
