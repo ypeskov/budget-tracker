@@ -15,9 +15,7 @@ router = APIRouter(
 
 
 @router.post("/", response_model=AccountResponseSchema | None)
-def add_account(account_dto: CreateAccountSchema,
-                request: Request,
-                db: Session = Depends(get_db)):
+def add_account(account_dto: CreateAccountSchema, request: Request, db: Session = Depends(get_db)):
     return create_account(account_dto, request.state.user['id'], db)
 
 

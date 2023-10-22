@@ -1,9 +1,10 @@
 from decimal import Decimal
 from datetime import datetime
+from typing import Annotated
 
 from app.schemas.currency_schema import CurrencyResponseSchema
 from app.schemas.account_type_schema import AccountTypeResponseSchema
-from pydantic import ConfigDict, BaseModel
+from pydantic import ConfigDict, BaseModel, PlainSerializer
 
 
 class CreateAccountSchema(BaseModel):
@@ -11,7 +12,9 @@ class CreateAccountSchema(BaseModel):
     user_id: int | None = None
     account_type_id: int
     currency_id: int
-    balance: Decimal = 0
+    balance: Annotated[Decimal, PlainSerializer(
+            lambda x: float(x), return_type=float, when_used='json'
+        )]
     name: str
     opening_date: datetime | None = None
     comment: str | None = None

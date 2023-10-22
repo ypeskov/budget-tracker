@@ -14,3 +14,11 @@ test_users = [
         "password": "qq",
     },
 ]
+
+main_test_user = {
+    'id': 1000,
+    "email": "user@example.com",
+    "first_name": "Yura",
+    "last_name": "Test",
+    "password": "q",
+}

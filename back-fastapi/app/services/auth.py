@@ -93,6 +93,7 @@ def get_jwt_token(user_login: UserLoginSchema, db: Session):
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={
+            'id': user.id,
             'first_name': user.first_name,
             'last_name': user.last_name,
             'email': user.email,
