@@ -1,17 +1,80 @@
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
-from app.tests.conftest import accounts_path_prefix
-from app.tests.data.accounts_data import test_accounts, test_account_types
-from app.main import app
+from app.models.User import User
 from app.models.Account import Account
-from app.tests.conftest import db
+from app.tests.conftest import accounts_path_prefix, main_test_user_id, truly_invalid_currency_id, auth_path_prefix
+from app.tests.data.accounts_data import test_accounts, test_account_types
+from app.tests.data.auth_data import test_users
+from app.main import app
+from app.tests.conftest import db, truly_invalid_account_id, truly_invalid_account_type_id
+from app.services.accounts import create_account, get_account_details
+from app.schemas.account_schema import CreateAccountSchema
 
 import icecream
 from icecream import ic
+
 icecream.install()
 
 client = TestClient(app)
+
+
+def test_invalid_token_add_account():
+    response = client.post(f'{accounts_path_prefix}/', json={}, headers={'auth-token': 'Invalid token'})
+    assert response.status_code == 401
+
+
+def test_wrong_account_details(token):
+    response = client.post(f'{accounts_path_prefix}/', json={}, headers={'auth-token': token})
+    assert response.status_code == 422
+
+
+def test_wrong_user_request(fake_account):
+    with pytest.raises(HTTPException) as e:
+        create_account(fake_account, truly_invalid_account_id, db)
+    assert e.value.status_code == 422
+    assert e.value.detail == 'Invalid user'
+
+
+def test_create_acc_with_invalid_currency(fake_account):
+    fake_account.currency_id = truly_invalid_currency_id
+    with pytest.raises(HTTPException) as e:
+        create_account(fake_account, main_test_user_id, db)
+    assert e.value.status_code == 422
+    assert e.value.detail == 'Invalid currency'
+
+
+def test_create_acc_with_invalid_type(fake_account):
+    fake_account.account_type_id = truly_invalid_account_type_id
+    with pytest.raises(HTTPException) as e:
+        create_account(fake_account, main_test_user_id, db)
+    assert e.value.status_code == 422
+    assert e.value.detail == 'Invalid account type'
+
+
+def test_access_denied_to_other_user_account(token):
+    other_user = client.post(f'{auth_path_prefix}/register/', json=test_users[0])
+    assert other_user.status_code == 200
+    other_user_account = create_account(CreateAccountSchema.model_validate(test_accounts[0]), other_user.json()['id'],
+                                        db)
+    assert other_user_account is not None
+
+    get_account_details(test_accounts[0]['id'], other_user.json()['id'], db)
+    with pytest.raises(HTTPException) as e:
+        get_account_details(other_user_account.id, main_test_user_id, db)
+    assert e.value.status_code == 403
+    assert e.value.detail == 'Forbidden'
+
+    db.query(Account).filter_by(id=other_user_account.id).delete()
+    db.query(User).filter_by(id=other_user.json()['id']).delete()
+    db.commit()
+
+
+def test_get_invalid_account_details():
+    with pytest.raises(HTTPException) as e:
+        get_account_details(truly_invalid_account_id, main_test_user_id, db)
+    assert e.value.status_code == 404
 
 
 @pytest.mark.parametrize("test_account", test_accounts)
