@@ -12,8 +12,10 @@ from app.models.Currency import Currency
 from app.models.DefaultCategory import DefaultCategory
 from app.models.UserCategory import UserCategory
 from app.models.AccountType import AccountType
+from app.models.Account import Account
 
 from app.tests.data.auth_data import test_users, main_test_user
+from app.tests.data.accounts_data import test_accounts
 
 app.dependency_overrides[get_db] = override_get_db
 
@@ -22,6 +24,8 @@ load_all_data(db)
 
 auth_path_prefix = '/auth'
 accounts_path_prefix = '/accounts'
+
+client = TestClient(app)
 
 
 def pytest_unconfigure(config):
@@ -37,7 +41,15 @@ def pytest_unconfigure(config):
 
 @pytest.fixture(scope="session")
 def token():
-    client = TestClient(app)
     client.post(f'{auth_path_prefix}/register/', json=main_test_user)
     response = client.post(f'{auth_path_prefix}/login/', json=main_test_user)
     return response.json()["access_token"]
+
+
+@pytest.fixture(scope="function")
+def create_accounts(token):
+    for test_account in test_accounts:
+        client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token})
+    yield
+    db.query(Account).delete()
+    db.commit()
