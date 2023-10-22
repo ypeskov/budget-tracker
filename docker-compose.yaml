@@ -16,6 +16,7 @@ services:
       - DEBUG=True
       - DB_HOST=db
       - DB_PORT=5432
+      - PYTHONPATH=/app:$PYTHONPATH
     depends_on:
       - db
 
