@@ -29,5 +29,5 @@ app.include_router(transaction_router)
 app.include_router(category_router)
 app.include_router(currency_router)
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8000)

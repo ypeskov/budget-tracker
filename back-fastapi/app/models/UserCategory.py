@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from app.models.User import User
 
 
@@ -28,7 +28,7 @@ class UserCategory(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
                                                  onupdate=func.now())
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f'UserCategory(id={self.id}, user_id={self.user_id}, name="{self.name}", parent_id={self.parent_id}, ' + \
             f'is_income={self.is_income}, is_deleted={self.is_deleted}, created_at={self.created_at}, ' + \
             f'updated_at={self.updated_at}'

@@ -14,5 +14,5 @@ router = APIRouter(
 
 
 @router.get('/', response_model=list[CurrencyResponseSchema] | None)
-def get_own_currencies(db: Session = Depends(get_db)):
+def get_all_currencies(db: Session = Depends(get_db)):
     return get_user_currencies(db)

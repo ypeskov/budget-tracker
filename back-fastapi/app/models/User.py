@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from app.models.UserCategory import UserCategory
     from app.models.Account import Account
     from app.models.Transaction import Transaction

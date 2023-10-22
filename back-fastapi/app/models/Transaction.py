@@ -10,7 +10,7 @@ from app.models.Currency import Currency
 from app.models.User import User
 from app.models.UserCategory import UserCategory
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from app.models.Account import Account
 
 LABEL_MAX_LENGTH = 50
@@ -49,7 +49,7 @@ class Transaction(Base):
                                                  onupdate=func.now(),
                                                  nullable=False)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f'Transaction(id={self.id}, user_id={self.user_id}, account_id={self.account_id}, ' + \
             f'target_account_id={self.target_account_id}, category_id={self.category_id}, amount={self.amount}, ' + \
             f'label="{self.label}", notes="{self.notes}", date_time={self.date_time}, ' + \

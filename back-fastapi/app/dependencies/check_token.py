@@ -14,6 +14,6 @@ async def check_token(request: Request, auth_token: Annotated[str, Header()]) ->
         return payload
     except jwt.DecodeError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    except jwt.ExpiredSignatureError:
+    except jwt.ExpiredSignatureError:  # pragma: no cover
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
 

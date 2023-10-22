@@ -25,6 +25,7 @@ load_all_data(db)
 
 auth_path_prefix = '/auth'
 accounts_path_prefix = '/accounts'
+currencies_path_prefix = '/currencies'
 main_test_user_id = 1000
 truly_invalid_account_id = 9999999
 truly_invalid_account_type_id = 9999999

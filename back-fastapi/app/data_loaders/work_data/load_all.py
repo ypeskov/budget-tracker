@@ -14,5 +14,5 @@ def load_all_data(db: Session | None = None):
     print('---- Default data is loaded ----\n\n')
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     load_all_data()
