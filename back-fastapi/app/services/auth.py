@@ -1,7 +1,7 @@
 from datetime import timedelta, datetime
 
 import jwt
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from icecream import ic
@@ -52,7 +52,7 @@ def create_users(user_request: UserRegistration, db: Session):
     existing_user = db.query(User).filter(
         User.email == user_request.email).first()  # type: ignore
     if existing_user:
-        raise HTTPException(status_code=400,
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                             detail="User with this email already exists")
 
     currency = db.query(Currency).filter_by(code=DEFAULT_CURRENCY_CODE).one()
@@ -83,12 +83,10 @@ def get_jwt_token(user_login: UserLoginSchema, db: Session):
     user = db.query(User).filter(
         User.email == user_login.email).first()  # type: ignore
     if not user:
-        raise HTTPException(status_code=400,
-                            detail="Incorrect email or password")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect email or password")
 
     if not pwd_context.verify(user_login.password, user.password_hash):
-        raise HTTPException(status_code=400,
-                            detail="Incorrect email or password")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect email or password")
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(

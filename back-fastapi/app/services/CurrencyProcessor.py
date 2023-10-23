@@ -2,7 +2,6 @@ from decimal import Decimal
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import NoResultFound
 
 from app.models.Transaction import Transaction
 
