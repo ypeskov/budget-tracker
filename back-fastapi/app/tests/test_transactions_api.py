@@ -2,9 +2,10 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from app.tests.conftest import categories_path_prefix, accounts_path_prefix, transactions_path_prefix
-from app.tests.data.accounts_data import test_accounts
+from app.tests.conftest import categories_path_prefix, transactions_path_prefix
+from app.tests.conftest import db
 from app.main import app
+from app.models.Transaction import Transaction
 
 import icecream
 from icecream import ic
@@ -20,29 +21,29 @@ def test_create_transaction_expense_route(token, one_account, amount):
     assert categories_response.status_code == 200
     categories = categories_response.json()
 
-    operations = ['expense', 'income',]
+    operations = ['expense', 'income', ]
+    created_transactions_ids = []
     for operation in operations:
         accounts_response = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token})
         account = accounts_response.json()
         initial_balance_acc = account['balance']
 
         is_income = True if operation == 'income' else False
-        transaction_response = client.post(
-            f'{transactions_path_prefix}/',
-            json={
-                'account_id': one_account['id'],
-                'category_id': categories[0]['id'],
-                'amount': amount,
-                'currency_id': one_account['currency_id'],
-                'date': '2021-01-01',
-                'is_income': is_income,
-                'is_transfer': False,
-                'notes': 'Test transaction'
-            },
-            headers={'auth-token': token}
-        )
+        transaction_data = {
+            'account_id': one_account['id'],
+            'category_id': categories[0]['id'],
+            'amount': amount,
+            'currency_id': one_account['currency_id'],
+            'date': '2021-01-01',
+            'is_income': is_income,
+            'is_transfer': False,
+            'notes': 'Test transaction'
+        }
+        transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
+                                           headers={'auth-token': token})
         assert transaction_response.status_code == status.HTTP_200_OK
         transaction = transaction_response.json()
+        created_transactions_ids.append(transaction['id'])
 
         assert transaction['amount'] == amount
         assert transaction['is_income'] is False if operation == 'expense' else True
@@ -55,7 +56,81 @@ def test_create_transaction_expense_route(token, one_account, amount):
         accounts_response = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token})
         account = accounts_response.json()
 
-        if is_income:
-            assert account['balance'] == (initial_balance_acc + amount)
-        else:
-            assert account['balance'] == (initial_balance_acc - amount)
+        assert account['balance'] == (initial_balance_acc + amount if is_income else initial_balance_acc - amount)
+
+        # and now test the get transaction details route
+        transaction_response = client.get(f'{transactions_path_prefix}/{transaction["id"]}',
+                                          headers={'auth-token': token})
+        assert transaction_response.status_code == status.HTTP_200_OK
+        transaction_details = transaction_response.json()
+        assert transaction_details['id'] == transaction['id']
+        assert transaction_details['amount'] == transaction_data['amount']
+        assert transaction_details['is_income'] == transaction_data['is_income']
+        assert transaction_details['is_transfer'] == transaction_data['is_transfer']
+        assert transaction_details['notes'] == transaction_data['notes']
+        assert transaction_details['account']['id'] == transaction_data['account_id']
+        assert transaction_details['category_id'] == transaction_data['category_id']
+        assert transaction_details['currency_id'] == transaction_data['currency_id']
+
+        # get all transactions for the user
+        transactions_response = client.get(f'{transactions_path_prefix}/', headers={'auth-token': token})
+        assert transactions_response.status_code == status.HTTP_200_OK
+        transactions = transactions_response.json()
+        assert len(transactions) == len(created_transactions_ids)
+        for t in transactions:
+            assert t['id'] in created_transactions_ids
+
+    # clean up created transactions
+    for i in created_transactions_ids:
+        db.query(Transaction).filter(Transaction.id == i).delete()
+    db.commit()
+
+
+def test_update_transaction(token, one_account):
+    account_response = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token})
+    account = account_response.json()
+    initial_balance_acc = account['balance']
+    amount = 100
+
+    categories_response = client.get(f'{categories_path_prefix}/', headers={'auth-token': token})
+    assert categories_response.status_code == 200
+    categories = categories_response.json()
+
+    transaction_data = {
+        'account_id': one_account['id'],
+        'category_id': categories[0]['id'],
+        'amount': amount,
+        'currency_id': one_account['currency_id'],
+        'date': '2021-01-01',
+        'is_income': False,
+        'is_transfer': False,
+        'notes': 'Test transaction'
+    }
+    transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
+                                       headers={'auth-token': token})
+    assert transaction_response.status_code == status.HTTP_200_OK
+    transaction = transaction_response.json()
+
+    # update transaction
+    transaction_data['id'] = transaction['id']
+    transaction_data['user_id'] = transaction['user_id']
+    transaction_data['amount'] = 200
+    transaction_data['is_income'] = True
+    transaction_data['notes'] = 'Updated transaction'
+    transaction_data['category_id'] = categories[1]['id']
+    transaction_data['date'] = '2021-01-02'
+    updated_transaction_response = client.put(f'{transactions_path_prefix}/{transaction["id"]}',
+                                              json=transaction_data,
+                                              headers={'auth-token': token})
+    assert updated_transaction_response.status_code == status.HTTP_200_OK
+    updated_transaction = updated_transaction_response.json()
+
+    assert updated_transaction['id'] == transaction['id']
+    assert updated_transaction['amount'] == transaction_data['amount']
+    assert updated_transaction['is_income'] == transaction_data['is_income']
+    assert updated_transaction['is_transfer'] == transaction_data['is_transfer']
+    assert updated_transaction['notes'] == transaction_data['notes']
+    assert updated_transaction['account']['id'] == transaction_data['account_id']
+    assert updated_transaction['category_id'] == transaction_data['category_id']
+    assert updated_transaction['currency_id'] == transaction_data['currency_id']
+

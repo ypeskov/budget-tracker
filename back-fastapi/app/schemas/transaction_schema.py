@@ -9,7 +9,6 @@ from pydantic import ConfigDict, BaseModel, PlainSerializer
 
 
 class CreateTransactionSchema(BaseModel):
-    id: int | None = None
     account_id: int
     target_account_id: int | None = None
     category_id: int | None = None
@@ -23,6 +22,12 @@ class CreateTransactionSchema(BaseModel):
     exchange_rate: Decimal | None = None
     is_transfer: bool
     is_income: bool
+
+
+class UpdateTransactionSchema(CreateTransactionSchema):
+    id: int
+    currency_id: int
+    user_id: int
 
 
 class ResponseTransactionSchema(CreateTransactionSchema):
