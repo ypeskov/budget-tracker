@@ -1,5 +1,3 @@
-from typing import Type
-
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 

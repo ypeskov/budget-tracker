@@ -14,6 +14,7 @@ from app.schemas.account_schema import CreateAccountSchema
 
 import icecream
 from icecream import ic
+
 icecream.install()
 
 client = TestClient(app)
@@ -36,7 +37,7 @@ def test_wrong_user_request(fake_account):
     assert e.value.detail == 'Invalid user'
 
 
-def test_create_acc_with_invalid_currency(fake_account):
+def test_create_acc_with_invalid_currency(fake_account, token):
     fake_account.currency_id = truly_invalid_currency_id
     with pytest.raises(HTTPException) as e:
         create_account(fake_account, main_test_user_id, db)
@@ -44,7 +45,7 @@ def test_create_acc_with_invalid_currency(fake_account):
     assert e.value.detail == 'Invalid currency'
 
 
-def test_create_acc_with_invalid_type(fake_account):
+def test_create_acc_with_invalid_type(fake_account, token):
     fake_account.account_type_id = truly_invalid_account_type_id
     with pytest.raises(HTTPException) as e:
         create_account(fake_account, main_test_user_id, db)
@@ -55,11 +56,12 @@ def test_create_acc_with_invalid_type(fake_account):
 def test_access_denied_to_other_user_account(token):
     other_user = client.post(f'{auth_path_prefix}/register/', json=test_users[0])
     assert other_user.status_code == 200
-    other_user_account = create_account(CreateAccountSchema.model_validate(test_accounts[0]), other_user.json()['id'],
-                                        db)
+    other_account_details = {**test_accounts[0]}
+    del other_account_details['id']
+    other_user_account = create_account(
+        CreateAccountSchema.model_validate(other_account_details), other_user.json()['id'], db)
     assert other_user_account is not None
 
-    get_account_details(test_accounts[0]['id'], other_user.json()['id'], db)
     with pytest.raises(HTTPException) as e:
         get_account_details(other_user_account.id, main_test_user_id, db)
     assert e.value.status_code == 403
@@ -78,9 +80,9 @@ def test_get_invalid_account_details():
 
 @pytest.mark.parametrize("test_account", test_accounts)
 def test_add_get_account(test_account, token):
-    response = client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token})
-    assert response.status_code == 200
-    account_details = response.json()
+    response_account = client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token})
+    assert response_account.status_code == 200
+    account_details = response_account.json()
     assert 'id' in account_details
     assert account_details['name'] == test_account['name']
     assert account_details['currency_id'] == test_account['currency_id']

@@ -61,7 +61,7 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
         raise HTTPException(403, 'Forbidden')
 
     # We have almost all required fields in the request
-    transaction = Transaction(**transaction_dto.dict())
+    transaction = Transaction(**transaction_dto.model_dump())
     transaction.account = account
     transaction.user_id = user_id
     transaction.currency = account.currency

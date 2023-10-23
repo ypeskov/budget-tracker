@@ -26,7 +26,13 @@ load_all_data(db)
 auth_path_prefix = '/auth'
 accounts_path_prefix = '/accounts'
 currencies_path_prefix = '/currencies'
+categories_path_prefix = '/categories'
+transactions_path_prefix = '/transactions'
+
 main_test_user_id = 1000
+main_user_account1_id = 1
+main_user_account2_id = 2
+
 truly_invalid_account_id = 9999999
 truly_invalid_account_type_id = 9999999
 truly_invalid_currency_id = 9999999
@@ -45,17 +51,36 @@ def pytest_unconfigure(config):
     print("\n\n------- DB is cleared -------\n\n")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def token():
+    """ Create a user for test purposes and return his access token """
     client.post(f'{auth_path_prefix}/register/', json=main_test_user)
     response = client.post(f'{auth_path_prefix}/login/', json=main_test_user)
-    return response.json()["access_token"]
+    assert response.status_code == 200
+    user = response.json()
+
+    yield user["access_token"]
+    db.query(User).filter(User.id == main_test_user_id).delete()
+    db.commit()
+
+
+@pytest.fixture(scope="function")
+def one_account(token, acc_id=1):
+    account_details = test_accounts[0]
+    account_details['id'] = acc_id
+
+    acc_response = client.post(f'{accounts_path_prefix}/', json=account_details, headers={'auth-token': token})
+    acc = acc_response.json()
+    yield acc
+    db.query(Account).filter(Account.id == acc['id']).delete()
+    db.commit()
 
 
 @pytest.fixture(scope="function")
 def fake_account():
     return CreateAccountSchema.model_validate({
         'name': 'Fake account',
+        'user_id': main_test_user_id,
         'currency_id': 1,
         'account_type_id': 1,
         'balance': 0,
@@ -67,8 +92,9 @@ def fake_account():
 
 @pytest.fixture(scope="function")
 def create_accounts(token):
+    accounts = []
     for test_account in test_accounts:
-        client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token})
-    yield
-    db.query(Account).delete()
+        accounts.append(client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token}).json())
+    yield accounts
+    db.query(Account).filter_by(user_id=main_test_user_id).delete()
     db.commit()
