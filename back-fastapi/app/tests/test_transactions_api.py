@@ -1,11 +1,15 @@
+from decimal import Decimal
+
 import pytest
 from fastapi import status, HTTPException
 from fastapi.testclient import TestClient
 
-from app.tests.conftest import categories_path_prefix, transactions_path_prefix, auth_path_prefix
+from app.models.Account import Account
+from app.tests.conftest import categories_path_prefix, transactions_path_prefix, accounts_path_prefix, auth_path_prefix
 from app.tests.conftest import db
 from app.main import app
 from app.models.Transaction import Transaction
+from app.services.transactions import process_transfer_type
 from app.services.CurrencyProcessor import CurrencyProcessor
 
 import icecream
@@ -137,16 +141,7 @@ def test_update_transaction(token, one_account):
 
 
 def test_currency_processor(create_transaction, token, one_account):
-    transaction_props: dict = create_transaction(one_account, 100)
-    transaction = Transaction(user_id=transaction_props['user_id'],
-                              account_id=transaction_props['account_id'],
-                              category_id=transaction_props['category_id'],
-                              amount=transaction_props['amount'],
-                              currency_id=transaction_props['currency_id'],
-                              date_time=transaction_props['date_time'],
-                              is_income=transaction_props['is_income'],
-                              is_transfer=transaction_props['is_transfer'],
-                              notes=transaction_props['notes'])
+    transaction: Transaction = create_transaction(one_account, 100)
 
     with pytest.raises(HTTPException) as ex:
         CurrencyProcessor(None, db).calculate_exchange_rate()
@@ -158,20 +153,66 @@ def test_currency_processor(create_transaction, token, one_account):
     assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert ex.value.detail == 'Exchange rate or target amount are required'
 
-    transaction.exchange_rate = 1.5
-    transaction.target_amount = 100
+    transaction.exchange_rate = Decimal(1.5)
+    transaction.target_amount = Decimal(100)
     with pytest.raises(HTTPException) as ex:
         CurrencyProcessor(transaction, db).calculate_exchange_rate()
     assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert ex.value.detail == 'Only one parameter must be provided: Exchange rate or target amount'
 
-    transaction.exchange_rate = 1.5
+    transaction.exchange_rate = Decimal(1.5)
     transaction.target_amount = None
     transaction = CurrencyProcessor(transaction, db).calculate_exchange_rate()
     assert transaction.target_amount == 150
 
     transaction.exchange_rate = None
-    transaction.target_amount = 150
+    transaction.target_amount = Decimal(150)
     transaction = CurrencyProcessor(transaction, db).calculate_exchange_rate()
     assert transaction.exchange_rate == 1.5
 
+    db.query(Transaction).filter(Transaction.id == transaction.id).delete()
+    db.commit()
+
+
+def test_process_transfer_type(create_transaction, token, one_account, create_user):
+    second_account_details = {**one_account, 'name': 'Second account', 'id': one_account['id'] + 1}
+    second_account_response = client.post(f'{accounts_path_prefix}/', json=second_account_details,
+                                          headers={'auth-token': token})
+    assert second_account_response.status_code == status.HTTP_200_OK
+    second_account = Account(**second_account_response.json())
+    transaction: Transaction = create_transaction(one_account, 100)
+    transaction.target_account_id = second_account.id
+    transaction.target_account = second_account
+    transaction.account = Account(**one_account)
+    transaction.account.balance = Decimal(transaction.account.balance)
+
+    transaction = process_transfer_type(transaction, transaction.user_id, db)
+    assert transaction.is_transfer is False
+
+    transaction.target_account_id = None
+    transaction.target_account = None
+    with pytest.raises(HTTPException) as ex:
+        process_transfer_type(transaction, transaction.user_id, db)
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.detail == 'Invalid target account'
+
+    new_user = create_user('ex@ex.com', 'qqq')
+    new_user_profile = client.post(f'{auth_path_prefix}/login/', json={
+        'email': 'ex@ex.com',
+        'password': 'qqq',
+    })
+    new_user_token = new_user_profile.json()['access_token']
+    third_account_details = {**one_account, 'name': 'Third account', 'id': one_account['id'] + 2,
+                             'user_id': new_user.id}
+    third_account_response = client.post(f'{accounts_path_prefix}/', json=third_account_details,
+                                         headers={'auth-token': new_user_token})
+    assert third_account_response.status_code == status.HTTP_200_OK
+    third_account = Account(**third_account_response.json())
+
+    transaction.target_account_id = third_account.id
+    transaction.target_account = third_account
+    transaction.target_account_id = third_account.id
+    with pytest.raises(HTTPException) as ex:
+        process_transfer_type(transaction, transaction.user_id, db)
+    assert ex.value.status_code == status.HTTP_403_FORBIDDEN
+    assert ex.value.detail == 'Forbidden'

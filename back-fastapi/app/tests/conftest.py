@@ -123,7 +123,34 @@ def create_transaction(token):
         transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
                                            headers={'auth-token': token})
         assert transaction_response.status_code == 200
-        transaction = transaction_response.json()
+        transaction_props = transaction_response.json()
+
+        transaction = Transaction(user_id=transaction_props['user_id'],
+                                  account_id=transaction_props['account_id'],
+                                  category_id=transaction_props['category_id'],
+                                  amount=Decimal(transaction_props['amount']),
+                                  currency_id=transaction_props['currency_id'],
+                                  date_time=transaction_props['date_time'],
+                                  is_income=transaction_props['is_income'],
+                                  is_transfer=transaction_props['is_transfer'],
+                                  notes=transaction_props['notes'])
+
         return transaction
 
     return _create_transaction
+
+
+@pytest.fixture(scope="function")
+def create_user():
+
+    def _create_user(email, password):
+        user = {
+            'email': email,
+            'password': password,
+        }
+        user_response = client.post(f'{auth_path_prefix}/register/', json=user)
+        assert user_response.status_code == 200
+        user_props = user_response.json()
+        return User(**user_props)
+
+    return _create_user

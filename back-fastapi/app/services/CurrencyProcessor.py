@@ -15,8 +15,8 @@ class CurrencyProcessor:
         if self.transaction is None:
             raise HTTPException(422, 'Transaction is required')
 
-        exchange_rate = self.transaction.exchange_rate
-        target_amount = self.transaction.target_amount
+        exchange_rate: Decimal = self.transaction.exchange_rate
+        target_amount: Decimal = self.transaction.target_amount
         if exchange_rate is None and target_amount is None:
             raise HTTPException(422, 'Exchange rate or target amount are required')
 
