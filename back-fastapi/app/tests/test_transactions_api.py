@@ -1,11 +1,12 @@
 import pytest
-from fastapi import status
+from fastapi import status, HTTPException
 from fastapi.testclient import TestClient
 
-from app.tests.conftest import categories_path_prefix, transactions_path_prefix
+from app.tests.conftest import categories_path_prefix, transactions_path_prefix, auth_path_prefix
 from app.tests.conftest import db
 from app.main import app
 from app.models.Transaction import Transaction
+from app.services.CurrencyProcessor import CurrencyProcessor
 
 import icecream
 from icecream import ic
@@ -133,4 +134,44 @@ def test_update_transaction(token, one_account):
     assert updated_transaction['account']['id'] == transaction_data['account_id']
     assert updated_transaction['category_id'] == transaction_data['category_id']
     assert updated_transaction['currency_id'] == transaction_data['currency_id']
+
+
+def test_currency_processor(create_transaction, token, one_account):
+    transaction_props: dict = create_transaction(one_account, 100)
+    transaction = Transaction(user_id=transaction_props['user_id'],
+                              account_id=transaction_props['account_id'],
+                              category_id=transaction_props['category_id'],
+                              amount=transaction_props['amount'],
+                              currency_id=transaction_props['currency_id'],
+                              date_time=transaction_props['date_time'],
+                              is_income=transaction_props['is_income'],
+                              is_transfer=transaction_props['is_transfer'],
+                              notes=transaction_props['notes'])
+
+    with pytest.raises(HTTPException) as ex:
+        CurrencyProcessor(None, db).calculate_exchange_rate()
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.detail == 'Transaction is required'
+
+    with pytest.raises(HTTPException) as ex:
+        CurrencyProcessor(transaction, db).calculate_exchange_rate()
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.detail == 'Exchange rate or target amount are required'
+
+    transaction.exchange_rate = 1.5
+    transaction.target_amount = 100
+    with pytest.raises(HTTPException) as ex:
+        CurrencyProcessor(transaction, db).calculate_exchange_rate()
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.detail == 'Only one parameter must be provided: Exchange rate or target amount'
+
+    transaction.exchange_rate = 1.5
+    transaction.target_amount = None
+    transaction = CurrencyProcessor(transaction, db).calculate_exchange_rate()
+    assert transaction.target_amount == 150
+
+    transaction.exchange_rate = None
+    transaction.target_amount = 150
+    transaction = CurrencyProcessor(transaction, db).calculate_exchange_rate()
+    assert transaction.exchange_rate == 1.5
 

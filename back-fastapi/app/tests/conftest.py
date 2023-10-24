@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from icecream import ic
 
 import pytest
@@ -11,6 +13,7 @@ from app.data_loaders.work_data.load_all import load_all_data
 from app.models.User import User
 from app.models.Currency import Currency
 from app.models.DefaultCategory import DefaultCategory
+from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
 from app.models.AccountType import AccountType
 from app.models.Account import Account
@@ -94,7 +97,33 @@ def fake_account():
 def create_accounts(token):
     accounts = []
     for test_account in test_accounts:
-        accounts.append(client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token}).json())
+        accounts.append(
+            client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token}).json())
     yield accounts
     db.query(Account).filter_by(user_id=main_test_user_id).delete()
     db.commit()
+
+
+@pytest.fixture(scope="function")
+def create_transaction(token):
+    categories_response = client.get(f'{categories_path_prefix}/', headers={'auth-token': token})
+    categories = categories_response.json()
+
+    def _create_transaction(account: dict, amount: Decimal, is_income: bool = False, is_transfer: bool = False):
+        transaction_data = {
+            'account_id': account['id'],
+            'category_id': categories[0]['id'],
+            'amount': amount,
+            'currency_id': account['currency_id'],
+            'date': '2021-01-01',
+            'is_income': is_income,
+            'is_transfer': is_transfer,
+            'notes': 'Test transaction'
+        }
+        transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
+                                           headers={'auth-token': token})
+        assert transaction_response.status_code == 200
+        transaction = transaction_response.json()
+        return transaction
+
+    return _create_transaction

@@ -13,7 +13,6 @@ test-accounts:
 	pytest -vs --disable-warnings test_accounts_api.py
 
 cov-missing:
-	#pytest --cov
 	pytest --cov=app --cov-report=term-missing
 
 cov:
