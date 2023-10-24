@@ -5,6 +5,7 @@ from fastapi import status, HTTPException
 from fastapi.testclient import TestClient
 
 from app.models.Account import Account
+from app.models.User import User
 from app.tests.conftest import categories_path_prefix, transactions_path_prefix, accounts_path_prefix, auth_path_prefix
 from app.tests.conftest import db
 from app.main import app
@@ -216,3 +217,10 @@ def test_process_transfer_type(create_transaction, token, one_account, create_us
         process_transfer_type(transaction, transaction.user_id, db)
     assert ex.value.status_code == status.HTTP_403_FORBIDDEN
     assert ex.value.detail == 'Forbidden'
+
+    db.query(Account).filter(Account.id == second_account.id).delete()
+    db.query(Account).filter(Account.id == third_account.id).delete()
+    db.query(Transaction).filter(Transaction.id == transaction.id).delete()
+    db.query(Account).filter(Account.id == one_account['id']).delete()
+    db.query(User).filter(User.id == new_user.id).delete()
+    db.commit()
