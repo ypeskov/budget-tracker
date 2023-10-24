@@ -12,7 +12,7 @@ from app.tests.data.accounts_data import test_accounts
 from app.main import app
 from app.models.Transaction import Transaction
 from app.services.transactions import process_transfer_type, create_transaction as create_transaction_service, \
-    get_transactions
+    get_transactions, get_transaction_details
 from app.services.CurrencyProcessor import CurrencyProcessor
 from app.schemas.transaction_schema import CreateTransactionSchema
 
@@ -458,7 +458,6 @@ def test_create_transaction_forbidden_account(create_user):
 
     with pytest.raises(HTTPException) as ex:
         create_transaction_service(transaction_schema, user1.id, db)
-    ic(ex)
     assert ex.value.status_code == status.HTTP_403_FORBIDDEN
     assert ex.value.detail == 'Forbidden'
 
@@ -491,10 +490,10 @@ def test_get_all_transactions(token, create_transaction, one_account):
     transactions_from_service = get_transactions(main_test_user_id, db)
     assert len(transactions_from_service) == number_of_transactions
 
-    transactions_from_service = get_transactions(main_test_user_id, db, {'types': ['expense',]})
+    transactions_from_service = get_transactions(main_test_user_id, db, {'types': ['expense', ]})
     assert len(transactions_from_service) == number_of_transactions
 
-    transactions_from_service = get_transactions(main_test_user_id, db, {'types': ['income',]})
+    transactions_from_service = get_transactions(main_test_user_id, db, {'types': ['income', ]})
     assert len(transactions_from_service) == 0
 
     transactions_from_service = get_transactions(main_test_user_id, db, {'types': ['expense', 'income']})
@@ -503,6 +502,84 @@ def test_get_all_transactions(token, create_transaction, one_account):
     transactions_from_service = get_transactions(main_test_user_id, db, {'types': ['transfer', 'income']})
     assert len(transactions_from_service) == 0
 
+    transactions_from_service = get_transactions(main_test_user_id,
+                                                 db,
+                                                 {
+                                                     'types': ['transfer', 'income'],
+                                                     'categories': []
+                                                 })
+    assert len(transactions_from_service) == 0
+
+    transactions_from_service = get_transactions(main_test_user_id, db, {'currencies': [1, 2, 3, 4]})
+    assert len(transactions_from_service) == number_of_transactions
+
+    transactions_from_service = get_transactions(main_test_user_id, db, {'accounts': [one_account['id'], ]})
+    assert len(transactions_from_service) == number_of_transactions
+
+    transactions_from_service = get_transactions(main_test_user_id, db, {'page': 1, 'per_page': 5})
+    assert len(transactions_from_service) == 5
+
     for transaction in transactions_from_service:
         db.query(Transaction).filter(Transaction.id == transaction.id).delete()
     db.commit()
+
+
+def test_get_transaction_details(token, create_transaction, one_account):
+    categories = client.get(f'{categories_path_prefix}/', headers={'auth-token': token}).json()
+
+    transaction_details = {
+        'account_id': one_account['id'],
+        'amount': 100,
+        'category_id': categories[0]['id'],
+        'currency_id': one_account['currency_id'],
+        'is_income': False,
+        'is_transfer': False,
+        'notes': 'Test transaction',
+        'target_account_id': None,
+    }
+
+    transaction = create_transaction_service(CreateTransactionSchema(**transaction_details), main_test_user_id, db)
+
+    transaction_from_service = get_transaction_details(transaction_id=transaction.id, user_id=main_test_user_id, db=db)
+    assert transaction_from_service.id == transaction.id
+    assert transaction_from_service.amount == transaction.amount
+    assert transaction_from_service.is_income == transaction.is_income
+    assert transaction_from_service.is_transfer == transaction.is_transfer
+    assert transaction_from_service.notes == transaction.notes
+    assert transaction_from_service.account_id == transaction.account_id
+    assert transaction_from_service.category_id == transaction.category_id
+    assert transaction_from_service.currency_id == transaction.currency_id
+
+    with pytest.raises(HTTPException) as ex:
+        get_transaction_details(99999999999, main_test_user_id, db)
+    assert ex.value.status_code == status.HTTP_404_NOT_FOUND
+    assert ex.value.detail == 'Transaction not found'
+
+    db.query(Transaction).filter(Transaction.id == transaction.id).delete()
+    db.commit()
+
+
+def test_get_transaction_details_forbidden(token, create_transaction, one_account, create_user):
+    email = 'email@email.com'
+    password = 'qqq'
+    user2 = create_user(email, password)
+    # user2_token = client.post(f'{auth_path_prefix}/login/',
+    #                           json={'email': email, 'password': password}).json()['access_token']
+    categories = client.get(f'{categories_path_prefix}/', headers={'auth-token': token}).json()
+
+    transaction_details = {
+        'account_id': one_account['id'],
+        'amount': 100,
+        'category_id': categories[0]['id'],
+        'currency_id': one_account['currency_id'],
+        'is_income': False,
+        'is_transfer': False,
+        'notes': 'Test transaction',
+        'target_account_id': None,
+    }
+
+    transaction = create_transaction_service(CreateTransactionSchema(**transaction_details), main_test_user_id, db)
+    with pytest.raises(HTTPException) as ex:
+        get_transaction_details(transaction_id=transaction.id, user_id=user2.id, db=db)
+    assert ex.value.status_code == status.HTTP_403_FORBIDDEN
+    assert ex.value.detail == 'Forbidden'
