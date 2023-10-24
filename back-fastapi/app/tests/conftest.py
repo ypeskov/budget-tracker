@@ -109,32 +109,36 @@ def create_transaction(token):
     categories_response = client.get(f'{categories_path_prefix}/', headers={'auth-token': token})
     categories = categories_response.json()
 
-    def _create_transaction(account: dict, amount: Decimal, is_income: bool = False, is_transfer: bool = False):
+    def _create_transaction(transaction_details: dict):
         transaction_data = {
-            'account_id': account['id'],
+            'account_id': transaction_details['account_id'],
             'category_id': categories[0]['id'],
-            'amount': amount,
-            'currency_id': account['currency_id'],
-            'date': '2021-01-01',
-            'is_income': is_income,
-            'is_transfer': is_transfer,
+            'amount': 100,
+            'target_amount': 100,
+            'currency_id': transaction_details['currency_id'],
+            'target_account_id': transaction_details['target_account_id'],
+            'is_income': False,
+            'is_transfer': False,
             'notes': 'Test transaction'
         }
+        transaction_data = {**transaction_data, **transaction_details}
+
         transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
                                            headers={'auth-token': token})
         assert transaction_response.status_code == 200
         transaction_props = transaction_response.json()
-
-        transaction = Transaction(user_id=transaction_props['user_id'],
+        transaction = Transaction(id=transaction_props['id'],
+                                  user_id=transaction_props['user_id'],
                                   account_id=transaction_props['account_id'],
                                   category_id=transaction_props['category_id'],
+                                  target_account_id=transaction_props['target_account_id'],
+                                  target_amount=Decimal(transaction_props['target_amount']),
                                   amount=Decimal(transaction_props['amount']),
                                   currency_id=transaction_props['currency_id'],
                                   date_time=transaction_props['date_time'],
                                   is_income=transaction_props['is_income'],
                                   is_transfer=transaction_props['is_transfer'],
                                   notes=transaction_props['notes'])
-
         return transaction
 
     return _create_transaction
@@ -142,7 +146,6 @@ def create_transaction(token):
 
 @pytest.fixture(scope="function")
 def create_user():
-
     def _create_user(email, password):
         user = {
             'email': email,

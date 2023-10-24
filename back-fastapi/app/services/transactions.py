@@ -89,7 +89,7 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
     return transaction
 
 
-def get_transactions(user_id: int, db: Session, params=None):
+def get_transactions(user_id: int, db: Session, params={}) -> list[Transaction]:
     stmt = (db.query(Transaction).options(joinedload(Transaction.account),
                                           joinedload(Transaction.target_account),
                                           joinedload(Transaction.category),
@@ -105,7 +105,10 @@ def get_transactions(user_id: int, db: Session, params=None):
         if 'income' in params['types']:
             expense_or_income.append(Transaction.is_income == True)
         if len(expense_or_income) > 0:
-            type_filters.append(and_(or_(*expense_or_income), Transaction.category_id.in_(params['categories'])))
+            if 'categories' not in params:
+                type_filters.append(or_(*expense_or_income))
+            else:
+                type_filters.append(and_(or_(*expense_or_income), Transaction.category_id.in_(params['categories'])))
 
         if 'transfer' in params['types']:
             type_filters.append(Transaction.is_transfer == True)
