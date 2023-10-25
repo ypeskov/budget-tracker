@@ -7,9 +7,12 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.database import get_db
-from app.schemas.account_schema import CreateAccountSchema
 from app.tests.db_test_cfg import override_get_db
 from app.data_loaders.work_data.load_all import load_all_data
+
+from app.schemas.account_schema import CreateAccountSchema
+from app.schemas.user_schema import UserRegistration, UserLoginSchema
+
 from app.models.User import User
 from app.models.Currency import Currency
 from app.models.DefaultCategory import DefaultCategory
@@ -17,6 +20,9 @@ from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
 from app.models.AccountType import AccountType
 from app.models.Account import Account
+
+from app.services.accounts import create_account as create_account_service
+from app.services.auth import create_users as create_users_service, get_jwt_token as get_jwt_token_service
 
 from app.tests.data.auth_data import test_users, main_test_user
 from app.tests.data.accounts_data import test_accounts
@@ -49,6 +55,8 @@ def pytest_unconfigure(config):
     db.query(AccountType).delete()
     db.query(UserCategory).delete()
     db.query(DefaultCategory).delete()
+    db.query(Account).delete()
+    db.query(Transaction).delete()
     db.commit()
 
     print("\n\n------- DB is cleared -------\n\n")
@@ -57,25 +65,38 @@ def pytest_unconfigure(config):
 @pytest.fixture(scope="function")
 def token():
     """ Create a user for test purposes and return his access token """
-    client.post(f'{auth_path_prefix}/register/', json=main_test_user)
-    response = client.post(f'{auth_path_prefix}/login/', json=main_test_user)
-    assert response.status_code == 200
-    user = response.json()
+    user: User = create_users_service(UserRegistration(**main_test_user), db)
+    user_dict = {**user.__dict__}
 
-    yield user["access_token"]
-    db.query(User).filter(User.id == main_test_user_id).delete()
+    if '_sa_instance_state' in user_dict:
+        del user_dict['_sa_instance_state']
+
+    token = get_jwt_token_service(UserLoginSchema(**main_test_user), db)
+
+    yield token['access_token']
+    db.query(User).filter(User.id == user.id).delete()
     db.commit()
 
 
 @pytest.fixture(scope="function")
-def one_account(token, acc_id=1):
-    account_details = test_accounts[0]
-    account_details['id'] = acc_id
+def one_account(token):
+    account_details = {**test_accounts[0], 'id': main_user_account1_id, 'user_id': main_test_user_id}
 
-    acc_response = client.post(f'{accounts_path_prefix}/', json=account_details, headers={'auth-token': token})
-    acc = acc_response.json()
-    yield acc
-    db.query(Account).filter(Account.id == acc['id']).delete()
+    account_schema = CreateAccountSchema(**account_details)
+    account: Account = create_account_service(account_schema, main_test_user_id, db)
+    account_dict = {**account.__dict__}
+
+    if '_sa_instance_state' in account_dict:
+        del account_dict['_sa_instance_state']
+
+    account_dict['balance'] = float(account_dict['balance'])
+    account_dict['opening_date'] = str(account_dict['opening_date'])
+    account_dict['updated_at'] = str(account_dict['updated_at'])
+    account_dict['created_at'] = str(account_dict['created_at'])
+
+    yield account_dict
+
+    db.query(Account).filter_by(id=account.id).delete()
     db.commit()
 
 
