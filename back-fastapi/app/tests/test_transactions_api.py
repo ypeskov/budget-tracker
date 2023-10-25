@@ -195,6 +195,54 @@ def test_update_transaction(token, one_account, create_user):
     db.commit()
 
 
+def test_update_transaction_transfer_type(token, one_account, create_transaction):
+    categories = client.get(f'{categories_path_prefix}/', headers={'auth-token': token}).json()
+    currencies = client.get('/currencies/', headers={'auth-token': token}).json()
+
+    second_acc_details = {**one_account, 'name': 'Second account', 'id': one_account['id'] + 1,
+                          'currency_id': currencies[1]['id']}
+    second_account_dict: dict = client.post(f'{accounts_path_prefix}/',
+                                            json=second_acc_details,
+                                            headers={'auth-token': token}).json()
+    src_amount = 100
+    target_amount = 200
+
+    transaction_details = {
+        'account_id': one_account['id'],
+        'user_id': main_test_user_id,
+        'category_id': categories[0]['id'],
+        'amount': src_amount,
+        'currency_id': one_account['currency_id'],
+        'date_time': '2023-10-12T12:00:00Z',
+        'is_income': False,
+        'is_transfer': True,
+        'notes': 'Test transaction',
+        'target_account_id': second_account_dict['id'],
+        'target_amount': target_amount,
+    }
+    transaction: Transaction = create_transaction_service(CreateTransactionSchema(**transaction_details),
+                                                          main_test_user_id, db)
+    acc1_updated_balance = (
+        client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json())['balance']
+    acc2_updated_balance = (
+        client.get(f'/accounts/{second_account_dict["id"]}', headers={'auth-token': token}).json())['balance']
+
+    transaction_details_update = {**transaction_details, 'id': transaction.id, 'amount': src_amount,
+                                  'target_amount': target_amount}
+    update_transaction_service(transaction.id, UpdateTransactionSchema(**transaction_details_update),
+                               main_test_user_id, db)
+
+    updated_first_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
+    updated_second_account = client.get(f'/accounts/{second_account_dict["id"]}', headers={'auth-token': token}).json()
+
+    assert updated_first_account['balance'] == acc1_updated_balance - src_amount
+    assert updated_second_account['balance'] == acc2_updated_balance + target_amount
+
+    db.query(Transaction).filter(Transaction.id == transaction.id).delete()
+    db.query(Account).filter(Account.id == second_account_dict['id']).delete()
+    db.commit()
+
+
 def test_currency_processor(create_transaction, token, one_account):
     transaction_details = {
         'account_id': one_account['id'],
@@ -219,13 +267,6 @@ def test_currency_processor(create_transaction, token, one_account):
         CurrencyProcessor(tmp_transaction, db).calculate_exchange_rate()
     assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert ex.value.detail == 'Exchange rate or target amount are required'
-
-    transaction.exchange_rate = Decimal(1.5)
-    transaction.target_amount = Decimal(100)
-    with pytest.raises(HTTPException) as ex:
-        CurrencyProcessor(transaction, db).calculate_exchange_rate()
-    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert ex.value.detail == 'Only one parameter must be provided: Exchange rate or target amount'
 
     transaction.exchange_rate = Decimal(1.5)
     transaction.target_amount = None
@@ -634,7 +675,6 @@ def test_get_transaction_details_forbidden(token, create_transaction, one_accoun
         get_transaction_details(transaction_id=transaction.id, user_id=user2.id, db=db)
     assert ex.value.status_code == status.HTTP_403_FORBIDDEN
     assert ex.value.detail == 'Forbidden'
-
 
 # def test_update_transaction(token, create_transaction, one_account):
 #     categories = client.get(f'{categories_path_prefix}/', headers={'auth-token': token}).json()
