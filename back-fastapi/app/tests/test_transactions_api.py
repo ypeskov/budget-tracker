@@ -16,8 +16,10 @@ from app.models.Transaction import Transaction
 from app.services.transactions import process_transfer_type, create_transaction as create_transaction_service, \
     get_transactions, get_transaction_details, update as update_transaction_service
 from app.services.CurrencyProcessor import CurrencyProcessor
+from app.services.auth import get_jwt_token as get_jwt_token_service
 
 from app.schemas.transaction_schema import CreateTransactionSchema, UpdateTransactionSchema
+from app.schemas.user_schema import UserLoginSchema
 
 import icecream
 from icecream import ic
@@ -240,6 +242,43 @@ def test_update_transaction_transfer_type(token, one_account, create_transaction
 
     db.query(Transaction).filter(Transaction.id == transaction.id).delete()
     db.query(Account).filter(Account.id == second_account_dict['id']).delete()
+    db.commit()
+
+
+def test_update_transaction_forbidden_category(one_account, create_user, create_transaction, token):
+    categories = client.get(f'{categories_path_prefix}/', headers={'auth-token': token}).json()
+
+    email = 'email@email.com'
+    password = 'qqq'
+    second_user: User = create_user(email, password)
+    second_user_token: str = get_jwt_token_service(UserLoginSchema(email=email, password=password), db)['access_token']
+    second_user_categories: dict = client.get(f'{categories_path_prefix}/',
+                                              headers={'auth-token': second_user_token}).json()
+
+    transaction_details: dict = {
+        'account_id': one_account['id'],
+        'user_id': main_test_user_id,
+        'category_id': categories[0]['id'],
+        'amount': 100,
+        'currency_id': one_account['currency_id'],
+        'date_time': '2023-10-12T12:00:00Z',
+        'is_income': False,
+        'is_transfer': False,
+    }
+    transaction: Transaction = create_transaction_service(CreateTransactionSchema(**transaction_details),
+                                                          main_test_user_id, db)
+    assert transaction.category_id == categories[0]['id']
+
+    transaction_details['id'] = transaction.id
+    transaction_details['category_id'] = second_user_categories[0]['id']
+    with pytest.raises(HTTPException) as ex:
+        update_transaction_service(transaction.id, UpdateTransactionSchema(**transaction_details),
+                                   main_test_user_id, db)
+    assert ex.value.status_code == status.HTTP_403_FORBIDDEN
+    assert ex.value.detail == 'Forbidden category'
+
+    db.query(Transaction).filter(Transaction.id == transaction.id).delete()
+    db.query(User).filter(User.id == second_user.id).delete()
     db.commit()
 
 

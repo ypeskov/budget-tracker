@@ -1,4 +1,5 @@
 from decimal import Decimal
+from collections.abc import Callable
 
 from icecream import ic
 
@@ -79,7 +80,7 @@ def token():
 
 
 @pytest.fixture(scope="function")
-def one_account(token):
+def one_account(token) -> dict:
     account_details = {**test_accounts[0], 'id': main_user_account1_id, 'user_id': main_test_user_id}
 
     account_schema = CreateAccountSchema(**account_details)
@@ -101,7 +102,7 @@ def one_account(token):
 
 
 @pytest.fixture(scope="function")
-def fake_account():
+def fake_account() -> CreateAccountSchema:
     return CreateAccountSchema.model_validate({
         'name': 'Fake account',
         'user_id': main_test_user_id,
@@ -115,7 +116,7 @@ def fake_account():
 
 
 @pytest.fixture(scope="function")
-def create_accounts(token):
+def create_accounts(token) -> list[Account]:
     accounts = []
     for test_account in test_accounts:
         accounts.append(
@@ -126,7 +127,7 @@ def create_accounts(token):
 
 
 @pytest.fixture(scope="function")
-def create_transaction(token):
+def create_transaction(token) -> Callable[[dict], Transaction]:
     categories_response = client.get(f'{categories_path_prefix}/', headers={'auth-token': token})
     categories = categories_response.json()
 
