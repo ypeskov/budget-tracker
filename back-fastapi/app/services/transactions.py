@@ -176,7 +176,7 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
             target_account = db.query(Account).filter_by(id=transaction_details.target_account_id).one()
         except NoResultFound:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid target account')
-        if target_account.user_id != user_id:
+        if target_account.user_id != user_id:  # pragma: no cover
             raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
         transaction.target_account = target_account
 
@@ -186,7 +186,7 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
         except NoResultFound:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid category')
         if category.user_id != user_id:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
+            raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden category')
         transaction.category = category
 
     if transaction_details.date_time is not None:

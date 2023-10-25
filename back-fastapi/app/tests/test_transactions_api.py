@@ -109,7 +109,7 @@ def test_update_transaction(token, one_account, create_user):
         'category_id': categories_dict[0]['id'],
         'amount': amount,
         'currency_id': one_account['currency_id'],
-        'date': '2021-01-01',
+        'date_time': '2023-10-12T12:00:00Z',
         'is_income': False,
         'is_transfer': False,
         'notes': 'Test transaction'
@@ -130,7 +130,8 @@ def test_update_transaction(token, one_account, create_user):
     transaction_data['is_income'] = True
     transaction_data['notes'] = 'Updated transaction'
     transaction_data['category_id'] = categories_dict[1]['id']
-    transaction_data['date'] = '2021-01-02'
+    transaction_data['target_amount'] = 200
+    transaction_data['date_time'] = '2023-10-12T12:00:00Z'
     updated_transaction_response = client.put(f'{transactions_path_prefix}/{transaction["id"]}',
                                               json=transaction_data,
                                               headers={'auth-token': token})
@@ -172,6 +173,26 @@ def test_update_transaction(token, one_account, create_user):
         update_transaction_service(updated_transaction['id'], transaction_schema_update, user2.id, db)
     assert ex.value.status_code == status.HTTP_403_FORBIDDEN
     assert ex.value.detail == 'Forbidden'
+
+    with pytest.raises(HTTPException) as ex:
+        updated_transaction['id'] = transaction['id']
+        updated_transaction['target_account_id'] = 999999999999
+        transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
+        update_transaction_service(updated_transaction['id'], transaction_schema_update, main_test_user_id, db)
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.detail == 'Invalid target account'
+
+    with pytest.raises(HTTPException) as ex:
+        updated_transaction['category_id'] = 999999999999
+        updated_transaction['target_account_id'] = None
+        transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
+        update_transaction_service(updated_transaction['id'], transaction_schema_update, main_test_user_id, db)
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.detail == 'Invalid category'
+
+    db.query(Transaction).filter(Transaction.id == transaction['id']).delete()
+    db.query(User).filter(User.id == user2.id).delete()
+    db.commit()
 
 
 def test_currency_processor(create_transaction, token, one_account):
