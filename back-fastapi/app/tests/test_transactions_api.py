@@ -4,17 +4,20 @@ import pytest
 from fastapi import status, HTTPException
 from fastapi.testclient import TestClient
 
-from app.models.Account import Account
-from app.models.User import User
+from app.main import app
 from app.tests.conftest import categories_path_prefix, transactions_path_prefix, accounts_path_prefix, auth_path_prefix
 from app.tests.conftest import db, main_test_user_id
 from app.tests.data.accounts_data import test_accounts
-from app.main import app
+
+from app.models.Account import Account
+from app.models.User import User
 from app.models.Transaction import Transaction
+
 from app.services.transactions import process_transfer_type, create_transaction as create_transaction_service, \
-    get_transactions, get_transaction_details
+    get_transactions, get_transaction_details, update as update_transaction_service
 from app.services.CurrencyProcessor import CurrencyProcessor
-from app.schemas.transaction_schema import CreateTransactionSchema
+
+from app.schemas.transaction_schema import CreateTransactionSchema, UpdateTransactionSchema
 
 import icecream
 from icecream import ic
@@ -95,19 +98,15 @@ def test_create_transaction_expense_route(token, one_account, amount):
     db.commit()
 
 
-def test_update_transaction(token, one_account):
-    account_response = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token})
-    account = account_response.json()
-    initial_balance_acc = account['balance']
-    amount = 100
+def test_update_transaction(token, one_account, create_user):
+    initial_balance_acc: float | Decimal = one_account['balance']
+    amount: int = 100
 
-    categories_response = client.get(f'{categories_path_prefix}/', headers={'auth-token': token})
-    assert categories_response.status_code == 200
-    categories = categories_response.json()
+    categories_dict: dict = client.get(f'{categories_path_prefix}/', headers={'auth-token': token}).json()
 
     transaction_data = {
         'account_id': one_account['id'],
-        'category_id': categories[0]['id'],
+        'category_id': categories_dict[0]['id'],
         'amount': amount,
         'currency_id': one_account['currency_id'],
         'date': '2021-01-01',
@@ -120,13 +119,17 @@ def test_update_transaction(token, one_account):
     assert transaction_response.status_code == status.HTTP_200_OK
     transaction = transaction_response.json()
 
+    updated_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
+    assert updated_account['balance'] == initial_balance_acc - amount
+    updated_balance = updated_account['balance']
+
     # update transaction
     transaction_data['id'] = transaction['id']
     transaction_data['user_id'] = transaction['user_id']
     transaction_data['amount'] = 200
     transaction_data['is_income'] = True
     transaction_data['notes'] = 'Updated transaction'
-    transaction_data['category_id'] = categories[1]['id']
+    transaction_data['category_id'] = categories_dict[1]['id']
     transaction_data['date'] = '2021-01-02'
     updated_transaction_response = client.put(f'{transactions_path_prefix}/{transaction["id"]}',
                                               json=transaction_data,
@@ -142,6 +145,33 @@ def test_update_transaction(token, one_account):
     assert updated_transaction['account']['id'] == transaction_data['account_id']
     assert updated_transaction['category_id'] == transaction_data['category_id']
     assert updated_transaction['currency_id'] == transaction_data['currency_id']
+
+    updated_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
+    assert updated_account['balance'] == updated_balance + transaction_data['amount']
+
+    with pytest.raises(HTTPException) as ex:
+        updated_transaction['id'] = 999999999999
+        update_transaction_service(updated_transaction['id'], updated_transaction, main_test_user_id, db)
+    assert ex.value.status_code == status.HTTP_404_NOT_FOUND
+    assert ex.value.detail == 'Transaction not found'
+
+    with pytest.raises(HTTPException) as ex:
+        updated_transaction['id'] = transaction['id']
+        updated_transaction['account_id'] = 999999999999
+        transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
+        update_transaction_service(updated_transaction['id'], transaction_schema_update, main_test_user_id, db)
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.detail == 'Invalid account'
+
+    user2 = create_user('email2@email.com', 'q')
+    with pytest.raises(HTTPException) as ex:
+        updated_transaction['id'] = transaction['id']
+        updated_transaction['account_id'] = one_account['id']
+        updated_transaction['user_id'] = user2.id
+        transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
+        update_transaction_service(updated_transaction['id'], transaction_schema_update, user2.id, db)
+    assert ex.value.status_code == status.HTTP_403_FORBIDDEN
+    assert ex.value.detail == 'Forbidden'
 
 
 def test_currency_processor(create_transaction, token, one_account):
@@ -583,3 +613,49 @@ def test_get_transaction_details_forbidden(token, create_transaction, one_accoun
         get_transaction_details(transaction_id=transaction.id, user_id=user2.id, db=db)
     assert ex.value.status_code == status.HTTP_403_FORBIDDEN
     assert ex.value.detail == 'Forbidden'
+
+
+# def test_update_transaction(token, create_transaction, one_account):
+#     categories = client.get(f'{categories_path_prefix}/', headers={'auth-token': token}).json()
+#
+#     transaction_details = {
+#         'account_id': one_account['id'],
+#         'amount': 100,
+#         'category_id': categories[0]['id'],
+#         'currency_id': one_account['currency_id'],
+#         'is_income': False,
+#         'is_transfer': False,
+#         'notes': 'Test transaction',
+#         'target_account_id': None,
+#     }
+#
+#     transaction = create_transaction_service(CreateTransactionSchema(**transaction_details), main_test_user_id, db)
+#
+#     transaction_from_service = get_transaction_details(transaction_id=transaction.id, user_id=main_test_user_id, db=db)
+#     assert transaction_from_service.id == transaction.id
+#     assert transaction_from_service.amount == transaction.amount
+#     assert transaction_from_service.is_income == transaction.is_income
+#     assert transaction_from_service.is_transfer == transaction.is_transfer
+#     assert transaction_from_service.notes == transaction.notes
+#     assert transaction_from_service.account_id == transaction.account_id
+#     assert transaction_from_service.category_id == transaction.category_id
+#     assert transaction_from_service.currency_id == transaction.currency_id
+#
+#     transaction_details['amount'] = 200
+#     transaction_details['is_income'] = True
+#     transaction_details['notes'] = 'Updated transaction'
+#     transaction_details['category_id'] = categories[1]['id']
+#     transaction_details['date'] = '2021-01-02'
+#     transaction_from_service = create_transaction_service(CreateTransactionSchema(**transaction_details),
+#                                                           main_test_user_id, db)
+#     assert transaction_from_service.id == transaction.id
+#     assert transaction_from_service.amount == transaction_details['amount']
+#     assert transaction_from_service.is_income == transaction_details['is_income']
+#     assert transaction_from_service.is_transfer == transaction_details['is_transfer']
+#     assert transaction_from_service.notes == transaction_details['notes']
+#     assert transaction_from_service.account_id == transaction_details['account_id']
+#     assert transaction_from_service.category_id == transaction_details['category_id']
+#     assert transaction_from_service.currency_id == transaction_details['currency_id']
+#
+#     db.query(Transaction).filter(Transaction.id == transaction.id).delete()
+#     db.commit()

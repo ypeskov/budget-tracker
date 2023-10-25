@@ -34,11 +34,10 @@ def process_transfer_type(transaction: Transaction, user_id: int, db: Session):
     return transaction
 
 
-def process_non_transfer_type(transaction_dto: CreateTransactionSchema, account: Account, user_id: int,
-                              transaction: Transaction, db: Session):
+def process_non_transfer_type(transaction: Transaction, account: Account, user_id: int, db: Session):
     """If the transaction is not transfer from one account to another then this function processes it"""
     try:
-        category = db.query(UserCategory).filter_by(id=transaction_dto.category_id).one()
+        category = db.query(UserCategory).filter_by(id=transaction.category_id).one()
     except NoResultFound:
         raise HTTPException(422, 'Invalid category')
     if category.user_id != user_id:
@@ -74,7 +73,7 @@ def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, d
         db.add(transaction.account)
         db.add(transaction.target_account)
     else:
-        account = process_non_transfer_type(transaction_dto, account, user_id, transaction, db)
+        account = process_non_transfer_type(transaction, account, user_id, db)
         db.add(account)
 
     db.add(transaction)
@@ -161,7 +160,7 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Transaction not found')
 
     if user_id != transaction.user_id:
-        raise HTTPException(status.HTTP_403_FORBIDDEN)
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail='Forbidden')
 
     if transaction_details.account_id is not None:
         try:
@@ -169,7 +168,7 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
         except NoResultFound:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid account')
         if account.user_id != user_id:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
+            raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')  # pragma: no cover
         transaction.account = account
 
     if transaction_details.target_account_id is not None:
@@ -210,6 +209,14 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
 
     if transaction_details.target_amount is not None:
         transaction.target_amount = transaction_details.target_amount
+
+    if transaction.is_transfer:
+        transaction = process_transfer_type(transaction, user_id, db)
+        db.add(transaction.account)
+        db.add(transaction.target_account)
+    else:
+        account = process_non_transfer_type(transaction, account, user_id, db)
+        db.add(account)
 
     db.add(transaction)
     db.commit()

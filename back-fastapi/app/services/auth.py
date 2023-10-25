@@ -72,7 +72,7 @@ def create_users(user_request: UserRegistration, db: Session):
     db.refresh(new_user)
 
     copy_all_categories(new_user.id, db)
-    
+
     return new_user
 
 
