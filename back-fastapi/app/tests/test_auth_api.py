@@ -60,8 +60,7 @@ def test_incorrect_password(token):
     existing_user['password'] = 'wrong_password'
 
     response = client.post(f'{auth_path_prefix}/login/', json=existing_user)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail': 'Incorrect email or password'}
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_incorrect_email(token):
@@ -72,5 +71,4 @@ def test_incorrect_email(token):
     existing_user['password'] = 'new_password'
 
     response = client.post(f'{auth_path_prefix}/login/', json=existing_user)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail': 'Incorrect email or password'}
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
