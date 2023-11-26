@@ -5,7 +5,7 @@ import CustomHr from '../utilities/CustomHr.vue';
 import TransactionType from './TransactionType.vue';
 import AccountsList from './AccountsList.vue';
 
-const props = defineProps(['transactions', 'resetstatus']);
+const props = defineProps(['transactions', 'resetstatus', 'isAccountDetails', ]);
 const emit = defineEmits(['filterApplied']);
 
 let filtersApplied = {};
@@ -116,7 +116,7 @@ function filterByType(transTypes) {
       <div class="col"><CustomHr text="Accounts" /></div>
     </div>
     
-    <div class="row">
+    <div v-show="props.isAccountDetails===false" class="row">
       <div class="col">
         <AccountsList @selected-accounts-updated="selectedAccountsUpdated" :selected-accounts="checkedAccounts" />
       </div>
