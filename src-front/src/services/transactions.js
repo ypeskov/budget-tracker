@@ -9,8 +9,13 @@ export class TransactionsService {
     this.accountService = accountService;
   }
 
-  async getUserTransactions() {
-    const transactionsUrl = '/transactions/?per_page=1000';
+  async getUserTransactions(filters={}) {
+    let transactionsUrl = '/transactions/?per_page=1000';
+
+    if (filters.accountId) {
+      transactionsUrl += `&accounts=${filters.accountId}`;
+    }
+    
     return await request(transactionsUrl, {}, {userService: this.userService});
   }
 

@@ -5,6 +5,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
 
+import TransactionsListView from './TransactionsListView.vue';
+
 const route = useRoute();
 const router = useRouter();
 
@@ -43,5 +45,7 @@ onBeforeMount(async () => {
         <div class="col">Open Date: {{ accountDetails.opening_date }}</div>
       </div>
     </div>
+
+    <TransactionsListView :account-id="accountDetails.id" :is-account-details="true" />
   </main>
 </template>
