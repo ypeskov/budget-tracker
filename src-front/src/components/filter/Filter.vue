@@ -1,5 +1,5 @@
 <script setup>
-import { watch, reactive } from 'vue';
+import { watch, reactive, ref } from 'vue';
 
 import CustomHr from '../utilities/CustomHr.vue';
 import TransactionType from './TransactionType.vue';
@@ -25,10 +25,9 @@ watch(() => props['resetstatus'], (newReset) => {
     for(const prop in transactionTypes) {
       transactionTypes[prop] = false;
     }
-
     checkedAccounts.splice(0); //remove all selected accounts
 
-    updateFilteredTransactions();
+    updateFilteredTransactions(true);
   }
 });
 
@@ -59,7 +58,7 @@ function applyFilter(event) {
   updateFilteredTransactions();
 }
 
-function updateFilteredTransactions() {
+function updateFilteredTransactions(newResetStatus = false) {
   let filteredTransactions = [...props['transactions']];
 
   if (filtersApplied.transactionTypes) {
@@ -72,7 +71,7 @@ function updateFilteredTransactions() {
 
   emit('filterApplied', {
     'filteredTransactions': filteredTransactions,
-    'resetStatus': false,
+    'resetStatus': newResetStatus,
   });
 }
 

@@ -1,12 +1,12 @@
 <script setup>
-import { onBeforeMount, reactive, ref } from 'vue';
+import { onBeforeMount, reactive, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import { DateTime } from 'luxon';
 
 import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
 import { useUserStore } from '../stores/user';
 import Filter from '../components/filter/Filter.vue';
+import List from '../components/transactions/List.vue';
 
 const userStore = useUserStore();
 let transactions = reactive([]);
@@ -15,7 +15,7 @@ let filteredTransactions = reactive([]);
 const router = useRouter();
 
 const showFilter = ref(false);
-const reset = ref(false);
+const reset = ref(true);
 
 onBeforeMount(async () => {
   try {
@@ -36,7 +36,7 @@ onBeforeMount(async () => {
 
 async function reloadTransactions(event) {
   event.preventDefault();
-  const allTransactions = await Services.transactionService.getUserTransactions();
+  const allTransactions = await Services.transactionsService.getUserTransactions();
   transactions.splice(0);
   transactions.push(...allTransactions);
   filteredTransactions.splice(0);
@@ -63,13 +63,16 @@ function filterApplied(payload) {
       <div class="row">
         <div class="col sub-menu">
           <span v-if="userStore.isLoggedIn">
-            <RouterLink class="btn btn-primary" :to="{ name: 'transactionNew' }">New</RouterLink>
+            <RouterLink class="btn btn-secondary" :to="{ name: 'transactionNew' }">New</RouterLink>
           </span>
           <span>
             <a href="" class="btn btn-secondary" @click="reloadTransactions">Reload</a>
           </span>
-          <span>
-            <a href="" class="btn btn-secondary" @click="toggleFilter">Filter</a>
+          <span>{{ reset }}
+            <a href="" 
+              class="btn" 
+              :class="{ 'active-filter btn-success': !reset, 'btn-secondary': reset }"
+              @click="toggleFilter">Filter</a>
           </span>
         </div>
       </div>
@@ -84,26 +87,8 @@ function filterApplied(payload) {
           <h3>Your transactions</h3>
         </div>
       </div>
-      <div v-if="transactions.length > 0">
-        <div v-for="transaction, idx in filteredTransactions" :key="transaction.id" class="list-item">
-          <RouterLink class="row" 
-                      :to="{ name: 'transactionDetails', 
-                            params: { 
-                              id: transaction.id,
-                            } }">
-            <div class="col-7">
-              <div class="transaction-element"><b>{{ transaction.label }}</b></div>
-              <div class="transaction-element">{{ transaction.notes }}</div>
-            </div>
-            <div class="col-5 amount-container">
-              <div><b>{{ parseFloat(transaction.amount).toFixed(2) }} {{ transaction.currency.code }}</b></div>
-              <div>{{ DateTime.fromISO(transaction.date_time).toLocaleString() }}</div>
-            </div>
-          </RouterLink>
-        </div>
-      </div>
-      <div v-else>
-        No transactions found
+      <div class="row">
+        <List :transactions="filteredTransactions" />
       </div>
     </div>
   </main>
@@ -120,5 +105,10 @@ function filterApplied(payload) {
 
 .amount-container {
   text-align: right;
+}
+
+.active-filter {
+  font-weight: bold;
+  color: #ffffff;
 }
 </style>
