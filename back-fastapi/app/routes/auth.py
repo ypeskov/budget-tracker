@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.logger_config import logger
 from app.schemas.user_schema import UserRegistration, UserLoginSchema, UserResponse
 from app.schemas.token_schema import Token
 from app.dependencies.check_token import check_token
@@ -22,7 +23,16 @@ def register_user(user_request: UserRegistration,
 
 @router.post("/login/", response_model=Token)
 def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)):
-    return get_jwt_token(user_login, db)
+    try:
+        token: str = get_jwt_token(user_login, db)
+
+        return token
+    except HTTPException as e:
+        logger.error(f"Error while logging in user: '{user_login.email}': {e.detail}")
+        raise HTTPException(status_code=401, detail="Invalid credentials. See logs for details")
+    except Exception as e:
+        logger.exception(f"Error while logging in user: {user_login.email}: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error. See logs for details")
 
 
 @router.get('/profile/')

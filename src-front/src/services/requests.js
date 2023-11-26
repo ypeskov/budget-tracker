@@ -17,7 +17,7 @@ export async function request(endPoint, params={}, services={}) {
   params.headers = mergedHeaders;
 
   const response = await fetch(`${BACKEND_HOST}${endPoint}`, params);
-
+  
   if (response.status === 200) {
     try {
       return await response.json();

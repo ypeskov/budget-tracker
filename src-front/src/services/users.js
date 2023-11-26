@@ -1,3 +1,4 @@
+import { HttpError } from '../errors/HttpError';
 import { request } from './requests';
 
 export class UserService {
@@ -38,7 +39,10 @@ export class UserService {
         alert('Something went wrong!');
       }
     } catch (e) {
-      console.log(e);
+      if (e instanceof HttpError && e.statusCode === 401) {
+        console.log('Wrong email or password!');
+      }
+      throw e;
     }
   }
 

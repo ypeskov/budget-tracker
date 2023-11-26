@@ -4,7 +4,6 @@ import jwt
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from icecream import ic
 
 from app.models.User import User, DEFAULT_CURRENCY_CODE
 from app.models.Currency import Currency
@@ -83,10 +82,10 @@ def get_jwt_token(user_login: UserLoginSchema, db: Session):
     user = db.query(User).filter(
         User.email == user_login.email).first()  # type: ignore
     if not user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect email or password")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email")
 
     if not pwd_context.verify(user_login.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect email or password")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
