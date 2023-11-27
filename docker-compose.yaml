@@ -14,11 +14,11 @@ services:
     # command: ["sh", "-c", "python -m debugpy --wait-for-client --listen 0.0.0.0:5678 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
     environment:
       - DEBUG=True
-      - DB_HOST=db
+      - DB_HOST=db-budgeter
       - DB_PORT=5432
       - PYTHONPATH=/app:$PYTHONPATH
     depends_on:
-      - db
+      - db-budgeter
 
   front:
     container_name: "front"
@@ -36,9 +36,9 @@ services:
     depends_on:
       - back
   
-  db:
+  db-budgeter:
     image: postgres:15.3-bullseye
-    container_name: Postgres
+    container_name: Postgres-budgeter
     restart: always
     environment:
       # POSTGRES_USER: urlshortener
@@ -48,9 +48,9 @@ services:
     volumes:
       - ./dbdata:/var/lib/postgresql/data
 
-  adminer:
+  adminer-budgeter:
     image: adminer
-    container_name: Adminer
+    container_name: Adminer-budgeter
     restart: always
     ports:
       - 8080:8080
