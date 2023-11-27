@@ -5,6 +5,7 @@ from typing import Annotated
 from app.schemas.account_schema import AccountResponseSchema
 from app.schemas.currency_schema import CurrencyResponseSchema
 from app.schemas.user_schema import UserResponse
+from app.schemas.category_schema import ResponseCategorySchema
 from pydantic import ConfigDict, BaseModel, PlainSerializer
 
 
@@ -38,5 +39,6 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     account: AccountResponseSchema
     target_account: AccountResponseSchema | None = None
     currency: CurrencyResponseSchema
+    category: ResponseCategorySchema | None = None
 
     model_config = ConfigDict(from_attributes=True)

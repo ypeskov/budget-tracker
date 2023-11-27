@@ -154,6 +154,7 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
     """
     This function updates transaction. It is used in PUT method of /transactions/{transaction_id} endpoint
     """
+
     try:
         transaction = db.query(Transaction).filter_by(id=transaction_id).one()
     except NoResultFound:
@@ -188,6 +189,9 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
         if category.user_id != user_id:
             raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden category')
         transaction.category = category
+
+    if transaction_details.label is not None:
+        transaction.label = transaction_details.label
 
     if transaction_details.date_time is not None:
         transaction.date_time = transaction_details.date_time

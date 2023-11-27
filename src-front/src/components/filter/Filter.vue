@@ -17,17 +17,19 @@ const transactionTypes = reactive({
   'transfer': false,
 });
 
+function resetFilters() {
+  filtersApplied = {}; //remove all filters
+  //disable all transaction types
+  for(const prop in transactionTypes) {
+    transactionTypes[prop] = false;
+  }
+  checkedAccounts.splice(0); //remove all selected accounts
+  updateFilteredTransactions(true);
+}
+
 watch(() => props['resetstatus'], (newReset) => {
   if (newReset) {
-    filtersApplied = {}; //remove all filters
-
-    //disable all transaction types
-    for(const prop in transactionTypes) {
-      transactionTypes[prop] = false;
-    }
-    checkedAccounts.splice(0); //remove all selected accounts
-
-    updateFilteredTransactions(true);
+    resetFilters();
   }
 });
 
@@ -124,6 +126,7 @@ function filterByType(transTypes) {
     <div class="row filter-bottom-menu-row">
       <div class="col bottom-menu-container">
         <a href="#" class="btn btn-secondary" @click="applyFilter">Apply</a>
+        <a href="#" class="btn btn-secondary" @click="resetFilters">Reset</a>
       </div>
     </div>
   </div>

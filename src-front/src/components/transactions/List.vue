@@ -1,7 +1,19 @@
 <script setup>
 import { DateTime } from 'luxon';
+import { computed } from 'vue';
 
 const props = defineProps(['transactions',]);
+
+function categoryLabel(transaction) {
+  if (transaction.category) {
+    return `${transaction.category.name} (${transaction.is_income ? 'Income' : 'Expense'})`;
+  } else if (transaction.is_transfer) {
+    return 'Transfer';
+  } else {
+    return 'Unknown';
+  }
+}
+
 </script>
 
 <template>
@@ -13,13 +25,15 @@ const props = defineProps(['transactions',]);
           id: transaction.id,
         }
       }">
-        <div class="col-7">
+        <div class="col-5">
           <div class="transaction-element"><b>{{ transaction.label }}</b></div>
-          <div class="transaction-element">{{ transaction.notes }}</div>
+          <div class="transaction-element">{{ categoryLabel(transaction) }}</div>
+
         </div>
-        <div class="col-5 amount-container">
+        <div class="col-7 amount-container">
           <div><b>{{ parseFloat(transaction.amount).toFixed(2) }} {{ transaction.currency.code }}</b></div>
-          <div>{{ DateTime.fromISO(transaction.date_time).toLocaleString() }}</div>
+          <div><span class="acc-name">{{ transaction.account.name }}</span> | {{
+            DateTime.fromISO(transaction.date_time).toLocaleString() }}</div>
         </div>
       </RouterLink>
     </div>
@@ -40,5 +54,9 @@ const props = defineProps(['transactions',]);
 
 .amount-container {
   text-align: right;
+}
+
+.acc-name {
+  color: blue;
 }
 </style>
