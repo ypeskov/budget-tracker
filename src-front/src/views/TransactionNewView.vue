@@ -57,6 +57,9 @@ onBeforeMount(async () => {
       itemType.value = transaction.is_transfer ? 'transfer' : transaction.is_income ? 'income' : 'expense';
       currentAccount.value = accounts.find((item) => item.id === transaction.account_id);
       targetAccount.value = accounts.find((item) => item.id === transaction.target_account_id);
+      if (targetAccount.value === undefined) {
+        targetAccount.value = accounts[0];
+      }
     }
 
     filterCategories();
@@ -68,7 +71,14 @@ onBeforeMount(async () => {
 
 function filterCategories() {
   const isIncome = itemType.value === 'income';
+  // filter categories by income/expense
   filteredCategories.value = categories.value.filter((item) => item.is_income === isIncome);
+  
+  // if the current category is not in the filtered categories, set the first one from the filtered list
+  if (!filteredCategories.value.some((item) => item.id === transaction.category_id)) {
+    transaction.category_id = filteredCategories.value[0].id;
+  }
+  
   updateTransactionProperties(itemType.value);
 }
 

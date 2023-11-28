@@ -1,9 +1,10 @@
 <script setup>
-import { computed } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps(['itemType']);
-const currentItem = computed(() => props.itemType);
 const emit = defineEmits(['typeChanged']);
+
+const currentItem = ref(props.itemType);
 
 function changeItemType($event) {
   currentItem.value = $event.target.getAttribute('data-itemtype');
@@ -17,7 +18,7 @@ function changeItemType($event) {
       <a
         id="expense-item"
         class="nav-link"
-        :class="{ active: currentItem === 'expense' }"
+        :class="{ active: props.itemType === 'expense' }"
         data-itemtype="expense"
         href="#">
         Expense
@@ -27,7 +28,7 @@ function changeItemType($event) {
       <a
         id="income-item"
         class="nav-link"
-        :class="{ active: currentItem === 'income' }"
+        :class="{ active: props.itemType === 'income' }"
         data-itemtype="income"
         href="#">
         Income
@@ -37,7 +38,7 @@ function changeItemType($event) {
       <a
         id="transfer-item"
         class="nav-link"
-        :class="currentItem == 'transfer' ? 'active' : ''"
+        :class="props.itemType == 'transfer' ? 'active' : ''"
         data-itemtype="transfer"
         href="#">
         Transfer
