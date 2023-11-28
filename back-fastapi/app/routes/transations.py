@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, Request, HTTPException, status
 from sqlalchemy.orm import Session
 
+from icecream import ic
+
+from app.logger_config import logger
 from app.database import get_db
 from app.schemas.transaction_schema import CreateTransactionSchema, ResponseTransactionSchema, UpdateTransactionSchema
 from app.dependencies.check_token import check_token
 from app.services.transactions import create_transaction, get_transactions, get_transaction_details, update
 from app.utils.sanitize_transaction_filters import prepare_filters
+
+ic.configureOutput(includeContext=True)
 
 router = APIRouter(
     tags=['Transactions'],
@@ -43,4 +48,15 @@ def update_transaction(transaction_id: int,
                        request: Request,
                        db: Session = Depends(get_db)) -> ResponseTransactionSchema:
     """ Update transaction details """
-    return update(transaction_id, transaction_details, request.state.user['id'], db)
+
+    try:
+        transaction = update(transaction_id, transaction_details, request.state.user['id'], db)
+        return transaction
+    except HTTPException as e:
+        logger.exception(e)
+        if e.status_code == status.HTTP_404_NOT_FOUND:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Transaction not found')
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to update transaction')
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to update transaction')
