@@ -36,7 +36,7 @@ export class TransactionsService {
   }
 
   async updateTransaction(transactionDetails) {
-    const transactionDetailsUrl = `/transactions/${transactionDetails.id}`;
+    const transactionDetailsUrl = `/transactions/`;
     const updatedTransaction = await request(transactionDetailsUrl, {
                                         method: 'PUT',
                                         body: JSON.stringify(transactionDetails),

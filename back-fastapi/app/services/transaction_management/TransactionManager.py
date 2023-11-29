@@ -13,7 +13,7 @@ from app.models.Transaction import Transaction
 from app.models.Account import Account
 from app.models.UserCategory import UserCategory
 
-from app.schemas.transaction_schema import UpdateTransactionSchema
+from app.schemas.transaction_schema import CreateTransactionSchema
 from app.services.CurrencyProcessor import CurrencyProcessor
 
 ic.configureOutput(includeContext=True)
@@ -38,11 +38,12 @@ def check_account_ownership(user_id: int, account_id: int, db: Session):
 
 
 class TransactionManager:
-    def __init__(self, transaction_details: UpdateTransactionSchema, user_id: int, db: Session):
+    def __init__(self, transaction_details: CreateTransactionSchema, user_id: int, db: Session):
         self._db = db
         self._transaction_details = transaction_details
         self._user_id = user_id
         self._is_update = False
+        self._prev_account_id = None
         self._prev_amount = Decimal(0.0)
         self._prev_target_account_id = None
         self._prev_target_amount = Decimal(0.0)
@@ -127,6 +128,7 @@ class TransactionManager:
 
             self._is_update = True
             self._prev_amount = self._transaction.amount
+            self._prev_account_id = self._transaction.account_id
             self._prev_target_account_id = self._transaction.target_account_id
             self._prev_target_amount = self._transaction.target_amount
             self._prev_is_transfer = self._transaction.is_transfer
@@ -159,9 +161,23 @@ class TransactionManager:
 
         if self._transaction.account.currency_id != self._transaction.target_account.currency_id:
             currency_processor: CurrencyProcessor = CurrencyProcessor(self._transaction, self._db)
-            transaction = currency_processor.calculate_exchange_rate()
-        else:
-            self._transaction.target_amount = self._transaction.amount
+            self._transaction = currency_processor.calculate_exchange_rate()
+
+        if self._is_update:
+            if self._prev_is_transfer:
+                prev_target_account: Account = self._db.query(Account).filter_by(id=self._prev_target_account_id).one_or_none()  # type: ignore
+                prev_target_account.balance -= self._prev_target_amount
+
+                prev_account: Account = self._db.query(Account).filter_by(id=self._prev_account_id).one_or_none()  # type: ignore
+                prev_account.balance += self._prev_amount
+                self._db.add(prev_target_account)
+                self._db.add(prev_account)
+                self._db.commit()
+            else:
+                if self._prev_is_income:
+                    self._transaction.account.balance -= self._prev_amount
+                else:
+                    self._transaction.account.balance += self._prev_amount
 
         self._transaction.account.balance -= self._transaction.amount
         self._transaction.target_account.balance += self._transaction.target_amount
