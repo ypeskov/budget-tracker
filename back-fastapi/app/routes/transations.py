@@ -44,9 +44,8 @@ def get_transaction(transaction_id: int, request: Request, db: Session = Depends
     return get_transaction_details(transaction_id, request.state.user['id'], db)
 
 
-@router.put('/{transaction_id}', response_model=ResponseTransactionSchema)
-def update_transaction(transaction_id: int,
-                       transaction_details: UpdateTransactionSchema,
+@router.put('/', response_model=ResponseTransactionSchema)
+def update_transaction(transaction_details: UpdateTransactionSchema,
                        request: Request,
                        db: Session = Depends(get_db)) -> ResponseTransactionSchema:
     """ Update transaction details """

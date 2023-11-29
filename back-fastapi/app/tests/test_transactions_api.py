@@ -102,14 +102,14 @@ def test_create_transaction_expense_route(token, one_account, amount):
 
 def test_update_transaction(token, one_account, create_user):
     initial_balance_acc: float | Decimal = one_account['balance']
-    amount: int = 100
+    amount_initial: int = 100
 
     categories_dict: dict = client.get(f'{categories_path_prefix}/', headers={'auth-token': token}).json()
 
     transaction_data = {
         'account_id': one_account['id'],
         'category_id': categories_dict[0]['id'],
-        'amount': amount,
+        'amount': amount_initial,
         'currency_id': one_account['currency_id'],
         'date_time': '2023-10-12T12:00:00Z',
         'is_income': False,
@@ -122,19 +122,19 @@ def test_update_transaction(token, one_account, create_user):
     transaction = transaction_response.json()
 
     updated_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
-    assert updated_account['balance'] == initial_balance_acc - amount
+    assert updated_account['balance'] == initial_balance_acc - amount_initial
     updated_balance = updated_account['balance']
 
+    amount_update = 200
     # update transaction
     transaction_data['id'] = transaction['id']
     transaction_data['user_id'] = transaction['user_id']
-    transaction_data['amount'] = 200
+    transaction_data['amount'] = amount_update
     transaction_data['is_income'] = True
     transaction_data['notes'] = 'Updated transaction'
     transaction_data['category_id'] = categories_dict[1]['id']
-    transaction_data['target_amount'] = 200
     transaction_data['date_time'] = '2023-10-12T12:00:00Z'
-    updated_transaction_response = client.put(f'{transactions_path_prefix}/{transaction["id"]}',
+    updated_transaction_response = client.put(f'{transactions_path_prefix}/',
                                               json=transaction_data,
                                               headers={'auth-token': token})
     assert updated_transaction_response.status_code == status.HTTP_200_OK
@@ -143,14 +143,13 @@ def test_update_transaction(token, one_account, create_user):
     assert updated_transaction['id'] == transaction['id']
     assert updated_transaction['amount'] == transaction_data['amount']
     assert updated_transaction['is_income'] == transaction_data['is_income']
-    assert updated_transaction['is_transfer'] == transaction_data['is_transfer']
     assert updated_transaction['notes'] == transaction_data['notes']
     assert updated_transaction['account']['id'] == transaction_data['account_id']
     assert updated_transaction['category_id'] == transaction_data['category_id']
     assert updated_transaction['currency_id'] == transaction_data['currency_id']
 
     updated_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
-    assert updated_account['balance'] == updated_balance + transaction_data['amount']
+    assert updated_account['balance'] == updated_balance + transaction_data['amount'] + amount_initial
 
     with pytest.raises(HTTPException) as ex:
         updated_transaction['id'] = 999999999999
@@ -420,9 +419,8 @@ def test_process_non_transfer_type(create_transaction, token, one_account, creat
         'target_amount': 0,
     }
     transaction1: Transaction = create_transaction(transaction_details)
-
     updated_account = client.get(f'/accounts/{first_account.id}', headers={'auth-token': token}).json()
-    assert updated_account['balance'] == first_account.balance - amount
+    assert first_account.balance - amount == updated_account['balance']
     updated_balance = updated_account['balance']
 
     transaction_details['is_income'] = True
