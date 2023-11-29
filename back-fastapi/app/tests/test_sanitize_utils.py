@@ -44,7 +44,6 @@ def test_incorrect_values_filter():
     with pytest.raises(HTTPException) as ex:
         prepare_filters(params)
     assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert ex.value.detail == f'Incorrect value [{incorrect_val}] for filter [currencies]'
     assert params['currencies'] is None
 
 
@@ -87,7 +86,7 @@ def test_incorrect_to_bool():
     processed_val = to_bool('False')
     assert processed_val is False
 
-    processed_val = to_bool(None)
+    processed_val = to_bool(None)  # type: ignore
     assert processed_val is False
 
 

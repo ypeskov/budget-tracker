@@ -28,7 +28,6 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
 
     return transaction
 
-
 @router.get('/', response_model=list[ResponseTransactionSchema])
 def get_user_transactions(request: Request, db: Session = Depends(get_db)):
     """ Get all transactions for a user """

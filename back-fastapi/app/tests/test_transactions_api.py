@@ -293,7 +293,7 @@ def test_currency_processor(create_transaction, token, one_account):
     transaction: Transaction = create_transaction(transaction_details)
 
     with pytest.raises(HTTPException) as ex:
-        CurrencyProcessor(None, db).calculate_exchange_rate()
+        CurrencyProcessor(transaction, db).calculate_exchange_rate()
     assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert ex.value.detail == 'Transaction is required'
 
