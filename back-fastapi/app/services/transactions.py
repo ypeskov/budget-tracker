@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from fastapi import HTTPException, status
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session, joinedload
@@ -7,13 +5,11 @@ from sqlalchemy.exc import NoResultFound
 
 from app.logger_config import logger
 from app.models.Transaction import Transaction
-from app.models.UserCategory import UserCategory
-from app.services.CurrencyProcessor import CurrencyProcessor
 from app.services.transaction_management.TransactionManager import TransactionManager
-from app.schemas.transaction_schema import CreateTransactionSchema, UpdateTransactionSchema
+from app.schemas.transaction_schema import UpdateTransactionSchema
 
 
-def create_transaction(transaction_details: CreateTransactionSchema, user_id: int, db: Session) -> Transaction:
+def create_transaction(transaction_details: UpdateTransactionSchema, user_id: int, db: Session) -> Transaction:
     """ Create a new transaction for a user
     :param transaction_details: CreateTransactionSchema
     :param user_id: int
@@ -101,22 +97,3 @@ def update(transaction_details: UpdateTransactionSchema, user_id: int, db: Sessi
     transaction: Transaction = transaction_manager.process().get_transaction()
 
     return transaction
-
-# def delete_transaction(transaction_id: int, user_id: int, db: Session):
-#     """
-#     This function deletes transaction. It is used in DELETE method of /transactions/{transaction_id} endpoint
-#     """
-#     try:
-#         transaction = db.query(Transaction).filter_by(id=transaction_id).one()
-#     except NoResultFound:
-#         raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Transaction not found')
-#
-#     if user_id != transaction.user_id:
-#         raise HTTPException(status.HTTP_403_FORBIDDEN, detail='Forbidden')
-#
-#     transaction.is_deleted = True
-#     db.add(transaction)
-#     db.commit()
-#     db.refresh(transaction)
-#
-#

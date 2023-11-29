@@ -11,7 +11,7 @@ from pydantic import ConfigDict, BaseModel, PlainSerializer
 
 class CreateTransactionSchema(BaseModel):
     id: int | None = None
-    user_id: None = None
+    user_id: int | None = None
     currency_id: int | None = None
     account_id: int
     target_account_id: int | None = None
@@ -25,7 +25,7 @@ class CreateTransactionSchema(BaseModel):
     label: str = ''
     notes: str = ''
     date_time: datetime | None = None
-    exchange_rate: Annotated[Decimal, PlainSerializer(
+    exchange_rate: Annotated[Decimal | None, PlainSerializer(
             lambda x: float(x), return_type=float, when_used='json'
         )] | None = None
     is_transfer: bool
