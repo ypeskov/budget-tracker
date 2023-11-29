@@ -2,15 +2,17 @@ from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import NoResultFound
 
 from app.logger_config import logger
-from app.database import get_db
 
 from app.models.Currency import Currency
 from app.models.Transaction import Transaction
 from app.models.Account import Account
+from app.models.UserCategory import UserCategory
 
 from app.schemas.transaction_schema import CreateTransactionSchema
+from app.services.CurrencyProcessor import CurrencyProcessor
 
 
 def check_account_ownership(user_id: int, account_id: int, db: Session):
@@ -35,25 +37,24 @@ class TransactionManager:
     def __init__(self, transaction_details: CreateTransactionSchema, user_id: int, db: Session):
         self._db = db
         self._transaction_details = transaction_details
-        self._transaction_details.user_id = user_id
+        self._user_id = user_id
 
-        self._transaction: Transaction = Transaction()
-        self._transaction.user_id = user_id
+        self._prepare_transaction()
 
         self.set_account(transaction_details.account_id)
         self.set_currency()
+        self.set_date_time(transaction_details.date_time)
 
         self._transaction.amount = transaction_details.amount
         self._transaction.label = transaction_details.label
         self._transaction.notes = transaction_details.notes
-
-        self.set_date_time(transaction_details.date_time)
 
         if transaction_details.is_transfer is True:
             self.set_account(transaction_details.target_account_id, 'target_')
             self._transaction.is_transfer = True
             self._transaction.exchange_rate = transaction_details.exchange_rate
             self._transaction.target_amount = transaction_details.target_amount
+            self._transaction.category_id = None
         else:
             self._transaction.is_transfer = False
             self._transaction.category_id = transaction_details.category_id
@@ -99,5 +100,68 @@ class TransactionManager:
             raise e
         return self
 
+    def _prepare_transaction(self) -> 'TransactionManager':
+        """ Prepare transaction object for update or create."""
+        if self._transaction_details.id is not None:
+            self._transaction: Transaction = self._db.query(Transaction).filter_by(  # type: ignore
+                id=self._transaction_details.id).one_or_none()
+
+            if self._transaction is None:
+                logger.error(f'Transaction {self._transaction_details.id} not found')
+                raise HTTPException(status.HTTP_404_NOT_FOUND,
+                                    detail=f'Transaction {self._transaction_details.id} not found')
+
+            if self._user_id != self._transaction.user_id:
+                logger.error(
+                    f'User {self._user_id} tried to update transaction {self._transaction.id} of user {self._transaction.user_id}')
+                raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
+        else:
+            self._transaction: Transaction = Transaction()
+            self._transaction.user_id = self._user_id
+        return self
+
     def get_transaction(self) -> Transaction:
         return self._transaction
+
+    def process(self) -> 'TransactionManager':
+        if self._transaction.is_transfer:
+            self._process_transfer_type()
+        else:
+            self._process_non_transfer_type()
+
+        self._db.add(self._transaction)
+        self._db.commit()
+        self._db.refresh(self._transaction)
+
+        return self
+
+    def _process_transfer_type(self) -> None:
+        """This function processes case of transfer from one account to another"""
+
+        if self._transaction.account.currency_id != self._transaction.target_account.currency_id:
+            currency_processor: CurrencyProcessor = CurrencyProcessor(self._transaction, self._db)
+            transaction = currency_processor.calculate_exchange_rate()
+        else:
+            self._transaction.target_amount = self._transaction.amount
+
+        self._transaction.account.balance -= self._transaction.amount
+        self._transaction.target_account.balance += self._transaction.target_amount
+
+    def _process_non_transfer_type(self):
+        """If the transaction is not transfer from one account to another then this function processes it"""
+
+        try:
+            category = self._db.query(UserCategory).filter_by(id=self._transaction.category_id).one()
+        except NoResultFound:
+            logger.error(f'Invalid category {self._transaction.category_id}')
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, 'Invalid category')
+
+        if category.user_id != self._user_id:
+            logger.error(f'User {self._user_id} tried to update transaction {self._transaction.id} ' +
+                         f'with not own category {self._transaction.category_id}')
+            raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
+
+        if self._transaction.is_income:
+            self._transaction.account.balance += self._transaction.amount
+        else:
+            self._transaction.account.balance -= self._transaction.amount
