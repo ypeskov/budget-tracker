@@ -4,16 +4,14 @@ from fastapi import HTTPException, status
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import NoResultFound
-from icecream import ic
 
 from app.logger_config import logger
 from app.models.Account import Account
 from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
 from app.services.CurrencyProcessor import CurrencyProcessor
+from app.services.transaction_management.TransactionManager import TransactionManager
 from app.schemas.transaction_schema import CreateTransactionSchema, UpdateTransactionSchema
-
-ic.configureOutput(includeContext=True)
 
 
 def process_transfer_type(transaction: Transaction, user_id: int, db: Session):
@@ -44,63 +42,47 @@ def process_transfer_type(transaction: Transaction, user_id: int, db: Session):
     return transaction
 
 
-def process_non_transfer_type(transaction: Transaction, account: Account, user_id: int, db: Session):
+def process_non_transfer_type(transaction: Transaction, user_id: int, db: Session):
     """If the transaction is not transfer from one account to another then this function processes it"""
-    ic(transaction)
+
     try:
         category = db.query(UserCategory).filter_by(id=transaction.category_id).one()
     except NoResultFound:
         logger.error(f'Invalid category {transaction.category_id}')
-        raise HTTPException(422, 'Invalid category')
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, 'Invalid category')
 
     if category.user_id != user_id:
         logger.error(f'User {user_id} tried to update transaction {transaction.id} with not own category ' +
                      f'{transaction.category_id}')
-        raise HTTPException(403, 'Forbidden')
+        raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
 
     if transaction.is_income:
-        account.balance += transaction.amount
+        transaction.account.balance += transaction.amount
     else:
-        account.balance -= transaction.amount
+        transaction.account.balance -= transaction.amount
 
-    return account
+    return transaction
 
 
-def create_transaction(transaction_dto: CreateTransactionSchema, user_id: int, db: Session) -> Transaction:
-    try:
-        account: Account = db.query(Account).filter_by(id=transaction_dto.account_id).one()
-    except NoResultFound:
-        logger.error(f'Invalid account {transaction_dto.account_id}')
-        raise HTTPException(422, 'Invalid account')
-    if account.user_id != user_id:
-        logger.error(f'User {user_id} tried to create transaction with not own account {transaction_dto.account_id}')
-        raise HTTPException(403, 'Forbidden')
+def create_transaction(transaction_details: CreateTransactionSchema, user_id: int, db: Session) -> Transaction:
+    """ Create a new transaction for a user
+    :param transaction_details: CreateTransactionSchema
+    :param user_id: int
+    :param db: SqlAlchemy Session
+    :return: Transaction
+    """
 
-    # We have almost all required fields in the request
-    transaction = Transaction(**transaction_dto.model_dump())
-    transaction.account = account
-    transaction.user_id = user_id
-    transaction.currency = account.currency
+    transaction_manager: TransactionManager = TransactionManager(transaction_details, user_id, db)
+    transaction: Transaction = transaction_manager.get_transaction()
 
-    if transaction_dto.date_time is None:
-        transaction.date_time = datetime.now(timezone.utc)
-
-    if transaction_dto.is_transfer:
+    if transaction_details.is_transfer:
         transaction = process_transfer_type(transaction, user_id, db)
-        db.add(transaction.account)
-        db.add(transaction.target_account)
     else:
-        account = process_non_transfer_type(transaction, account, user_id, db)
-        db.add(account)
+        transaction = process_non_transfer_type(transaction, user_id, db)
 
     db.add(transaction)
     db.commit()
     db.refresh(transaction)
-    db.refresh(transaction.account)
-    db.refresh(transaction.user)
-    db.refresh(transaction.currency)
-    if transaction.target_account is not None:
-        db.refresh(transaction.currency)
 
     return transaction
 
@@ -187,7 +169,7 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
 
     if transaction_details.account_id is not None:
         try:
-            account: Account = db.query(Account).filter_by(id=transaction_details.account_id).one()
+            account: Account = db.query(Account).filter_by(id=transaction_details.account_id).one()  # type: ignore
         except NoResultFound:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid account')
         if account.user_id != user_id:
@@ -197,7 +179,7 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
     if transaction_details.target_account_id is not None:
         try:
             target_account: Account = db.query(Account).filter_by(  # type: ignore
-                id=transaction_details.target_account_id).one()  # type: ignore
+                id=transaction_details.target_account_id).one()
         except NoResultFound:
             logger.error(f'Invalid target account {transaction_details.target_account_id}')
             raise HTTPException(status.HTTP_404_NOT_FOUND, 'Invalid target account')
@@ -229,7 +211,7 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
     if transaction_details.notes is not None:
         transaction.notes = transaction_details.notes
 
-    ic(transaction_details)
+    # If is_transfer is True then transfer fields must be filled and vice versa
     if transaction_details.is_transfer is True:
         transaction.is_transfer = transaction_details.is_transfer
         transaction.category_id = None
@@ -251,18 +233,11 @@ def update(transaction_id: int, transaction_details: UpdateTransactionSchema, us
 
     if transaction.is_transfer:
         transaction = process_transfer_type(transaction, user_id, db)
-        db.add(transaction.account)
-        db.add(transaction.target_account)
     else:
-        account = process_non_transfer_type(transaction, account, user_id, db)
-        db.add(account)
+        transaction = process_non_transfer_type(transaction, user_id, db)
 
     db.add(transaction)
     db.commit()
-    db.refresh(transaction)
-    db.refresh(transaction.account)
-    db.refresh(transaction.user)
-    db.refresh(transaction.currency)
 
     return transaction
 

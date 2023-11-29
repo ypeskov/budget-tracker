@@ -8,6 +8,7 @@ from app.database import get_db
 from app.schemas.transaction_schema import CreateTransactionSchema, ResponseTransactionSchema, UpdateTransactionSchema
 from app.dependencies.check_token import check_token
 from app.services.transactions import create_transaction, get_transactions, get_transaction_details, update
+
 from app.utils.sanitize_transaction_filters import prepare_filters
 
 ic.configureOutput(includeContext=True)
@@ -22,6 +23,7 @@ router = APIRouter(
 @router.post('/', response_model=ResponseTransactionSchema | None)
 def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Request, db: Session = Depends(get_db)):
     """ Add a new transaction for a user """
+
     transaction = create_transaction(transaction_dto, request.state.user['id'], db)
 
     return transaction
@@ -53,10 +55,12 @@ def update_transaction(transaction_id: int,
         transaction = update(transaction_id, transaction_details, request.state.user['id'], db)
         return transaction
     except HTTPException as e:
-        logger.exception(e)
+        logger.error(f'Error updating transaction: {e.detail}')
         if e.status_code == status.HTTP_404_NOT_FOUND:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Transaction not found')
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to update transaction')
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
+        elif e.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to update transaction')

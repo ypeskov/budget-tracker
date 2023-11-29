@@ -10,17 +10,24 @@ from pydantic import ConfigDict, BaseModel, PlainSerializer
 
 
 class CreateTransactionSchema(BaseModel):
+    id: int | None = None
+    user_id: None = None
+    currency_id: int | None = None
     account_id: int
     target_account_id: int | None = None
     category_id: int | None = None
     amount: Annotated[Decimal, PlainSerializer(
             lambda x: float(x), return_type=float, when_used='json'
         )]
-    target_amount: Decimal | None = None
+    target_amount: Annotated[Decimal, PlainSerializer(
+            lambda x: float(x), return_type=float, when_used='json'
+        )] | None = None
     label: str = ''
     notes: str = ''
     date_time: datetime | None = None
-    exchange_rate: Decimal | None = None
+    exchange_rate: Annotated[Decimal, PlainSerializer(
+            lambda x: float(x), return_type=float, when_used='json'
+        )] | None = None
     is_transfer: bool
     is_income: bool
 
