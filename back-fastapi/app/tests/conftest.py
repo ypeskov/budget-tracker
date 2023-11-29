@@ -1,13 +1,16 @@
 from decimal import Decimal
 from collections.abc import Callable
 
-from icecream import ic
+import os
+os.environ["TEST_MODE"] = "True"
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 from app.database import get_db
+from app.logger_config import logger
+from app.config import Settings
 from app.tests.db_test_cfg import override_get_db
 from app.data_loaders.work_data.load_all import load_all_data
 
@@ -28,7 +31,12 @@ from app.services.auth import create_users as create_users_service, get_jwt_toke
 from app.tests.data.auth_data import test_users, main_test_user
 from app.tests.data.accounts_data import test_accounts
 
-ic.configureOutput(includeContext=True)
+settings = Settings()
+
+test_log_file = f"logs/{settings.TEST_LOG_FILE}"
+with open(test_log_file, 'w') as f:
+    pass
+
 app.dependency_overrides[get_db] = override_get_db
 
 db = next(override_get_db())
@@ -155,13 +163,14 @@ def create_transaction(token) -> Callable[[dict], Transaction]:
                                   account_id=transaction_props['account_id'],
                                   category_id=transaction_props['category_id'],
                                   target_account_id=transaction_props['target_account_id'],
-                                  target_amount=Decimal(transaction_props['target_amount']),
                                   amount=Decimal(transaction_props['amount']),
                                   currency_id=transaction_props['currency_id'],
                                   date_time=transaction_props['date_time'],
                                   is_income=transaction_props['is_income'],
                                   is_transfer=transaction_props['is_transfer'],
                                   notes=transaction_props['notes'])
+        if transaction_props['target_amount'] is not None:
+            transaction.target_amount = Decimal(transaction_props['target_amount'])
         return transaction
 
     return _create_transaction

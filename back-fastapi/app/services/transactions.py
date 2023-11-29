@@ -92,7 +92,7 @@ def get_transaction_details(transaction_id: int, user_id: int, db: Session) -> T
     return transaction
 
 
-def update(transaction_id: int, transaction_details: UpdateTransactionSchema, user_id: int, db: Session):
+def update(transaction_details: UpdateTransactionSchema, user_id: int, db: Session):
     """
     This function updates transaction. It is used in PUT method of /transactions/{transaction_id} endpoint
     """
