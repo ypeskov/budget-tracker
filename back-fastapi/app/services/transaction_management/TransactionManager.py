@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
+from icecream import ic
 
 from app.logger_config import logger
 
@@ -11,7 +12,7 @@ from app.models.Transaction import Transaction
 from app.models.Account import Account
 from app.models.UserCategory import UserCategory
 
-from app.schemas.transaction_schema import CreateTransactionSchema
+from app.schemas.transaction_schema import UpdateTransactionSchema
 from app.services.CurrencyProcessor import CurrencyProcessor
 
 
@@ -34,13 +35,12 @@ def check_account_ownership(user_id: int, account_id: int, db: Session):
 
 
 class TransactionManager:
-    def __init__(self, transaction_details: CreateTransactionSchema, user_id: int, db: Session):
+    def __init__(self, transaction_details: UpdateTransactionSchema, user_id: int, db: Session):
         self._db = db
         self._transaction_details = transaction_details
         self._user_id = user_id
 
         self._prepare_transaction()
-
         self.set_account(transaction_details.account_id)
         self.set_currency()
         self.set_date_time(transaction_details.date_time)

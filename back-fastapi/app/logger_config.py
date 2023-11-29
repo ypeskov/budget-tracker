@@ -12,4 +12,4 @@ logger.add("logs/error.log", level="ERROR", rotation="1 week", compression="zip"
 
 if "TEST_MODE" in os.environ:
     logger.remove()
-    logger.add(f"logs/{settings.TEST_LOG_FILE}", level="WARNING", rotation="1 week", compression="zip")
+    logger.add(f"logs/{settings.TEST_LOG_FILE}", level="DEBUG", rotation="1 week", compression="zip")

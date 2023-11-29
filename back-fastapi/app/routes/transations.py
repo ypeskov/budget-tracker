@@ -52,7 +52,7 @@ def update_transaction(transaction_id: int,
     """ Update transaction details """
 
     try:
-        transaction = update(transaction_id, transaction_details, request.state.user['id'], db)
+        transaction = update(transaction_details, request.state.user['id'], db)
         return transaction
     except HTTPException as e:
         logger.error(f'Error updating transaction: {e.detail}')

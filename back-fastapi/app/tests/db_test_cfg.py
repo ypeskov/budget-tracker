@@ -6,7 +6,8 @@ from app.database import Base
 DB_NAME = 'budgeter_test'
 DB_USER = 'postgres'
 DB_PASSWORD = 'budgeter'
-DB_HOST = 'db-budgeter'
+# DB_HOST = 'db-budgeter'
+DB_HOST = 'localhost'
 
 SQLALCHEMY_DATABASE_URL = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}'
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False)
