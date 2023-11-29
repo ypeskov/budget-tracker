@@ -36,3 +36,8 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
                                                  onupdate=func.now(), nullable=False)
+
+    def __repr__(self):  # pragma: no cover
+        return f'User(id={self.id}, email="{self.email}", first_name="{self.first_name}", ' + \
+            f'last_name="{self.last_name}", is_active={self.is_active}, base_currency_id={self.base_currency_id}, ' + \
+            f'is_deleted={self.is_deleted}, created_at={self.created_at}, updated_at={self.updated_at})'

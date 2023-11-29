@@ -28,6 +28,7 @@ from app.services.auth import create_users as create_users_service, get_jwt_toke
 from app.tests.data.auth_data import test_users, main_test_user
 from app.tests.data.accounts_data import test_accounts
 
+ic.configureOutput(includeContext=True)
 app.dependency_overrides[get_db] = override_get_db
 
 db = next(override_get_db())

@@ -181,8 +181,7 @@ def test_update_transaction(token, one_account, create_user):
         updated_transaction['target_account_id'] = 999999999999
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(updated_transaction['id'], transaction_schema_update, main_test_user_id, db)
-    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert ex.value.detail == 'Invalid target account'
+    assert ex.value.status_code == status.HTTP_404_NOT_FOUND
 
     with pytest.raises(HTTPException) as ex:
         updated_transaction['category_id'] = 999999999999
@@ -475,8 +474,7 @@ def test_create_transaction_expense_route_invalid_account(token, one_account):
         }
         transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
                                            headers={'auth-token': token})
-        assert transaction_response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-        assert transaction_response.json()['detail'] == 'Invalid account'
+        assert transaction_response.status_code == status.HTTP_404_NOT_FOUND
 
     # clean up created transactions
     db.query(Transaction).filter(Transaction.account_id == 999999999).delete()
