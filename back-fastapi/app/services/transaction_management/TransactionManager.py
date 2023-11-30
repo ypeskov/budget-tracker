@@ -19,7 +19,7 @@ from app.services.CurrencyProcessor import CurrencyProcessor
 ic.configureOutput(includeContext=True)
 
 
-def check_account_ownership(user_id: int, account_id: int, db: Session):
+def check_account_ownership(user_id: int, account_id: int | None, db: Session):
     """ Check if account belongs to user """
     if account_id is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Account id is required')
@@ -43,11 +43,13 @@ class TransactionManager:
         self._transaction_details = transaction_details
         self._user_id = user_id
         self._is_update = False
-        self._prev_amount = Decimal(0.0)
-        self._prev_target_account_id = None
-        self._prev_target_amount = Decimal(0.0)
-        self._prev_is_transfer = None
-        self._prev_is_income = None
+
+        self._prev_account_id: int | None= None
+        self._prev_amount: Decimal = Decimal(0.0)
+        self._prev_target_account_id: int | None = None
+        self._prev_target_amount: Decimal = Decimal(0.0)
+        self._prev_is_transfer: bool = False
+        self._prev_is_income: bool = False
 
         self._prepare_transaction()
         self.set_account(transaction_details.account_id)
@@ -77,7 +79,7 @@ class TransactionManager:
 
         return self
 
-    def set_currency(self, currency_id: int = None) -> 'TransactionManager':
+    def set_currency(self, currency_id: int | None = None) -> 'TransactionManager':
         if currency_id is None:
             currency_id = self._transaction_details.currency_id
         if currency_id is None:
@@ -127,14 +129,16 @@ class TransactionManager:
 
             self._is_update = True
             self._prev_amount = self._transaction.amount
+            self._prev_account_id = self._transaction.account_id
             self._prev_target_account_id = self._transaction.target_account_id
-            self._prev_target_amount = self._transaction.target_amount
+            self._prev_target_amount = self._transaction.target_amount  # type: ignore
             self._prev_is_transfer = self._transaction.is_transfer
             self._prev_is_income = self._transaction.is_income
         else:
             self._is_update = False
             self._prev_amount = Decimal(0.0)
             self._prev_target_amount = Decimal(0.0)
+
             self._transaction: Transaction = Transaction()
             self._transaction.user_id = self._user_id
         return self
@@ -159,12 +163,26 @@ class TransactionManager:
 
         if self._transaction.account.currency_id != self._transaction.target_account.currency_id:
             currency_processor: CurrencyProcessor = CurrencyProcessor(self._transaction, self._db)
-            transaction = currency_processor.calculate_exchange_rate()
-        else:
-            self._transaction.target_amount = self._transaction.amount
+            self._transaction = currency_processor.calculate_exchange_rate()
+
+        if self._is_update:
+            if self._prev_is_transfer:
+                prev_target_account: Account = self._db.query(Account).filter_by(id=self._prev_target_account_id).one_or_none()  # type: ignore
+                prev_target_account.balance -= self._prev_target_amount
+
+                prev_account: Account = self._db.query(Account).filter_by(id=self._prev_account_id).one_or_none()  # type: ignore
+                prev_account.balance += self._prev_amount
+                self._db.add(prev_target_account)
+                self._db.add(prev_account)
+                self._db.commit()
+            else:
+                if self._prev_is_income:
+                    self._transaction.account.balance -= self._prev_amount
+                else:
+                    self._transaction.account.balance += self._prev_amount
 
         self._transaction.account.balance -= self._transaction.amount
-        self._transaction.target_account.balance += self._transaction.target_amount
+        self._transaction.target_account.balance += self._transaction.target_amount  # type: ignore
 
     def _process_non_transfer_type(self):
         """If the transaction is not transfer from one account to another then this function processes it"""

@@ -1,6 +1,7 @@
 services:
   back:
     container_name: "back"
+    platform: "linux/amd64"
     build: 
       context: "./back-fastapi"
       dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"

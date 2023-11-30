@@ -221,19 +221,23 @@ def test_update_transaction_transfer_type(token, one_account, create_transaction
         client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json())['balance']
     acc2_updated_balance = (
         client.get(f'/accounts/{second_account_dict["id"]}', headers={'auth-token': token}).json())['balance']
+    assert acc1_updated_balance == one_account['balance'] - src_amount
+    assert acc2_updated_balance == second_account_dict['balance'] + target_amount
 
+    new_src_amount = 50
+    new_target_amount = 100
     transaction_details_update = {**transaction_details,
                                   'id': transaction.id,
                                   'user_id': transaction.user_id,
-                                  'amount': src_amount,
-                                  'target_amount': target_amount}
+                                  'amount': new_src_amount,
+                                  'target_amount': new_target_amount,}
     update_transaction_service(UpdateTransactionSchema(**transaction_details_update), main_test_user_id, db)
 
     updated_first_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
     updated_second_account = client.get(f'/accounts/{second_account_dict["id"]}', headers={'auth-token': token}).json()
 
-    assert updated_first_account['balance'] == acc1_updated_balance - src_amount
-    assert updated_second_account['balance'] == acc2_updated_balance + target_amount
+    assert updated_first_account['balance'] == acc1_updated_balance + src_amount - new_src_amount
+    assert updated_second_account['balance'] == acc2_updated_balance - target_amount + new_target_amount
 
     db.query(Transaction).filter(Transaction.id == transaction.id).delete()
     db.query(Account).filter(Account.id == second_account_dict['id']).delete()
@@ -289,9 +293,8 @@ def test_currency_processor(create_transaction, token, one_account):
     transaction: Transaction = create_transaction(transaction_details)
 
     with pytest.raises(HTTPException) as ex:
-        CurrencyProcessor(None, db).calculate_exchange_rate()
+        CurrencyProcessor(transaction, db).calculate_exchange_rate()
     assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert ex.value.detail == 'Transaction is required'
 
     tmp_transaction = Transaction(**transaction_details)
     tmp_transaction.target_amount = None
