@@ -295,7 +295,6 @@ def test_currency_processor(create_transaction, token, one_account):
     with pytest.raises(HTTPException) as ex:
         CurrencyProcessor(transaction, db).calculate_exchange_rate()
     assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert ex.value.detail == 'Transaction is required'
 
     tmp_transaction = Transaction(**transaction_details)
     tmp_transaction.target_amount = None

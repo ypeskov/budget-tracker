@@ -134,7 +134,7 @@ class TransactionManager:
             self._prev_amount = self._transaction.amount
             self._prev_account_id = self._transaction.account_id
             self._prev_target_account_id = self._transaction.target_account_id
-            self._prev_target_amount = self._transaction.target_amount
+            self._prev_target_amount = self._transaction.target_amount  # type: ignore
             self._prev_is_transfer = self._transaction.is_transfer
             self._prev_is_income = self._transaction.is_income
         else:
