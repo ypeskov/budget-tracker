@@ -8,7 +8,12 @@ from alembic import context
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+env = os.environ.get("ENV")
+
+if env == "prod":
+    load_dotenv(".env.prod")
+else:
+    load_dotenv(".env")
 db_user = os.environ.get("db_user")
 db_password = os.environ.get("db_password")
 db_host = os.environ.get("db_host")
