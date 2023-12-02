@@ -8,12 +8,18 @@ from alembic import context
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+env = os.environ.get("ENV")
+
+if env == "prod":
+    load_dotenv(".env.prod")
+else:
+    load_dotenv(".env")
 db_user = os.environ.get("db_user")
 db_password = os.environ.get("db_password")
 db_host = os.environ.get("db_host")
 db_name = os.environ.get("db_name")
-connection_string = f'postgresql://{db_user}:{db_password}@{db_host}:5432/{db_name}'
+db_port = os.environ.get("db_port")
+connection_string = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

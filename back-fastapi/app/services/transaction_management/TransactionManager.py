@@ -13,7 +13,7 @@ from app.models.Transaction import Transaction
 from app.models.Account import Account
 from app.models.UserCategory import UserCategory
 
-from app.schemas.transaction_schema import CreateTransactionSchema
+from app.schemas.transaction_schema import UpdateTransactionSchema
 from app.services.CurrencyProcessor import CurrencyProcessor
 
 ic.configureOutput(includeContext=True)
@@ -38,15 +38,12 @@ def check_account_ownership(user_id: int, account_id: int | None, db: Session):
 
 
 class TransactionManager:
-    def __init__(self, transaction_details: CreateTransactionSchema, user_id: int, db: Session):
-        """
-
-        :type transaction_details: CreateTransactionSchema
-        """
+    def __init__(self, transaction_details: UpdateTransactionSchema, user_id: int, db: Session):
         self._db = db
         self._transaction_details = transaction_details
         self._user_id = user_id
         self._is_update = False
+
         self._prev_account_id: int | None= None
         self._prev_amount: Decimal = Decimal(0.0)
         self._prev_target_account_id: int | None = None
@@ -141,7 +138,8 @@ class TransactionManager:
             self._is_update = False
             self._prev_amount = Decimal(0.0)
             self._prev_target_amount = Decimal(0.0)
-            self._transaction = Transaction()
+
+            self._transaction: Transaction = Transaction()
             self._transaction.user_id = self._user_id
         return self
 

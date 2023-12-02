@@ -6,10 +6,10 @@ from sqlalchemy.exc import NoResultFound
 from app.logger_config import logger
 from app.models.Transaction import Transaction
 from app.services.transaction_management.TransactionManager import TransactionManager
-from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
+from app.schemas.transaction_schema import UpdateTransactionSchema
 
 
-def create_transaction(transaction_details: CreateTransactionSchema, user_id: int, db: Session) -> Transaction:
+def create_transaction(transaction_details: UpdateTransactionSchema, user_id: int, db: Session) -> Transaction:
     """ Create a new transaction for a user
     :param transaction_details: CreateTransactionSchema
     :param user_id: int

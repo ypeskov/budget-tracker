@@ -25,7 +25,7 @@ export class TransactionsService {
   }
 
   async addTransaction(transactionDetails) {
-    const transactionDetailsUrl = `/transactions`;
+    const transactionDetailsUrl = `/transactions/`;
     const createdTransaction = await request(transactionDetailsUrl, {
                                         method: 'POST',
                                         body: JSON.stringify(transactionDetails),
