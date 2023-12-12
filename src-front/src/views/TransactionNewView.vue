@@ -120,7 +120,16 @@ async function submitTransaction() {
     console.log(e)
     router.push({ name: 'home' });
   }
+}
 
+async function deleteTransaction() {
+  try {
+    await Services.transactionsService.deleteTransaction(transaction.id);
+    router.push({ name: 'transactions' });
+  } catch (e) {
+    console.log(e)
+    router.push({ name: 'home' });
+  }
 }
 </script>
 
@@ -159,10 +168,22 @@ async function submitTransaction() {
                 rows="3"></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="flex-container">
+              <button type="submit" class="btn btn-primary">Submit</button>
+              <button @click="deleteTransaction" class="btn btn-danger">Delete</button>
+            </div>
+            
           </form>
         </div>
       </div>
     </div>
   </main>
 </template>
+
+<style scoped>
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+</style>

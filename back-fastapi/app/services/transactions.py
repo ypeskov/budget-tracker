@@ -6,10 +6,10 @@ from sqlalchemy.exc import NoResultFound
 from app.logger_config import logger
 from app.models.Transaction import Transaction
 from app.services.transaction_management.TransactionManager import TransactionManager
-from app.schemas.transaction_schema import UpdateTransactionSchema
+from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 
 
-def create_transaction(transaction_details: UpdateTransactionSchema, user_id: int, db: Session) -> Transaction:
+def create_transaction(transaction_details: CreateTransactionSchema, user_id: int, db: Session) -> Transaction:
     """ Create a new transaction for a user
     :param transaction_details: CreateTransactionSchema
     :param user_id: int
@@ -23,13 +23,16 @@ def create_transaction(transaction_details: UpdateTransactionSchema, user_id: in
     return transaction
 
 
-def get_transactions(user_id: int, db: Session, params={}) -> list[Transaction]:
+def get_transactions(user_id: int, db: Session, params={}, include_deleted=False) -> list[Transaction]:
     stmt = (db.query(Transaction).options(joinedload(Transaction.account),
                                           joinedload(Transaction.target_account),
                                           joinedload(Transaction.category),
                                           joinedload(Transaction.currency))
             .filter_by(user_id=user_id)
             .order_by(Transaction.date_time.desc()))
+
+    if not include_deleted:
+        stmt = stmt.filter(Transaction.is_deleted == False)  # noqa: E712
 
     if 'types' in params:
         type_filters = []
@@ -97,3 +100,21 @@ def update(transaction_details: UpdateTransactionSchema, user_id: int, db: Sessi
     transaction: Transaction = transaction_manager.process().get_transaction()
 
     return transaction
+
+
+def delete(transaction_id: int, user_id: int, db: Session) -> Transaction:
+    transaction: Transaction = db.query(Transaction).filter_by(id=transaction_id).one_or_none()  # type: ignore
+
+    if transaction is None:
+        logger.error(f'Transaction {transaction_id} not found')
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Transaction not found')
+
+    if user_id != transaction.user_id:
+        logger.error(f'User {user_id} tried to delete not own transaction {transaction_id}')
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+    transaction.is_deleted = True
+    transaction_manager: TransactionManager = TransactionManager(transaction, user_id, db)
+    processed_transaction = transaction_manager.delete_transaction().get_transaction()
+
+    return processed_transaction
