@@ -45,4 +45,14 @@ export class TransactionsService {
     this.accountService.setShouldUpdateAccountsList(true);
     return updatedTransaction;
   }
+
+  async deleteTransaction(transactionId) {
+    const transactionDetailsUrl = `/transactions/${transactionId}`;
+    const deletedTransaction = await request(transactionDetailsUrl, {
+                                        method: 'DELETE',
+                                      }, 
+                                      {userService: this.userService});
+    this.accountService.setShouldUpdateAccountsList(true);
+    return deletedTransaction;
+  }
 }
