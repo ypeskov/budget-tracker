@@ -15,8 +15,6 @@ from app.schemas.account_schema import CreateAccountSchema
 import icecream
 from icecream import ic
 
-icecream.install()
-
 client = TestClient(app)
 
 

@@ -44,7 +44,7 @@ class TransactionManager:
         self._user_id = user_id
         self._is_update = False
 
-        self._prev_account_id: int | None= None
+        self._prev_account_id: int | None = None
         self._prev_amount: Decimal = Decimal(0.0)
         self._prev_target_account_id: int | None = None
         self._prev_target_amount: Decimal = Decimal(0.0)
@@ -139,7 +139,7 @@ class TransactionManager:
             self._prev_amount = Decimal(0.0)
             self._prev_target_amount = Decimal(0.0)
 
-            self._transaction: Transaction = Transaction()
+            self._transaction = Transaction()
             self._transaction.user_id = self._user_id
         return self
 
@@ -158,6 +158,19 @@ class TransactionManager:
 
         return self
 
+    def delete_transaction(self) -> 'TransactionManager':
+        """This function deletes transaction"""
+        if self._transaction.is_transfer:
+            self.update_acc_prev_transfer()
+        else:
+            self.update_acc_prev_nontransfer()
+
+        self._transaction.is_deleted = True
+        self._db.add(self._transaction)
+        self._db.commit()
+
+        return self
+
     def _process_transfer_type(self) -> None:
         """This function processes case of transfer from one account to another"""
 
@@ -166,23 +179,29 @@ class TransactionManager:
             self._transaction = currency_processor.calculate_exchange_rate()
 
         if self._is_update:
-            if self._prev_is_transfer:
-                prev_target_account: Account = self._db.query(Account).filter_by(id=self._prev_target_account_id).one_or_none()  # type: ignore
-                prev_target_account.balance -= self._prev_target_amount
-
-                prev_account: Account = self._db.query(Account).filter_by(id=self._prev_account_id).one_or_none()  # type: ignore
-                prev_account.balance += self._prev_amount
-                self._db.add(prev_target_account)
-                self._db.add(prev_account)
-                self._db.commit()
-            else:
-                if self._prev_is_income:
-                    self._transaction.account.balance -= self._prev_amount
-                else:
-                    self._transaction.account.balance += self._prev_amount
+            self.update_acc_prev_transfer()
 
         self._transaction.account.balance -= self._transaction.amount
         self._transaction.target_account.balance += self._transaction.target_amount  # type: ignore
+
+    def update_acc_prev_transfer(self):
+        """This function updates account balance (by previous amount) if transaction is transfer"""
+        if self._prev_is_transfer:
+            prev_target_account: Account = self._db.query(Account).filter_by(  # type: ignore
+                id=self._prev_target_account_id).one_or_none()
+            prev_target_account.balance -= self._prev_target_amount
+
+            prev_account: Account = self._db.query(Account).filter_by(  # type: ignore
+                id=self._prev_account_id).one_or_none()
+            prev_account.balance += self._prev_amount
+            self._db.add(prev_target_account)
+            self._db.add(prev_account)
+            self._db.commit()
+        else:
+            if self._prev_is_income:
+                self._transaction.account.balance -= self._prev_amount
+            else:
+                self._transaction.account.balance += self._prev_amount
 
     def _process_non_transfer_type(self):
         """If the transaction is not transfer from one account to another then this function processes it"""
@@ -198,13 +217,17 @@ class TransactionManager:
                          f'with not own category {self._transaction.category_id}')
             raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
 
-        if self._is_update:
-            if self._prev_is_income:
-                self._transaction.account.balance -= self._prev_amount
-            else:
-                self._transaction.account.balance += self._prev_amount
+        self.update_acc_prev_nontransfer()
 
         if self._transaction.is_income:
             self._transaction.account.balance += self._transaction.amount
         else:
             self._transaction.account.balance -= self._transaction.amount
+
+    def update_acc_prev_nontransfer(self):
+        """This function updates account balance (by previous amount) if transaction is not transfer"""
+        if self._is_update:
+            if self._prev_is_income:
+                self._transaction.account.balance -= self._prev_amount
+            else:
+                self._transaction.account.balance += self._prev_amount

@@ -7,7 +7,7 @@ from app.logger_config import logger
 from app.database import get_db
 from app.schemas.transaction_schema import CreateTransactionSchema, ResponseTransactionSchema, UpdateTransactionSchema
 from app.dependencies.check_token import check_token
-from app.services.transactions import create_transaction, get_transactions, get_transaction_details, update
+from app.services.transactions import create_transaction, get_transactions, get_transaction_details, update, delete
 
 from app.utils.sanitize_transaction_filters import prepare_filters
 
@@ -27,6 +27,7 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
     transaction = create_transaction(transaction_dto, request.state.user['id'], db)
 
     return transaction
+
 
 @router.get('/', response_model=list[ResponseTransactionSchema])
 def get_user_transactions(request: Request, db: Session = Depends(get_db)):
@@ -62,3 +63,22 @@ def update_transaction(transaction_details: UpdateTransactionSchema,
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to update transaction')
+
+
+@router.delete('/{transaction_id}', response_model=ResponseTransactionSchema)
+def delete_transaction(transaction_id: int, request: Request,
+                       db: Session = Depends(get_db)) -> ResponseTransactionSchema:
+    """ Delete transaction """
+    try:
+        transaction = delete(transaction_id, request.state.user['id'], db)
+        return transaction
+    except HTTPException as e:
+        logger.error(f'Error deleting transaction: {e.detail}')
+        if e.status_code == status.HTTP_404_NOT_FOUND:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
+        elif e.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to delete transaction')
