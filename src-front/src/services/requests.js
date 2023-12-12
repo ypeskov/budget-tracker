@@ -28,7 +28,9 @@ export async function request(endPoint, params={}, services={}) {
     services.userService.logOutUser();
     throw new HttpError('Unauthorized', 401);
   } else {
-    console.log(response);
+    const err = await response.json();
+    console.log(err.detail);
+    throw new HttpError(err.detail, response.status);
   }
   return [];
 }

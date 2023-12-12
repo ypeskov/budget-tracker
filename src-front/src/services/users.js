@@ -13,7 +13,7 @@ export class UserService {
     this.userStore = userStore;
   }
 
-  injectServices(services={}) {
+  injectServices(services = {}) {
     for (const [serviceName, service] of Object.entries(services)) {
       this[serviceName] = service;
     }
@@ -26,17 +26,20 @@ export class UserService {
       password,
     };
     try {
-      const data = await request(loginPath, {
-                                        method: 'POST',
-                                        body: JSON.stringify(requestBody),
-                                      }, 
-                                      {userService: this});
+      const data = await request(
+        loginPath,
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody),
+        },
+        { userService: this },
+      );
       if (data.access_token) {
         this.userStore.accessToken = data.access_token;
         this.getUserProfile(this.userStore.accessToken);
         this.accountsService.getAllUserAccounts();
       } else {
-        alert('Something went wrong!');
+        console.log('Something went wrong!');
       }
     } catch (e) {
       if (e instanceof HttpError && e.statusCode === 401) {
@@ -82,7 +85,35 @@ export class UserService {
         exp: null,
       },
       false,
-      ''
+      '',
     );
+  }
+
+  async registerUser(email, password, firstName, lastName) {
+    const registerPath = '/auth/register/';
+    const requestBody = {
+      email,
+      password,
+      first_name: firstName,
+      last_name: lastName,
+    };
+    try {
+      const data = await request(
+        registerPath,
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody),
+        },
+        { userService: this },
+      );
+      console.log('Registration successful');
+    } catch (e) {
+      if (e instanceof HttpError) {
+        console.error('Registration error:', e.message);
+      } else {
+        console.error('Unexpected error:', e);
+      }
+      throw e;
+    }
   }
 }

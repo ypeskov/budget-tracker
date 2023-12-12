@@ -41,24 +41,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container">
+  <div class="container mt-5">
     <main>
       <form @submit.prevent="submitLogin" autocomplete="on">
-        <div class="row">
-          <div class="col">
-            <input type="email" :value="loginEmail" @change="updateEmail" ref="emailInputRef" />
-          </div>
+        <div class="mb-3">
+          <label for="emailInput" class="form-label">Email address</label>
+          <input type="email" class="form-control" id="emailInput" :value="loginEmail" @change="updateEmail"
+            ref="emailInputRef" placeholder="Enter email" />
         </div>
-        <div class="row">
-          <div class="col">
-            <input type="password" v-model="loginPassword" />
-          </div>
+        <div class="mb-3">
+          <label for="passwordInput" class="form-label">Password</label>
+          <input type="password" class="form-control" id="passwordInput" v-model="loginPassword"
+            placeholder="Enter password" />
         </div>
-        <div class="row">
-          <div class="col">
-            <button type="submit">Login</button>
-          </div>
-        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
       </form>
     </main>
   </div>
