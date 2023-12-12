@@ -45,17 +45,22 @@ onMounted(() => {
     <main>
       <form @submit.prevent="submitLogin" autocomplete="on">
         <div class="mb-3">
-          <label for="emailInput" class="form-label">Email address</label>
+          <label for="emailInput" class="form-label">
+            Email Address <span class="text-danger">*</span> <!-- Red asterisk for required field -->
+          </label>
           <input type="email" class="form-control" id="emailInput" :value="loginEmail" @change="updateEmail"
-            ref="emailInputRef" placeholder="Enter email" />
+            ref="emailInputRef" placeholder="Enter Email" required /> <!-- 'required' attribute added -->
         </div>
         <div class="mb-3">
-          <label for="passwordInput" class="form-label">Password</label>
+          <label for="passwordInput" class="form-label">
+            Password <span class="text-danger">*</span> <!-- Red asterisk for required field -->
+          </label>
           <input type="password" class="form-control" id="passwordInput" v-model="loginPassword"
-            placeholder="Enter password" />
+            placeholder="Enter Password" required /> <!-- 'required' attribute added -->
         </div>
         <button type="submit" class="btn btn-primary">Login</button>
       </form>
     </main>
   </div>
 </template>
+
