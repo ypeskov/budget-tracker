@@ -24,7 +24,17 @@ router = APIRouter(
 def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Request, db: Session = Depends(get_db)):
     """ Add a new transaction for a user """
 
-    transaction = create_transaction(transaction_dto, request.state.user['id'], db)
+    try:
+        transaction = create_transaction(transaction_dto, request.state.user['id'], db)
+    except HTTPException as e:
+        ic(e)
+        logger.exception(f'Error creating transaction: {e.detail}')
+        if e.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to create transaction')
 
     return transaction
 
@@ -56,9 +66,9 @@ def update_transaction(transaction_details: UpdateTransactionSchema,
     except HTTPException as e:
         logger.error(f'Error updating transaction: {e.detail}')
         if e.status_code == status.HTTP_404_NOT_FOUND:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
         elif e.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unable to update transaction")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)
     except Exception as e:
         logger.exception(e)
@@ -75,10 +85,10 @@ def delete_transaction(transaction_id: int, request: Request,
     except HTTPException as e:
         logger.error(f'Error deleting transaction: {e.detail}')
         if e.status_code == status.HTTP_404_NOT_FOUND:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
         elif e.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to delete transaction")
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to delete transaction')

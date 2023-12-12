@@ -13,7 +13,7 @@ from app.models.Transaction import Transaction
 from app.models.Account import Account
 from app.models.UserCategory import UserCategory
 
-from app.schemas.transaction_schema import UpdateTransactionSchema
+from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.services.CurrencyProcessor import CurrencyProcessor
 
 ic.configureOutput(includeContext=True)
@@ -38,7 +38,7 @@ def check_account_ownership(user_id: int, account_id: int | None, db: Session):
 
 
 class TransactionManager:
-    def __init__(self, transaction_details: UpdateTransactionSchema, user_id: int, db: Session):
+    def __init__(self, transaction_details: UpdateTransactionSchema | CreateTransactionSchema, user_id: int, db: Session):
         self._db = db
         self._transaction_details = transaction_details
         self._user_id = user_id
@@ -130,6 +130,7 @@ class TransactionManager:
             self._is_update = True
             self._prev_amount = self._transaction.amount
             self._prev_account_id = self._transaction.account_id
+            self._prev_account = self._transaction.account
             self._prev_target_account_id = self._transaction.target_account_id
             self._prev_target_amount = self._transaction.target_amount  # type: ignore
             self._prev_is_transfer = self._transaction.is_transfer
@@ -151,10 +152,12 @@ class TransactionManager:
             self._process_transfer_type()
         else:
             self._process_non_transfer_type()
-
+        ic(self._transaction.account)
         self._db.add(self._transaction)
+        self._db.add(self._transaction.account)
         self._db.commit()
         self._db.refresh(self._transaction)
+        self._db.refresh(self._transaction.account)
 
         return self
 
@@ -228,6 +231,7 @@ class TransactionManager:
         """This function updates account balance (by previous amount) if transaction is not transfer"""
         if self._is_update:
             if self._prev_is_income:
-                self._transaction.account.balance -= self._prev_amount
+                self._prev_account.balance -= self._prev_amount
             else:
-                self._transaction.account.balance += self._prev_amount
+                self._prev_account.balance += self._prev_amount
+            self._db.add(self._prev_account)
