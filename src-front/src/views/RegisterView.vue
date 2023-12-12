@@ -47,23 +47,31 @@ onMounted(() => {
           <label for="firstNameInput" class="form-label">First Name</label>
           <input type="text" class="form-control" id="firstNameInput" v-model="firstName" placeholder="First Name" />
         </div>
+        
         <div class="mb-3">
           <label for="lastNameInput" class="form-label">Last Name</label>
           <input type="text" class="form-control" id="lastNameInput" v-model="lastName" placeholder="Last Name" />
         </div>
+        
         <div class="mb-3">
-          <label for="emailInput" class="form-label">Email Address</label>
+          <label for="emailInput" class="form-label">
+            Email Address <span class="text-danger">*</span> <!-- Red asterisk for required field -->
+          </label>
           <input type="email" class="form-control" id="emailInput" :value="registerEmail" @change="updateEmail"
-            ref="emailInputRef" placeholder="Enter Email" />
-          <div v-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</div> <!-- Error message display -->
+            ref="emailInputRef" placeholder="Enter Email" required /> <!-- 'required' attribute added -->
+          <div v-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</div>
         </div>
+
         <div class="mb-3">
-          <label for="passwordInput" class="form-label">Password</label>
+          <label for="passwordInput" class="form-label">
+            Password <span class="text-danger">*</span> <!-- Red asterisk for required field -->
+          </label>
           <input type="password" class="form-control" id="passwordInput" v-model="registerPassword"
-            placeholder="Password" />
+            placeholder="Password" required /> <!-- 'required' attribute added -->
         </div>
         <button type="submit" class="btn btn-primary">Register</button>
       </form>
     </main>
   </div>
 </template>
+
