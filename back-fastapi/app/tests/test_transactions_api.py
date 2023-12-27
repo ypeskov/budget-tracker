@@ -479,7 +479,7 @@ def test_create_transaction_expense_route_invalid_category(token, one_account):
         transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
                                            headers={'auth-token': token})
         logger.info(transaction_response.json())
-        assert transaction_response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert transaction_response.status_code == status.HTTP_400_BAD_REQUEST
 
     # clean up created transactions
     db.query(Transaction).filter(Transaction.category_id == 999999999).delete()
