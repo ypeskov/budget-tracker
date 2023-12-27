@@ -44,6 +44,7 @@ onBeforeMount(() => {
             </span>
             <span v-if="!userStore.isLoggedIn">
               <RouterLink :to="{ name: 'login' }">Login</RouterLink>
+              <RouterLink :to="{ name: 'register' }">Register</RouterLink>
             </span>
             <span v-else>
               <RouterLink :to="{ name: 'logout' }">Logout</RouterLink>
