@@ -152,7 +152,6 @@ class TransactionManager:
             self._process_transfer_type()
         else:
             self._process_non_transfer_type()
-        ic(self._transaction.account)
         self._db.add(self._transaction)
         self._db.add(self._transaction.account)
         self._db.commit()

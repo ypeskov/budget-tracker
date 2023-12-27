@@ -27,10 +27,13 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
     try:
         transaction = create_transaction(transaction_dto, request.state.user['id'], db)
     except HTTPException as e:
-        ic(e)
         logger.exception(f'Error creating transaction: {e.detail}')
-        if e.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
+        if e.status_code == status.HTTP_400_BAD_REQUEST:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.detail)
+        elif e.status_code == status.HTTP_403_FORBIDDEN:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.detail)
+        elif e.status_code == status.HTTP_404_NOT_FOUND:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)
     except Exception as e:
         logger.exception(e)
