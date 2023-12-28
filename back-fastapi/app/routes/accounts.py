@@ -6,8 +6,7 @@ from app.logger_config import logger
 from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema, UpdateAccountSchema
 from app.schemas.account_type_schema import AccountTypeResponseSchema
 from app.dependencies.check_token import check_token
-from app.services.accounts import create_account, get_user_accounts, \
-    get_account_details, get_account_types as get_types
+from app.services.accounts import create_account, get_user_accounts, get_account_details, get_account_types
 
 router = APIRouter(
     tags=['Accounts'],
@@ -27,8 +26,8 @@ def get_accounts(request: Request, db: Session = Depends(get_db)):
 
 
 @router.get('/types/', response_model=list[AccountTypeResponseSchema] | None)
-def get_account_types(db: Session = Depends(get_db)):
-    return get_types(db)
+def account_types(db: Session = Depends(get_db)):
+    return get_account_types(db)
 
 
 @router.get('/{account_id}', response_model=AccountResponseSchema | None)
