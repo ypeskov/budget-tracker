@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.orm import Session
-from icecream import ic
 
 from app.database import get_db
+from app.logger_config import logger
 from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema, UpdateAccountSchema
 from app.schemas.account_type_schema import AccountTypeResponseSchema
 from app.dependencies.check_token import check_token
@@ -44,5 +44,9 @@ def update_account(account_id: int,
                    request: Request,
                    db: Session = Depends(get_db)):
     account_dto.id = account_id
-    acc = create_account(account_dto, request.state.user['id'], db)
+    try:
+        acc = create_account(account_dto, request.state.user['id'], db)
+    except HTTPException as e:
+        logger.exception(f'Error updating account: {e.detail}')
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
     return acc

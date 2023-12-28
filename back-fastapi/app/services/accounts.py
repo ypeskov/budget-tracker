@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import UTC
 
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
@@ -28,10 +29,12 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account type")
 
     if account_dto.opening_date is None:
-        account_dto.opening_date = datetime.utcnow()
+        account_dto.opening_date = datetime.now(UTC)
 
     if hasattr(account_dto, 'id'):
-        account = db.query(Account).filter_by(id=account_dto.id).first()
+        account = db.execute(select(Account).where(Account.id == account_dto.id)).scalar_one_or_none()
+        if account is None:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account")
         if account:
             account.user = existing_user
             account.account_type = account_type

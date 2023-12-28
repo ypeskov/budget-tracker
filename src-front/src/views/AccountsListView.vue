@@ -73,7 +73,7 @@ async function updateAccuntsList(event) {
               {{ acc.name }}
               </div>
               <div class="col-2">
-                {{ acc.account_type.type_name }}
+                {{ acc.accountType.type_name }}
               </div>
               <div class="col account-balance">
                 {{ acc.balance }} {{ acc.currency.code }}
