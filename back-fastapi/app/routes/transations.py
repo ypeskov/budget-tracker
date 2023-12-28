@@ -34,8 +34,8 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.detail)
         elif e.status_code == status.HTTP_404_NOT_FOUND:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)
-    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)  # pragma: no cover
+    except Exception as e:  # pragma: no cover
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to create transaction')
 

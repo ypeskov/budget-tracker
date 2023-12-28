@@ -1,0 +1,11 @@
+[run]
+omit =
+    app/tests/*
+    app/data_loaders/*
+    app/config.py
+    app/database.py
+    *__init__.py*
+    app/models/BaseCurrencyChangeHistory.py
+    app/models/CreditAccountDetails.py
+    app/models/ExchangeRateHistory.py
+
