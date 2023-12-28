@@ -7,11 +7,11 @@ from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from app.database import Base
 
-from .AccountType import AccountType
-from .User import User
-from .Currency import Currency
+from app.models.AccountType import AccountType
+from app.models.User import User
+from app.models.Currency import Currency
 
-if TYPE_CHECKING: # pragma: no cover
+if TYPE_CHECKING:  # pragma: no cover
     from .Transaction import Transaction
 
 ACCOUNT_NAME_MAX_LENGTH = 100
@@ -31,7 +31,7 @@ class Account(Base):
     comment: Mapped[str] = mapped_column(nullable=True)
     is_hidden: Mapped[bool] = mapped_column(default=False)
 
-    user: Mapped[User] = relationship(back_populates="accounts", passive_deletes=True)
+    user: Mapped[User] = relationship(backref="accounts", passive_deletes=True)
     account_type: Mapped[AccountType] = relationship()
     currency: Mapped[Currency] = relationship()
     transactions: Mapped['Transaction'] = relationship(back_populates='account', foreign_keys='Transaction.account_id')

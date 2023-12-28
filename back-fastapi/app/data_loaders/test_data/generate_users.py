@@ -40,7 +40,9 @@ def clear_test_users():
             db.delete(u)
         db.commit()
     except Exception as e:
+        ic()
         ic(e)
+        raise e
 
 
 if __name__ == '__main__':

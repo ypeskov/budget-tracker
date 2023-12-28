@@ -36,7 +36,7 @@ class Transaction(Base):
     is_transfer: Mapped[bool] = mapped_column(nullable=False)
     is_income: Mapped[bool] = mapped_column(default=False)
 
-    user: Mapped[User] = relationship(back_populates='transactions')
+    user: Mapped[User] = relationship(backref='transactions')
     account: Mapped['Account'] = relationship('Account', foreign_keys="Transaction.account_id")
     target_account: Mapped['Account'] = relationship('Account', foreign_keys="Transaction.target_account_id")
 
