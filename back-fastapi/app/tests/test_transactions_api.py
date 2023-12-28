@@ -231,7 +231,7 @@ def test_update_transaction_transfer_type(token, one_account, create_transaction
                                   'id': transaction.id,
                                   'user_id': transaction.user_id,
                                   'amount': new_src_amount,
-                                  'target_amount': new_target_amount,}
+                                  'target_amount': new_target_amount, }
     update_transaction_service(UpdateTransactionSchema(**transaction_details_update), main_test_user_id, db)
 
     updated_first_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
@@ -329,7 +329,18 @@ def test_process_transfer_type(create_transaction, token, one_account, create_us
     second_account_response = client.post(f'{accounts_path_prefix}/', json=second_account_details,
                                           headers={'auth-token': token})
     assert second_account_response.status_code == status.HTTP_200_OK
-    second_account = Account(**second_account_response.json())
+    json_response = second_account_response.json()
+    second_account = Account(user_id=json_response['userId'],
+                             account_type_id=json_response['accountTypeId'],
+                             balance=json_response['balance'],
+                             currency_id=json_response['currencyId'],
+                             id=json_response['id'],
+                             initial_balance=json_response['initialBalance'],
+                             is_hidden=json_response['isHidden'],
+                             name=json_response['name'],
+                             opening_date=json_response['openingDate'],
+                             comment=json_response['comment'],
+                             )
     transaction_details = {
         'account_id': one_account['id'],
         'amount': 100,
@@ -361,7 +372,18 @@ def test_process_transfer_type(create_transaction, token, one_account, create_us
     third_account_response = client.post(f'{accounts_path_prefix}/', json=third_account_details,
                                          headers={'auth-token': new_user_token})
     assert third_account_response.status_code == status.HTTP_200_OK
-    third_account = Account(**third_account_response.json())
+    json_response = third_account_response.json()
+    third_account = Account(user_id=json_response['userId'],
+                            account_type_id=json_response['accountTypeId'],
+                            balance=json_response['balance'],
+                            currency_id=json_response['currencyId'],
+                            id=json_response['id'],
+                            initial_balance=json_response['initialBalance'],
+                            is_hidden=json_response['isHidden'],
+                            name=json_response['name'],
+                            opening_date=json_response['openingDate'],
+                            comment=json_response['comment'],
+                            )
 
     db.query(Account).filter(Account.id == second_account.id).delete()
     db.query(Account).filter(Account.id == third_account.id).delete()
@@ -379,11 +401,23 @@ def test_process_transfer_type_diff_currencies(create_transaction, token, one_ac
 
     currencies = client.get('/currencies/', headers={'auth-token': token}).json()
 
-    second_account_details = {**test_accounts[0], 'name': 'Second account', 'id': first_account.id + 1,
+    second_account_details = {**test_accounts[0],
+                              'name': 'Second account',
+                              'id': first_account.id + 1,
                               'currency_id': currencies[1]['id']}
-    second_account_response = client.post(f'{accounts_path_prefix}/', json=second_account_details,
-                                          headers={'auth-token': token}).json()
-    second_account = Account(**second_account_response)
+    json_response = client.post(f'{accounts_path_prefix}/', json=second_account_details,
+                                headers={'auth-token': token}).json()
+    second_account = Account(user_id=json_response['userId'],
+                             account_type_id=json_response['accountTypeId'],
+                             balance=json_response['balance'],
+                             currency_id=json_response['currencyId'],
+                             id=json_response['id'],
+                             initial_balance=json_response['initialBalance'],
+                             is_hidden=json_response['isHidden'],
+                             name=json_response['name'],
+                             opening_date=json_response['openingDate'],
+                             comment=json_response['comment'],
+                             )
     second_account.balance = Decimal(second_account.balance)
 
     transaction_details = {
@@ -516,8 +550,18 @@ def test_create_transaction_forbidden(create_user):
     account_response = client.post(f'{accounts_path_prefix}/', json=account_details,
                                    headers={'auth-token': user1_token})
     assert account_response.status_code == status.HTTP_200_OK
-
-    account = Account(**account_response.json())
+    json_response = account_response.json()
+    account = Account(user_id=json_response['userId'],
+                      account_type_id=json_response['accountTypeId'],
+                      balance=json_response['balance'],
+                      currency_id=json_response['currencyId'],
+                      id=json_response['id'],
+                      initial_balance=json_response['initialBalance'],
+                      is_hidden=json_response['isHidden'],
+                      name=json_response['name'],
+                      opening_date=json_response['openingDate'],
+                      comment=json_response['comment'],
+                      )
 
     transaction_data = {
         'account_id': account.id,
@@ -566,7 +610,7 @@ def test_create_transaction_forbidden_account(create_user):
         'account_id': account2['id'],
         'category_id': categories[0]['id'],
         'amount': 100,
-        'currency_id': account2['currency_id'],
+        'currency_id': account2['currencyId'],
         'date': '2021-01-01',
         'is_income': False,
         'is_transfer': False,

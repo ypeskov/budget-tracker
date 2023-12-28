@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 from icecream import ic
@@ -10,16 +10,17 @@ from app.models.Account import Account
 from app.models.AccountType import AccountType
 from app.models.Currency import Currency
 from app.models.User import User
-from app.schemas.account_schema import CreateAccountSchema
+from app.schemas.account_schema import CreateAccountSchema, UpdateAccountSchema
 
 
-def create_account(account_dto: CreateAccountSchema, user_id: int, db: Session) -> Account:
+def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_id: int, db: Session) -> Account:
     """Create new account for user with user_id"""
     existing_user = db.query(User).filter(User.id == user_id).first()  # type: ignore
     if not existing_user:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid user")
 
-    currency = db.query(Currency).filter_by(id=account_dto.currency_id).first()
+    # currency = db.query(Currency).filter_by(id=account_dto.currency_id).first()
+    currency = db.execute(select(Currency).where(Currency.id == account_dto.currency_id)).scalar_one_or_none()
     if not currency:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid currency")
 
@@ -34,7 +35,7 @@ def create_account(account_dto: CreateAccountSchema, user_id: int, db: Session) 
                           initial_balance=account_dto.initial_balance, balance=account_dto.balance,
                           opening_date=account_dto.opening_date, is_hidden=account_dto.is_hidden, name=account_dto.name,
                           comment=account_dto.comment)
-    if account_dto.id is not None:
+    if hasattr(account_dto, 'id'):
         new_account.id = account_dto.id
     db.add(new_account)
     db.commit()

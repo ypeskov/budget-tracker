@@ -80,25 +80,26 @@ def test_get_invalid_account_details():
 def test_add_get_account(test_account, token):
     response_account = client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token})
     assert response_account.status_code == 200
+
     account_details = response_account.json()
     assert 'id' in account_details
     assert account_details['name'] == test_account['name']
-    assert account_details['currency_id'] == test_account['currency_id']
-    assert account_details['account_type_id'] == test_account['account_type_id']
+    assert account_details['currencyId'] == test_account['currencyId']
+    assert account_details['accountTypeId'] == test_account['accountTypeId']
     assert account_details['balance'] == test_account['balance']
-    assert 'opening_date' in account_details
-    assert account_details['opening_date'] is not None
+    assert 'openingDate' in account_details
+    assert account_details['openingDate'] is not None
 
     response = client.get(f'{accounts_path_prefix}/{account_details["id"]}', headers={'auth-token': token})
     assert response.status_code == 200
     account_details = response.json()
     assert 'id' in account_details
     assert account_details['name'] == test_account['name']
-    assert account_details['currency_id'] == test_account['currency_id']
-    assert account_details['account_type_id'] == test_account['account_type_id']
+    assert account_details['currencyId'] == test_account['currencyId']
+    assert account_details['accountTypeId'] == test_account['accountTypeId']
     assert account_details['balance'] == test_account['balance']
-    assert 'opening_date' in account_details
-    assert account_details['opening_date'] is not None
+    assert 'openingDate' in account_details
+    assert account_details['openingDate'] is not None
 
     # delete account after test
     db.query(Account).filter_by(id=account_details['id']).delete()
@@ -115,19 +116,19 @@ def test_get_accounts_list(token, create_accounts):
 
     # check first account details in response
     assert accounts_list[0]['name'] == test_accounts[0]['name']
-    assert accounts_list[0]['currency_id'] == test_accounts[0]['currency_id']
-    assert accounts_list[0]['account_type_id'] == test_accounts[0]['account_type_id']
+    assert accounts_list[0]['currencyId'] == test_accounts[0]['currencyId']
+    assert accounts_list[0]['accountTypeId'] == test_accounts[0]['accountTypeId']
     assert accounts_list[0]['balance'] == test_accounts[0]['balance']
-    assert 'opening_date' in accounts_list[0]
-    assert accounts_list[0]['opening_date'] is not None
+    assert 'openingDate' in accounts_list[0]
+    assert accounts_list[0]['openingDate'] is not None
 
     # check last account details in response
     assert accounts_list[7]['name'] == test_accounts[7]['name']
-    assert accounts_list[7]['currency_id'] == test_accounts[7]['currency_id']
-    assert accounts_list[7]['account_type_id'] == test_accounts[7]['account_type_id']
+    assert accounts_list[0]['currencyId'] == test_accounts[0]['currencyId']
+    assert accounts_list[0]['accountTypeId'] == test_accounts[0]['accountTypeId']
     assert accounts_list[7]['balance'] == test_accounts[7]['balance']
-    assert 'opening_date' in accounts_list[7]
-    assert accounts_list[7]['opening_date'] is not None
+    assert 'openingDate' in accounts_list[0]
+    assert accounts_list[0]['openingDate'] is not None
 
 
 def test_all_account_types_exist(token):
