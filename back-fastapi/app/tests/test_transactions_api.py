@@ -3,6 +3,7 @@ from decimal import Decimal
 import pytest
 from fastapi import status, HTTPException
 from fastapi.testclient import TestClient
+from icecream import ic
 
 from app.main import app
 from app.logger_config import logger
@@ -319,7 +320,12 @@ def test_currency_processor(create_transaction, token, one_account):
 
 
 def test_process_transfer_type(create_transaction, token, one_account, create_user):
-    second_account_details = {**one_account, 'name': 'Second account', 'id': one_account['id'] + 1}
+    second_account_details = {
+        **one_account,
+        'name': 'Second account',
+        'id': one_account['id'] + 1
+    }
+
     second_account_response = client.post(f'{accounts_path_prefix}/', json=second_account_details,
                                           headers={'auth-token': token})
     assert second_account_response.status_code == status.HTTP_200_OK
@@ -502,6 +508,7 @@ def test_create_transaction_forbidden(create_user):
     account_details = {
         'name': 'Test account',
         'account_type_id': 2,
+        'initial_balance': 100,
         'balance': 100,
         'currency_id': 1,
         'user_id': user1.id,
@@ -546,6 +553,7 @@ def test_create_transaction_forbidden_account(create_user):
     account2_details = {
         'name': 'Test account',
         'account_type_id': 2,
+        'initial_balance': 100,
         'balance': 100,
         'currency_id': 1,
         'user_id': user2.id,

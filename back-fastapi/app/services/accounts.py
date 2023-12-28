@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
+from icecream import ic
 
 from app.models.Account import Account
 from app.models.AccountType import AccountType
@@ -29,7 +30,8 @@ def create_account(account_dto: CreateAccountSchema, user_id: int, db: Session) 
     if account_dto.opening_date is None:
         account_dto.opening_date = datetime.utcnow()
 
-    new_account = Account(user=existing_user, account_type=account_type, currency=currency, balance=account_dto.balance,
+    new_account = Account(user=existing_user, account_type=account_type, currency=currency,
+                          initial_balance=account_dto.initial_balance, balance=account_dto.balance,
                           opening_date=account_dto.opening_date, is_hidden=account_dto.is_hidden, name=account_dto.name,
                           comment=account_dto.comment)
     if account_dto.id is not None:

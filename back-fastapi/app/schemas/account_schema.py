@@ -12,6 +12,9 @@ class CreateAccountSchema(BaseModel):
     user_id: int | None = None
     account_type_id: int
     currency_id: int
+    initial_balance: Annotated[Decimal, PlainSerializer(
+            lambda x: float(x), return_type=float, when_used='json'
+        )]
     balance: Annotated[Decimal, PlainSerializer(
             lambda x: float(x), return_type=float, when_used='json'
         )]

@@ -6,6 +6,7 @@ os.environ["TEST_MODE"] = "True"
 
 import pytest
 from fastapi.testclient import TestClient
+from icecream import ic
 
 from app.main import app
 from app.database import get_db
@@ -89,8 +90,13 @@ def token():
 
 
 @pytest.fixture(scope="function")
-def one_account(token) -> dict:
-    account_details = {**test_accounts[0], 'id': main_user_account1_id, 'user_id': main_test_user_id}
+def one_account(token):
+    account_details = {
+        **test_accounts[0],
+        'id': main_user_account1_id,
+        'user_id': main_test_user_id,
+        'initial_balance': test_accounts[0]['balance'],
+    }
 
     account_schema = CreateAccountSchema(**account_details)
     account: Account = create_account_service(account_schema, main_test_user_id, db)
@@ -99,6 +105,7 @@ def one_account(token) -> dict:
     if '_sa_instance_state' in account_dict:
         del account_dict['_sa_instance_state']
 
+    account_dict['initial_balance'] = float(account_dict['initial_balance'])
     account_dict['balance'] = float(account_dict['balance'])
     account_dict['opening_date'] = str(account_dict['opening_date'])
     account_dict['updated_at'] = str(account_dict['updated_at'])
@@ -117,6 +124,7 @@ def fake_account() -> CreateAccountSchema:
         'user_id': main_test_user_id,
         'currency_id': 1,
         'account_type_id': 1,
+        'initial_balance': 0,
         'balance': 0,
         'opening_date': None,
         'is_hidden': False,

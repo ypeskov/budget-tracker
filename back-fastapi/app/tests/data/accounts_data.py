@@ -32,6 +32,7 @@ test_accounts = [
         "name": "Test Account 1 (USD)",
         "currency_id": 1,
         "account_type_id": 2,
+        'initial_balance': 500_000,
         "balance": 500_000
     },
     {
@@ -39,6 +40,7 @@ test_accounts = [
         "name": "Test Account 2 (USD)",
         "currency_id": 1,
         "account_type_id": 2,
+        'initial_balance': 30_000,
         "balance": 30_000
     },
     {
@@ -46,6 +48,7 @@ test_accounts = [
         "name": "Test Account 1 (UAH)",
         "currency_id": 2,
         "account_type_id": 2,
+        'initial_balance': 1_000_000,
         "balance": 1_000_000
     },
     {
@@ -53,6 +56,7 @@ test_accounts = [
         "name": "Test Account 2 (UAH)",
         "currency_id": 2,
         "account_type_id": 2,
+        'initial_balance': 20_000,
         "balance": 20_000
     },
     {
@@ -60,6 +64,7 @@ test_accounts = [
         "name": "Test Account 1 (EUR)",
         "currency_id": 3,
         "account_type_id": 2,
+        'initial_balance': 250_000,
         "balance": 250_000
     },
     {
@@ -67,6 +72,7 @@ test_accounts = [
         "name": "Test Account 2 (EUR)",
         "currency_id": 3,
         "account_type_id": 2,
+        'initial_balance': 350_000,
         "balance": 350_000
     },
     {
@@ -74,6 +80,7 @@ test_accounts = [
         "name": "Test Account 1 (BGN)",
         "currency_id": 4,
         "account_type_id": 1,
+        'initial_balance': 0,
         "balance": 0
     },
     {
@@ -81,6 +88,7 @@ test_accounts = [
         "name": "Test Account 2 (BGN)",
         "currency_id": 4,
         "account_type_id": 2,
+        'initial_balance': 25_000,
         "balance": 25_000
     },
 ]
