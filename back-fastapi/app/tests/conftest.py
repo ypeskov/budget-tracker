@@ -128,7 +128,7 @@ def fake_account() -> CreateAccountSchema:
         'balance': 0,
         'opening_date': None,
         'is_hidden': False,
-        'comment': None
+        'comment': ""
     })
 
 

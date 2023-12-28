@@ -15,13 +15,13 @@ class CreateAccountSchema(BaseModel):
     currency_id: int
     initial_balance: Annotated[Decimal, PlainSerializer(
             lambda x: float(x), return_type=float, when_used='json'
-        )] | None = Decimal(0)
+        )] = Decimal(0)
     balance: Annotated[Decimal, PlainSerializer(
             lambda x: float(x), return_type=float, when_used='json'
-        )] | None = Decimal(0)
+        )] = Decimal(0)
     name: str
     opening_date: datetime | None = None
-    comment: str | None = None
+    comment: str = ""
     is_hidden: bool = False
 
     model_config = ConfigDict(populate_by_name=True,
@@ -29,6 +29,7 @@ class CreateAccountSchema(BaseModel):
 
 
 class UpdateAccountSchema(CreateAccountSchema):
+    id: int | None = None
     user_id: int
     initial_balance: Annotated[Decimal, PlainSerializer(
             lambda x: float(x), return_type=float, when_used='json'

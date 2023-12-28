@@ -19,7 +19,6 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
     if not existing_user:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid user")
 
-    # currency = db.query(Currency).filter_by(id=account_dto.currency_id).first()
     currency = db.execute(select(Currency).where(Currency.id == account_dto.currency_id)).scalar_one_or_none()
     if not currency:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid currency")
@@ -31,17 +30,33 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
     if account_dto.opening_date is None:
         account_dto.opening_date = datetime.utcnow()
 
-    new_account = Account(user=existing_user, account_type=account_type, currency=currency,
-                          initial_balance=account_dto.initial_balance, balance=account_dto.balance,
-                          opening_date=account_dto.opening_date, is_hidden=account_dto.is_hidden, name=account_dto.name,
-                          comment=account_dto.comment)
     if hasattr(account_dto, 'id'):
-        new_account.id = account_dto.id
-    db.add(new_account)
+        account = db.query(Account).filter_by(id=account_dto.id).first()
+        if account:
+            account.user = existing_user
+            account.account_type = account_type
+            account.currency = currency
+            account.initial_balance = account_dto.initial_balance
+            account.balance = account_dto.balance
+            account.opening_date = account_dto.opening_date
+            account.is_hidden = account_dto.is_hidden
+            account.name = account_dto.name
+            account.comment = account_dto.comment
+    else:
+        account = Account(user=existing_user,
+                          account_type=account_type,
+                          currency=currency,
+                          initial_balance=account_dto.initial_balance,
+                          balance=account_dto.balance,
+                          opening_date=account_dto.opening_date,
+                          is_hidden=account_dto.is_hidden,
+                          name=account_dto.name,
+                          comment=account_dto.comment)
+    db.add(account)
     db.commit()
-    db.refresh(new_account)
+    db.refresh(account)
 
-    return new_account
+    return account
 
 
 def get_user_accounts(user_id: int,
