@@ -24,6 +24,7 @@ class Account(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
     account_type_id: Mapped[int] = mapped_column(ForeignKey('account_types.id', ondelete='CASCADE'))
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
+    initial_balance: Mapped[Decimal] = mapped_column(default=0)
     balance: Mapped[Decimal] = mapped_column(default=0)
     name: Mapped[str] = mapped_column(String(ACCOUNT_NAME_MAX_LENGTH), index=True)
     opening_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
