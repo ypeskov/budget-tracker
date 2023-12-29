@@ -20,8 +20,9 @@ default_values = [
 
 def generate_test_users():
     # set autoincrement for categories to 1
-    sql_query = text(f"ALTER SEQUENCE user_categories_id_seq RESTART WITH 1;")
-    db.execute(sql_query)
+    db.execute(text(f"ALTER SEQUENCE user_categories_id_seq RESTART WITH 1;"))
+    db.execute(text(f"ALTER SEQUENCE users_id_seq RESTART WITH 1;"))
+
 
     try:
         for user in default_values:

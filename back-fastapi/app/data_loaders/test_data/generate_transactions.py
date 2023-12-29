@@ -31,14 +31,18 @@ def generate_test_transactions():
             user_categories_ids = [cat.id for cat in user_categories]
             user_accounts = db.query(Account).filter(Account.user_id == user.id).all()
             for user_acc in user_accounts:
-                for i in range(20):
+                for i in range(2):
                     category_id = random.choice(user_categories_ids)
                     amount = Decimal(str(random.uniform(1, 10))).quantize(Decimal('0.00'), rounding=ROUND_DOWN)
                     label = f'Transaction-{i}'
                     notes = f'Notes for transaction-{i}'
                     transaction_dto = CreateTransactionSchema(category_id=category_id,
-                                                              amount=amount, label=label, account_id=user_acc.id,
-                                                              is_income=False, is_transfer=False, notes=notes)
+                                                              amount=amount,
+                                                              label=label,
+                                                              account_id=user_acc.id,
+                                                              is_income=False,
+                                                              is_transfer=False,
+                                                              notes=notes)
                     transaction = create_transaction(transaction_dto, user.id, db)
                     num_generated_transactions += 1
                     print(f'Generated #{num_generated_transactions}, Transaction: {transaction.id}')

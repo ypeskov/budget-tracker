@@ -1,7 +1,9 @@
 import pytest
+
 from sqlalchemy import select
 from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
+from icecream import ic
 
 from app.models.User import User
 from app.models.Account import Account
@@ -11,10 +13,8 @@ from app.tests.data.auth_data import test_users
 from app.main import app
 from app.tests.conftest import db, truly_invalid_account_id, truly_invalid_account_type_id
 from app.services.accounts import create_account, get_account_details
+from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, AccessDenied, InvalidAccount
 from app.schemas.account_schema import CreateAccountSchema
-
-import icecream
-from icecream import ic
 
 client = TestClient(app)
 
@@ -30,26 +30,20 @@ def test_wrong_account_details(token):
 
 
 def test_wrong_user_request(fake_account):
-    with pytest.raises(HTTPException) as e:
+    with pytest.raises(InvalidUser):
         create_account(fake_account, truly_invalid_account_id, db)
-    assert e.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert e.value.detail == 'Invalid user'
 
 
 def test_create_acc_with_invalid_currency(fake_account, token):
     fake_account.currency_id = truly_invalid_currency_id
-    with pytest.raises(HTTPException) as e:
+    with pytest.raises(InvalidCurrency):
         create_account(fake_account, main_test_user_id, db)
-    assert e.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert e.value.detail == 'Invalid currency'
 
 
 def test_create_acc_with_invalid_type(fake_account, token):
     fake_account.account_type_id = truly_invalid_account_type_id
-    with pytest.raises(HTTPException) as e:
+    with pytest.raises(InvalidAccountType):
         create_account(fake_account, main_test_user_id, db)
-    assert e.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert e.value.detail == 'Invalid account type'
 
 
 def test_access_denied_to_other_user_account(token):
@@ -57,14 +51,13 @@ def test_access_denied_to_other_user_account(token):
     assert other_user.status_code == status.HTTP_200_OK
     other_account_details = {**test_accounts[0]}
     del other_account_details['id']
+
     other_user_account = create_account(
         CreateAccountSchema.model_validate(other_account_details), other_user.json()['id'], db)
     assert other_user_account is not None
 
-    with pytest.raises(HTTPException) as e:
+    with pytest.raises(AccessDenied):
         get_account_details(other_user_account.id, main_test_user_id, db)
-    assert e.value.status_code == status.HTTP_403_FORBIDDEN
-    assert e.value.detail == 'Forbidden'
 
     db.query(Account).filter_by(id=other_user_account.id).delete()
     db.query(User).filter_by(id=other_user.json()['id']).delete()
@@ -72,9 +65,8 @@ def test_access_denied_to_other_user_account(token):
 
 
 def test_get_invalid_account_details():
-    with pytest.raises(HTTPException) as e:
+    with pytest.raises(InvalidAccount):
         get_account_details(truly_invalid_account_id, main_test_user_id, db)
-    assert e.value.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.parametrize("test_account", test_accounts)
@@ -180,5 +172,4 @@ def test_update_invalid_account(token, one_account):
     account['openingDate'] = '2023-12-28T23:00:00Z'
 
     response = client.put(f'{accounts_path_prefix}/{truly_invalid_account_id}', json=account, headers={'auth-token': token})
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert response.json()['detail'] == 'Invalid account'
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

@@ -1,16 +1,12 @@
 from decimal import Decimal
 from collections.abc import Callable
 
-import os
-os.environ["TEST_MODE"] = "True"
-
 import pytest
 from fastapi.testclient import TestClient
 from icecream import ic
 
 from app.main import app
 from app.database import get_db
-from app.logger_config import logger
 from app.config import Settings
 from app.tests.db_test_cfg import override_get_db
 from app.data_loaders.work_data.load_all import load_all_data
@@ -29,7 +25,7 @@ from app.models.Account import Account
 from app.services.accounts import create_account as create_account_service
 from app.services.auth import create_users as create_users_service, get_jwt_token as get_jwt_token_service
 
-from app.tests.data.auth_data import test_users, main_test_user
+from app.tests.data.auth_data import main_test_user
 from app.tests.data.accounts_data import test_accounts
 
 settings = Settings()
@@ -41,7 +37,6 @@ with open(test_log_file, 'w') as f:
 app.dependency_overrides[get_db] = override_get_db
 
 db = next(override_get_db())
-load_all_data(db)
 
 auth_path_prefix = '/auth'
 accounts_path_prefix = '/accounts'
@@ -60,7 +55,8 @@ truly_invalid_currency_id = 9999999
 client = TestClient(app)
 
 
-def pytest_unconfigure(config):
+@pytest.fixture(scope='module', autouse=True)
+def setup_db():
     db.query(User).delete()
     db.query(Currency).delete()
     db.query(AccountType).delete()
@@ -69,8 +65,11 @@ def pytest_unconfigure(config):
     db.query(Account).delete()
     db.query(Transaction).delete()
     db.commit()
+    print("\n------- DB is cleared -------")
 
-    print("\n\n------- DB is cleared -------\n\n")
+    load_all_data(db)
+
+    yield
 
 
 @pytest.fixture(scope="function")
@@ -133,14 +132,15 @@ def fake_account() -> CreateAccountSchema:
 
 
 @pytest.fixture(scope="function")
-def create_accounts(token) -> list[Account]:
+def create_accounts(token):
     accounts = []
     for test_account in test_accounts:
         accounts.append(
             client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token}).json())
     yield accounts
-    db.query(Account).filter_by(user_id=main_test_user_id).delete()
-    db.commit()
+
+    for account in accounts:
+        db.delete(db.query(Account).filter(Account.id == account['id']).first())
 
 
 @pytest.fixture(scope="function")

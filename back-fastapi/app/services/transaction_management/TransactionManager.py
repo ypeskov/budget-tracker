@@ -45,9 +45,11 @@ class TransactionManager:
         self._is_update = False
 
         self._prev_account_id: int | None = None
+        self._prev_new_balance: Decimal = Decimal(0.0)
         self._prev_amount: Decimal = Decimal(0.0)
         self._prev_target_account_id: int | None = None
-        self._prev_target_amount: Decimal = Decimal(0.0)
+        self._prev_target_new_balance: Decimal | None = Decimal(0.0)
+        self._prev_target_amount: Decimal | None = Decimal(0.0)
         self._prev_is_transfer: bool = False
         self._prev_is_income: bool = False
 
@@ -130,9 +132,11 @@ class TransactionManager:
             self._is_update = True
             self._prev_amount = self._transaction.amount
             self._prev_account_id = self._transaction.account_id
+            self._prev_new_balance = self._transaction.new_balance
             self._prev_account = self._transaction.account
             self._prev_target_account_id = self._transaction.target_account_id
-            self._prev_target_amount = self._transaction.target_amount  # type: ignore
+            self._prev_target_new_balance = self._transaction.target_new_balance
+            self._prev_target_amount = self._transaction.target_amount
             self._prev_is_transfer = self._transaction.is_transfer
             self._prev_is_income = self._transaction.is_income
         else:
@@ -185,6 +189,8 @@ class TransactionManager:
 
         self._transaction.account.balance -= self._transaction.amount
         self._transaction.target_account.balance += self._transaction.target_amount  # type: ignore
+        self._transaction.new_balance = self._transaction.account.balance
+        self._transaction.target_new_balance = self._transaction.target_account.balance
 
     def update_acc_prev_transfer(self):
         """This function updates account balance (by previous amount) if transaction is transfer"""
@@ -225,6 +231,7 @@ class TransactionManager:
             self._transaction.account.balance += self._transaction.amount
         else:
             self._transaction.account.balance -= self._transaction.amount
+        self._transaction.new_balance = self._transaction.account.balance
 
     def update_acc_prev_nontransfer(self):
         """This function updates account balance (by previous amount) if transaction is not transfer"""

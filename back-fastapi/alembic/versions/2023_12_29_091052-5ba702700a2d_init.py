@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 76ba1a2e993d
+Revision ID: 5ba702700a2d
 Revises: 
-Create Date: 2023-09-20 12:26:58.456792
+Create Date: 2023-12-29 09:10:52.720145
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '76ba1a2e993d'
+revision = '5ba702700a2d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -51,20 +51,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_default_categories_name'), 'default_categories', ['name'], unique=False)
-    op.create_table('exchange_rates',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('from_currency_id', sa.Integer(), nullable=False),
-    sa.Column('to_currency_id', sa.Integer(), nullable=False),
-    sa.Column('rate', sa.Numeric(), nullable=False),
-    sa.Column('datetime', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('is_deleted', sa.Boolean(), server_default='f', nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['from_currency_id'], ['currencies.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['to_currency_id'], ['currencies.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_exchange_rates_datetime'), 'exchange_rates', ['datetime'], unique=False)
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
@@ -87,6 +73,7 @@ def upgrade() -> None:
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('account_type_id', sa.Integer(), nullable=False),
     sa.Column('currency_id', sa.Integer(), nullable=False),
+    sa.Column('initial_balance', sa.Numeric(), nullable=False),
     sa.Column('balance', sa.Numeric(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('opening_date', sa.DateTime(timezone=True), nullable=True),
@@ -102,19 +89,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_accounts_name'), 'accounts', ['name'], unique=False)
     op.create_index(op.f('ix_accounts_user_id'), 'accounts', ['user_id'], unique=False)
-    op.create_table('base_currency_change_history',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('base_currency_id', sa.Integer(), nullable=False),
-    sa.Column('change_date_time', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('is_deleted', sa.Boolean(), server_default='f', nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['base_currency_id'], ['currencies.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_base_currency_change_history_change_date_time'), 'base_currency_change_history', ['change_date_time'], unique=False)
     op.create_table('user_categories',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -131,29 +105,20 @@ def upgrade() -> None:
     op.create_index(op.f('ix_user_categories_name'), 'user_categories', ['name'], unique=False)
     op.create_index(op.f('ix_user_categories_parent_id'), 'user_categories', ['parent_id'], unique=False)
     op.create_index(op.f('ix_user_categories_user_id'), 'user_categories', ['user_id'], unique=False)
-    op.create_table('credit_account_details',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('account_id', sa.Integer(), nullable=False),
-    sa.Column('own_balance', sa.Numeric(), nullable=False),
-    sa.Column('credit_balance', sa.Numeric(), nullable=False),
-    sa.Column('is_deleted', sa.Boolean(), server_default='f', nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('transactions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('account_id', sa.Integer(), nullable=False),
+    sa.Column('new_balance', sa.Numeric(), nullable=False),
     sa.Column('target_account_id', sa.Integer(), nullable=True),
+    sa.Column('target_new_balance', sa.Numeric(), nullable=True),
     sa.Column('category_id', sa.Integer(), nullable=True),
     sa.Column('currency_id', sa.Integer(), nullable=True),
     sa.Column('amount', sa.Numeric(), nullable=False),
     sa.Column('target_amount', sa.Numeric(), nullable=True),
     sa.Column('label', sa.String(length=50), nullable=True),
     sa.Column('notes', sa.String(), nullable=True),
-    sa.Column('datetime', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('date_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('exchange_rate', sa.Numeric(), nullable=True),
     sa.Column('is_transfer', sa.Boolean(), nullable=False),
     sa.Column('is_income', sa.Boolean(), nullable=False),
@@ -170,7 +135,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_transactions_account_id'), 'transactions', ['account_id'], unique=False)
     op.create_index(op.f('ix_transactions_category_id'), 'transactions', ['category_id'], unique=False)
     op.create_index(op.f('ix_transactions_currency_id'), 'transactions', ['currency_id'], unique=False)
-    op.create_index(op.f('ix_transactions_datetime'), 'transactions', ['datetime'], unique=False)
+    op.create_index(op.f('ix_transactions_date_time'), 'transactions', ['date_time'], unique=False)
     op.create_index(op.f('ix_transactions_label'), 'transactions', ['label'], unique=False)
     op.create_index(op.f('ix_transactions_target_account_id'), 'transactions', ['target_account_id'], unique=False)
     op.create_index(op.f('ix_transactions_user_id'), 'transactions', ['user_id'], unique=False)
@@ -182,18 +147,15 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_transactions_user_id'), table_name='transactions')
     op.drop_index(op.f('ix_transactions_target_account_id'), table_name='transactions')
     op.drop_index(op.f('ix_transactions_label'), table_name='transactions')
-    op.drop_index(op.f('ix_transactions_datetime'), table_name='transactions')
+    op.drop_index(op.f('ix_transactions_date_time'), table_name='transactions')
     op.drop_index(op.f('ix_transactions_currency_id'), table_name='transactions')
     op.drop_index(op.f('ix_transactions_category_id'), table_name='transactions')
     op.drop_index(op.f('ix_transactions_account_id'), table_name='transactions')
     op.drop_table('transactions')
-    op.drop_table('credit_account_details')
     op.drop_index(op.f('ix_user_categories_user_id'), table_name='user_categories')
     op.drop_index(op.f('ix_user_categories_parent_id'), table_name='user_categories')
     op.drop_index(op.f('ix_user_categories_name'), table_name='user_categories')
     op.drop_table('user_categories')
-    op.drop_index(op.f('ix_base_currency_change_history_change_date_time'), table_name='base_currency_change_history')
-    op.drop_table('base_currency_change_history')
     op.drop_index(op.f('ix_accounts_user_id'), table_name='accounts')
     op.drop_index(op.f('ix_accounts_name'), table_name='accounts')
     op.drop_table('accounts')
@@ -201,8 +163,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_users_first_name'), table_name='users')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
-    op.drop_index(op.f('ix_exchange_rates_datetime'), table_name='exchange_rates')
-    op.drop_table('exchange_rates')
     op.drop_index(op.f('ix_default_categories_name'), table_name='default_categories')
     op.drop_table('default_categories')
     op.drop_index(op.f('ix_currencies_name'), table_name='currencies')

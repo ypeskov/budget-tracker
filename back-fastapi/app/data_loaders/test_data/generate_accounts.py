@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-# from collections import namedtuple
 from decimal import Decimal
 
+from sqlalchemy import text
 from icecream import ic
 
 from app.database import get_db
@@ -14,30 +14,40 @@ from app.schemas.account_schema import CreateAccountSchema
 db = next(get_db())
 
 
-# AccountData = namedtuple('AccountData',
-#                          'id user_id account_type_id currency_id balance name opening_date is_hidden comment')
-
-
 def generate_test_accounts():
     users = db.query(User).all()
     currencies = db.query(Currency).all()
     account_types = db.query(AccountType).all()
 
+    # set autoincrement for transactions to 1
+    sql_query = text(f"ALTER SEQUENCE accounts_id_seq RESTART WITH 1;")
+    db.execute(sql_query)
+
     try:
         account_id = 1
         for user in users:
             for currency in currencies:
-                acc_data0 = CreateAccountSchema(user_id=user.id, account_type_id=account_types[0].id, id=account_id,
-                                                currency_id=currency.id, balance=Decimal(1000),
-                                                name=f'Acc-{currency.code}-0',
-                                                opening_date=datetime.now(timezone.utc), is_hidden=False, comment='')
+                acc_data0 = CreateAccountSchema(
+                    # id=account_id,
+                    user_id=user.id,
+                    account_type_id=account_types[0].id,
+                    currency_id=currency.id, balance=Decimal(1000),
+                    name=f'Acc-{currency.code}-0',
+                    opening_date=datetime.now(timezone.utc),
+                    is_hidden=False, comment='')
                 acc = create_account(acc_data0, user.id, db)
                 print(f'{acc.name} {acc.currency.code}-{acc.account_type.type_name} was created')
                 account_id += 1
-                acc_data1 = CreateAccountSchema(user_id=user.id, account_type_id=account_types[0].id, id=account_id,
-                                                currency_id=currency.id, balance=Decimal(1000),
-                                                name=f'Acc-{currency.code}-1',
-                                                opening_date=datetime.now(timezone.utc), is_hidden=False, comment='')
+                acc_data1 = CreateAccountSchema(
+                    # id=account_id,
+                    user_id=user.id,
+                    account_type_id=account_types[0].id,
+                    currency_id=currency.id,
+                    balance=Decimal(1000),
+                    name=f'Acc-{currency.code}-1',
+                    opening_date=datetime.now(timezone.utc),
+                    is_hidden=False,
+                    comment='')
                 acc = create_account(acc_data1, user.id, db)
                 print(f'{acc.name} {acc.currency.code}-{acc.account_type.type_name} was created')
                 account_id += 1

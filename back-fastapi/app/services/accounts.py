@@ -1,32 +1,31 @@
 from datetime import datetime
 from datetime import UTC
 
-from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
-from icecream import ic
 
 from app.models.Account import Account
 from app.models.AccountType import AccountType
 from app.models.Currency import Currency
 from app.models.User import User
 from app.schemas.account_schema import CreateAccountSchema, UpdateAccountSchema
+from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied
 
 
 def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_id: int, db: Session) -> Account:
     """Create new account for user with user_id"""
     existing_user = db.query(User).filter(User.id == user_id).first()  # type: ignore
     if not existing_user:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid user")
+        raise InvalidUser()
 
     currency = db.execute(select(Currency).where(Currency.id == account_dto.currency_id)).scalar_one_or_none()
     if not currency:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid currency")
+        raise InvalidCurrency()
 
     account_type = db.query(AccountType).filter_by(id=account_dto.account_type_id).first()
     if not account_type:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account type")
+        raise InvalidAccountType()
 
     if account_dto.opening_date is None:
         account_dto.opening_date = datetime.now(UTC)
@@ -34,7 +33,7 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
     if hasattr(account_dto, 'id'):
         account = db.execute(select(Account).where(Account.id == account_dto.id)).scalar_one_or_none()
         if account is None:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account")
+            raise InvalidAccount()
         if account:
             account.user = existing_user
             account.account_type = account_type
@@ -81,9 +80,9 @@ def get_account_details(account_id: int, user_id: int, db: Session) -> Account:
     try:
         account = db.query(Account).filter_by(id=account_id).one()
     except NoResultFound:
-        raise HTTPException(404)
+        raise InvalidAccount()
     if account.user_id != user_id:
-        raise HTTPException(403, 'Forbidden')
+        raise AccessDenied()
     return account
 
 

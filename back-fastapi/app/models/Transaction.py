@@ -22,10 +22,12 @@ class Transaction(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
     account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id', ondelete='CASCADE'), index=True)
+    new_balance: Mapped[Decimal] = mapped_column(nullable=False, )
     target_account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id', ondelete='CASCADE'), index=True,
                                                    nullable=True, default=None)
+    target_new_balance: Mapped[Decimal | None] = mapped_column(nullable=True, default=None, server_default=None)
     category_id: Mapped[int | None] = mapped_column(ForeignKey('user_categories.id', ondelete='CASCADE'), index=True,
-                                             nullable=True)
+                                                    nullable=True)
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'), index=True, nullable=True)
     amount: Mapped[Decimal] = mapped_column()
     target_amount: Mapped[Decimal | None] = mapped_column(nullable=True, default=None, server_default=None)
