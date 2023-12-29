@@ -48,7 +48,7 @@ main_test_user_id = 1000
 main_user_account1_id = 1
 main_user_account2_id = 2
 
-truly_invalid_account_id = 9999999
+truly_invalid_account_id = 999999999
 truly_invalid_account_type_id = 9999999
 truly_invalid_currency_id = 9999999
 
@@ -75,13 +75,14 @@ def setup_db():
 @pytest.fixture(scope="function")
 def token():
     """ Create a user for test purposes and return his access token """
-    user: User = create_users_service(UserRegistration(**main_test_user), db)
+    user_schema = UserRegistration.model_validate(main_test_user)
+    user: User = create_users_service(user_schema, db)
     user_dict = {**user.__dict__}
 
     if '_sa_instance_state' in user_dict:
         del user_dict['_sa_instance_state']
 
-    token = get_jwt_token_service(UserLoginSchema(**main_test_user), db)
+    token = get_jwt_token_service(UserLoginSchema.model_validate(main_test_user), db)
 
     yield token['access_token']
     db.query(User).filter(User.id == user.id).delete()
@@ -97,7 +98,7 @@ def one_account(token):
         'initial_balance': test_accounts[0]['balance'],
     }
 
-    account_schema = CreateAccountSchema(**account_details)
+    account_schema = CreateAccountSchema.model_validate(account_details)
     account: Account = create_account_service(account_schema, main_test_user_id, db)
     account_dict = {**account.__dict__}
 

@@ -4,21 +4,21 @@ test_users = [
         "email": "user1@example.com",
         "first_name": "Yura",
         "last_name": "Peskov",
-        "password": "q",
+        "password": "qqq_111_",
     },
     {
         'id': 2,
         "email": "user2@example.com",
         "first_name": "Yura",
         "last_name": "Peskov",
-        "password": "qq",
+        "password": "qqq_111_",
     },
 ]
 
 main_test_user = {
-    'id': 1000,
+    'id': int(1000),
     "email": "user@example.com",
     "first_name": "Yura",
     "last_name": "Test",
-    "password": "q",
+    "password": "qqq_111_",
 }
