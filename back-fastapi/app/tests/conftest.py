@@ -26,7 +26,7 @@ from app.services.accounts import create_account as create_account_service
 from app.services.auth import create_users as create_users_service, get_jwt_token as get_jwt_token_service
 
 from app.tests.data.auth_data import main_test_user
-from app.tests.data.accounts_data import test_accounts
+from app.tests.data.accounts_data import test_accounts_data
 
 settings = Settings()
 
@@ -75,27 +75,22 @@ def setup_db():
 @pytest.fixture(scope="function")
 def token():
     """ Create a user for test purposes and return his access token """
-    user_schema = UserRegistration.model_validate(main_test_user)
-    user: User = create_users_service(user_schema, db)
-    user_dict = {**user.__dict__}
-
-    if '_sa_instance_state' in user_dict:
-        del user_dict['_sa_instance_state']
-
+    user: User = create_users_service(UserRegistration.model_validate(main_test_user), db)
     token = get_jwt_token_service(UserLoginSchema.model_validate(main_test_user), db)
 
     yield token['access_token']
-    db.query(User).filter(User.id == user.id).delete()
+
+    db.delete(user)
     db.commit()
 
 
 @pytest.fixture(scope="function")
 def one_account(token):
     account_details = {
-        **test_accounts[0],
+        **test_accounts_data[0],
         'id': main_user_account1_id,
         'user_id': main_test_user_id,
-        'initial_balance': test_accounts[0]['balance'],
+        'initial_balance': test_accounts_data[0]['balance'],
     }
 
     account_schema = CreateAccountSchema.model_validate(account_details)
@@ -134,14 +129,14 @@ def fake_account() -> CreateAccountSchema:
 
 @pytest.fixture(scope="function")
 def create_accounts(token):
-    accounts = []
-    for test_account in test_accounts:
-        accounts.append(
-            client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token}).json())
+    accounts = [
+        create_account_service(CreateAccountSchema.model_validate(test_acc), main_test_user_id, db)
+        for test_acc in test_accounts_data
+    ]
     yield accounts
 
     for account in accounts:
-        db.delete(db.query(Account).filter(Account.id == account['id']).first())
+        db.delete(db.query(Account).filter(Account.id == account.id).first())
 
 
 @pytest.fixture(scope="function")
@@ -187,7 +182,7 @@ def create_transaction(token) -> Callable[[dict], Transaction]:
 
 @pytest.fixture(scope="function")
 def create_user():
-    def _create_user(email, password):
+    def _create_user(email, password='qqq_111_'):
         user = {
             'email': email,
             'password': password,

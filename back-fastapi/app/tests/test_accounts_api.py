@@ -8,7 +8,7 @@ from icecream import ic
 from app.models.User import User
 from app.models.Account import Account
 from app.tests.conftest import accounts_path_prefix, main_test_user_id, truly_invalid_currency_id, auth_path_prefix
-from app.tests.data.accounts_data import test_accounts, test_account_types
+from app.tests.data.accounts_data import test_accounts_data, test_account_types
 from app.tests.data.auth_data import test_users
 from app.main import app
 from app.tests.conftest import db, truly_invalid_account_id, truly_invalid_account_type_id
@@ -49,7 +49,7 @@ def test_create_acc_with_invalid_type(fake_account, token):
 def test_access_denied_to_other_user_account(token):
     other_user = client.post(f'{auth_path_prefix}/register/', json=test_users[0])
     assert other_user.status_code == status.HTTP_200_OK
-    other_account_details = {**test_accounts[0]}
+    other_account_details = {**test_accounts_data[0]}
     del other_account_details['id']
 
     other_user_account = create_account(
@@ -69,7 +69,7 @@ def test_get_invalid_account_details():
         get_account_details(truly_invalid_account_id, main_test_user_id, db)
 
 
-@pytest.mark.parametrize("test_account", test_accounts)
+@pytest.mark.parametrize("test_account", test_accounts_data)
 def test_add_get_account(test_account, token):
     response_account = client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token})
     assert response_account.status_code == status.HTTP_200_OK
@@ -105,23 +105,24 @@ def test_get_accounts_list(token, create_accounts):
     accounts_list = response.json()
 
     # check if all accounts are in response
-    assert len(accounts_list) == len(test_accounts)
+    number_of_accounts = len(test_accounts_data)
+    assert len(accounts_list) == number_of_accounts
 
     # check first account details in response
-    assert accounts_list[0]['name'] == test_accounts[0]['name']
-    assert accounts_list[0]['currencyId'] == test_accounts[0]['currencyId']
-    assert accounts_list[0]['accountTypeId'] == test_accounts[0]['accountTypeId']
-    assert accounts_list[0]['balance'] == test_accounts[0]['balance']
+    assert accounts_list[0]['name'] == test_accounts_data[0]['name']
+    assert accounts_list[0]['currencyId'] == test_accounts_data[0]['currencyId']
+    assert accounts_list[0]['accountTypeId'] == test_accounts_data[0]['accountTypeId']
+    assert accounts_list[0]['balance'] == test_accounts_data[0]['balance']
     assert 'openingDate' in accounts_list[0]
     assert accounts_list[0]['openingDate'] is not None
 
     # check last account details in response
-    assert accounts_list[7]['name'] == test_accounts[7]['name']
-    assert accounts_list[0]['currencyId'] == test_accounts[0]['currencyId']
-    assert accounts_list[0]['accountTypeId'] == test_accounts[0]['accountTypeId']
-    assert accounts_list[7]['balance'] == test_accounts[7]['balance']
-    assert 'openingDate' in accounts_list[0]
-    assert accounts_list[0]['openingDate'] is not None
+    assert accounts_list[number_of_accounts - 1]['name'] == test_accounts_data[number_of_accounts - 1]['name']
+    assert accounts_list[number_of_accounts - 1]['currencyId'] == test_accounts_data[number_of_accounts - 1]['currencyId']
+    assert accounts_list[number_of_accounts - 1]['accountTypeId'] == test_accounts_data[number_of_accounts - 1]['accountTypeId']
+    assert accounts_list[number_of_accounts - 1]['balance'] == test_accounts_data[number_of_accounts - 1]['balance']
+    assert 'openingDate' in accounts_list[number_of_accounts - 1]
+    assert accounts_list[number_of_accounts - 1]['openingDate'] is not None
 
 
 def test_all_account_types_exist(token):
@@ -171,5 +172,6 @@ def test_update_invalid_account(token, one_account):
     account['comment'] = 'Updated comment'
     account['openingDate'] = '2023-12-28T23:00:00Z'
 
-    response = client.put(f'{accounts_path_prefix}/{truly_invalid_account_id}', json=account, headers={'auth-token': token})
+    response = client.put(f'{accounts_path_prefix}/{truly_invalid_account_id}', json=account,
+                          headers={'auth-token': token})
     assert response.status_code == status.HTTP_400_BAD_REQUEST

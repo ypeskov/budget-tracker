@@ -9,7 +9,7 @@ from app.main import app
 from app.logger_config import logger
 from app.tests.conftest import categories_path_prefix, transactions_path_prefix, accounts_path_prefix, auth_path_prefix
 from app.tests.conftest import db, main_test_user_id
-from app.tests.data.accounts_data import test_accounts
+from app.tests.data.accounts_data import test_accounts_data
 
 from app.models.Account import Account
 from app.models.User import User
@@ -401,7 +401,7 @@ def test_process_transfer_type_diff_currencies(create_transaction, token, one_ac
 
     currencies = client.get('/currencies/', headers={'auth-token': token}).json()
 
-    second_account_details = {**test_accounts[0],
+    second_account_details = {**test_accounts_data[0],
                               'name': 'Second account',
                               'id': first_account.id + 1,
                               'currency_id': currencies[1]['id']}

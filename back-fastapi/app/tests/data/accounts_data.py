@@ -26,7 +26,7 @@ test_account_types = [
     },
 ]
 
-test_accounts = [
+test_accounts_data = [
     {
         'id': 1,
         "name": "Test Account 1 (USD)",
@@ -50,45 +50,5 @@ test_accounts = [
         "accountTypeId": 2,
         'initial_balance': 1_000_000,
         "balance": 1_000_000
-    },
-    {
-        'id': 4,
-        "name": "Test Account 2 (UAH)",
-        "currencyId": 2,
-        "accountTypeId": 2,
-        'initial_balance': 20_000,
-        "balance": 20_000
-    },
-    {
-        'id': 5,
-        "name": "Test Account 1 (EUR)",
-        "currencyId": 3,
-        "accountTypeId": 2,
-        'initial_balance': 250_000,
-        "balance": 250_000
-    },
-    {
-        'id': 6,
-        "name": "Test Account 2 (EUR)",
-        "currencyId": 3,
-        "accountTypeId": 2,
-        'initial_balance': 350_000,
-        "balance": 350_000
-    },
-    {
-        'id': 7,
-        "name": "Test Account 1 (BGN)",
-        "currencyId": 4,
-        "accountTypeId": 1,
-        'initial_balance': 0,
-        "balance": 0
-    },
-    {
-        'id': 8,
-        "name": "Test Account 2 (BGN)",
-        "currencyId": 4,
-        "accountTypeId": 2,
-        'initial_balance': 25_000,
-        "balance": 25_000
     },
 ]
