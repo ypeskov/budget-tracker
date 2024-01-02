@@ -7,15 +7,15 @@ from sqlalchemy.exc import NoResultFound
 from icecream import ic
 
 from app.logger_config import logger
-
 from app.models.Currency import Currency
 from app.models.Transaction import Transaction
 from app.models.Account import Account
 from app.models.UserCategory import UserCategory
 from app.services.errors import AccessDenied, InvalidCategory, InvalidAccount, InvalidCurrency
+from app.services.transaction_management.NonTransferTypeTransaction import NonTransferTypeTransaction
 from app.services.transaction_management.errors import InvalidTransaction
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
-from app.services.CurrencyProcessor import CurrencyProcessor
+from app.services.transaction_management.TransferTypeTransaction import TransferTypeTransaction
 
 ic.configureOutput(includeContext=True)
 
@@ -155,7 +155,6 @@ class TransactionManager:
             self.state.prev_amount = Decimal(0.0)
             self.state.prev_target_amount = Decimal(0.0)
 
-            self._transaction = Transaction()
             self._transaction.user_id = self.state.user_id
 
         return self
@@ -178,9 +177,11 @@ class TransactionManager:
 
     def delete_transaction(self) -> 'TransactionManager':
         if self._transaction.is_transfer:
-            self.update_acc_prev_transfer()
+            transfer_type_transaction = TransferTypeTransaction(self._transaction, self.state, self.state.db)
+            transfer_type_transaction.update_acc_prev_transfer()
         else:
-            self.update_acc_prev_nontransfer()
+            non_transfer_transaction = NonTransferTypeTransaction(self._transaction, self.state, self.state.db)
+            non_transfer_transaction.update_acc_prev_nontransfer()
 
         self._transaction.is_deleted = True
         self.state.db.add(self._transaction)
@@ -189,59 +190,9 @@ class TransactionManager:
         return self
 
     def _process_transfer_type(self) -> None:
-        if self._transaction.account.currency_id != self._transaction.target_account.currency_id:
-            currency_processor = CurrencyProcessor(self._transaction, self.state.db)
-            self._transaction = currency_processor.calculate_exchange_rate()
-
-        if self.state.is_update:
-            self.update_acc_prev_transfer()
-
-        self._transaction.account.balance -= self._transaction.amount
-        self._transaction.target_account.balance += self._transaction.target_amount
-        self._transaction.new_balance = self._transaction.account.balance
-        self._transaction.target_new_balance = self._transaction.target_account.balance
-
-    def update_acc_prev_transfer(self):
-        if self.state.prev_is_transfer:
-            prev_target_account = self.state.db.query(Account).filter_by(
-                id=self.state.prev_target_account_id).one()
-            prev_target_account.balance -= self.state.prev_target_amount
-
-            prev_account = self.state.db.query(Account).filter_by(id=self.state.prev_account_id).one()
-            prev_account.balance += self.state.prev_amount
-            self.state.db.add(prev_target_account)
-            self.state.db.add(prev_account)
-            self.state.db.commit()
-        else:
-            if self.state.prev_is_income:
-                self._transaction.account.balance -= self.state.prev_amount
-            else:
-                self._transaction.account.balance += self.state.prev_amount
+        transfer_type_transaction = TransferTypeTransaction(self._transaction, self.state, self.state.db)
+        transfer_type_transaction.process()
 
     def _process_non_transfer_type(self):
-        try:
-            category = self.state.db.query(UserCategory).filter_by(id=self._transaction.category_id).one()
-        except NoResultFound:
-            logger.error(f'Invalid category {self._transaction.category_id}')
-            raise InvalidCategory()
-
-        if category.user_id != self.state.user_id:
-            logger.error(f'User {self.state.user_id} tried to update transaction {self._transaction.id} ' +
-                         f'with not own category {self._transaction.category_id}')
-            raise AccessDenied()
-
-        self.update_acc_prev_nontransfer()
-
-        if self._transaction.is_income:
-            self._transaction.account.balance += self._transaction.amount
-        else:
-            self._transaction.account.balance -= self._transaction.amount
-        self._transaction.new_balance = self._transaction.account.balance
-
-    def update_acc_prev_nontransfer(self):
-        if self.state.is_update:
-            if self.state.prev_is_income:
-                self.state.prev_account.balance -= self.state.prev_amount  # type: ignore
-            else:
-                self.state.prev_account.balance += self.state.prev_amount  # type: ignore
-            self.state.db.add(self.state.prev_account)
+        non_transfer_transaction = NonTransferTypeTransaction(self._transaction, self.state, self.state.db)
+        non_transfer_transaction.process()
