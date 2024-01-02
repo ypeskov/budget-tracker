@@ -7,6 +7,8 @@ from icecream import ic
 
 from app.main import app
 from app.logger_config import logger
+from app.services.transaction_management.errors import InvalidTransaction
+from app.services.errors import AccessDenied
 from app.tests.conftest import categories_path_prefix, transactions_path_prefix, accounts_path_prefix, auth_path_prefix
 from app.tests.conftest import db, main_test_user_id
 from app.tests.data.accounts_data import test_accounts_data
@@ -152,10 +154,10 @@ def test_update_transaction(token, one_account, create_user):
     updated_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
     assert updated_account['balance'] == updated_balance + transaction_data['amount'] + amount_initial
 
-    with pytest.raises(HTTPException) as ex:
+    with pytest.raises(InvalidTransaction) as ex:
         updated_transaction['id'] = 999999999999
         update_transaction_service(UpdateTransactionSchema(**updated_transaction), main_test_user_id, db)
-    assert ex.value.status_code == status.HTTP_404_NOT_FOUND
+        assert ex.value.status_code == status.HTTP_404_NOT_FOUND
 
     with pytest.raises(HTTPException) as ex:
         updated_transaction['id'] = transaction['id']
@@ -165,14 +167,12 @@ def test_update_transaction(token, one_account, create_user):
     assert ex.value.status_code == status.HTTP_404_NOT_FOUND
 
     user2 = create_user('email2@email.com', 'qqq_111_')
-    with pytest.raises(HTTPException) as ex:
+    with pytest.raises(AccessDenied) as ex:
         updated_transaction['id'] = transaction['id']
         updated_transaction['account_id'] = one_account['id']
         updated_transaction['user_id'] = user2.id
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, user2.id, db)
-    assert ex.value.status_code == status.HTTP_403_FORBIDDEN
-    assert ex.value.detail == 'Forbidden'
 
     with pytest.raises(HTTPException) as ex:
         updated_transaction['id'] = transaction['id']

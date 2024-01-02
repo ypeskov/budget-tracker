@@ -1,3 +1,6 @@
+import os
+os.environ['TEST_MODE'] = 'True'
+
 from decimal import Decimal
 from collections.abc import Callable
 

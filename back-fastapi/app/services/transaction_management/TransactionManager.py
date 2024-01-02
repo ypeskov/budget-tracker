@@ -12,7 +12,8 @@ from app.models.Currency import Currency
 from app.models.Transaction import Transaction
 from app.models.Account import Account
 from app.models.UserCategory import UserCategory
-
+from app.services.errors import AccessDenied
+from app.services.transaction_management.errors import InvalidTransaction
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.services.CurrencyProcessor import CurrencyProcessor
 
@@ -121,13 +122,12 @@ class TransactionManager:
 
             if self._transaction is None:
                 logger.error(f'Transaction {self._transaction_details.id} not found')
-                raise HTTPException(status.HTTP_404_NOT_FOUND,
-                                    detail=f'Transaction {self._transaction_details.id} not found')
+                raise InvalidTransaction(detail=f'Transaction {self._transaction_details.id} not found')
 
             if self._user_id != self._transaction.user_id:
                 logger.error(
                     f'User {self._user_id} tried to update transaction {self._transaction.id} of user {self._transaction.user_id}')
-                raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
+                raise AccessDenied()
 
             self._is_update = True
             self._prev_amount = self._transaction.amount
