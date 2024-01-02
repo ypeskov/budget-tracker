@@ -16,3 +16,7 @@ class InvalidAccount(Exception):
 
 class AccessDenied(Exception):
     pass
+
+
+class InvalidCategory(Exception):
+    pass

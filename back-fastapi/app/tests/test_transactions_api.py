@@ -8,7 +8,7 @@ from icecream import ic
 from app.main import app
 from app.logger_config import logger
 from app.services.transaction_management.errors import InvalidTransaction
-from app.services.errors import AccessDenied
+from app.services.errors import AccessDenied, InvalidAccount, InvalidCategory
 from app.tests.conftest import categories_path_prefix, transactions_path_prefix, accounts_path_prefix, auth_path_prefix
 from app.tests.conftest import db, main_test_user_id
 from app.tests.data.accounts_data import test_accounts_data
@@ -157,39 +157,34 @@ def test_update_transaction(token, one_account, create_user):
     with pytest.raises(InvalidTransaction) as ex:
         updated_transaction['id'] = 999999999999
         update_transaction_service(UpdateTransactionSchema(**updated_transaction), main_test_user_id, db)
-        assert ex.value.status_code == status.HTTP_404_NOT_FOUND
 
-    with pytest.raises(HTTPException) as ex:
+    with pytest.raises(InvalidAccount):
         updated_transaction['id'] = transaction['id']
         updated_transaction['account_id'] = 999999999999
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, main_test_user_id, db)
-    assert ex.value.status_code == status.HTTP_404_NOT_FOUND
 
     user2 = create_user('email2@email.com', 'qqq_111_')
-    with pytest.raises(AccessDenied) as ex:
+    with pytest.raises(AccessDenied):
         updated_transaction['id'] = transaction['id']
         updated_transaction['account_id'] = one_account['id']
         updated_transaction['user_id'] = user2.id
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, user2.id, db)
 
-    with pytest.raises(HTTPException) as ex:
+    with pytest.raises(InvalidAccount):
         updated_transaction['id'] = transaction['id']
         updated_transaction['is_transfer'] = True
         updated_transaction['target_account_id'] = 999999999999
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, main_test_user_id, db)
-    assert ex.value.status_code == status.HTTP_404_NOT_FOUND
 
-    with pytest.raises(HTTPException) as ex:
+    with pytest.raises(InvalidCategory) as ex:
         updated_transaction['category_id'] = 999999999999
         updated_transaction['is_transfer'] = False
         updated_transaction['target_account_id'] = None
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, main_test_user_id, db)
-    assert ex.value.status_code == status.HTTP_400_BAD_REQUEST
-    assert ex.value.detail == 'Invalid category'
 
 
 def test_update_transaction_transfer_type(token, one_account, create_transaction):
@@ -272,9 +267,8 @@ def test_update_transaction_forbidden_category(one_account, create_user, create_
     transaction_details['id'] = transaction.id
     transaction_details['user_id'] = second_user.id
     transaction_details['category_id'] = second_user_categories[0]['id']
-    with pytest.raises(HTTPException) as ex:
+    with pytest.raises(AccessDenied) as ex:
         update_transaction_service(UpdateTransactionSchema(**transaction_details), main_test_user_id, db)
-    assert ex.value.status_code == status.HTTP_403_FORBIDDEN
 
     db.query(Transaction).filter(Transaction.id == transaction.id).delete()
     db.query(User).filter(User.id == second_user.id).delete()
@@ -496,7 +490,7 @@ def test_create_transaction_expense_route_invalid_account(token, one_account):
         }
         transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
                                            headers={'auth-token': token})
-        assert transaction_response.status_code == status.HTTP_404_NOT_FOUND
+        assert transaction_response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     # clean up created transactions
     db.query(Transaction).filter(Transaction.account_id == 999999999).delete()
@@ -519,7 +513,7 @@ def test_create_transaction_expense_route_invalid_category(token, one_account):
         transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
                                            headers={'auth-token': token})
         logger.info(transaction_response.json())
-        assert transaction_response.status_code == status.HTTP_400_BAD_REQUEST
+        assert transaction_response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     # clean up created transactions
     db.query(Transaction).filter(Transaction.category_id == 999999999).delete()
@@ -576,7 +570,6 @@ def test_create_transaction_forbidden(create_user):
     transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
                                        headers={'auth-token': user1_token})
     assert transaction_response.status_code == status.HTTP_403_FORBIDDEN
-    assert transaction_response.json()['detail'] == 'Forbidden'
 
     db.query(Account).filter(Account.id == account.id).delete()
     db.query(User).filter(User.id == user1.id).delete()
@@ -619,10 +612,8 @@ def test_create_transaction_forbidden_account(create_user):
     }
     transaction_schema = CreateTransactionSchema(**transaction_details)
 
-    with pytest.raises(HTTPException) as ex:
+    with pytest.raises(AccessDenied) as ex:
         create_transaction_service(transaction_schema, user1.id, db)
-    assert ex.value.status_code == status.HTTP_403_FORBIDDEN
-    assert ex.value.detail == 'Forbidden'
 
     db.query(Account).filter(Account.id == account2['id']).delete()
     db.query(User).filter(User.id == user1.id).delete()

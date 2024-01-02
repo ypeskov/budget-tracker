@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from fastapi import HTTPException, status
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 from icecream import ic
@@ -12,7 +12,7 @@ from app.models.Currency import Currency
 from app.models.Transaction import Transaction
 from app.models.Account import Account
 from app.models.UserCategory import UserCategory
-from app.services.errors import AccessDenied
+from app.services.errors import AccessDenied, InvalidCategory, InvalidAccount, InvalidCurrency
 from app.services.transaction_management.errors import InvalidTransaction
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.services.CurrencyProcessor import CurrencyProcessor
@@ -20,40 +20,49 @@ from app.services.CurrencyProcessor import CurrencyProcessor
 ic.configureOutput(includeContext=True)
 
 
+class TransactionState(BaseModel):
+    user_id: int
+    db: Session
+    transaction_details: UpdateTransactionSchema | CreateTransactionSchema
+    is_update: bool = False
+    prev_account_id: int | None = None
+    prev_account: Account | None = None
+    prev_new_balance: Decimal = Decimal(0.0)
+    prev_amount: Decimal = Decimal(0.0)
+    prev_target_account_id: int | None = None
+    prev_target_new_balance: Decimal = Decimal(0.0)
+    prev_target_amount: Decimal = Decimal(0.0)
+    prev_is_transfer: bool = False
+    prev_is_income: bool = False
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
 def check_account_ownership(user_id: int, account_id: int | None, db: Session):
     """ Check if account belongs to user """
     if account_id is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Account id is required')
+        raise InvalidAccount()
 
     account: Account = db.query(Account).filter_by(id=account_id).one_or_none()  # type: ignore
     if account is None:
         logger.error(f'Account {account_id} not found')
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Account not found')
+        raise InvalidAccount()
 
     if account.user_id != user_id:
         logger.error(
             f'User {user_id} tried to create transaction with not own account {account_id}')
-        raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
+        raise AccessDenied()
 
     return True
 
 
 class TransactionManager:
-    def __init__(self, transaction_details: UpdateTransactionSchema | CreateTransactionSchema, user_id: int, db: Session):
-        self._db = db
-        self._transaction_details = transaction_details
-        self._user_id = user_id
-        self._is_update = False
-
-        self._prev_account_id: int | None = None
-        self._prev_new_balance: Decimal = Decimal(0.0)
-        self._prev_amount: Decimal = Decimal(0.0)
-        self._prev_target_account_id: int | None = None
-        self._prev_target_new_balance: Decimal | None = Decimal(0.0)
-        self._prev_target_amount: Decimal | None = Decimal(0.0)
-        self._prev_is_transfer: bool = False
-        self._prev_is_income: bool = False
-
+    def __init__(self,
+                 transaction_details: UpdateTransactionSchema | CreateTransactionSchema,
+                 user_id: int,
+                 db: Session):
+        self.state = TransactionState(user_id=user_id, db=db, transaction_details=transaction_details)
+        self._transaction: Transaction = Transaction()
         self._prepare_transaction()
         self.set_account(transaction_details.account_id)
         self.set_currency()
@@ -67,7 +76,7 @@ class TransactionManager:
             self.set_account(transaction_details.target_account_id, 'target_')
             self._transaction.is_transfer = True
             self._transaction.exchange_rate = transaction_details.exchange_rate
-            self._transaction.target_amount = transaction_details.target_amount
+            self._transaction.target_amount = transaction_details.target_amount  # type: ignore
             self._transaction.category_id = None
         else:
             self._transaction.is_transfer = False
@@ -84,19 +93,19 @@ class TransactionManager:
 
     def set_currency(self, currency_id: int | None = None) -> 'TransactionManager':
         if currency_id is None:
-            currency_id = self._transaction_details.currency_id
+            currency_id = self.state.transaction_details.currency_id
+
         if currency_id is None:
-            account: Account = self._db.query(Account).filter_by(  # type: ignore
-                id=self._transaction_details.account_id).one_or_none()
+            account = self.state.db.query(Account).filter_by(id=self.state.transaction_details.account_id).one_or_none()
             if account is None:
-                logger.error(f'Account {self._transaction_details.account_id} not found')
-                raise HTTPException(status.HTTP_400_BAD_REQUEST, detail='Account not found')
+                logger.error(f'Account {self.state.transaction_details.account_id} not found')
+                raise InvalidAccount()
             currency_id = account.currency_id
 
-        currency: Currency = self._db.query(Currency).filter_by(id=currency_id).one_or_none()  # type: ignore
+        currency = self.state.db.query(Currency).filter_by(id=currency_id).one_or_none()
         if currency is None:
             logger.error(f'Currency {currency_id} not found')
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail='Currency not found')
+            raise InvalidCurrency()
 
         self._transaction.currency_id = currency.id
         self._transaction.currency = currency
@@ -105,47 +114,50 @@ class TransactionManager:
 
     def set_account(self, account_id: int | None = None, account_prefix: str = '') -> 'TransactionManager':
         try:
-            check_account_ownership(self._transaction.user_id, account_id, self._db)
+            check_account_ownership(self.state.user_id, account_id, self.state.db)
             setattr(self._transaction, f'{account_prefix}account_id', account_id)
-            account: Account = self._db.query(Account).filter_by(id=account_id).one_or_none()  # type: ignore
+            account = self.state.db.query(Account).filter_by(id=account_id).one_or_none()
             setattr(self._transaction, f'{account_prefix}account', account)
-        except HTTPException as e:
-            logger.error(f'Error checking account ownership: {e.detail}')
+        except AccessDenied as e:
+            logger.error(f'Access denied. user_id={self.state.user_id}, account_id={account_id}')
             raise e
         return self
 
-    def _prepare_transaction(self) -> 'TransactionManager':
-        """ Prepare transaction object for update or create."""
-        if self._transaction_details.id is not None:
-            self._transaction: Transaction = self._db.query(Transaction).filter_by(  # type: ignore
-                id=self._transaction_details.id).one_or_none()
+    def _prepare_transaction(self):
+        transaction_details = self.state.transaction_details
+
+        if transaction_details.id is not None:
+            self._transaction = self.state.db.query(Transaction).filter_by(
+                id=transaction_details.id).one_or_none()  # type: ignore
 
             if self._transaction is None:
-                logger.error(f'Transaction {self._transaction_details.id} not found')
-                raise InvalidTransaction(detail=f'Transaction {self._transaction_details.id} not found')
+                logger.error(f'Transaction {transaction_details.id} not found')
+                raise InvalidTransaction(detail=f'Transaction {transaction_details.id} not found')
 
-            if self._user_id != self._transaction.user_id:
+            if self.state.user_id != self._transaction.user_id:
                 logger.error(
-                    f'User {self._user_id} tried to update transaction {self._transaction.id} of user {self._transaction.user_id}')
+                    f'User {self.state.user_id} tried to update self._transaction {self._transaction.id} of user '
+                    + f'{self._transaction.user_id}')
                 raise AccessDenied()
 
-            self._is_update = True
-            self._prev_amount = self._transaction.amount
-            self._prev_account_id = self._transaction.account_id
-            self._prev_new_balance = self._transaction.new_balance
-            self._prev_account = self._transaction.account
-            self._prev_target_account_id = self._transaction.target_account_id
-            self._prev_target_new_balance = self._transaction.target_new_balance
-            self._prev_target_amount = self._transaction.target_amount
-            self._prev_is_transfer = self._transaction.is_transfer
-            self._prev_is_income = self._transaction.is_income
+            self.state.is_update = True
+            self.state.prev_amount = self._transaction.amount
+            self.state.prev_account_id = self._transaction.account_id
+            self.state.prev_new_balance = self._transaction.new_balance
+            self.state.prev_account = self._transaction.account
+            self.state.prev_target_account_id = self._transaction.target_account_id
+            self.state.prev_target_new_balance = self._transaction.target_new_balance
+            self.state.prev_target_amount = self._transaction.target_amount
+            self.state.prev_is_transfer = self._transaction.is_transfer
+            self.state.prev_is_income = self._transaction.is_income
         else:
-            self._is_update = False
-            self._prev_amount = Decimal(0.0)
-            self._prev_target_amount = Decimal(0.0)
+            self.state.is_update = False
+            self.state.prev_amount = Decimal(0.0)
+            self.state.prev_target_amount = Decimal(0.0)
 
             self._transaction = Transaction()
-            self._transaction.user_id = self._user_id
+            self._transaction.user_id = self.state.user_id
+
         return self
 
     def get_transaction(self) -> Transaction:
@@ -156,74 +168,67 @@ class TransactionManager:
             self._process_transfer_type()
         else:
             self._process_non_transfer_type()
-        self._db.add(self._transaction)
-        self._db.add(self._transaction.account)
-        self._db.commit()
-        self._db.refresh(self._transaction)
-        self._db.refresh(self._transaction.account)
+        self.state.db.add(self._transaction)
+        self.state.db.add(self._transaction.account)
+        self.state.db.commit()
+        self.state.db.refresh(self._transaction)
+        self.state.db.refresh(self._transaction.account)
 
         return self
 
     def delete_transaction(self) -> 'TransactionManager':
-        """This function deletes transaction"""
         if self._transaction.is_transfer:
             self.update_acc_prev_transfer()
         else:
             self.update_acc_prev_nontransfer()
 
         self._transaction.is_deleted = True
-        self._db.add(self._transaction)
-        self._db.commit()
+        self.state.db.add(self._transaction)
+        self.state.db.commit()
 
         return self
 
     def _process_transfer_type(self) -> None:
-        """This function processes case of transfer from one account to another"""
-
         if self._transaction.account.currency_id != self._transaction.target_account.currency_id:
-            currency_processor: CurrencyProcessor = CurrencyProcessor(self._transaction, self._db)
+            currency_processor = CurrencyProcessor(self._transaction, self.state.db)
             self._transaction = currency_processor.calculate_exchange_rate()
 
-        if self._is_update:
+        if self.state.is_update:
             self.update_acc_prev_transfer()
 
         self._transaction.account.balance -= self._transaction.amount
-        self._transaction.target_account.balance += self._transaction.target_amount  # type: ignore
+        self._transaction.target_account.balance += self._transaction.target_amount
         self._transaction.new_balance = self._transaction.account.balance
         self._transaction.target_new_balance = self._transaction.target_account.balance
 
     def update_acc_prev_transfer(self):
-        """This function updates account balance (by previous amount) if transaction is transfer"""
-        if self._prev_is_transfer:
-            prev_target_account: Account = self._db.query(Account).filter_by(  # type: ignore
-                id=self._prev_target_account_id).one_or_none()
-            prev_target_account.balance -= self._prev_target_amount
+        if self.state.prev_is_transfer:
+            prev_target_account = self.state.db.query(Account).filter_by(
+                id=self.state.prev_target_account_id).one()
+            prev_target_account.balance -= self.state.prev_target_amount
 
-            prev_account: Account = self._db.query(Account).filter_by(  # type: ignore
-                id=self._prev_account_id).one_or_none()
-            prev_account.balance += self._prev_amount
-            self._db.add(prev_target_account)
-            self._db.add(prev_account)
-            self._db.commit()
+            prev_account = self.state.db.query(Account).filter_by(id=self.state.prev_account_id).one()
+            prev_account.balance += self.state.prev_amount
+            self.state.db.add(prev_target_account)
+            self.state.db.add(prev_account)
+            self.state.db.commit()
         else:
-            if self._prev_is_income:
-                self._transaction.account.balance -= self._prev_amount
+            if self.state.prev_is_income:
+                self._transaction.account.balance -= self.state.prev_amount
             else:
-                self._transaction.account.balance += self._prev_amount
+                self._transaction.account.balance += self.state.prev_amount
 
     def _process_non_transfer_type(self):
-        """If the transaction is not transfer from one account to another then this function processes it"""
-
         try:
-            category = self._db.query(UserCategory).filter_by(id=self._transaction.category_id).one()
+            category = self.state.db.query(UserCategory).filter_by(id=self._transaction.category_id).one()
         except NoResultFound:
             logger.error(f'Invalid category {self._transaction.category_id}')
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, 'Invalid category')
+            raise InvalidCategory()
 
-        if category.user_id != self._user_id:
-            logger.error(f'User {self._user_id} tried to update transaction {self._transaction.id} ' +
+        if category.user_id != self.state.user_id:
+            logger.error(f'User {self.state.user_id} tried to update transaction {self._transaction.id} ' +
                          f'with not own category {self._transaction.category_id}')
-            raise HTTPException(status.HTTP_403_FORBIDDEN, 'Forbidden')
+            raise AccessDenied()
 
         self.update_acc_prev_nontransfer()
 
@@ -234,10 +239,9 @@ class TransactionManager:
         self._transaction.new_balance = self._transaction.account.balance
 
     def update_acc_prev_nontransfer(self):
-        """This function updates account balance (by previous amount) if transaction is not transfer"""
-        if self._is_update:
-            if self._prev_is_income:
-                self._prev_account.balance -= self._prev_amount
+        if self.state.is_update:
+            if self.state.prev_is_income:
+                self.state.prev_account.balance -= self.state.prev_amount  # type: ignore
             else:
-                self._prev_account.balance += self._prev_amount
-            self._db.add(self._prev_account)
+                self.state.prev_account.balance += self.state.prev_amount  # type: ignore
+            self.state.db.add(self.state.prev_account)

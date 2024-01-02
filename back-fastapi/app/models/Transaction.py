@@ -25,12 +25,12 @@ class Transaction(Base):
     new_balance: Mapped[Decimal] = mapped_column(nullable=False, )
     target_account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id', ondelete='CASCADE'), index=True,
                                                    nullable=True, default=None)
-    target_new_balance: Mapped[Decimal | None] = mapped_column(nullable=True, default=None, server_default=None)
+    target_new_balance: Mapped[Decimal] = mapped_column(nullable=True, default=None, server_default=None)
     category_id: Mapped[int | None] = mapped_column(ForeignKey('user_categories.id', ondelete='CASCADE'), index=True,
                                                     nullable=True)
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'), index=True, nullable=True)
     amount: Mapped[Decimal] = mapped_column()
-    target_amount: Mapped[Decimal | None] = mapped_column(nullable=True, default=None, server_default=None)
+    target_amount: Mapped[Decimal] = mapped_column(nullable=True, default=None, server_default=None)
     label: Mapped[str] = mapped_column(String(LABEL_MAX_LENGTH), index=True, nullable=True)
     notes: Mapped[str] = mapped_column(nullable=True)
     date_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True, nullable=True)
