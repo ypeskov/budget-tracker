@@ -4,4 +4,5 @@ git pull
 
 back-fastapi/scripts/deploy.sh
 
-src-front/build.sh
+cd src-front
+./build.sh
