@@ -170,7 +170,7 @@ async function deleteTransaction() {
 
             <div class="flex-container">
               <button type="submit" class="btn btn-primary">Submit</button>
-              <button @click="deleteTransaction" class="btn btn-danger">Delete</button>
+              <button @click.prevent="deleteTransaction" class="btn btn-danger">Delete</button>
             </div>
             
           </form>

@@ -57,16 +57,12 @@ def check_account_ownership(user_id: int, account_id: int | None, db: Session):
 
 
 class TransactionManager:
-    def __init__(self,
-                 transaction_details: UpdateTransactionSchema | CreateTransactionSchema,
-                 user_id: int,
+    def __init__(self, transaction_details: UpdateTransactionSchema | CreateTransactionSchema, user_id: int,
                  db: Session):
         self.state = TransactionState(user_id=user_id, db=db, transaction_details=transaction_details)
         self._transaction: Transaction = Transaction()
-        self._prepare_transaction()
-        self.set_account(transaction_details.account_id)
-        self.set_currency()
-        self.set_date_time(transaction_details.date_time)
+        self._prepare_transaction().set_account(transaction_details.account_id).set_currency().set_date_time(
+            transaction_details.date_time)
 
         self._transaction.amount = transaction_details.amount
         self._transaction.label = transaction_details.label
@@ -123,7 +119,7 @@ class TransactionManager:
             raise e
         return self
 
-    def _prepare_transaction(self):
+    def _prepare_transaction(self) -> 'TransactionManager':
         transaction_details = self.state.transaction_details
 
         if transaction_details.id is not None:

@@ -86,13 +86,12 @@ def delete_transaction(transaction_id: int, request: Request,
     try:
         transaction = delete(transaction_id, request.state.user['id'], db)
         return transaction
-    except HTTPException as e:
+    except InvalidTransaction as e:
         logger.error(f'Error deleting transaction: {e.detail}')
-        if e.status_code == status.HTTP_404_NOT_FOUND:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
-        elif e.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to delete transaction")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
+    except AccessDenied as e:
+        logger.error(f'Error deleting transaction: Access denied')
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to delete transaction')
