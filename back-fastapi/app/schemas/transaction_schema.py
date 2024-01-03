@@ -7,6 +7,7 @@ from app.schemas.currency_schema import CurrencyResponseSchema
 from app.schemas.user_schema import UserResponse
 from app.schemas.category_schema import ResponseCategorySchema
 from pydantic import ConfigDict, BaseModel, PlainSerializer
+from pydantic.alias_generators import to_camel
 
 
 class CreateTransactionSchema(BaseModel):
@@ -46,8 +47,16 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     currency_id: int | None = None
     user: UserResponse
     account: AccountResponseSchema
+    new_balance: Annotated[Decimal, PlainSerializer(
+            lambda x: float(x), return_type=float, when_used='json'
+        )]
     target_account: AccountResponseSchema | None = None
+    target_new_balance: Annotated[Decimal, PlainSerializer(
+            lambda x: float(x), return_type=float, when_used='json'
+        )] | None = None
     currency: CurrencyResponseSchema
     category: ResponseCategorySchema | None = None
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True,
+                              populate_by_name=True,
+                              alias_generator=to_camel)

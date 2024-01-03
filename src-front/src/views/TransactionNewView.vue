@@ -21,6 +21,7 @@ const targetAccount = ref(accounts[0]);
 let transaction = reactive({});
 const categories = ref([]);
 let filteredCategories = ref([]);
+const showDeleteConfirmation = ref(false);
 
 const itemType = ref('expense');
 transaction.is_transfer = itemType.value === 'transfer';
@@ -122,6 +123,10 @@ async function submitTransaction() {
   }
 }
 
+function confirmDelete() {
+  showDeleteConfirmation.value = true;
+}
+
 async function deleteTransaction() {
   try {
     await Services.transactionsService.deleteTransaction(transaction.id);
@@ -129,6 +134,8 @@ async function deleteTransaction() {
   } catch (e) {
     console.log(e)
     router.push({ name: 'home' });
+  } finally {
+    showDeleteConfirmation.value = false;
   }
 }
 </script>
@@ -170,10 +177,19 @@ async function deleteTransaction() {
 
             <div class="flex-container">
               <button type="submit" class="btn btn-primary">Submit</button>
-              <button @click.prevent="deleteTransaction" class="btn btn-danger">Delete</button>
+              <button @click.prevent="confirmDelete" class="btn btn-danger">Delete</button>
             </div>
-            
           </form>
+
+          <div v-if="showDeleteConfirmation" class="overlay"></div>
+
+          <div v-if="showDeleteConfirmation" class="delete-confirmation">
+            <p>Delete the transaction?</p>
+            <div class="buttons-container">
+              <button @click="deleteTransaction" class="btn btn-danger">Yes</button>
+              <button @click="showDeleteConfirmation = false" class="btn btn-secondary">Cancel</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -185,5 +201,42 @@ async function deleteTransaction() {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.delete-confirmation {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000; 
+  text-align: center;
+  width: auto; 
+}
+
+.delete-confirmation p {
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #333;
+}
+
+.buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px; 
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999; 
 }
 </style>
