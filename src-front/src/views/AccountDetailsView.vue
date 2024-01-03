@@ -1,6 +1,7 @@
 <script setup>
 import { onBeforeMount, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { DateTime } from 'luxon';
 
 import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
@@ -41,7 +42,7 @@ onBeforeMount(async () => {
         <div class="col">Balance: {{ accountDetails.balance }} {{ accountDetails?.currency?.code }}</div>
       </div>
       <div class="row">
-        <div class="col">Open Date: {{ accountDetails.opening_date }}</div>
+        <div class="col">Open Date: {{ DateTime.fromISO(accountDetails.openingDate).toLocaleString() }}</div>
       </div>
     </div>
 
