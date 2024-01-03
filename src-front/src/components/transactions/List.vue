@@ -1,41 +1,58 @@
 <script setup>
-import { DateTime } from 'luxon';
 import { computed } from 'vue';
+import { RouterLink } from 'vue-router';
 
 const props = defineProps(['transactions',]);
+
+const groupedTransactions = computed(() => {
+  const grouped = [];
+  let lastDate = null;
+
+  props.transactions.forEach(transaction => {
+    const transactionDate = transaction.dateTime.split('T')[0];
+    if (lastDate !== transactionDate) {
+      grouped.push({ date: transactionDate, transactions: [] });
+      lastDate = transactionDate;
+    }
+    grouped[grouped.length - 1].transactions.push(transaction);
+  });
+
+  return grouped;
+});
 
 function categoryLabel(transaction) {
   if (transaction.category) {
     return `${transaction.category.name} (${transaction.isIncome ? 'Income' : 'Expense'})`;
-  } else if (transaction.is_transfer) {
+  } else if (transaction.isTransfer) {
     return 'Transfer';
   } else {
     return 'Unknown';
   }
 }
-
 </script>
 
 <template>
-  <div v-if="transactions.length > 0">
-    <div v-for="transaction, idx in props.transactions" :key="transaction.id" class="list-item">
-      <RouterLink class="row" :to="{
-        name: 'transactionDetails',
-        params: {
-          id: transaction.id,
-        }
-      }">
-        <div class="col-5">
-          <div class="transaction-element"><b>{{ transaction.label }}</b></div>
-          <div class="transaction-element">{{ categoryLabel(transaction) }}</div>
-
-        </div>
-        <div class="col-7 amount-container">
-          <div><b>{{ parseFloat(transaction.amount).toFixed(2) }} {{ transaction.currency.code }}</b></div>
-          <div><span class="acc-name">{{ transaction.account.name }}</span> | {{
-            parseFloat(transaction.newBalance).toFixed(2) }}</div>
-        </div>
-      </RouterLink>
+  <div v-if="groupedTransactions.length > 0">
+    <div v-for="group in groupedTransactions" :key="group.date">
+      <div class="date-header">{{ group.date }}</div>
+      <div v-for="transaction in group.transactions" :key="transaction.id" class="list-item">
+        <RouterLink class="row" :to="{
+          name: 'transactionDetails',
+          params: {
+            id: transaction.id,
+          }
+        }">
+          <div class="col-5">
+            <div class="transaction-element"><b>{{ transaction.label }}</b></div>
+            <div class="transaction-element">{{ categoryLabel(transaction) }}</div>
+          </div>
+          <div class="col-7 amount-container">
+            <div><b>{{ parseFloat(transaction.amount).toFixed(2) }} {{ transaction.currency.code }}</b></div>
+            <div><span class="acc-name">{{ transaction.account.name }}</span> | {{
+              parseFloat(transaction.newBalance).toFixed(2) }}</div>
+          </div>
+        </RouterLink>
+      </div>
     </div>
   </div>
   <div v-else>
@@ -43,8 +60,26 @@ function categoryLabel(transaction) {
   </div>
 </template>
 
+<!-- Стили остаются прежними -->
+
+
 <style scoped>
 @import '../../assets/main.scss';
+
+.date-header {
+  font-weight: bold;
+  margin: 10px 0;
+  background-color: #b3b2b2;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.list-item {
+  padding: 5px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  margin-top: 5px;
+}
 
 .transaction-element {
   overflow: hidden;

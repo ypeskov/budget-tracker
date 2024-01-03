@@ -33,19 +33,34 @@ onBeforeMount(async () => {
 <template>
   <main>
     <div class="container">
-      <div class="row">
-        <div class="col">
+      <div class="account-row">
+        <div class="account-name">
           Account: <strong>{{ accountDetails.name }}</strong>
         </div>
-      </div>
-      <div class="row">
-        <div class="col">Balance: {{ accountDetails.balance }} {{ accountDetails?.currency?.code }}</div>
-      </div>
-      <div class="row">
-        <div class="col">Open Date: {{ DateTime.fromISO(accountDetails.openingDate).toLocaleString() }}</div>
       </div>
     </div>
 
     <TransactionsListView :account-id="accountDetails.id" :is-account-details="true" />
   </main>
 </template>
+
+
+<style scoped>
+.container {
+  margin: 0 auto;
+  /* padding: 10px 0;  */
+}
+
+.account-row {
+  background-color: #e2e0e0;
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin: 0.5rem 0 0.5rem 0.5rem;
+}
+
+.account-name {
+  font-size: 1em;
+  color: #333;
+}
+</style>
+
