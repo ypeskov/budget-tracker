@@ -78,6 +78,8 @@ const router = createRouter({
       },
       props: {
         isEdit: true,
+        accountId: 0,
+        isAccountDetails: false,
       },
       component: () => import('../views/TransactionNewView.vue'),
     },
@@ -88,6 +90,10 @@ const router = createRouter({
         requiresAuth: true,
         requiresUnAuth: false,
       },
+      props: route => ({ 
+        returnUrl: route.query.returnUrl,
+        accountId: route.query.accountId, 
+      }),
       component: () => import('../views/TransactionNewView.vue'),
     },
   ],

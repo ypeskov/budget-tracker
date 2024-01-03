@@ -11,7 +11,7 @@ import Category from '../components/transactions/Category.vue';
 import Account from '../components/transactions/Account.vue';
 import ExchangeRate from '../components/transactions/ExchangeRate.vue'
 
-const props = defineProps(['isEdit']);
+const props = defineProps(['isEdit', 'returnUrl', 'accountId']);
 const router = useRouter();
 const route = useRoute();
 
@@ -25,6 +25,8 @@ const showDeleteConfirmation = ref(false);
 
 const itemType = ref('expense');
 transaction.is_transfer = itemType.value === 'transfer';
+
+const returnUrlName = ref('');
 
 function changeAccount({ accountType, account }) {
   if (accountType === 'src') {
@@ -43,6 +45,12 @@ function amountChanged({ amountType, amount }) {
 }
 
 onBeforeMount(async () => {
+  if (props.returnUrl == 'accountDetails') {
+    returnUrlName.value = 'accountDetails';
+  } else {
+    returnUrlName.value = 'transactions';
+}
+
   try {
     accounts.length = 0;
     accounts.push(...(await Services.accountsService.getAllUserAccounts()));
@@ -116,7 +124,13 @@ async function submitTransaction() {
   for (const key in transaction) {
     transaction[key] = null;
   }
-  router.push({ name: 'transactions' });
+  router.push({
+    name: returnUrlName.value,
+    params: {
+      id: props.accountId,
+    }
+  });
+  // router.go(-1);
   } catch (e) {
     console.log(e)
     router.push({ name: 'home' });
