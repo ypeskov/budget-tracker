@@ -8,7 +8,7 @@ import { useUserStore } from '../../stores/user';
 import Filter from '../filter/Filter.vue';
 import List from './List.vue';
 
-const props = defineProps(['accountId', 'isAccountDetails', ]);
+const props = defineProps(['accountId', 'isAccountDetails',]);
 
 const userStore = useUserStore();
 let transactions = reactive([]);
@@ -19,10 +19,18 @@ const router = useRouter();
 const showFilter = ref(false);
 const reset = ref(true);
 
+const returnUrlName = ref("");
+
+if (props.isAccountDetails) {
+  returnUrlName.value = 'accountDetails';
+} else {
+  returnUrlName.value = 'transactions';
+}
+
 async function fetchTransactions() {
   try {
     transactions.splice(0);
-    const allTransactions = await Services.transactionsService.getUserTransactions({accountId: props.accountId});
+    const allTransactions = await Services.transactionsService.getUserTransactions({ accountId: props.accountId });
     transactions.push(...allTransactions);
     filteredTransactions.push(...allTransactions);
   } catch (e) {
@@ -50,7 +58,7 @@ onBeforeMount(async () => {
 
 async function reloadTransactions(event) {
   event.preventDefault();
-  const allTransactions = await Services.transactionsService.getUserTransactions({accountId: props.accountId});
+  const allTransactions = await Services.transactionsService.getUserTransactions({ accountId: props.accountId });
   transactions.splice(0);
   transactions.push(...allTransactions);
   filteredTransactions.splice(0);
@@ -76,7 +84,15 @@ function filterApplied(payload) {
     <div class="row">
       <div class="col sub-menu">
         <span v-if="userStore.isLoggedIn">
-          <RouterLink class="btn btn-secondary" :to="{ name: 'transactionNew' }">New</RouterLink>
+          <RouterLink class="btn btn-secondary" 
+                    :to="{ 
+                      name: 'transactionNew', 
+                      query: {
+                        returnUrl: returnUrlName,
+                        accountId: props.accountId,
+                      }
+                    }">New
+          </RouterLink>
         </span>
         <span>
           <a href="" class="btn btn-secondary" @click="reloadTransactions">Reload</a>
