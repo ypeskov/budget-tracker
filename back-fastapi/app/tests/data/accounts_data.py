@@ -26,61 +26,29 @@ test_account_types = [
     },
 ]
 
-test_accounts = [
+test_accounts_data = [
     {
         'id': 1,
         "name": "Test Account 1 (USD)",
-        "currency_id": 1,
-        "account_type_id": 2,
+        "currencyId": 1,
+        "accountTypeId": 2,
+        'initial_balance': 500_000,
         "balance": 500_000
     },
     {
         'id': 2,
         "name": "Test Account 2 (USD)",
-        "currency_id": 1,
-        "account_type_id": 2,
+        "currencyId": 1,
+        "accountTypeId": 2,
+        'initial_balance': 30_000,
         "balance": 30_000
     },
     {
         'id': 3,
         "name": "Test Account 1 (UAH)",
-        "currency_id": 2,
-        "account_type_id": 2,
+        "currencyId": 2,
+        "accountTypeId": 2,
+        'initial_balance': 1_000_000,
         "balance": 1_000_000
-    },
-    {
-        'id': 4,
-        "name": "Test Account 2 (UAH)",
-        "currency_id": 2,
-        "account_type_id": 2,
-        "balance": 20_000
-    },
-    {
-        'id': 5,
-        "name": "Test Account 1 (EUR)",
-        "currency_id": 3,
-        "account_type_id": 2,
-        "balance": 250_000
-    },
-    {
-        'id': 6,
-        "name": "Test Account 2 (EUR)",
-        "currency_id": 3,
-        "account_type_id": 2,
-        "balance": 350_000
-    },
-    {
-        'id': 7,
-        "name": "Test Account 1 (BGN)",
-        "currency_id": 4,
-        "account_type_id": 1,
-        "balance": 0
-    },
-    {
-        'id': 8,
-        "name": "Test Account 2 (BGN)",
-        "currency_id": 4,
-        "account_type_id": 2,
-        "balance": 25_000
     },
 ]

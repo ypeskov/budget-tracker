@@ -37,6 +37,8 @@ class UpdateTransactionSchema(CreateTransactionSchema):
     currency_id: int
     user_id: int
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class ResponseTransactionSchema(CreateTransactionSchema):
     id: int

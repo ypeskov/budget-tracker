@@ -1,7 +1,7 @@
 from pydantic import ConfigDict, BaseModel, EmailStr, Field
 
 
-PASSWORD_MIN_LENGTH = 1 # TODO:  change back to 8
+PASSWORD_MIN_LENGTH = 3
 PASSWORD_MAX_LENGTH = 15
 password_field: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
 

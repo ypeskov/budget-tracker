@@ -22,13 +22,15 @@ class Transaction(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
     account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id', ondelete='CASCADE'), index=True)
+    new_balance: Mapped[Decimal] = mapped_column(nullable=False, )
     target_account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id', ondelete='CASCADE'), index=True,
                                                    nullable=True, default=None)
+    target_new_balance: Mapped[Decimal] = mapped_column(nullable=True, default=None, server_default=None)
     category_id: Mapped[int | None] = mapped_column(ForeignKey('user_categories.id', ondelete='CASCADE'), index=True,
-                                             nullable=True)
+                                                    nullable=True)
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'), index=True, nullable=True)
     amount: Mapped[Decimal] = mapped_column()
-    target_amount: Mapped[Decimal | None] = mapped_column(nullable=True, default=None, server_default=None)
+    target_amount: Mapped[Decimal] = mapped_column(nullable=True, default=None, server_default=None)
     label: Mapped[str] = mapped_column(String(LABEL_MAX_LENGTH), index=True, nullable=True)
     notes: Mapped[str] = mapped_column(nullable=True)
     date_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True, nullable=True)
@@ -36,7 +38,7 @@ class Transaction(Base):
     is_transfer: Mapped[bool] = mapped_column(nullable=False)
     is_income: Mapped[bool] = mapped_column(default=False)
 
-    user: Mapped[User] = relationship(back_populates='transactions')
+    user: Mapped[User] = relationship(backref='transactions')
     account: Mapped['Account'] = relationship('Account', foreign_keys="Transaction.account_id")
     target_account: Mapped['Account'] = relationship('Account', foreign_keys="Transaction.target_account_id")
 

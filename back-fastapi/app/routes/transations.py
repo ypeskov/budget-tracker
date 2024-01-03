@@ -7,8 +7,9 @@ from app.logger_config import logger
 from app.database import get_db
 from app.schemas.transaction_schema import CreateTransactionSchema, ResponseTransactionSchema, UpdateTransactionSchema
 from app.dependencies.check_token import check_token
+from app.services.errors import AccessDenied, InvalidCategory, InvalidAccount
 from app.services.transactions import create_transaction, get_transactions, get_transaction_details, update, delete
-
+from app.services.transaction_management.errors import InvalidTransaction
 from app.utils.sanitize_transaction_filters import prepare_filters
 
 ic.configureOutput(includeContext=True)
@@ -26,16 +27,16 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
 
     try:
         transaction = create_transaction(transaction_dto, request.state.user['id'], db)
-    except HTTPException as e:
-        logger.exception(f'Error creating transaction: {e.detail}')
-        if e.status_code == status.HTTP_400_BAD_REQUEST:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.detail)
-        elif e.status_code == status.HTTP_403_FORBIDDEN:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.detail)
-        elif e.status_code == status.HTTP_404_NOT_FOUND:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)
-    except Exception as e:
+    except AccessDenied:
+        logger.exception(f'Access denied')
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+    except InvalidCategory:
+        logger.exception(f'Invalid category: {transaction_dto}')
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid category")
+    except InvalidAccount:
+        logger.exception(f'Invalid account: {transaction_dto}')
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account")
+    except Exception as e:  # pragma: no cover
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to create transaction')
 
@@ -62,16 +63,16 @@ def update_transaction(transaction_details: UpdateTransactionSchema,
                        request: Request,
                        db: Session = Depends(get_db)) -> ResponseTransactionSchema:
     """ Update transaction details """
-
     try:
         transaction = update(transaction_details, request.state.user['id'], db)
         return transaction
+    except InvalidTransaction as e:
+        logger.error(f'Error updating transaction: {e.detail}')
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
     except HTTPException as e:
         logger.error(f'Error updating transaction: {e.detail}')
         if e.status_code == status.HTTP_404_NOT_FOUND:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
-        elif e.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unable to update transaction")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)
     except Exception as e:
         logger.exception(e)
@@ -85,13 +86,12 @@ def delete_transaction(transaction_id: int, request: Request,
     try:
         transaction = delete(transaction_id, request.state.user['id'], db)
         return transaction
-    except HTTPException as e:
+    except InvalidTransaction as e:
         logger.error(f'Error deleting transaction: {e.detail}')
-        if e.status_code == status.HTTP_404_NOT_FOUND:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
-        elif e.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to delete transaction")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
+    except AccessDenied as e:
+        logger.error(f'Error deleting transaction: Access denied')
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to delete transaction')

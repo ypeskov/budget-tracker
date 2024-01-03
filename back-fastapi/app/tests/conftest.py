@@ -1,15 +1,15 @@
+import os
+os.environ['TEST_MODE'] = 'True'
+
 from decimal import Decimal
 from collections.abc import Callable
 
-import os
-os.environ["TEST_MODE"] = "True"
-
 import pytest
 from fastapi.testclient import TestClient
+from icecream import ic
 
 from app.main import app
 from app.database import get_db
-from app.logger_config import logger
 from app.config import Settings
 from app.tests.db_test_cfg import override_get_db
 from app.data_loaders.work_data.load_all import load_all_data
@@ -28,8 +28,8 @@ from app.models.Account import Account
 from app.services.accounts import create_account as create_account_service
 from app.services.auth import create_users as create_users_service, get_jwt_token as get_jwt_token_service
 
-from app.tests.data.auth_data import test_users, main_test_user
-from app.tests.data.accounts_data import test_accounts
+from app.tests.data.auth_data import main_test_user
+from app.tests.data.accounts_data import test_accounts_data
 
 settings = Settings()
 
@@ -40,7 +40,6 @@ with open(test_log_file, 'w') as f:
 app.dependency_overrides[get_db] = override_get_db
 
 db = next(override_get_db())
-load_all_data(db)
 
 auth_path_prefix = '/auth'
 accounts_path_prefix = '/accounts'
@@ -52,14 +51,15 @@ main_test_user_id = 1000
 main_user_account1_id = 1
 main_user_account2_id = 2
 
-truly_invalid_account_id = 9999999
+truly_invalid_account_id = 999999999
 truly_invalid_account_type_id = 9999999
 truly_invalid_currency_id = 9999999
 
 client = TestClient(app)
 
 
-def pytest_unconfigure(config):
+@pytest.fixture(scope='module', autouse=True)
+def setup_db():
     db.query(User).delete()
     db.query(Currency).delete()
     db.query(AccountType).delete()
@@ -68,37 +68,42 @@ def pytest_unconfigure(config):
     db.query(Account).delete()
     db.query(Transaction).delete()
     db.commit()
+    print("\n------- DB is cleared -------")
 
-    print("\n\n------- DB is cleared -------\n\n")
+    load_all_data(db)
+
+    yield
 
 
 @pytest.fixture(scope="function")
 def token():
     """ Create a user for test purposes and return his access token """
-    user: User = create_users_service(UserRegistration(**main_test_user), db)
-    user_dict = {**user.__dict__}
-
-    if '_sa_instance_state' in user_dict:
-        del user_dict['_sa_instance_state']
-
-    token = get_jwt_token_service(UserLoginSchema(**main_test_user), db)
+    user: User = create_users_service(UserRegistration.model_validate(main_test_user), db)
+    token = get_jwt_token_service(UserLoginSchema.model_validate(main_test_user), db)
 
     yield token['access_token']
-    db.query(User).filter(User.id == user.id).delete()
+
+    db.delete(user)
     db.commit()
 
 
 @pytest.fixture(scope="function")
-def one_account(token) -> dict:
-    account_details = {**test_accounts[0], 'id': main_user_account1_id, 'user_id': main_test_user_id}
+def one_account(token):
+    account_details = {
+        **test_accounts_data[0],
+        'id': main_user_account1_id,
+        'user_id': main_test_user_id,
+        'initial_balance': test_accounts_data[0]['balance'],
+    }
 
-    account_schema = CreateAccountSchema(**account_details)
+    account_schema = CreateAccountSchema.model_validate(account_details)
     account: Account = create_account_service(account_schema, main_test_user_id, db)
     account_dict = {**account.__dict__}
 
     if '_sa_instance_state' in account_dict:
         del account_dict['_sa_instance_state']
 
+    account_dict['initial_balance'] = float(account_dict['initial_balance'])
     account_dict['balance'] = float(account_dict['balance'])
     account_dict['opening_date'] = str(account_dict['opening_date'])
     account_dict['updated_at'] = str(account_dict['updated_at'])
@@ -117,22 +122,24 @@ def fake_account() -> CreateAccountSchema:
         'user_id': main_test_user_id,
         'currency_id': 1,
         'account_type_id': 1,
+        'initial_balance': 0,
         'balance': 0,
         'opening_date': None,
         'is_hidden': False,
-        'comment': None
+        'comment': ""
     })
 
 
 @pytest.fixture(scope="function")
-def create_accounts(token) -> list[Account]:
-    accounts = []
-    for test_account in test_accounts:
-        accounts.append(
-            client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token}).json())
+def create_accounts(token):
+    accounts = [
+        create_account_service(CreateAccountSchema.model_validate(test_acc), main_test_user_id, db)
+        for test_acc in test_accounts_data
+    ]
     yield accounts
-    db.query(Account).filter_by(user_id=main_test_user_id).delete()
-    db.commit()
+
+    for account in accounts:
+        db.delete(db.query(Account).filter(Account.id == account.id).first())
 
 
 @pytest.fixture(scope="function")
@@ -178,7 +185,7 @@ def create_transaction(token) -> Callable[[dict], Transaction]:
 
 @pytest.fixture(scope="function")
 def create_user():
-    def _create_user(email, password):
+    def _create_user(email, password='qqq_111_'):
         user = {
             'email': email,
             'password': password,

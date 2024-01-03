@@ -27,10 +27,7 @@ class User(Base):
     base_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
 
     base_currency: Mapped['Currency'] = relationship()
-    accounts: Mapped[list['Account']] = relationship('Account', order_by="Account.id", back_populates="user",
-                                                     passive_deletes=True)
     categories: Mapped[list['UserCategory']] = relationship(back_populates="user", passive_deletes=True)
-    transactions: Mapped[list['Transaction']] = relationship(back_populates='user', passive_deletes=True)
 
     is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

@@ -1,12 +1,15 @@
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import NoResultFound
 
 from app.logger_config import logger
 from app.models.Transaction import Transaction
+from app.services.errors import AccessDenied
 from app.services.transaction_management.TransactionManager import TransactionManager
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
+from app.services.transaction_management.errors import InvalidTransaction
 
 
 def create_transaction(transaction_details: CreateTransactionSchema, user_id: int, db: Session) -> Transaction:
@@ -23,7 +26,9 @@ def create_transaction(transaction_details: CreateTransactionSchema, user_id: in
     return transaction
 
 
-def get_transactions(user_id: int, db: Session, params={}, include_deleted=False) -> list[Transaction]:
+def get_transactions(user_id: int, db: Session, params=None, include_deleted=False) -> list[Transaction]:
+    if params is None:
+        params = dict()
     stmt = (db.query(Transaction).options(joinedload(Transaction.account),
                                           joinedload(Transaction.target_account),
                                           joinedload(Transaction.category),
@@ -103,18 +108,19 @@ def update(transaction_details: UpdateTransactionSchema, user_id: int, db: Sessi
 
 
 def delete(transaction_id: int, user_id: int, db: Session) -> Transaction:
-    transaction: Transaction = db.query(Transaction).filter_by(id=transaction_id).one_or_none()  # type: ignore
+    transaction = db.execute(select(Transaction).filter_by(id=transaction_id)).scalar_one_or_none()
 
     if transaction is None:
         logger.error(f'Transaction {transaction_id} not found')
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Transaction not found')
+        raise InvalidTransaction("Transaction not found")
 
     if user_id != transaction.user_id:
         logger.error(f'User {user_id} tried to delete not own transaction {transaction_id}')
-        raise HTTPException(status.HTTP_403_FORBIDDEN)
+        raise AccessDenied()
 
     transaction.is_deleted = True
-    transaction_manager: TransactionManager = TransactionManager(transaction, user_id, db)
+    schema = UpdateTransactionSchema.model_validate(transaction)
+    transaction_manager: TransactionManager = TransactionManager(schema, user_id, db)
     processed_transaction = transaction_manager.delete_transaction().get_transaction()
 
     return processed_transaction

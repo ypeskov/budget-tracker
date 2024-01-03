@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, UTC
 
 import jwt
 from fastapi import HTTPException, status
@@ -105,7 +105,7 @@ def create_access_token(data: dict, expires_delta: timedelta):
     Generate JWT access token.
     """
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
+    expire = datetime.now(UTC) + expires_delta
 
     to_encode.update(
         {"exp": expire, 'exp_human': expire.strftime("%Y-%m-%d %H:%M:%S")})

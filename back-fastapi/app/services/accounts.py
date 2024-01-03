@@ -1,7 +1,7 @@
 from datetime import datetime
+from datetime import UTC
 
-from fastapi import HTTPException, status
-from sqlalchemy import asc
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 
@@ -9,36 +9,56 @@ from app.models.Account import Account
 from app.models.AccountType import AccountType
 from app.models.Currency import Currency
 from app.models.User import User
-from app.schemas.account_schema import CreateAccountSchema
+from app.schemas.account_schema import CreateAccountSchema, UpdateAccountSchema
+from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied
 
 
-def create_account(account_dto: CreateAccountSchema, user_id: int, db: Session) -> Account:
+def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_id: int, db: Session) -> Account:
     """Create new account for user with user_id"""
     existing_user = db.query(User).filter(User.id == user_id).first()  # type: ignore
     if not existing_user:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid user")
+        raise InvalidUser()
 
-    currency = db.query(Currency).filter_by(id=account_dto.currency_id).first()
+    currency = db.execute(select(Currency).where(Currency.id == account_dto.currency_id)).scalar_one_or_none()
     if not currency:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid currency")
+        raise InvalidCurrency()
 
     account_type = db.query(AccountType).filter_by(id=account_dto.account_type_id).first()
     if not account_type:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account type")
+        raise InvalidAccountType()
 
     if account_dto.opening_date is None:
-        account_dto.opening_date = datetime.utcnow()
+        account_dto.opening_date = datetime.now(UTC)
 
-    new_account = Account(user=existing_user, account_type=account_type, currency=currency, balance=account_dto.balance,
-                          opening_date=account_dto.opening_date, is_hidden=account_dto.is_hidden, name=account_dto.name,
+    if hasattr(account_dto, 'id'):
+        account = db.execute(select(Account).where(Account.id == account_dto.id)).scalar_one_or_none()
+        if account is None:
+            raise InvalidAccount()
+        if account:
+            account.user = existing_user
+            account.account_type = account_type
+            account.currency = currency
+            account.initial_balance = account_dto.initial_balance
+            account.balance = account_dto.balance
+            account.opening_date = account_dto.opening_date
+            account.is_hidden = account_dto.is_hidden
+            account.name = account_dto.name
+            account.comment = account_dto.comment
+    else:
+        account = Account(user=existing_user,
+                          account_type=account_type,
+                          currency=currency,
+                          initial_balance=account_dto.initial_balance,
+                          balance=account_dto.balance,
+                          opening_date=account_dto.opening_date,
+                          is_hidden=account_dto.is_hidden,
+                          name=account_dto.name,
                           comment=account_dto.comment)
-    if account_dto.id is not None:
-        new_account.id = account_dto.id
-    db.add(new_account)
+    db.add(account)
     db.commit()
-    db.refresh(new_account)
+    db.refresh(account)
 
-    return new_account
+    return account
 
 
 def get_user_accounts(user_id: int,
@@ -60,9 +80,9 @@ def get_account_details(account_id: int, user_id: int, db: Session) -> Account:
     try:
         account = db.query(Account).filter_by(id=account_id).one()
     except NoResultFound:
-        raise HTTPException(404)
+        raise InvalidAccount()
     if account.user_id != user_id:
-        raise HTTPException(403, 'Forbidden')
+        raise AccessDenied()
     return account
 
 
