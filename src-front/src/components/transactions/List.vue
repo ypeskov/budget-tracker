@@ -6,7 +6,7 @@ const props = defineProps(['transactions',]);
 
 function categoryLabel(transaction) {
   if (transaction.category) {
-    return `${transaction.category.name} (${transaction.is_income ? 'Income' : 'Expense'})`;
+    return `${transaction.category.name} (${transaction.isIncome ? 'Income' : 'Expense'})`;
   } else if (transaction.is_transfer) {
     return 'Transfer';
   } else {
@@ -33,7 +33,7 @@ function categoryLabel(transaction) {
         <div class="col-7 amount-container">
           <div><b>{{ parseFloat(transaction.amount).toFixed(2) }} {{ transaction.currency.code }}</b></div>
           <div><span class="acc-name">{{ transaction.account.name }}</span> | {{
-            DateTime.fromISO(transaction.date_time).toLocaleString() }}</div>
+            parseFloat(transaction.newBalance).toFixed(2) }}</div>
         </div>
       </RouterLink>
     </div>
