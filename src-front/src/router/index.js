@@ -76,11 +76,11 @@ const router = createRouter({
         requiresAuth: true,
         requiresUnAuth: false,
       },
-      props: {
+      props: route => ({
         isEdit: true,
-        accountId: 0,
-        isAccountDetails: false,
-      },
+        returnUrl: route.query.returnUrl,
+        accountId: route.query.accountId, 
+      }),
       component: () => import('../views/TransactionNewView.vue'),
     },
     {

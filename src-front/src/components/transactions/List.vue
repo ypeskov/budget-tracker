@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 
-const props = defineProps(['transactions',]);
+const props = defineProps(['transactions', "accountId", "returnUrl"]);
 
 const groupedTransactions = computed(() => {
   const grouped = [];
@@ -40,6 +40,10 @@ function categoryLabel(transaction) {
           name: 'transactionDetails',
           params: {
             id: transaction.id,
+          },
+          query: {
+            returnUrl: props.returnUrl,
+            accountId: props.accountId,
           }
         }">
           <div class="col-5">
