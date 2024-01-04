@@ -18,17 +18,17 @@ class CreateTransactionSchema(BaseModel):
     target_account_id: int | None = None
     category_id: int | None = None
     amount: Annotated[Decimal, PlainSerializer(
-            lambda x: float(x), return_type=float, when_used='json'
-        )]
+        lambda x: float(x), return_type=float, when_used='json'
+    )]
     target_amount: Annotated[Decimal, PlainSerializer(
-            lambda x: float(x), return_type=float, when_used='json'
-        )] | None = None
+        lambda x: float(x), return_type=float, when_used='json'
+    )] | None = None
     label: str = ''
     notes: str = ''
     date_time: datetime | None = None
     exchange_rate: Annotated[Decimal | None, PlainSerializer(
-            lambda x: float(x), return_type=float, when_used='json'
-        )] | None = None
+        lambda x: float(x), return_type=float, when_used='json'
+    )] | None = None
     is_transfer: bool
     is_income: bool
 
@@ -38,7 +38,9 @@ class UpdateTransactionSchema(CreateTransactionSchema):
     currency_id: int
     user_id: int
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True,
+                              populate_by_name=True,
+                              alias_generator=to_camel)
 
 
 class ResponseTransactionSchema(CreateTransactionSchema):
@@ -48,12 +50,12 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     user: UserResponse
     account: AccountResponseSchema
     new_balance: Annotated[Decimal, PlainSerializer(
-            lambda x: float(x), return_type=float, when_used='json'
-        )]
+        lambda x: float(x), return_type=float, when_used='json'
+    )]
     target_account: AccountResponseSchema | None = None
     target_new_balance: Annotated[Decimal, PlainSerializer(
-            lambda x: float(x), return_type=float, when_used='json'
-        )] | None = None
+        lambda x: float(x), return_type=float, when_used='json'
+    )] | None = None
     currency: CurrencyResponseSchema
     category: ResponseCategorySchema | None = None
 
