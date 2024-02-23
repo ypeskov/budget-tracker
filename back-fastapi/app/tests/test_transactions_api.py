@@ -68,12 +68,12 @@ def test_create_transaction_expense_route(token, one_account, amount):
         created_transactions_ids.append(transaction['id'])
 
         assert transaction['amount'] == amount
-        assert transaction['is_income'] is False if operation == 'expense' else True
-        assert transaction['is_transfer'] is False
+        assert transaction['isIncome'] is False if operation == 'expense' else True
+        assert transaction['isTransfer'] is False
         assert transaction['notes'] == 'Test transaction'
         assert transaction['account']['id'] == one_account['id']
-        assert transaction['category_id'] == categories[0]['id']
-        assert transaction['currency_id'] == one_account['currency_id']
+        assert transaction['categoryId'] == categories[0]['id']
+        assert transaction['currencyId'] == one_account['currency_id']
 
         accounts_response = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token})
         account = accounts_response.json()
@@ -87,12 +87,12 @@ def test_create_transaction_expense_route(token, one_account, amount):
         transaction_details = transaction_response.json()
         assert transaction_details['id'] == transaction['id']
         assert transaction_details['amount'] == transaction_data['amount']
-        assert transaction_details['is_income'] == transaction_data['is_income']
-        assert transaction_details['is_transfer'] == transaction_data['is_transfer']
+        assert transaction_details['isIncome'] == transaction_data['is_income']
+        assert transaction_details['isTransfer'] == transaction_data['is_transfer']
         assert transaction_details['notes'] == transaction_data['notes']
         assert transaction_details['account']['id'] == transaction_data['account_id']
-        assert transaction_details['category_id'] == transaction_data['category_id']
-        assert transaction_details['currency_id'] == transaction_data['currency_id']
+        assert transaction_details['categoryId'] == transaction_data['category_id']
+        assert transaction_details['currencyId'] == transaction_data['currency_id']
 
         # get all transactions for the user
         transactions_response = client.get(f'{transactions_path_prefix}/', headers={'auth-token': token})
@@ -131,7 +131,7 @@ def test_update_transaction(token, one_account, create_user):
     amount_update = 200
     # update transaction
     transaction_data['id'] = transaction['id']
-    transaction_data['user_id'] = transaction['user_id']
+    transaction_data['user_id'] = transaction['userId']
     transaction_data['amount'] = amount_update
     transaction_data['is_income'] = True
     transaction_data['notes'] = 'Updated transaction'
@@ -145,11 +145,11 @@ def test_update_transaction(token, one_account, create_user):
 
     assert updated_transaction['id'] == transaction['id']
     assert updated_transaction['amount'] == transaction_data['amount']
-    assert updated_transaction['is_income'] == transaction_data['is_income']
+    assert updated_transaction['isIncome'] == transaction_data['is_income']
     assert updated_transaction['notes'] == transaction_data['notes']
     assert updated_transaction['account']['id'] == transaction_data['account_id']
-    assert updated_transaction['category_id'] == transaction_data['category_id']
-    assert updated_transaction['currency_id'] == transaction_data['currency_id']
+    assert updated_transaction['categoryId'] == transaction_data['category_id']
+    assert updated_transaction['currencyId'] == transaction_data['currency_id']
 
     updated_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
     assert updated_account['balance'] == updated_balance + transaction_data['amount'] + amount_initial
@@ -160,29 +160,29 @@ def test_update_transaction(token, one_account, create_user):
 
     with pytest.raises(InvalidAccount):
         updated_transaction['id'] = transaction['id']
-        updated_transaction['account_id'] = 999999999999
+        updated_transaction['accountId'] = 999999999999
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
-        update_transaction_service(transaction_schema_update, main_test_user_id, db)
+        q = update_transaction_service(transaction_schema_update, main_test_user_id, db)
 
     user2 = create_user('email2@email.com', 'qqq_111_')
     with pytest.raises(AccessDenied):
         updated_transaction['id'] = transaction['id']
-        updated_transaction['account_id'] = one_account['id']
-        updated_transaction['user_id'] = user2.id
+        updated_transaction['accountId'] = one_account['id']
+        updated_transaction['userId'] = user2.id
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, user2.id, db)
 
     with pytest.raises(InvalidAccount):
         updated_transaction['id'] = transaction['id']
-        updated_transaction['is_transfer'] = True
-        updated_transaction['target_account_id'] = 999999999999
+        updated_transaction['isTransfer'] = True
+        updated_transaction['targetAccountId'] = 999999999999
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, main_test_user_id, db)
 
     with pytest.raises(InvalidCategory) as ex:
-        updated_transaction['category_id'] = 999999999999
-        updated_transaction['is_transfer'] = False
-        updated_transaction['target_account_id'] = None
+        updated_transaction['categoryId'] = 999999999999
+        updated_transaction['isTransfer'] = False
+        updated_transaction['targetAccountId'] = None
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, main_test_user_id, db)
 
