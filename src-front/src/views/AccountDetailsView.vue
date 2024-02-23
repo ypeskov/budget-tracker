@@ -38,7 +38,7 @@ const confirmDelete = async () => {
   try {
     await Services.accountsService.deleteAccount(accountDetails.id);
     console.log("Account deleted successfully");
-    router.push({ name: 'home' });
+    router.push({ name: 'accounts' });
   } catch (e) {
     console.error("Failed to delete account:", e);
     // Handle error, e.g., display an error message to the user
