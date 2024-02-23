@@ -88,3 +88,10 @@ def get_account_details(account_id: int, user_id: int, db: Session) -> Account:
 
 def get_account_types(db: Session) -> list[AccountType]:
     return db.query(AccountType).all()
+
+
+def delete_account(account_id: int, user_id: int, db: Session) -> Account:
+    account = get_account_details(account_id, user_id, db)
+    account.is_deleted = True
+    db.commit()
+    return account

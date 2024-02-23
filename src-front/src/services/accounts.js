@@ -60,4 +60,12 @@ export class AccountService {
     this.accountStore.accountTypes.push(...types);
     return this.accountStore.accountTypes;
   }
+
+  async deleteAccount(accountId) {
+    const accUrl = '/accounts/' + accountId + '/';
+    await request(accUrl, {
+      method: 'DELETE',
+    }, {userService: this.userService});
+    this.setShouldUpdateAccountsList(true);
+  }
 }
