@@ -166,18 +166,18 @@ def create_transaction(token) -> Callable[[dict], Transaction]:
         assert transaction_response.status_code == 200
         transaction_props = transaction_response.json()
         transaction = Transaction(id=transaction_props['id'],
-                                  user_id=transaction_props['user_id'],
-                                  account_id=transaction_props['account_id'],
-                                  category_id=transaction_props['category_id'],
-                                  target_account_id=transaction_props['target_account_id'],
+                                  user_id=transaction_props['userId'],
+                                  account_id=transaction_props['accountId'],
+                                  category_id=transaction_props['categoryId'],
+                                  target_account_id=transaction_props['targetAccountId'],
                                   amount=Decimal(transaction_props['amount']),
-                                  currency_id=transaction_props['currency_id'],
-                                  date_time=transaction_props['date_time'],
-                                  is_income=transaction_props['is_income'],
-                                  is_transfer=transaction_props['is_transfer'],
+                                  currency_id=transaction_props['currencyId'],
+                                  date_time=transaction_props['dateTime'],
+                                  is_income=transaction_props['isIncome'],
+                                  is_transfer=transaction_props['isTransfer'],
                                   notes=transaction_props['notes'])
-        if transaction_props['target_amount'] is not None:
-            transaction.target_amount = Decimal(transaction_props['target_amount'])
+        if transaction_props['targetAmount'] is not None:
+            transaction.target_amount = Decimal(transaction_props['targetAmount'])
         return transaction
 
     return _create_transaction
