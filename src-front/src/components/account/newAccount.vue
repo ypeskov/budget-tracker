@@ -97,7 +97,7 @@ async function createAccount() {
       </div>
       <div class="form-group">
         <label for="balance">Balance:</label>
-        <input type="number" id="balance" v-model="balance" required>
+        <input type="number" id="balance" v-model="balance" step="0.01" required>
       </div>
       <div class="form-group">
         <label for="opening_date">Opening Date:</label>
