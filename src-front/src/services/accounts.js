@@ -62,7 +62,7 @@ export class AccountService {
   }
 
   async deleteAccount(accountId) {
-    const accUrl = '/accounts/' + accountId + '/';
+    const accUrl = '/accounts/' + accountId;
     await request(accUrl, {
       method: 'DELETE',
     }, {userService: this.userService});
