@@ -5,6 +5,8 @@ import { useRouter } from 'vue-router';
 import { Services } from '../../services/servicesConfig';
 import { HttpError } from '../../errors/HttpError';
 
+const props = defineProps(['accountCreated']);
+
 const router = useRouter();
 
 const accountType = ref(1);
@@ -48,7 +50,8 @@ async function createAccount() {
   };
 
   try {
-    await Services.accountsService.createAccount(newAccount);
+    let createdAccount = await Services.accountsService.createAccount(newAccount);
+    props.accountCreated();
   } catch(e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       console.log(e.message);

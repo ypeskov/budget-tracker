@@ -28,8 +28,11 @@ onBeforeMount(async () => {
   }  
 });
 
-async function updateAccuntsList(event) {
-  event.preventDefault();
+async function updateAccountsList(event) {
+  if (event) {
+    event.preventDefault();
+  }
+  
   Services.accountsService.setShouldUpdateAccountsList(true);
   try {
     accounts.splice(0);
@@ -45,6 +48,11 @@ async function updateAccuntsList(event) {
     router.push({ name: 'home' });
   } 
 }
+
+async function accountCreated() {
+  await updateAccountsList();
+  showNewAccForm.value = false;
+}
 </script>
 
 <template>
@@ -52,13 +60,13 @@ async function updateAccuntsList(event) {
     <div class="container">
       <div class="row">
         <div class="col sub-menu">
-          <a href="" class="btn btn-secondary" @click="updateAccuntsList">Reload</a>
+          <a href="" class="btn btn-secondary" @click="updateAccountsList">Reload</a>
           <a href="" class="btn btn-secondary" @click.prevent="showNewAccForm=!showNewAccForm">New Account</a>
         </div>
       </div>
 
       <div v-if="showNewAccForm" class="row">
-        <div class="col"><newAccount /></div>
+        <div class="col"><newAccount :account-created="accountCreated" /></div>
       </div>
 
       <div class="row">
