@@ -1,6 +1,8 @@
 <script setup>
 import { onBeforeMount, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { defineProps } from 'vue';
+import { DateTime } from 'luxon';
 
 import { Services } from '../../services/servicesConfig';
 import { HttpError } from '../../errors/HttpError';
@@ -13,7 +15,7 @@ const accountType = ref(1);
 const currency = ref(1);
 const name = ref('');
 const balance = ref(0);
-const openingDate = ref('');
+const openingDate = ref(DateTime.now().toFormat("yyyy-LL-dd'T'HH:mm"));
 const comment = ref('');
 const isHidden = ref(false);
 
