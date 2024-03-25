@@ -30,10 +30,6 @@ class CreateAccountSchema(BaseModel):
 
 class UpdateAccountSchema(CreateAccountSchema):
     id: int | None = None
-    user_id: int
-    initial_balance: Annotated[Decimal, PlainSerializer(
-            lambda x: float(x), return_type=float, when_used='json'
-        )]
     balance: Annotated[Decimal, PlainSerializer(
             lambda x: float(x), return_type=float, when_used='json'
         )]

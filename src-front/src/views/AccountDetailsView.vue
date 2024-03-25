@@ -7,12 +7,14 @@ import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
 
 import TransactionsListView from './TransactionsListView.vue';
+import newAccount from '../components/account/newAccount.vue';
 
 const route = useRoute();
 const router = useRouter();
 
 let accountDetails = reactive({});
 const showConfirmation = ref(false);
+const showEditAccForm = ref(false);
 
 onBeforeMount(async () => {
   try {
@@ -43,11 +45,23 @@ const formattedBalance = computed(() => {
   })
 })
 
+const accountCreated = () => {
+  closeEditAccForm();
+}
+
+const handleEditClick = () => {
+  showEditAccForm.value = true;
+}
+
+const closeEditAccForm = () => {
+  showEditAccForm.value = false;
+}
+
 const confirmDelete = async () => {
   try {
     await Services.accountsService.deleteAccount(accountDetails.id);
     console.log("Account deleted successfully");
-    router.push({ name: 'accounts' });
+    await router.push({name: 'accounts'});
   } catch (e) {
     console.error("Failed to delete account:", e);
     // Handle error, e.g., display an error message to the user
@@ -63,14 +77,14 @@ const confirmDelete = async () => {
       <div class="account-row">
         <div class="account-name">
           <span>Account: <strong>{{ accountDetails.name }}</strong></span>
-          <a class="delete-acc-icon" href="" @click.prevent="handleDeleteClick">
+          <a class="edit-acc-icon" href="" @click.prevent="handleEditClick">
             <img src="/images/icons/edit-icon.svg" alt="Edit account" width="24" height="24" title="Edit account" />
-
           </a>
         </div>
+
         <div class="account-balance">
           <span>Balance: <b>{{ formattedBalance }}&nbsp;{{ accountDetails?.currency?.code }}</b></span>
-          <a class="edit-acc-icon" href="" @click.prevent="">
+          <a class="edit-acc-icon" href="" @click.prevent="handleDeleteClick">
             <img src="/images/icons/delete-icon.svg" alt="Delete account" width="24" height="24"
               title="Delete account" />
           </a>
@@ -78,6 +92,16 @@ const confirmDelete = async () => {
         <div class="account-open-date">
           <span>Created: <b>{{ DateTime.fromISO(accountDetails?.openingDate).toISODate() }}</b></span>
         </div>
+      </div>
+    </div>
+
+    <div v-if="showEditAccForm" class="row">
+      <div class="col">
+        <newAccount
+            :account-created="accountCreated"
+            :close-new-acc-form="closeEditAccForm"
+            :account-details="accountDetails"
+        />
       </div>
     </div>
 
