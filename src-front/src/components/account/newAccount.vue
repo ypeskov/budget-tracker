@@ -6,7 +6,7 @@ import { DateTime } from 'luxon';
 import { Services } from '../../services/servicesConfig';
 import { HttpError } from '../../errors/HttpError';
 
-const props = defineProps(['accountCreated']);
+const props = defineProps(['accountCreated', 'closeNewAccForm']);
 
 const router = useRouter();
 
@@ -30,12 +30,12 @@ onBeforeMount(async () => {
   } catch(e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       console.log(e.message);
-      router.push({ name: 'login' });
+      await router.push({name: 'login'});
       return;
     } else {
       console.log(e);
     }
-    router.push({ name: 'home' });
+    await router.push({name: 'home'});
   }
 });
 
@@ -51,17 +51,17 @@ async function createAccount() {
   };
 
   try {
-    let createdAccount = await Services.accountsService.createAccount(newAccount);
+    await Services.accountsService.createAccount(newAccount);
     props.accountCreated();
   } catch(e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       console.log(e.message);
-      router.push({ name: 'login' });
+      await router.push({name: 'login'});
       return;
     } else {
       console.log(e);
     }
-    router.push({ name: 'home' });
+    await router.push({name: 'home'});
   }
 }
 </script>
@@ -69,6 +69,7 @@ async function createAccount() {
 <template>
   <div class="container">
     <form @submit.prevent="createAccount" class="form">
+      <div class="buttons-row"><a class="btn btn-primary" @click.prevent="props.closeNewAccForm" href="">Cancel</a></div>
       <div class="form-group">
         <label for="account_type_id">Account Type:</label>
         <div class="select-wrapper">
@@ -125,6 +126,13 @@ async function createAccount() {
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+  .buttons-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+    width: 100%;
   }
 
   .form {

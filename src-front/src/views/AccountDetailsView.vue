@@ -3,8 +3,8 @@ import { onBeforeMount, reactive, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 
-import { Services } from '@/services/servicesConfig';
-import { HttpError } from '@/errors/HttpError';
+import { Services } from '../services/servicesConfig';
+import { HttpError } from '../errors/HttpError';
 
 import TransactionsListView from './TransactionsListView.vue';
 
