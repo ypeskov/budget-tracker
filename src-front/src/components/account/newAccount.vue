@@ -1,7 +1,6 @@
 <script setup>
 import { onBeforeMount, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { defineProps } from 'vue';
 import { DateTime } from 'luxon';
 
 import { Services } from '../../services/servicesConfig';
