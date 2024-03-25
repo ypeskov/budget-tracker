@@ -1,9 +1,9 @@
 <script setup>
-import { onBeforeMount, reactive, ref } from 'vue';
+import {computed, onBeforeMount, reactive, ref} from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
-import { Services } from '../services/servicesConfig';
-import { HttpError } from '../errors/HttpError';
+import { Services } from '@/services/servicesConfig';
+import { HttpError } from '@/errors/HttpError';
 import newAccount from '../components/account/newAccount.vue';
 
 let accounts = reactive([]);
@@ -19,12 +19,12 @@ onBeforeMount(async () => {
   } catch(e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       console.log(e.message);
-      router.push({ name: 'login' });
+      await router.push({name: 'login'});
       return;
     } else {
       console.log(e);
     }
-    router.push({ name: 'home' });
+    await router.push({name: 'home'});
   }  
 });
 
@@ -40,14 +40,23 @@ async function updateAccountsList(event) {
   } catch(e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       console.log(e.message);
-      router.push({ name: 'login' });
+      await router.push({name: 'login'});
       return;
     } else {
       console.log(e);
     }
-    router.push({ name: 'home' });
+    await router.push({name: 'home'});
   } 
 }
+
+const formattedBalance = computed((balance) => {
+  console.log(balance);
+  return balance.toLocaleString('ru-UA', {
+    style: 'decimal',
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2
+  })
+})
 
 async function accountCreated() {
   await updateAccountsList();
@@ -80,10 +89,7 @@ async function accountCreated() {
               <div class="col-4">
               {{ acc.name }}
               </div>
-              <div class="col-2">
-                {{ acc.accountType.type_name }}
-              </div>
-              <div class="col account-balance">
+              <div class="col account-balance">{{ formattedBalance(acc.balance) }}
                 {{ acc.balance }} {{ acc.currency.code }}
               </div>
             </div>
