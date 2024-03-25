@@ -50,7 +50,6 @@ async function updateAccountsList(event) {
 }
 
 const formattedBalance = computed((balance) => {
-  console.log(balance);
   return balance.toLocaleString('ru-UA', {
     style: 'decimal',
     maximumFractionDigits: 2,
@@ -89,7 +88,7 @@ async function accountCreated() {
               <div class="col-4">
               {{ acc.name }}
               </div>
-              <div class="col account-balance">{{ formattedBalance(acc.balance) }}
+              <div class="col account-balance">
                 {{ acc.balance }} {{ acc.currency.code }}
               </div>
             </div>
