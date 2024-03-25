@@ -3,8 +3,8 @@ import { onBeforeMount, reactive, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 
-import { Services } from '../services/servicesConfig';
-import { HttpError } from '../errors/HttpError';
+import { Services } from '@/services/servicesConfig';
+import { HttpError } from '@/errors/HttpError';
 
 import TransactionsListView from './TransactionsListView.vue';
 
@@ -21,12 +21,12 @@ onBeforeMount(async () => {
   } catch (e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       console.log(e.message);
-      router.push({ name: 'login' });
+      await router.push({name: 'login'});
       return;
     } else {
       console.log(e);
     }
-    router.push({ name: 'home' });
+    await router.push({name: 'home'});
   }
 });
 
