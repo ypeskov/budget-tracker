@@ -2,8 +2,8 @@
 import {computed, onBeforeMount, reactive, ref} from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
-import { Services } from '@/services/servicesConfig';
-import { HttpError } from '@/errors/HttpError';
+import { Services } from '../services/servicesConfig';
+import { HttpError } from '../errors/HttpError';
 import newAccount from '../components/account/newAccount.vue';
 
 let accounts = reactive([]);
