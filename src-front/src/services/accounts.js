@@ -1,7 +1,7 @@
 import {DateTime} from 'luxon';
 
-import { request } from './requests';
-import { HttpError } from '../errors/HttpError';
+import {request} from './requests';
+import {HttpError} from '../errors/HttpError';
 
 export class AccountService {
   accountStore;
@@ -19,11 +19,11 @@ export class AccountService {
     const currentTime = DateTime.now();
     const deltaFromLastUpdate = currentTime - this.accountStore.lastUpdated;
 
-    if (!this.accountStore.shouldUpdate 
+    if (!this.accountStore.shouldUpdate
       && (this.accountStore.accounts.length > 0 && deltaFromLastUpdate < this.timeToCacheAccountsList)) {
       return this.accountStore.accounts;
     }
-    
+
     const accountsUrl = '/accounts/';
     const accs = await request(accountsUrl, {}, {userService: this.userService});
     this.accountStore.accounts.length = 0;
@@ -45,10 +45,10 @@ export class AccountService {
   async createAccount(accountDetails) {
     const accountsUrl = '/accounts/';
     const createdAccount = await request(accountsUrl, {
-                                          method: 'POST',
-                                          body: JSON.stringify(accountDetails),
-                                        }, 
-                                        {userService: this.userService});
+        method: 'POST',
+        body: JSON.stringify(accountDetails),
+      },
+      {userService: this.userService});
     this.setShouldUpdateAccountsList(true);
     return createdAccount;
   }
@@ -65,6 +65,15 @@ export class AccountService {
     const accUrl = '/accounts/' + accountId;
     await request(accUrl, {
       method: 'DELETE',
+    }, {userService: this.userService});
+    this.setShouldUpdateAccountsList(true);
+  }
+
+  async updateAccount(accountDetails) {
+    const accUrl = '/accounts/' + accountDetails.id;
+    await request(accUrl, {
+      method: 'PUT',
+      body: JSON.stringify(accountDetails),
     }, {userService: this.userService});
     this.setShouldUpdateAccountsList(true);
   }

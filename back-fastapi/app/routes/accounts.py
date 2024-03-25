@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.orm import Session
 
+from icecream import ic
+
 from app.database import get_db
 from app.logger_config import logger
 from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema, UpdateAccountSchema
