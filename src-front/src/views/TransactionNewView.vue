@@ -182,8 +182,10 @@ async function deleteTransaction() {
                           :currency-src="currentAccount.currency.code" :currency-target="targetAccount.currency.code"
                           :target-amount="transaction.target_amount" />
 
-            <Category v-if="!transaction.is_transfer" :item-type="itemType" :transaction="transaction"
-                      :categories="filteredCategories" />
+            <Category v-if="!transaction.is_transfer"
+                      :transaction="transaction"
+                      :categories="filteredCategories"
+                      @update:categoryId="transaction.categoryId = $event" />
 
             <div class="mb-3">
               <label for="notes" class="form-label">{{ $t('message.notes') }}</label>
