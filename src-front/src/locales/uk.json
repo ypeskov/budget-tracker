@@ -1,6 +1,47 @@
 {
   "message": {
-    "anotherBudgeter": "Ще один Бюджет Контролер",
-    "farewell": "Huiting!"
+    "anotherBudgeter": "Ще один Бюджетер",
+    "invalidCredentials": "Невірні пароль або email",
+    "enterEmail": "Введить email",
+    "enterPassword": "Введить password",
+    "emailAddress": "Email адреса",
+    "welcome": "Ласкаво, просимо",
+    "reload": "Перечитати",
+    "newAccount": "Новий рахунок",
+    "yourAccounts": "Ваші рахунки",
+    "filter": "Фільтр",
+    "new": "Новий",
+    "yourTransactions": "Ваші транзакції",
+    "editAccount": "Редагувати рахунок",
+    "deleteAccount": "Видалити рахунок",
+    "account": "Рахунок",
+    "targetAccount": "Цільовий рахунок",
+    "balance": "Баланс",
+    "created": "Створено",
+    "notes": "Примітки",
+    "expense": "Витрата",
+    "income": "Дохід",
+    "transfer": "Переказ",
+    "label": "Мітка",
+    "amount": "Сума",
+    "category": "Категорія"
+  },
+  "menu": {
+    "home": "Початок",
+    "accounts": "Рахунки",
+    "transactions": "Транзакції",
+    "logout": "Вийти",
+    "login": "Вхід",
+    "register": "Реєстрація"
+  },
+  "buttons": {
+    "login": "Вхід",
+    "register": "Реєстрація",
+    "save": "Зберегти",
+    "cancel": "Скасувати",
+    "delete": "Видалити",
+    "new": "Новий",
+    "submit": "Відправити",
+    "yes": "Так"
   }
 }
