@@ -27,27 +27,27 @@ onBeforeMount(() => {
 <template>
   <div class="container">
     <div class="row">
-      <div class="col">Another Budgeter</div>
+      <div class="col">{{ $t('message.anotherBudgeter') }}</div>
     </div>
     <header>
       <div class="row nav-row">
         <div class="col">
           <nav>
             <span>
-              <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+              <RouterLink :to="{ name: 'home' }">{{ $t('menu.home') }}</RouterLink>
             </span>
             <span v-if="userStore.isLoggedIn">
-              <RouterLink :to="{ name: 'accounts' }">Accounts</RouterLink>
+              <RouterLink :to="{ name: 'accounts' }">{{ $t('menu.accounts') }}</RouterLink>
             </span>
             <span v-if="userStore.isLoggedIn">
-              <RouterLink :to="{ name: 'transactions' }">Transactions</RouterLink>
+              <RouterLink :to="{ name: 'transactions' }">{{ $t('menu.transactions') }}</RouterLink>
             </span>
             <span v-if="!userStore.isLoggedIn">
-              <RouterLink :to="{ name: 'login' }">Login</RouterLink>
-              <RouterLink :to="{ name: 'register' }">Register</RouterLink>
+              <RouterLink :to="{ name: 'login' }">{{ $t('menu.login') }}</RouterLink>
+              <RouterLink :to="{ name: 'register' }">{{ $t('menu.register') }}</RouterLink>
             </span>
             <span v-else>
-              <RouterLink :to="{ name: 'logout' }">Logout</RouterLink>
+              <RouterLink :to="{ name: 'logout' }">{{ $t('menu.logout') }}</RouterLink>
             </span>
           </nav>
         </div>
@@ -66,6 +66,7 @@ onBeforeMount(() => {
 nav a {
   margin: 0 0.2rem;
 }
+
 .nav-row {
   margin-bottom: 0.5rem;
 }

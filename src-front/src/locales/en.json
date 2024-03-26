@@ -1,0 +1,17 @@
+{
+  "message": {
+    "anotherBudgeter": "Another Budgeter",
+    "invalidCredentials": "Wrong credentials",
+    "enterEmail": "Enter email",
+    "enterPassword": "Enter password",
+    "emailAddress": "Email address"
+  },
+  "menu": {
+    "home": "Home",
+    "accounts": "Accounts",
+    "transactions": "Transactions",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  }
+}

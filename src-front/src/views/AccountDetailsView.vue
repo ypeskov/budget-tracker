@@ -17,6 +17,10 @@ const showConfirmation = ref(false);
 const showEditAccForm = ref(false);
 
 onBeforeMount(async () => {
+  await loadAccountDetails();
+});
+
+async function loadAccountDetails() {
   try {
     const details = await Services.accountsService.getAccountDetails(route.params.id);
     accountDetails = Object.assign(accountDetails, details);
@@ -30,7 +34,7 @@ onBeforeMount(async () => {
     }
     await router.push({name: 'home'});
   }
-});
+}
 
 const handleDeleteClick = () => {
   showConfirmation.value = true; // Show the confirmation popup
@@ -45,7 +49,8 @@ const formattedBalance = computed(() => {
   })
 })
 
-const accountCreated = () => {
+const handleUpdateAccount = () => {
+  loadAccountDetails();
   closeEditAccForm();
 }
 
@@ -98,7 +103,7 @@ const confirmDelete = async () => {
     <div v-if="showEditAccForm" class="row">
       <div class="col">
         <newAccount
-            :account-created="accountCreated"
+            :account-created="handleUpdateAccount"
             :close-new-acc-form="closeEditAccForm"
             :account-details="accountDetails"
         />
