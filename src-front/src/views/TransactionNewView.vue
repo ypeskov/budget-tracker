@@ -1,6 +1,7 @@
 <script setup>
 import { onBeforeMount, reactive, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import { Services } from '../services/servicesConfig';
 
@@ -14,6 +15,7 @@ import ExchangeRate from '../components/transactions/ExchangeRate.vue';
 const props = defineProps(['isEdit', 'returnUrl', 'accountId']);
 const router = useRouter();
 const route = useRoute();
+const { t } = useI18n();
 
 const accounts = reactive([]);
 const currentAccount = ref(accounts[0]);
@@ -134,7 +136,7 @@ async function submitTransaction() {
     // router.go(-1);
   } catch (e) {
     console.log(e);
-    router.push({ name: 'home' });
+    await router.push({ name: 'home' });
   }
 }
 
@@ -168,13 +170,14 @@ async function deleteTransaction() {
             <Account :transaction="transaction" @account-changed="changeAccount" account-type="src"
                      :accounts="accounts" />
 
-            <TransactionAmount label="Amount" type="src" :transaction="transaction" @amount-changed="amountChanged"
+            <TransactionAmount :label="t('message.account')" type="src"
+                               :transaction="transaction" @amount-changed="amountChanged"
                                :current-account="currentAccount" />
 
             <Account v-if="transaction.is_transfer === true" @account-changed="changeAccount" account-type="target"
                      :transaction="transaction" :accounts="accounts" />
 
-            <TransactionAmount v-if="itemType === 'transfer'" type="target" label="Target Amount"
+            <TransactionAmount v-if="itemType === 'transfer'" type="target" :label="t('message.amount')"
                                @amount-changed="amountChanged" :transaction="transaction"
                                :current-account="targetAccount" />
 
