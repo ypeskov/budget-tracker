@@ -21,7 +21,7 @@ function changeItemType($event) {
         :class="{ active: props.itemType === 'expense' }"
         data-itemtype="expense"
         href="#">
-        Expense
+        {{ $t('message.expense') }}
       </a>
     </li>
     <li class="nav-item">
@@ -31,17 +31,17 @@ function changeItemType($event) {
         :class="{ active: props.itemType === 'income' }"
         data-itemtype="income"
         href="#">
-        Income
+        {{ $t('message.income') }}
       </a>
     </li>
     <li class="nav-item">
       <a
         id="transfer-item"
         class="nav-link"
-        :class="props.itemType == 'transfer' ? 'active' : ''"
+        :class="props.itemType === 'transfer' ? 'active' : ''"
         data-itemtype="transfer"
         href="#">
-        Transfer
+        {{ $t('message.transfer') }}
       </a>
     </li>
   </ul>

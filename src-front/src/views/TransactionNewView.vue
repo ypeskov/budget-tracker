@@ -9,7 +9,7 @@ import TransactionLabel from '../components/transactions/TransactionLabel.vue';
 import TransactionAmount from '../components/transactions/TransactionAmount.vue';
 import Category from '../components/transactions/Category.vue';
 import Account from '../components/transactions/Account.vue';
-import ExchangeRate from '../components/transactions/ExchangeRate.vue'
+import ExchangeRate from '../components/transactions/ExchangeRate.vue';
 
 const props = defineProps(['isEdit', 'returnUrl', 'accountId']);
 const router = useRouter();
@@ -45,11 +45,11 @@ function amountChanged({ amountType, amount }) {
 }
 
 onBeforeMount(async () => {
-  if (props.returnUrl == 'accountDetails') {
+  if (props.returnUrl === 'accountDetails') {
     returnUrlName.value = 'accountDetails';
   } else {
     returnUrlName.value = 'transactions';
-}
+  }
 
   try {
     accounts.length = 0;
@@ -59,7 +59,7 @@ onBeforeMount(async () => {
     transaction.account_id = currentAccount.value.id;
     transaction.target_account_id = targetAccount.value.id;
     categories.value = await Services.categoriesService.getUserCategories();
-    
+
     if (props.isEdit) {
       const details = await Services.transactionsService.getTransactionDetails(route.params.id);
       transaction = Object.assign(transaction, details);
@@ -73,8 +73,8 @@ onBeforeMount(async () => {
 
     filterCategories();
   } catch (e) {
-    console.log(e)
-    router.push({ name: 'home' });
+    console.log(e);
+    await router.push({ name: 'home' });
   }
 });
 
@@ -82,12 +82,12 @@ function filterCategories() {
   const isIncome = itemType.value === 'income';
   // filter categories by income/expense
   filteredCategories.value = categories.value.filter((item) => item.is_income === isIncome);
-  
+
   // if the current category is not in the filtered categories, set the first one from the filtered list
   if (!filteredCategories.value.some((item) => item.id === transaction.category_id)) {
     transaction.category_id = filteredCategories.value[0].id;
   }
-  
+
   updateTransactionProperties(itemType.value);
 }
 
@@ -117,22 +117,23 @@ function changeItemType(type) {
 async function submitTransaction() {
   try {
     if (props.isEdit) {
+      console.log(transaction);
       await Services.transactionsService.updateTransaction(transaction);
     } else {
       await Services.transactionsService.addTransaction(transaction);
-  }
-  for (const key in transaction) {
-    transaction[key] = null;
-  }
-  router.push({
-    name: returnUrlName.value,
-    params: {
-      id: props.accountId,
     }
-  });
-  // router.go(-1);
+    for (const key in transaction) {
+      transaction[key] = null;
+    }
+    await router.push({
+      name: returnUrlName.value,
+      params: {
+        id: props.accountId,
+      },
+    });
+    // router.go(-1);
   } catch (e) {
-    console.log(e)
+    console.log(e);
     router.push({ name: 'home' });
   }
 }
@@ -144,10 +145,10 @@ function confirmDelete() {
 async function deleteTransaction() {
   try {
     await Services.transactionsService.deleteTransaction(transaction.id);
-    router.push({ name: 'transactions' });
+    await router.push({ name: 'transactions' });
   } catch (e) {
-    console.log(e)
-    router.push({ name: 'home' });
+    console.log(e);
+    await router.push({ name: 'home' });
   } finally {
     showDeleteConfirmation.value = false;
   }
@@ -165,33 +166,36 @@ async function deleteTransaction() {
             <TransactionLabel :transaction="transaction" />
 
             <Account :transaction="transaction" @account-changed="changeAccount" account-type="src"
-              :accounts="accounts" />
+                     :accounts="accounts" />
 
             <TransactionAmount label="Amount" type="src" :transaction="transaction" @amount-changed="amountChanged"
-              :current-account="currentAccount" />
+                               :current-account="currentAccount" />
 
             <Account v-if="transaction.is_transfer === true" @account-changed="changeAccount" account-type="target"
-              :transaction="transaction" :accounts="accounts" />
+                     :transaction="transaction" :accounts="accounts" />
 
             <TransactionAmount v-if="itemType === 'transfer'" type="target" label="Target Amount"
-              @amount-changed="amountChanged" :transaction="transaction" :current-account="targetAccount" />
+                               @amount-changed="amountChanged" :transaction="transaction"
+                               :current-account="targetAccount" />
 
             <ExchangeRate v-if="itemType === 'transfer'" :amount-src="transaction.amount"
-              :currency-src="currentAccount.currency.code" :currency-target="targetAccount.currency.code"
-              :target-amount="transaction.target_amount" />
+                          :currency-src="currentAccount.currency.code" :currency-target="targetAccount.currency.code"
+                          :target-amount="transaction.target_amount" />
 
-            <Category v-if="!transaction.is_transfer" :item-type="itemType" :transaction="transaction"
-              :categories="filteredCategories" />
+            <Category v-if="!transaction.is_transfer"
+                      :transaction="transaction"
+                      :categories="filteredCategories"
+                      @update:categoryId="transaction.categoryId = $event" />
 
             <div class="mb-3">
-              <label for="notes" class="form-label">Notes</label>
+              <label for="notes" class="form-label">{{ $t('message.notes') }}</label>
               <textarea @keyup="changeNotes" class="form-control" id="notes" v-model="transaction.notes"
-                rows="3"></textarea>
+                        rows="3"></textarea>
             </div>
 
             <div class="flex-container">
-              <button type="submit" class="btn btn-primary">Submit</button>
-              <button @click.prevent="confirmDelete" class="btn btn-danger">Delete</button>
+              <button type="submit" class="btn btn-primary">{{ $t('buttons.submit') }}</button>
+              <button @click.prevent="confirmDelete" class="btn btn-danger">{{ $t('buttons.delete') }}</button>
             </div>
           </form>
 
@@ -200,8 +204,9 @@ async function deleteTransaction() {
           <div v-if="showDeleteConfirmation" class="delete-confirmation">
             <p>Delete the transaction?</p>
             <div class="buttons-container">
-              <button @click="deleteTransaction" class="btn btn-danger">Yes</button>
-              <button @click="showDeleteConfirmation = false" class="btn btn-secondary">Cancel</button>
+              <button @click="deleteTransaction" class="btn btn-danger">{{ $t('buttons.yes') }}</button>
+              <button @click="showDeleteConfirmation = false"
+                      class="btn btn-secondary">{{ $t('buttons.cancel') }}</button>
             </div>
           </div>
         </div>
@@ -227,9 +232,9 @@ async function deleteTransaction() {
   border: 1px solid #ccc;
   border-radius: 5px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000; 
+  z-index: 1000;
   text-align: center;
-  width: auto; 
+  width: auto;
 }
 
 .delete-confirmation p {
@@ -241,7 +246,7 @@ async function deleteTransaction() {
 .buttons-container {
   display: flex;
   justify-content: center;
-  gap: 10px; 
+  gap: 10px;
 }
 
 .overlay {
@@ -251,6 +256,6 @@ async function deleteTransaction() {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999; 
+  z-index: 999;
 }
 </style>

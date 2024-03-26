@@ -6,7 +6,7 @@ const props = defineProps(['accountId', 'isAccountDetails',]);
 
 <template>
   <main>
-    <ListContainer :account-id="props.accountId" :is-account-details="props.isAccountDetails ? true : false" />
+    <ListContainer :account-id="props.accountId" :is-account-details="!!props.isAccountDetails" />
   </main>
 </template>
 

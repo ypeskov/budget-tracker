@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
@@ -9,6 +10,7 @@ let loginEmail = ref('');
 let loginPassword = ref('');
 
 const router = useRouter();
+const { t } = useI18n();
 
 function updateEmail(event) {
   loginEmail.value = event.target.value;
@@ -19,11 +21,11 @@ async function submitLogin() {
     await Services.userService.loginUser(loginEmail.value, loginPassword.value);
     loginEmail.value = '';
     loginPassword.value = '';
-    router.push('/');
+    await router.push('/');
   } catch (error) {
     if (error instanceof HttpError && error.statusCode === 401) {
       console.log(error.message);
-      alert('Wrong email or password');
+      alert(t('message.invalidCredentials'));
       return;
     } else {
       console.log('Something went wrong');
@@ -46,19 +48,19 @@ onMounted(() => {
       <form @submit.prevent="submitLogin" autocomplete="on">
         <div class="mb-3">
           <label for="emailInput" class="form-label">
-            Email Address <span class="text-danger">*</span> <!-- Red asterisk for required field -->
+            {{ $t('message.emailAddress') }} <span class="text-danger">*</span>
           </label>
           <input type="email" class="form-control" id="emailInput" :value="loginEmail" @change="updateEmail"
-            ref="emailInputRef" placeholder="Enter Email" required /> <!-- 'required' attribute added -->
+            ref="emailInputRef" :placeholder="t('message.enterEmail')" required />
         </div>
         <div class="mb-3">
           <label for="passwordInput" class="form-label">
-            Password <span class="text-danger">*</span> <!-- Red asterisk for required field -->
+            Password <span class="text-danger">*</span>
           </label>
           <input type="password" class="form-control" id="passwordInput" v-model="loginPassword"
-            placeholder="Enter Password" required /> <!-- 'required' attribute added -->
+            :placeholder="t('message.enterPassword')" required />
         </div>
-        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-primary">{{$t('menu.login')}}</button>
       </form>
     </main>
   </div>

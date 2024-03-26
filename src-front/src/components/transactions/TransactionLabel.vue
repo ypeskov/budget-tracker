@@ -10,7 +10,7 @@ function labelChanged($event) {
 
 <template>
   <div class="mb-3">
-    <label for="label" class="form-label">Label</label>
+    <label for="label" class="form-label">{{ $t('message.label') }}</label>
     <input type="text" class="form-control" @keyup="labelChanged" id="label" :value="transaction.label" />
   </div>
 </template>
