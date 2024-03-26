@@ -37,6 +37,7 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
         if account:
             account.user = existing_user
             account.account_type = account_type
+            account.category = account_dto.category
             account.currency = currency
             account.initial_balance = account_dto.initial_balance
             account.balance = account_dto.balance

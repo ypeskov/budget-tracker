@@ -35,12 +35,12 @@ async function fetchTransactions() {
     filteredTransactions.push(...allTransactions);
   } catch (e) {
     if (e instanceof HttpError && e.statusCode === 401) {
-      router.push({ name: 'login' });
+      await router.push({ name: 'login' });
       return;
     } else {
       console.log(e);
     }
-    router.push({ name: 'home' });
+    await router.push({ name: 'home' });
   }
 }
 
@@ -52,7 +52,7 @@ watch(() => props.accountId, (newAccountId) => {
 
 onBeforeMount(async () => {
   if (!props.isAccountDetails) {
-    fetchTransactions();
+    await fetchTransactions();
   }
 });
 
@@ -91,15 +91,15 @@ function filterApplied(payload) {
                         returnUrl: returnUrlName,
                         accountId: props.accountId,
                       }
-                    }">New
+                    }">{{ $t('message.new')}}
           </RouterLink>
         </span>
         <span>
-          <a href="" class="btn btn-secondary" @click="reloadTransactions">Reload</a>
+          <a href="" class="btn btn-secondary" @click="reloadTransactions">{{$t('message.reload')}}</a>
         </span>
         <span>
           <a href="" class="btn" :class="{ 'active-filter btn-success': !reset, 'btn-secondary': reset }"
-            @click="toggleFilter">Filter</a>
+            @click="toggleFilter">{{$t('message.filter')}}</a>
         </span>
       </div>
     </div>
@@ -112,7 +112,7 @@ function filterApplied(payload) {
 
     <div class="row">
       <div class="col">
-        <h3>Your transactions</h3>
+        <h3>{{$t('message.yourTransactions')}}</h3>
       </div>
     </div>
     <div class="row">

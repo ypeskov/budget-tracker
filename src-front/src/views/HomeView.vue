@@ -12,7 +12,7 @@ const userStore = useUserStore();
       <div class="row">
         <div class="col">
           <div v-if="userStore.user.id">
-            Welcome, {{ userStore.user.first_name }} {{ userStore.user.last_name }}
+            {{ $t('message.welcome') }}, {{ userStore.user.first_name }} {{ userStore.user.last_name }}
           </div>
           <div v-else>
             <RouterLink :to="{name: 'login'}">{{ $t('menu.login') }}</RouterLink>

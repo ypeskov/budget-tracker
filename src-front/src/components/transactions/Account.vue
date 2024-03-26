@@ -1,8 +1,11 @@
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps(['transaction', 'accounts', 'accountType']);
 const emit = defineEmits(['accountChanged']);
+
+const t = useI18n().t;
 
 function changeAccount($event) {
   const acc = props.accounts[$event.target.value];
@@ -28,9 +31,9 @@ const accountIdx = computed(() => {
 
 const accLabel = computed(() => {
   if (props.accountType === 'src') {
-    return 'Account';
+    return t('message.account');
   } else {
-    return 'Target Account';
+    return t('message.targetAccount');
   }
 });
 </script>

@@ -1,6 +1,7 @@
 <script setup>
 import { onBeforeMount, reactive, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { DateTime } from 'luxon';
 
 import { Services } from '../services/servicesConfig';
@@ -11,6 +12,7 @@ import newAccount from '../components/account/newAccount.vue';
 
 const route = useRoute();
 const router = useRouter();
+const t = useI18n().t;
 
 let accountDetails = reactive({});
 const showConfirmation = ref(false);
@@ -65,7 +67,6 @@ const closeEditAccForm = () => {
 const confirmDelete = async () => {
   try {
     await Services.accountsService.deleteAccount(accountDetails.id);
-    console.log("Account deleted successfully");
     await router.push({name: 'accounts'});
   } catch (e) {
     console.error("Failed to delete account:", e);
@@ -81,21 +82,24 @@ const confirmDelete = async () => {
     <div class="container">
       <div class="account-row">
         <div class="account-name">
-          <span>Account: <strong>{{ accountDetails.name }}</strong></span>
+          <span>{{$t('message.account')}}: <strong>{{ accountDetails.name }}</strong></span>
           <a class="edit-acc-icon" href="" @click.prevent="handleEditClick">
-            <img src="/images/icons/edit-icon.svg" alt="Edit account" width="24" height="24" title="Edit account" />
+            <img src="/images/icons/edit-icon.svg" alt="Edit account"
+                 width="24" height="24" :title="t('message.editAccount')" />
           </a>
         </div>
 
         <div class="account-balance">
-          <span>Balance: <b>{{ formattedBalance }}&nbsp;{{ accountDetails?.currency?.code }}</b></span>
+          <span>
+            {{$t('message.balance')}}: <b>{{ formattedBalance }}&nbsp;{{ accountDetails?.currency?.code }}</b>
+          </span>
           <a class="edit-acc-icon" href="" @click.prevent="handleDeleteClick">
             <img src="/images/icons/delete-icon.svg" alt="Delete account" width="24" height="24"
-              title="Delete account" />
+              :title="t('message.deleteAccount')" />
           </a>
         </div>
         <div class="account-open-date">
-          <span>Created: <b>{{ DateTime.fromISO(accountDetails?.openingDate).toISODate() }}</b></span>
+          <span>{{$t('message.created')}}: <b>{{ DateTime.fromISO(accountDetails?.openingDate).toISODate() }}</b></span>
         </div>
       </div>
     </div>

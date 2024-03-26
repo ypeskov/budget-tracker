@@ -4,7 +4,27 @@
     "invalidCredentials": "Wrong credentials",
     "enterEmail": "Enter email",
     "enterPassword": "Enter password",
-    "emailAddress": "Email address"
+    "emailAddress": "Email address",
+    "welcome": "Welcome",
+    "reload": "Reload",
+    "newAccount": "New account",
+    "yourAccounts": "Your accounts",
+    "filter": "Filter",
+    "new": "New",
+    "yourTransactions": "Your transactions",
+    "editAccount": "Edit account",
+    "deleteAccount": "Delete account",
+    "account": "Account",
+    "targetAccount": "Target Account",
+    "balance": "Balance",
+    "created": "Created",
+    "notes": "Notes",
+    "expense": "Expense",
+    "income": "Income",
+    "transfer": "Transfer",
+    "label": "Label",
+    "amount": "Amount",
+    "category": "Category"
   },
   "menu": {
     "home": "Home",
@@ -13,5 +33,15 @@
     "logout": "Logout",
     "login": "Login",
     "register": "Register"
+  },
+  "buttons": {
+    "login": "Login",
+    "register": "Register",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "new": "New",
+    "submit": "Submit",
+    "yes": "Yes"
   }
 }

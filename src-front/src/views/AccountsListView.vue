@@ -76,8 +76,10 @@ function closeNewAccForm() {
     <div class="container">
       <div class="row">
         <div class="col sub-menu">
-          <a href="" class="btn btn-secondary" @click="updateAccountsList">Reload</a>
-          <a href="" class="btn btn-secondary" @click.prevent="showNewAccForm=!showNewAccForm">New Account</a>
+          <a href="" class="btn btn-secondary" @click="updateAccountsList">{{ $t('message.reload') }}</a>
+          <a href="" class="btn btn-secondary" @click.prevent="showNewAccForm=!showNewAccForm">
+            {{ $t('message.newAccount') }}
+          </a>
         </div>
       </div>
 
@@ -89,7 +91,7 @@ function closeNewAccForm() {
 
       <div class="row">
         <div class="col">
-          <div><b>Your accounts</b> (Total balance: <b>No idea</b>)</div>
+          <div><b>{{ $t('message.yourAccounts') }}</b> (Total balance: <b>No idea</b>)</div>
         </div>
       </div>
       <div v-for="acc in accounts" :key="acc.id" class="list-item">
