@@ -1,10 +1,13 @@
 <script setup>
-import {computed, onBeforeMount, reactive, ref} from 'vue';
-import {RouterLink, useRouter} from 'vue-router';
+import { onBeforeMount, reactive, ref } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
-import {Services} from '../services/servicesConfig';
-import {HttpError} from '../errors/HttpError';
+import { Services } from '../services/servicesConfig';
+import { HttpError } from '../errors/HttpError';
 import newAccount from '../components/account/newAccount.vue';
+
+const n = useI18n().n;
 
 let accounts = reactive([]);
 
@@ -19,17 +22,13 @@ onBeforeMount(async () => {
   } catch (e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       console.log(e.message);
-      await router.push({name: 'login'});
+      await router.push({ name: 'login' });
       return;
     } else {
       console.log(e);
     }
-    await router.push({name: 'home'});
+    await router.push({ name: 'home' });
   }
-});
-
-const totalBalance = computed(() => {
-  return accounts.reduce((acc, item) => acc + item.balance, 0);
 });
 
 async function updateAccountsList(event) {
@@ -44,21 +43,13 @@ async function updateAccountsList(event) {
   } catch (e) {
     if (e instanceof HttpError && e.statusCode === 401) {
       console.log(e.message);
-      await router.push({name: 'login'});
+      await router.push({ name: 'login' });
       return;
     } else {
       console.log(e);
     }
-    await router.push({name: 'home'});
+    await router.push({ name: 'home' });
   }
-}
-
-function formattedBalance(balance) {
-  return balance.toLocaleString('ru-UA', {
-    style: 'decimal',
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2
-  });
 }
 
 async function accountCreated() {
@@ -85,7 +76,7 @@ function closeNewAccForm() {
 
       <div v-if="showNewAccForm" class="row">
         <div class="col">
-          <newAccount :account-created="accountCreated" :close-new-acc-form="closeNewAccForm"/>
+          <newAccount :account-created="accountCreated" :close-new-acc-form="closeNewAccForm" />
         </div>
       </div>
 
@@ -101,7 +92,7 @@ function closeNewAccForm() {
               {{ acc.name }}
             </div>
             <div class="col account-balance">
-              <b>{{ formattedBalance(acc.balance) }}</b> {{ acc.currency.code }}
+              <b>{{ $n(acc.balance, 'decimal') }}</b> {{ acc.currency.code }}
             </div>
           </div>
         </RouterLink>

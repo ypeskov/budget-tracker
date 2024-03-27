@@ -19,11 +19,37 @@ const messages = {
 }
 
 const i18n = createI18n({
-  'legacy': false,
-  'locale': 'en',
-  'fallbackLocale': 'en',
-  'messages': messages,
-})
+  legacy: false,
+  locale: 'en',
+  fallbackLocale: 'en',
+  messages: {
+    en: enMessages,
+    uk: ukMessages,
+  },
+  numberFormats: {
+    en: {
+      currency: {
+        style: 'currency', currency: 'USD'
+      },
+      decimal: {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 4
+      }
+    },
+    uk: {
+      currency: {
+        style: 'currency', currency: 'UAH'
+      },
+      decimal: {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 4
+      }
+    },
+  }
+});
+
 
 const app = createApp(App)
 

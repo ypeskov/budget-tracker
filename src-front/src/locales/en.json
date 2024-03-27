@@ -25,7 +25,8 @@
     "label": "Label",
     "amount": "Amount",
     "category": "Category",
-    "settings": "Settings"
+    "settings": "Settings",
+    "deleted": "Deleted"
   },
   "menu": {
     "home": "Home",

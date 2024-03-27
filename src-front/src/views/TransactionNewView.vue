@@ -170,7 +170,7 @@ async function deleteTransaction() {
             <Account :transaction="transaction" @account-changed="changeAccount" account-type="src"
                      :accounts="accounts" />
 
-            <TransactionAmount :label="t('message.account')" type="src"
+            <TransactionAmount :label="t('message.amount')" type="src"
                                :transaction="transaction" @amount-changed="amountChanged"
                                :current-account="currentAccount" />
 
