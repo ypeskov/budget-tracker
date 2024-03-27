@@ -45,6 +45,7 @@ class AccountResponseSchema(CreateAccountSchema):
     id: int
     currency: CurrencyResponseSchema
     account_type: AccountTypeResponseSchema
+    is_deleted: bool
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,
                               alias_generator=to_camel)

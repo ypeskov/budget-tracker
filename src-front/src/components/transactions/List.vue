@@ -1,8 +1,12 @@
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
-const props = defineProps(['transactions', "accountId", "returnUrl"]);
+const props = defineProps(['transactions', 'accountId', 'returnUrl']);
+
+const t = useI18n().t;
+const n = useI18n().n;
 
 const groupedTransactions = computed(() => {
   const grouped = [];
@@ -29,6 +33,14 @@ function categoryLabel(transaction) {
     return 'Unknown';
   }
 }
+
+function accountName(account) {
+  if (account.isDeleted) {
+    return `${account.name} (${t('message.deleted')})`;
+  } else {
+    return account.name;
+  }
+}
 </script>
 
 <template>
@@ -39,7 +51,7 @@ function categoryLabel(transaction) {
         <RouterLink class="row" :to="{
           name: 'transactionDetails',
           params: {
-            id: transaction.id,
+            id: transaction.id
           },
           query: {
             returnUrl: props.returnUrl,
@@ -51,9 +63,11 @@ function categoryLabel(transaction) {
             <div class="transaction-element">{{ categoryLabel(transaction) }}</div>
           </div>
           <div class="col-7 amount-container">
-            <div><b>{{ parseFloat(transaction.amount).toFixed(2) }} {{ transaction.currency.code }}</b></div>
-            <div><span class="acc-name">{{ transaction.account.name }}</span> | {{
-              parseFloat(transaction.newBalance).toFixed(2) }}</div>
+            <div><b>{{ $n(transaction.amount, 'decimal') }} {{ transaction.currency.code }}</b></div>
+            <div>
+              <span class="acc-name">{{ transaction.account.name }}{{ accountName(transaction.account) }}</span>
+              | {{ $n(transaction.newBalance, 'decimal') }}
+            </div>
           </div>
         </RouterLink>
       </div>
