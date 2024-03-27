@@ -97,7 +97,7 @@ function closeNewAccForm() {
       <div v-for="acc in accounts" :key="acc.id" class="list-item">
         <RouterLink class="account-link" :to="{name: 'accountDetails', params: {id: acc.id}}">
           <div class="row account-item">
-            <div class="col-4">
+            <div class="col-5 account-name">
               {{ acc.name }}
             </div>
             <div class="col account-balance">
@@ -112,6 +112,12 @@ function closeNewAccForm() {
 
 <style scoped>
 @import '../assets/main.scss';
+
+.account-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .account-balance {
   text-align: right;
