@@ -65,7 +65,7 @@ function accountName(account) {
           <div class="col-7 amount-container">
             <div><b>{{ $n(transaction.amount, 'decimal') }} {{ transaction.currency.code }}</b></div>
             <div>
-              <span class="acc-name">{{ transaction.account.name }}{{ accountName(transaction.account) }}</span>
+              <span class="acc-name">{{ accountName(transaction.account) }}</span>
               | {{ $n(transaction.newBalance, 'decimal') }}
             </div>
           </div>
