@@ -96,6 +96,15 @@ const router = createRouter({
       }),
       component: () => import('../views/TransactionNewView.vue'),
     },
+    {
+      path: '/settings',
+      name: 'settings',
+      meta: {
+        requiresAuth: true,
+        requiresUnAuth: false,
+      },
+      component: () => import('../views/Settings.vue'),
+    },
   ],
 });
 

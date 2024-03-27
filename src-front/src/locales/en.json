@@ -24,7 +24,8 @@
     "transfer": "Transfer",
     "label": "Label",
     "amount": "Amount",
-    "category": "Category"
+    "category": "Category",
+    "settings": "Settings"
   },
   "menu": {
     "home": "Home",
