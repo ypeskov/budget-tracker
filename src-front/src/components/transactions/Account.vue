@@ -11,9 +11,9 @@ function changeAccount($event) {
   const acc = props.accounts[$event.target.value];
   const accountId = acc.id;
   if (props.accountType === 'src') {
-    props.transaction.account_id = accountId;
+    props.transaction.accountId = accountId;
   } else {
-    props.transaction.target_account_id = accountId;
+    props.transaction.targetAccountId = accountId;
   }
   emit('accountChanged', {
     accountType: props.accountType,
@@ -23,9 +23,12 @@ function changeAccount($event) {
 
 const accountIdx = computed(() => {
   if (props.accountType === 'src') {
-    return props.accounts.findIndex((item) => item.id === props.transaction.account_id);
+    // console.log(props.transaction.accountId);
+    // console.log(props.accounts);
+    // console.log(props.accounts.findIndex((item) => item.id === props.transaction.accountId));
+    return props.accounts.findIndex((item) => item.id === props.transaction.accountId);
   } else {
-    return props.accounts.findIndex((item) => item.id === props.transaction.target_account_id);
+    return props.accounts.findIndex((item) => item.id === props.transaction.targetAccountId);
   }
 });
 
