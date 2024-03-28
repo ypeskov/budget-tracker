@@ -25,8 +25,9 @@
     "label": "Мітка",
     "amount": "Сума",
     "category": "Категорія",
-    "settings": "Settings",
-    "deleted": "Deleted"
+    "settings": "Налаштування",
+    "deleted": "Видалено",
+    "select_language": "Вибрати мову"
   },
   "menu": {
     "home": "Початок",
@@ -44,6 +45,9 @@
     "delete": "Видалити",
     "new": "Новий",
     "submit": "Відправити",
-    "yes": "Так"
+    "yes": "Так",
+    "language": "Мова",
+    "profile": "Профіль",
+    "apply": "Застосувати"
   }
 }
