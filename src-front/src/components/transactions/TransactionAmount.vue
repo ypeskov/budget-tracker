@@ -8,7 +8,7 @@ const amount = computed(() => {
   if (props.type === 'src') {
     return props.transaction.amount;
   } else if (props.type === 'target') {
-    return props.transaction.target_amount;
+    return props.transaction.targetAmount;
   }
 })
 
