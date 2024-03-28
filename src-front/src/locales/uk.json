@@ -6,7 +6,7 @@
     "enterPassword": "Введить password",
     "emailAddress": "Email адреса",
     "welcome": "Ласкаво, просимо",
-    "reload": "Перечитати",
+    "update": "Оновити",
     "newAccount": "Новий рахунок",
     "yourAccounts": "Ваші рахунки",
     "filter": "Фільтр",
@@ -24,7 +24,9 @@
     "transfer": "Переказ",
     "label": "Мітка",
     "amount": "Сума",
-    "category": "Категорія"
+    "category": "Категорія",
+    "settings": "Settings",
+    "deleted": "Deleted"
   },
   "menu": {
     "home": "Початок",

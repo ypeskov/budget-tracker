@@ -26,7 +26,7 @@ let filteredCategories = ref([]);
 const showDeleteConfirmation = ref(false);
 
 const itemType = ref('expense');
-transaction.is_transfer = itemType.value === 'transfer';
+transaction.isTransfer = itemType.value === 'transfer';
 
 const returnUrlName = ref('');
 
@@ -42,7 +42,7 @@ function amountChanged({ amountType, amount }) {
   if (amountType === 'src') {
     transaction.amount = amount;
   } else {
-    transaction.target_amount = amount;
+    transaction.targetAmount = amount;
   }
 }
 
@@ -58,16 +58,16 @@ onBeforeMount(async () => {
     accounts.push(...(await Services.accountsService.getAllUserAccounts()));
     currentAccount.value = accounts[0];
     targetAccount.value = accounts[0];
-    transaction.account_id = currentAccount.value.id;
-    transaction.target_account_id = targetAccount.value.id;
+    transaction.accountId = currentAccount.value.id;
+    transaction.targetAccountId = targetAccount.value.id;
     categories.value = await Services.categoriesService.getUserCategories();
 
     if (props.isEdit) {
       const details = await Services.transactionsService.getTransactionDetails(route.params.id);
       transaction = Object.assign(transaction, details);
-      itemType.value = transaction.is_transfer ? 'transfer' : transaction.is_income ? 'income' : 'expense';
-      currentAccount.value = accounts.find((item) => item.id === transaction.account_id);
-      targetAccount.value = accounts.find((item) => item.id === transaction.target_account_id);
+      itemType.value = transaction.isTransfer ? 'transfer' : transaction.isIncome ? 'income' : 'expense';
+      currentAccount.value = accounts.find((item) => item.id === transaction.accountId);
+      targetAccount.value = accounts.find((item) => item.id === transaction.targetAccountId);
       if (targetAccount.value === undefined) {
         targetAccount.value = accounts[0];
       }
@@ -83,11 +83,11 @@ onBeforeMount(async () => {
 function filterCategories() {
   const isIncome = itemType.value === 'income';
   // filter categories by income/expense
-  filteredCategories.value = categories.value.filter((item) => item.is_income === isIncome);
+  filteredCategories.value = categories.value.filter((item) => item.isIncome === isIncome);
 
   // if the current category is not in the filtered categories, set the first one from the filtered list
-  if (!filteredCategories.value.some((item) => item.id === transaction.category_id)) {
-    transaction.category_id = filteredCategories.value[0].id;
+  if (!filteredCategories.value.some((item) => item.id === transaction.categoryId)) {
+    transaction.categoryId = filteredCategories.value[0].id;
   }
 
   updateTransactionProperties(itemType.value);
@@ -95,15 +95,15 @@ function filterCategories() {
 
 function updateTransactionProperties(type) {
   if (type === 'transfer') {
-    transaction.category_id = transaction.category_id || null;
-    transaction.is_transfer = true;
-    transaction.target_account_id = targetAccount.value.id;
-    transaction.is_income = false;
+    transaction.categoryId = transaction.categoryId || null;
+    transaction.isTransfer = true;
+    transaction.targetAccountId = targetAccount.value.id;
+    transaction.isIncome = false;
   } else {
-    transaction.target_account_id = null;
-    transaction.is_transfer = false;
-    transaction.category_id = transaction.category_id || filteredCategories.value[0].id;
-    transaction.is_income = itemType.value === 'income';
+    transaction.targetAccountId = null;
+    transaction.isTransfer = false;
+    transaction.categoryId = transaction.categoryId || filteredCategories.value[0].id;
+    transaction.isIncome = itemType.value === 'income';
   }
 }
 
@@ -119,7 +119,6 @@ function changeItemType(type) {
 async function submitTransaction() {
   try {
     if (props.isEdit) {
-      console.log(transaction);
       await Services.transactionsService.updateTransaction(transaction);
     } else {
       await Services.transactionsService.addTransaction(transaction);
@@ -133,7 +132,6 @@ async function submitTransaction() {
         id: props.accountId,
       },
     });
-    // router.go(-1);
   } catch (e) {
     console.log(e);
     await router.push({ name: 'home' });
@@ -174,7 +172,7 @@ async function deleteTransaction() {
                                :transaction="transaction" @amount-changed="amountChanged"
                                :current-account="currentAccount" />
 
-            <Account v-if="transaction.is_transfer === true" @account-changed="changeAccount" account-type="target"
+            <Account v-if="transaction.isTransfer === true" @account-changed="changeAccount" account-type="target"
                      :transaction="transaction" :accounts="accounts" />
 
             <TransactionAmount v-if="itemType === 'transfer'" type="target" :label="t('message.amount')"
@@ -183,9 +181,9 @@ async function deleteTransaction() {
 
             <ExchangeRate v-if="itemType === 'transfer'" :amount-src="transaction.amount"
                           :currency-src="currentAccount.currency.code" :currency-target="targetAccount.currency.code"
-                          :target-amount="transaction.target_amount" />
+                          :target-amount="transaction.targetAmount" />
 
-            <Category v-if="!transaction.is_transfer"
+            <Category v-if="!transaction.isTransfer"
                       :transaction="transaction"
                       :categories="filteredCategories"
                       @update:categoryId="transaction.categoryId = $event" />

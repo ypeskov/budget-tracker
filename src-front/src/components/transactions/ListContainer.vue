@@ -95,7 +95,7 @@ function filterApplied(payload) {
           </RouterLink>
         </span>
         <span>
-          <a href="" class="btn btn-secondary" @click="reloadTransactions">{{$t('message.reload')}}</a>
+          <a href="" class="btn btn-secondary" @click="reloadTransactions">{{$t('message.update')}}</a>
         </span>
         <span>
           <a href="" class="btn" :class="{ 'active-filter btn-success': !reset, 'btn-secondary': reset }"

@@ -32,6 +32,10 @@ class CreateTransactionSchema(BaseModel):
     is_transfer: bool
     is_income: bool
 
+    model_config = ConfigDict(from_attributes=True,
+                              populate_by_name=True,
+                              alias_generator=to_camel)
+
 
 class UpdateTransactionSchema(CreateTransactionSchema):
     id: int
