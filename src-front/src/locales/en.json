@@ -26,7 +26,8 @@
     "amount": "Amount",
     "category": "Category",
     "settings": "Settings",
-    "deleted": "Deleted"
+    "deleted": "Deleted",
+    "select_language": "Select language"
   },
   "menu": {
     "home": "Home",
@@ -45,6 +46,8 @@
     "new": "New",
     "submit": "Submit",
     "yes": "Yes",
-    "language": "Language"
+    "language": "Language",
+    "profile": "Profile",
+    "apply": "Apply"
   }
 }
