@@ -30,11 +30,14 @@ transaction.isTransfer = itemType.value === 'transfer';
 
 const returnUrlName = ref('');
 
-function changeAccount({ accountType, account }) {
+function changeAccount({ accountType, accountId }) {
+  const account = accounts.find((item) => item.id === accountId);
   if (accountType === 'src') {
     currentAccount.value = account;
+    transaction.accountId = accountId;
   } else if (accountType === 'target') {
     targetAccount.value = account;
+    transaction.targetAccountId = accountId;
   }
 }
 
