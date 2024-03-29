@@ -9,8 +9,18 @@ const BACKEND_HOST = import.meta.env.VITE_BACKEND_HOST;
 
 export async function request(endPoint, params={}, services={}) {
   const userStore = useUserStore();
+
+  let accessToken = userStore.accessToken;
+  if (accessToken === null) {
+    accessToken = localStorage.getItem('accessToken');
+  }
+  if (accessToken === null) {
+    services.userService.logOutUser();
+    throw new HttpError('Unauthorized', 401);
+  }
+
   const defaultHeaders = {
-    'auth-token': userStore.accessToken,
+    'auth-token': accessToken,
     'Content-Type': 'application/json',
   };
   const mergedHeaders = { ...defaultHeaders, ...params.headers };
