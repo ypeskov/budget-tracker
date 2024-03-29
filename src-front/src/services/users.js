@@ -83,6 +83,8 @@ export class UserService {
       false,
       '',
     );
+    this.accountsService.clearAccounts();
+    localStorage.clear();
   }
 
   async registerUser(email, password, firstName, lastName) {
@@ -94,7 +96,7 @@ export class UserService {
       last_name: lastName,
     };
     try {
-      const data = await request(
+      await request(
         registerPath,
         {
           method: 'POST',
@@ -102,7 +104,6 @@ export class UserService {
         },
         { userService: this },
       );
-      console.log('Registration successful');
     } catch (e) {
       if (e instanceof HttpError) {
         console.error('Registration error:', e.message);
