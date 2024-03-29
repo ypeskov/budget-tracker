@@ -9,7 +9,8 @@ from app.models.User import User, DEFAULT_CURRENCY_CODE
 from app.models.Currency import Currency
 from app.models.DefaultCategory import DefaultCategory
 from app.models.UserCategory import UserCategory
-from app.schemas.user_schema import UserRegistration, UserResponse, UserLoginSchema
+from app.schemas.user_schema import UserRegistration, UserLoginSchema
+from app.services.user_settings import generate_initial_settings
 
 # Password hashing configuration
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -69,6 +70,7 @@ def create_users(user_request: UserRegistration, db: Session):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    generate_initial_settings(new_user.id, db)
 
     copy_all_categories(new_user.id, db)
 
