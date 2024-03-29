@@ -7,7 +7,7 @@ from app.logger_config import logger
 from app.database import get_db
 from app.dependencies.check_token import check_token
 from app.schemas.language_schema import LanguageSchema
-from app.services.settings import get_languages
+from app.services.user_settings import get_languages, get_user_settings
 
 ic.configureOutput(includeContext=True)
 
@@ -27,3 +27,14 @@ def get_all_languages(request: Request, db: Session = Depends(get_db)):
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to get languages')
+
+
+@router.get('/')
+def get_settings(request: Request, db: Session = Depends(get_db)):
+    """ Get user settings """
+    try:
+        user_settings = get_user_settings(request.state.user['id'], db)
+        return user_settings
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to get user settings')
