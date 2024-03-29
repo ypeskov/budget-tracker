@@ -14,20 +14,18 @@ const userStore = useUserStore();
 const userService = new UserService(userStore);
 
 onBeforeMount(async () => {
-  let isLoggedIn, accessToken, localStorageUser, language;
+  let isLoggedIn, accessToken, localStorageUser;
   try {
     localStorageUser = JSON.parse(localStorage.getItem('user'));
     isLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn'));
     accessToken = localStorage.getItem('accessToken');
-    let settings = localStorage.getItem('settings') ? JSON.parse(localStorage.getItem('settings')) : null;
-    language = settings ? settings.language : 'en';
   } catch (e) {
     userService.logOutUser();
   }
 
   if (isLoggedIn) {
-    locale.value = language;
-    userService.setUser(localStorageUser, isLoggedIn, accessToken, language);
+    locale.value = localStorageUser.settings.language;
+    userService.setUser(localStorageUser, isLoggedIn, accessToken);
   }
 });
 

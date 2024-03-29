@@ -48,13 +48,13 @@ export class UserService {
     try {
       const profileEndpoint = '/auth/profile/';
       const userProfile = await request(profileEndpoint, {}, { userService: this });
-      this.setUser(userProfile, true, accessToken, userProfile.settings.language);
+      this.setUser(userProfile, true, accessToken);
     } catch (e) {
       console.log(e);
     }
   }
 
-  setUser(userProfile, isLoggedIn = false, accessToken = '', language = 'en') {
+  setUser(userProfile, isLoggedIn = false, accessToken = '') {
     // need to make deep copying to avoid cycling errors
     const clonedUserProfile = JSON.parse(JSON.stringify(userProfile));
     this.userStore.user = Object.assign(this.userStore.user, clonedUserProfile);
@@ -62,12 +62,10 @@ export class UserService {
     this.userStore.isLoggedIn = isLoggedIn;
     this.userStore.accessToken = accessToken;
     this.userStore.settings = Object.assign(this.userStore.settings, userProfile.settings);
-    this.userStore.settings.language = language;
 
     localStorage.setItem('user', JSON.stringify(this.userStore.user));
     localStorage.setItem('isLoggedIn', this.userStore.isLoggedIn);
     localStorage.setItem('accessToken', this.userStore.accessToken);
-    localStorage.setItem('settings', JSON.stringify(this.userStore.settings));
   }
 
   logOutUser() {
