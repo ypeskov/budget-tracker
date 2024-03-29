@@ -35,3 +35,16 @@ def get_user_settings(user_id: int, db: Session) -> UserSettings:
         raise e
 
     return user_settings
+
+
+def save_user_settings(user_id: int, settings: dict, db: Session) -> UserSettings:
+    try:
+        user_settings: UserSettings = db.query(UserSettings).filter(UserSettings.user_id == user_id).one()
+        user_settings.settings = settings
+        db.commit()
+        db.refresh(user_settings)
+    except Exception as e:
+        logger.exception(e)
+        raise e
+
+    return user_settings
