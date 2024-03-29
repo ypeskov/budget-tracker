@@ -20,6 +20,9 @@ class UserSettings(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  server_default=func.now(), onupdate=func.now(), nullable=False)
 
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     def __repr__(self):
         return f'UserSettings(id={self.id}, settings={self.settings}, user={self.user}, ' \
                 f'created_at={self.created_at}, updated_at={self.updated_at})'

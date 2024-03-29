@@ -5,12 +5,16 @@ import { useI18n } from 'vue-i18n';
 
 import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
+import { useUserStore } from '../stores/user';
+
+const userStore = useUserStore();
 
 let loginEmail = ref('');
 let loginPassword = ref('');
 
 const router = useRouter();
 const { t } = useI18n();
+const { locale } = useI18n();
 
 function updateEmail(event) {
   loginEmail.value = event.target.value;
@@ -21,6 +25,7 @@ async function submitLogin() {
     await Services.userService.loginUser(loginEmail.value, loginPassword.value);
     loginEmail.value = '';
     loginPassword.value = '';
+    locale.value = userStore.settings.language;
     await router.push('/');
   } catch (error) {
     if (error instanceof HttpError && error.statusCode === 401) {

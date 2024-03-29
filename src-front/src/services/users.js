@@ -4,11 +4,6 @@ import { request } from './requests';
 export class UserService {
   userStore;
 
-  accountsService;
-  transactionsService;
-  categoriesService;
-  currenciesService;
-
   constructor(userStore) {
     this.userStore = userStore;
   }
@@ -36,7 +31,7 @@ export class UserService {
       );
       if (data.access_token) {
         this.userStore.accessToken = data.access_token;
-        this.getUserProfile(this.userStore.accessToken);
+        await this.getUserProfile(this.userStore.accessToken);
         this.accountsService.getAllUserAccounts();
       } else {
         console.log('Something went wrong!');
@@ -66,6 +61,7 @@ export class UserService {
 
     this.userStore.isLoggedIn = isLoggedIn;
     this.userStore.accessToken = accessToken;
+    this.userStore.settings = Object.assign(this.userStore.settings, userProfile.settings);
 
     localStorage.setItem('user', JSON.stringify(this.userStore.user));
     localStorage.setItem('isLoggedIn', this.userStore.isLoggedIn);
