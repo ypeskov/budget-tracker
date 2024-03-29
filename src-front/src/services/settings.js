@@ -21,7 +21,7 @@ export class SettingsService {
       settings = toRaw(this.userService.userStore.settings);
     }
 
-    localStorage.setItem('settings', JSON.stringify(settings));
+    this.updateSettingsInStorage(settings);
 
     return await request(saveUserSettingsUrl,
       {
@@ -31,5 +31,13 @@ export class SettingsService {
         }),
       },
       { userService: this.userService });
+  }
+
+  updateSettingsInStorage(settings) {
+    const user = JSON.parse(localStorage.getItem('user'));
+    user.settings = settings;
+    localStorage.setItem('user', JSON.stringify(user));
+
+    return user;
   }
 }
