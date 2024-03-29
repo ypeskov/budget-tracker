@@ -1,7 +1,8 @@
 <script setup>
 import { onBeforeMount, reactive, ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { DateTime } from 'luxon';
 
 import { Services } from '../services/servicesConfig';
 
@@ -11,6 +12,7 @@ import TransactionAmount from '../components/transactions/TransactionAmount.vue'
 import Category from '../components/transactions/Category.vue';
 import Account from '../components/transactions/Account.vue';
 import ExchangeRate from '../components/transactions/ExchangeRate.vue';
+import TransactionDateTime from '../components/transactions/TransactionDateTIme.vue';
 
 const props = defineProps(['isEdit', 'returnUrl', 'accountId']);
 const router = useRouter();
@@ -119,6 +121,12 @@ function changeItemType(type) {
   filterCategories();
 }
 
+function dateTimeChanged({ date, time }) {
+  const dateTimeString = `${date}T${time}`;
+  const localDateTime = DateTime.fromISO(dateTimeString, { zone: 'local' });
+  transaction.dateTime = localDateTime.toUTC().toISO().replace('.000', '');
+}
+
 async function submitTransaction() {
   try {
     if (props.isEdit) {
@@ -191,6 +199,8 @@ async function deleteTransaction() {
                       :categories="filteredCategories"
                       @update:categoryId="transaction.categoryId = $event" />
 
+            <TransactionDateTime :transaction="transaction" :is-edit="isEdit" @date-time-changed="dateTimeChanged" />
+
             <div class="mb-3">
               <label for="notes" class="form-label">{{ $t('message.notes') }}</label>
               <textarea @keyup="changeNotes" class="form-control" id="notes" v-model="transaction.notes"
@@ -210,7 +220,8 @@ async function deleteTransaction() {
             <div class="buttons-container">
               <button @click="deleteTransaction" class="btn btn-danger">{{ $t('buttons.yes') }}</button>
               <button @click="showDeleteConfirmation = false"
-                      class="btn btn-secondary">{{ $t('buttons.cancel') }}</button>
+                      class="btn btn-secondary">{{ $t('buttons.cancel') }}
+              </button>
             </div>
           </div>
         </div>
