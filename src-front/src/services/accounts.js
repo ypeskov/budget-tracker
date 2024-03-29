@@ -1,7 +1,6 @@
 import {DateTime} from 'luxon';
 
 import {request} from './requests';
-import {HttpError} from '../errors/HttpError';
 
 export class AccountService {
   accountStore;
@@ -76,5 +75,11 @@ export class AccountService {
       body: JSON.stringify(accountDetails),
     }, {userService: this.userService});
     this.setShouldUpdateAccountsList(true);
+  }
+
+  clearAccounts() {
+    this.accountStore.accounts.length = 0;
+    this.accountStore.lastUpdated = null;
+    this.accountStore.shouldUpdate = true;
   }
 }
