@@ -4,11 +4,6 @@ import { request } from './requests';
 export class UserService {
   userStore;
 
-  accountsService;
-  transactionsService;
-  categoriesService;
-  currenciesService;
-
   constructor(userStore) {
     this.userStore = userStore;
   }
@@ -36,7 +31,7 @@ export class UserService {
       );
       if (data.access_token) {
         this.userStore.accessToken = data.access_token;
-        this.getUserProfile(this.userStore.accessToken);
+        await this.getUserProfile(this.userStore.accessToken);
         this.accountsService.getAllUserAccounts();
       } else {
         console.log('Something went wrong!');
@@ -52,24 +47,27 @@ export class UserService {
   async getUserProfile(accessToken) {
     try {
       const profileEndpoint = '/auth/profile/';
-      const userProfile = await request(profileEndpoint);
-      this.setUser(userProfile, true, accessToken);
+      const userProfile = await request(profileEndpoint, {}, { userService: this });
+      this.setUser(userProfile, true, accessToken, userProfile.settings.language);
     } catch (e) {
       console.log(e);
     }
   }
 
-  setUser(userProfile, isLoggedIn = false, accessToken = '') {
+  setUser(userProfile, isLoggedIn = false, accessToken = '', language = 'en') {
     // need to make deep copying to avoid cycling errors
     const clonedUserProfile = JSON.parse(JSON.stringify(userProfile));
     this.userStore.user = Object.assign(this.userStore.user, clonedUserProfile);
 
     this.userStore.isLoggedIn = isLoggedIn;
     this.userStore.accessToken = accessToken;
+    this.userStore.settings = Object.assign(this.userStore.settings, userProfile.settings);
+    this.userStore.settings.language = language;
 
     localStorage.setItem('user', JSON.stringify(this.userStore.user));
     localStorage.setItem('isLoggedIn', this.userStore.isLoggedIn);
     localStorage.setItem('accessToken', this.userStore.accessToken);
+    localStorage.setItem('settings', JSON.stringify(this.userStore.settings));
   }
 
   logOutUser() {

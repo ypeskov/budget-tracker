@@ -15,7 +15,6 @@ const languages = reactive([]);
 const { locale } = useI18n();
 const selectedLanguage = ref('');
 
-
 onBeforeMount(async () => {
   languages.length = 0;
   try {
@@ -30,11 +29,13 @@ onBeforeMount(async () => {
 });
 
 const handleLanguageChange = () => {
-  console.log(languages.find((language) => language.id === selectedLanguage.value).name);
+  // console.log(languages.find((language) => language.id === selectedLanguage.value).name);
 };
 
 const applyAndClose = () => {
   locale.value = languages.find((language) => language.id === selectedLanguage.value)?.code;
+  Services.userService.userStore.settings.language = locale.value;
+  Services.settingsService.saveUserSettings();
   props.closeLanguageModal();
 };
 
