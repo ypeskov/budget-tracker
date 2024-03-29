@@ -20,6 +20,9 @@ export class SettingsService {
     if (settings === null) {
       settings = toRaw(this.userService.userStore.settings);
     }
+
+    localStorage.setItem('settings', JSON.stringify(settings));
+
     return await request(saveUserSettingsUrl,
       {
         method: 'POST',

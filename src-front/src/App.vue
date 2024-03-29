@@ -8,22 +8,26 @@ import { UserService } from './services/users';
 
 const router = useRouter();
 const t = useI18n().t;
+const { locale } = useI18n();
 
 const userStore = useUserStore();
 const userService = new UserService(userStore);
 
-onBeforeMount(() => {
-  let localStorageUser, isLoggedIn, accessToken;
+onBeforeMount(async () => {
+  let isLoggedIn, accessToken, localStorageUser, language;
   try {
     localStorageUser = JSON.parse(localStorage.getItem('user'));
     isLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn'));
     accessToken = localStorage.getItem('accessToken');
+    let settings = localStorage.getItem('settings') ? JSON.parse(localStorage.getItem('settings')) : null;
+    language = settings ? settings.language : 'en';
   } catch (e) {
     userService.logOutUser();
   }
 
   if (isLoggedIn) {
-    userService.setUser(localStorageUser, isLoggedIn, accessToken);
+    locale.value = language;
+    userService.setUser(localStorageUser, isLoggedIn, accessToken, language);
   }
 });
 
@@ -47,22 +51,22 @@ const goToSettings = () => {
       <div class="row nav-row">
         <div class="col">
           <nav>
-            <span>
-              <RouterLink :to="{ name: 'home' }">{{ $t('menu.home') }}</RouterLink>
-            </span>
+              <span>
+                <RouterLink :to="{ name: 'home' }">{{ $t('menu.home') }}</RouterLink>
+              </span>
             <span v-if="userStore.isLoggedIn">
-              <RouterLink :to="{ name: 'accounts' }">{{ $t('menu.accounts') }}</RouterLink>
-            </span>
+                <RouterLink :to="{ name: 'accounts' }">{{ $t('menu.accounts') }}</RouterLink>
+              </span>
             <span v-if="userStore.isLoggedIn">
-              <RouterLink :to="{ name: 'transactions' }">{{ $t('menu.transactions') }}</RouterLink>
-            </span>
+                <RouterLink :to="{ name: 'transactions' }">{{ $t('menu.transactions') }}</RouterLink>
+              </span>
             <span v-if="!userStore.isLoggedIn">
-              <RouterLink :to="{ name: 'login' }">{{ $t('menu.login') }}</RouterLink>
-              <RouterLink :to="{ name: 'register' }">{{ $t('menu.register') }}</RouterLink>
-            </span>
+                <RouterLink :to="{ name: 'login' }">{{ $t('menu.login') }}</RouterLink>
+                <RouterLink :to="{ name: 'register' }">{{ $t('menu.register') }}</RouterLink>
+              </span>
             <span v-else>
-              <RouterLink :to="{ name: 'logout' }">{{ $t('menu.logout') }}</RouterLink>
-            </span>
+                <RouterLink :to="{ name: 'logout' }">{{ $t('menu.logout') }}</RouterLink>
+              </span>
           </nav>
         </div>
       </div>
@@ -86,14 +90,14 @@ nav a {
 }
 
 .header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .settings-icon img {
-    cursor: pointer;
-    transition: transform 0.2s ease;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
 .settings-icon img:hover {
