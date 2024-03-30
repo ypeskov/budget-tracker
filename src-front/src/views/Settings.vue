@@ -1,22 +1,18 @@
 <script setup>
 import { ref } from 'vue';
-// import { useI18n } from 'vue-i18n';
-// import { useRouter } from 'vue-router';
-// import { Services } from '../services/servicesConfig';
-// import { HttpError } from '../errors/HttpError';
-import LanguageSelector from '../components/settings/LanguageSelector.vue';
+
+import UserProfile from '../components/settings/UserProfile.vue';
 
 // const router = useRouter();
 
+const showProfileModal = ref(false);
 
-const showLanguageModal = ref(false);
-
-const openLanguageModal = () => {
-  showLanguageModal.value = true;
+const openProfileModal = () => {
+  showProfileModal.value = true;
 };
 
-const closeLanguageModal = () => {
-  showLanguageModal.value = false;
+const closeProfileModal = () => {
+  showProfileModal.value = false;
 };
 
 </script>
@@ -32,19 +28,10 @@ const closeLanguageModal = () => {
 
       <div class="row">
         <div class="col-12 profile-section">
-          <a href="/settings/profile" class="btn btn-primary w-100">{{ $t('buttons.profile') }}</a>
+          <button @click="openProfileModal" class="btn btn-primary w-100">{{ $t('buttons.profile') }}</button>
         </div>
-      </div>
-
-      <div class="row">
-        <div class="col-12 lang-section">
-          <button @click="openLanguageModal" class="btn btn-primary w-100">{{ $t('buttons.language') }}</button>
-        </div>
-
         <teleport to="body">
-          <LanguageSelector v-if="showLanguageModal"
-                            :show-language-modal="showLanguageModal"
-                            :close-language-modal="closeLanguageModal" />
+          <UserProfile v-if="showProfileModal" :close-modal="closeProfileModal" />
         </teleport>
       </div>
     </div>
