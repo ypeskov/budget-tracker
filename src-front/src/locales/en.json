@@ -28,7 +28,8 @@
     "settings": "Settings",
     "deleted": "Deleted",
     "select_language": "Select language",
-    "profile": "Profile"
+    "profile": "Profile",
+    "categories": "Categories"
   },
   "menu": {
     "home": "Home",
@@ -49,6 +50,8 @@
     "yes": "Yes",
     "language": "Language",
     "profile": "Profile",
-    "apply": "Apply"
+    "apply": "Apply",
+    "categories": "Categories",
+    "close": "Close"
   }
 }

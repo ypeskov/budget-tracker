@@ -1,5 +1,7 @@
 import { request } from './requests';
 
+const categoriesUrlPrefix = '/categories';
+
 export class CategoriesService {
   userService;
 
@@ -8,7 +10,12 @@ export class CategoriesService {
   }
 
   async getUserCategories() {
-    const categoriesUrl = '/categories/';
+    const categoriesUrl = `${categoriesUrlPrefix}/`;
+    return await request(categoriesUrl, {}, {userService: this.userService});
+  }
+
+  async getGroupedCategories() {
+    const categoriesUrl = `${categoriesUrlPrefix}/grouped/`;
     return await request(categoriesUrl, {}, {userService: this.userService});
   }
 }

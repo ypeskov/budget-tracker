@@ -2,10 +2,10 @@
 import { ref } from 'vue';
 
 import UserProfile from '../components/settings/UserProfile.vue';
-
-// const router = useRouter();
+import CategoriesManager   from '../components/settings/CategoriesManager.vue';
 
 const showProfileModal = ref(false);
+const showCategoriesModal = ref(false);
 
 const openProfileModal = () => {
   showProfileModal.value = true;
@@ -13,6 +13,14 @@ const openProfileModal = () => {
 
 const closeProfileModal = () => {
   showProfileModal.value = false;
+};
+
+const openCategoriesModal = () => {
+  showCategoriesModal.value = true;
+};
+
+const closeCategoriesModal = () => {
+  showCategoriesModal.value = false;
 };
 
 </script>
@@ -32,6 +40,15 @@ const closeProfileModal = () => {
         </div>
         <teleport to="body">
           <UserProfile v-if="showProfileModal" :close-modal="closeProfileModal" />
+        </teleport>
+      </div>
+
+      <div class="row">
+        <div class="col-12 profile-section">
+          <button @click="openCategoriesModal" class="btn btn-primary w-100">{{ $t('buttons.categories') }}</button>
+        </div>
+        <teleport to="body">
+          <CategoriesManager v-if="showCategoriesModal" :close-modal="closeCategoriesModal" />
         </teleport>
       </div>
     </div>

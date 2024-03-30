@@ -28,7 +28,8 @@
     "settings": "Налаштування",
     "deleted": "Видалено",
     "select_language": "Вибрати мову",
-    "profile": "Профіль"
+    "profile": "Профіль",
+    "categories": "Категорії"
   },
   "menu": {
     "home": "Початок",
@@ -49,6 +50,8 @@
     "yes": "Так",
     "language": "Мова",
     "profile": "Профіль",
-    "apply": "Застосувати"
+    "apply": "Застосувати",
+    "categories": "Категорії",
+    "close": "Закрити"
   }
 }
