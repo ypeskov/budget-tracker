@@ -39,7 +39,7 @@ const goToSettings = () => {
     <div class="row ">
       <div class="col header-row">
         <div>{{ $t('message.anotherBudgeter') }}</div>
-        <div class="settings-icon" @click="goToSettings">
+        <div v-if="userStore.isLoggedIn" class="settings-icon" @click="goToSettings">
           <img src="/images/icons/settings.svg" :alt="t('message.settings')">
         </div>
       </div>
