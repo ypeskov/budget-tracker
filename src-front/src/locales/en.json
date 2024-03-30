@@ -27,7 +27,8 @@
     "category": "Category",
     "settings": "Settings",
     "deleted": "Deleted",
-    "select_language": "Select language"
+    "select_language": "Select language",
+    "profile": "Profile"
   },
   "menu": {
     "home": "Home",
