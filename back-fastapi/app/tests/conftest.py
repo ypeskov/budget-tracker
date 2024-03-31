@@ -1,4 +1,7 @@
 import os
+
+from app.models.UserSettings import UserSettings
+
 os.environ['TEST_MODE'] = 'True'
 
 from decimal import Decimal
@@ -83,6 +86,7 @@ def token():
 
     yield token['access_token']
 
+    db.query(UserSettings).filter(UserSettings.user_id == user.id).delete()
     db.delete(user)
     db.commit()
 

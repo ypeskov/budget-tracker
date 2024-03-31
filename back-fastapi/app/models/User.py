@@ -8,8 +8,6 @@ from app.database import Base
 
 if TYPE_CHECKING:  # pragma: no cover
     from app.models.UserCategory import UserCategory
-    from app.models.Account import Account
-    from app.models.Transaction import Transaction
     from app.models.Currency import Currency
 
 DEFAULT_CURRENCY_CODE = 'USD'
