@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get('/', response_model=ResponseCategorySchema)
+@router.get('/', response_model=list[ResponseCategorySchema])
 def get_categories(request: Request, db: Session = Depends(get_db)) -> list[UserCategory]:
     return get_user_categories(request.state.user['id'], db)
 

@@ -717,8 +717,6 @@ def test_get_transaction_details_forbidden(token, create_transaction, one_accoun
     email = 'email@email.com'
     password = 'qqq_111_'
     user2 = create_user(email, password)
-    # user2_token = client.post(f'{auth_path_prefix}/login/',
-    #                           json={'email': email, 'password': password}).json()['access_token']
     categories = client.get(f'{categories_path_prefix}/', headers={'auth-token': token}).json()
 
     transaction_details = {
