@@ -13,7 +13,7 @@ class UserSettings(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     settings: Mapped[dict] = mapped_column(JSON, default=lambda: {})
 
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user: Mapped[User] = relationship(backref='settings')
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -25,4 +25,4 @@ class UserSettings(Base):
 
     def __repr__(self):
         return f'UserSettings(id={self.id}, settings={self.settings}, user={self.user}, ' \
-                f'created_at={self.created_at}, updated_at={self.updated_at})'
+               f'created_at={self.created_at}, updated_at={self.updated_at})'
