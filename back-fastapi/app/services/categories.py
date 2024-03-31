@@ -1,6 +1,3 @@
-import json
-from typing import List, Dict
-
 from icecream import ic
 from sqlalchemy.orm import Session
 
@@ -13,12 +10,12 @@ def get_user_categories(user_id: int, db: Session) -> list[UserCategory]:
 
 
 def grouped_user_categories(user_id: int, db: Session) -> GroupedCategorySchema:
-    raw_categories: List[UserCategory] = db.query(UserCategory).filter_by(user_id=user_id).all()
+    raw_categories: list[UserCategory] = db.query(UserCategory).filter_by(user_id=user_id).all()
 
-    categories_dict: Dict[int, UserCategory] = {}
+    categories_dict: dict[int, UserCategory] = {}
 
-    income_categories: List[Dict] = []
-    expense_categories: List[Dict] = []
+    income_categories: list[dict] = []
+    expense_categories: list[dict] = []
 
     for category in raw_categories:
         categories_dict[category.id] = category

@@ -29,14 +29,16 @@ export class UserService {
         },
         { userService: this },
       );
+
       if (data.access_token) {
         this.userStore.accessToken = data.access_token;
         await this.getUserProfile(this.userStore.accessToken);
         this.accountsService.getAllUserAccounts();
       } else {
-        console.log('Something went wrong!');
+        console.log('No access token in response!');
       }
     } catch (e) {
+      console.log(e);
       if (e instanceof HttpError && e.statusCode === 401) {
         console.log('Wrong email or password!');
       }

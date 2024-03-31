@@ -14,11 +14,6 @@ export async function request(endPoint, params={}, services={}) {
   if (accessToken === null) {
     accessToken = localStorage.getItem('accessToken');
   }
-  if (accessToken === null) {
-    services.userService.logOutUser();
-    throw new HttpError('Unauthorized', 401);
-  }
-
   const defaultHeaders = {
     'auth-token': accessToken,
     'Content-Type': 'application/json',
@@ -27,7 +22,7 @@ export async function request(endPoint, params={}, services={}) {
   params.headers = mergedHeaders;
 
   const response = await fetch(`${BACKEND_HOST}${endPoint}`, params);
-  
+
   if (response.status === 200) {
     try {
       return await response.json();
