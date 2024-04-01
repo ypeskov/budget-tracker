@@ -1,25 +1,34 @@
 <script setup>
-import { defineProps, defineEmits, computed } from 'vue';
+import { computed, defineProps, defineEmits } from 'vue';
 
 const props = defineProps(['transaction', 'categories']);
 const emit = defineEmits(['update:categoryId']);
+
+const userLocale = navigator.language || 'en-US';
 
 function changeCategory($event) {
   emit('update:categoryId', $event.target.value);
 }
 
-const getParentCategoryLabel = (category) => {
-  const parentCategory = props.categories.find(cat => cat.id === category.parentId);
-  return parentCategory ? `${parentCategory.name} >> ` : '';
-};
+const getCategoryPath = (category, categories) => {
+  let path = category.name;
+  let currentCategory = category;
 
-const categoryLabel = category => `${getParentCategoryLabel(category)} ${category.name}`;
+  while (currentCategory.parentId) {
+    const parentCategory = categories.find(cat => cat.id === currentCategory.parentId);
+    if (!parentCategory) break;
+    path = `${parentCategory.name} >> ${path}`;
+    currentCategory = parentCategory;
+  }
+
+  return path;
+};
 
 const sortedCategories = computed(() => {
   return [...props.categories].sort((a, b) => {
-    const labelA = categoryLabel(a);
-    const labelB = categoryLabel(b);
-    return labelA.localeCompare(labelB);
+    const pathA = getCategoryPath(a, props.categories);
+    const pathB = getCategoryPath(b, props.categories);
+    return pathA.localeCompare(pathB, userLocale);
   });
 });
 </script>
@@ -31,7 +40,8 @@ const sortedCategories = computed(() => {
   <select id="category-select" class="form-select bottom-space" @change="changeCategory"
           :value="props.transaction.categoryId">
     <option v-for="category in sortedCategories" :key="category.id" :value="category.id">
-      {{ categoryLabel(category) }}
+      {{ getCategoryPath(category, props.categories) }}
     </option>
   </select>
 </template>
+
