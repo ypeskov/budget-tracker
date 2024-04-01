@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
 const props = defineProps(['transaction', 'categories']);
 const emit = defineEmits(['update:categoryId']);
@@ -15,6 +15,13 @@ const getParentCategoryLabel = (category) => {
 
 const categoryLabel = category => `${getParentCategoryLabel(category)} ${category.name}`;
 
+const sortedCategories = computed(() => {
+  return [...props.categories].sort((a, b) => {
+    const labelA = categoryLabel(a);
+    const labelB = categoryLabel(b);
+    return labelA.localeCompare(labelB);
+  });
+});
 </script>
 
 <template>
@@ -23,7 +30,7 @@ const categoryLabel = category => `${getParentCategoryLabel(category)} ${categor
   </label>
   <select id="category-select" class="form-select bottom-space" @change="changeCategory"
           :value="props.transaction.categoryId">
-    <option v-for="category in categories" :key="category.id" :value="category.id">
+    <option v-for="category in sortedCategories" :key="category.id" :value="category.id">
       {{ categoryLabel(category) }}
     </option>
   </select>
