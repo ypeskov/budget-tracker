@@ -29,7 +29,13 @@
     "deleted": "Видалено",
     "select_language": "Вибрати мову",
     "profile": "Профіль",
-    "categories": "Категорії"
+    "categories": "Категорії",
+    "isIncome": "Дохід",
+    "parent": "Батьківська",
+    "isDeleted": "Видалено",
+    "name": "Ім'я",
+    "none": "Немає",
+    "group": "Група"
   },
   "menu": {
     "home": "Початок",
