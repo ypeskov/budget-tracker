@@ -124,7 +124,6 @@ function accountName(account) {
 }
 
 .transfer-transaction {
-  //color: blue;
 }
 
 .income-transaction {
