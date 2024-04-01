@@ -56,12 +56,19 @@ const updateCategoryType = ({isIncome}) => {
 const categoryUpdated = async () => {
   reReadCategories();
 };
+
+const addNewCategory = () => {
+  openCategoryEditor({
+    children: [],
+  });
+};
 </script>
 
 <template>
   <div class="modal-overlay" @click="closeModal">
     <div class="modal-content" @click.stop>
       <h2>{{ $t('message.categories') }}</h2>
+      <button class="btn btn-primary mb-3" @click="addNewCategory">{{ $t('buttons.addNewCategory') }}</button>
       <div class="container">
         <div class="row mb-3" v-for="(categoriesList, type) in categories" :key="type">
           <div class="col-12">

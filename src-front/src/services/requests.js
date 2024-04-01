@@ -23,19 +23,30 @@ export async function request(endPoint, params={}, services={}) {
 
   const response = await fetch(`${BACKEND_HOST}${endPoint}`, params);
 
-  if (response.status === 200) {
-    try {
+if ([200, 201, 204].includes(response.status)) {
+  try {
+    if (response.status === 204) {
+      return null;
+    } else {
       return await response.json();
-    } catch (e) {
-      console.log(e);
     }
-  } else if (response.status === 401) {
+  } catch (e) {
+    console.log(e);
+    return null;
+  }
+} else {
+  if (response.status === 401) {
     services.userService.logOutUser();
     throw new HttpError('Unauthorized', 401);
+  } else if ([400, 500].includes(response.status)) {
+    const err = await response.json();
+    console.log(err.detail || 'Error occurred');
+    throw new HttpError(err.detail || 'Error occurred', response.status);
   } else {
     const err = await response.json();
-    console.log(err.detail);
-    throw new HttpError(err.detail, response.status);
+    console.log(err.detail || 'An unexpected error occurred');
+    throw new HttpError(err.detail || 'An unexpected error occurred', response.status);
   }
-  return [];
+}
+
 }

@@ -26,4 +26,19 @@ export class CategoriesService {
       body: JSON.stringify(category),
     }, { userService: this.userService });
   }
+
+  async createCategory(category) {
+    const categoriesUrl = `${categoriesUrlPrefix}/`;
+    return await request(categoriesUrl, {
+      method: 'POST',
+      body: JSON.stringify(category),
+    }, { userService: this.userService });
+  }
+
+  async deleteCategory(categoryId) {
+    const categoriesUrl = `${categoriesUrlPrefix}/${categoryId}/`;
+    return await request(categoriesUrl, {
+      method: 'DELETE',
+    }, { userService: this.userService });
+  }
 }
