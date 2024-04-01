@@ -26,13 +26,23 @@ const groupedTransactions = computed(() => {
 
 function categoryLabel(transaction) {
   if (transaction.category) {
-    return `${transaction.category.name} (${transaction.isIncome ? 'Income' : 'Expense'})`;
+    return `${transaction.category.name}`;
   } else if (transaction.isTransfer) {
     return 'Transfer';
   } else {
     return 'Unknown';
   }
 }
+
+const transactionClass = (transaction) => {
+  if (transaction.isTransfer) {
+    return 'transfer-transaction';
+  } else if (transaction.isIncome) {
+    return 'income-transaction';
+  } else {
+    return 'expense-transaction';
+  }
+};
 
 function accountName(account) {
   if (account.isDeleted) {
@@ -63,7 +73,10 @@ function accountName(account) {
             <div class="transaction-element">{{ categoryLabel(transaction) }}</div>
           </div>
           <div class="col-7 amount-container">
-            <div><b>{{ $n(transaction.amount, 'decimal') }} {{ transaction.currency.code }}</b></div>
+            <div>
+              <b :class="transactionClass(transaction)"
+              >{{ $n(transaction.amount, 'decimal') }}{{ transaction.currency.code }}</b>
+            </div>
             <div>
               <span class="acc-name">{{ accountName(transaction.account) }}</span>
               | {{ $n(transaction.newBalance, 'decimal') }}
@@ -77,9 +90,6 @@ function accountName(account) {
     No transactions found
   </div>
 </template>
-
-<!-- Стили остаются прежними -->
-
 
 <style scoped>
 @import '../../assets/main.scss';
@@ -111,5 +121,17 @@ function accountName(account) {
 
 .acc-name {
   color: blue;
+}
+
+.transfer-transaction {
+  //color: blue;
+}
+
+.income-transaction {
+  color: green;
+}
+
+.expense-transaction {
+  color: red;
 }
 </style>
