@@ -23,6 +23,8 @@ function reReadCategories() {
   Services.categoriesService.getGroupedCategories().then(newCategories => {
     Object.keys(categories).forEach(key => delete categories[key]);
     Object.assign(categories, newCategories);
+    categories.income.sort((a, b) => a.name.toUpperCase().localeCompare(b.name));
+    categories.expenses.sort((a, b) => a.name.toUpperCase().localeCompare(b.name));
   });
 }
 
