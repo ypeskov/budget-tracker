@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException, Body
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies.check_token import check_token
+from app.logger_config import logger
 from app.models.UserCategory import UserCategory
-from app.schemas.category_schema import ResponseCategorySchema, GroupedCategorySchema
-from app.services.categories import get_user_categories, grouped_user_categories
+from app.schemas.category_schema import ResponseCategorySchema, GroupedCategorySchema, CategoryCreateUpdateSchema
+from app.services.categories import get_user_categories, grouped_user_categories, create_or_update_category
 
 router = APIRouter(
     tags=['Categories'],
@@ -24,3 +25,29 @@ def get_grouped_categories(request: Request, db: Session = Depends(get_db)) -> G
     user_id = request.state.user['id']
     return grouped_user_categories(user_id, db)
 
+
+@router.put('/{category_id}/', response_model=ResponseCategorySchema)
+def update_category(category_id: int,
+                    request: Request,
+                    category_data: CategoryCreateUpdateSchema = Body(...),
+                    db: Session = Depends(get_db)) -> UserCategory:
+    try:
+        user_id = request.state.user['id']
+        updated_category = create_or_update_category(user_id, db, category_data, )
+        return updated_category
+    except Exception as e:
+        logger.error(f"Error updating category: {e}")
+        raise HTTPException(status_code=400, detail="Error updating category")
+
+
+@router.post('/', response_model=ResponseCategorySchema, status_code=201)
+def create_category(request: Request,
+                    category_data: CategoryCreateUpdateSchema = Body(...),
+                    db: Session = Depends(get_db)) -> ResponseCategorySchema:
+    user_id = request.state.user['id']
+    try:
+        new_category = create_or_update_category(user_id=user_id, db=db, category_data=category_data)
+        return new_category
+    except Exception as e:
+        logger.error(f"Error creating category: {e}")
+        raise HTTPException(status_code=400, detail=f"Error creating category: {e}")

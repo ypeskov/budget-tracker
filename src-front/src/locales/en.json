@@ -29,7 +29,13 @@
     "deleted": "Deleted",
     "select_language": "Select language",
     "profile": "Profile",
-    "categories": "Categories"
+    "categories": "Categories",
+    "isIncome": "Is income",
+    "parent": "Parent",
+    "isDeleted": "Is deleted",
+    "name": "Name",
+    "none": "No category",
+    "group": "Group"
   },
   "menu": {
     "home": "Home",

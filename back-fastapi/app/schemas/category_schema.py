@@ -31,3 +31,12 @@ class GroupedCategorySchema(BaseModel):
     income: list[dict]
     expenses: list[dict]
     model_config = ConfigDict(alias_generator=to_camel)
+
+
+class CategoryCreateUpdateSchema(BaseModel):
+    id: int | None = None
+    name: str
+    parent_id: int | None = None
+    is_income: bool
+
+    model_config = ConfigDict(alias_generator=to_camel)
