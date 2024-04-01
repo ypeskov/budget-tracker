@@ -9,8 +9,13 @@ def get_user_categories(user_id: int, db: Session) -> list[UserCategory]:
     return db.query(UserCategory).filter_by(user_id=user_id).all()
 
 
-def grouped_user_categories(user_id: int, db: Session) -> GroupedCategorySchema:
-    raw_categories: list[UserCategory] = db.query(UserCategory).filter_by(user_id=user_id).all()
+def grouped_user_categories(user_id: int, db: Session, include_deleted: bool = False) -> GroupedCategorySchema:
+    query = db.query(UserCategory).filter(UserCategory.user_id == user_id)
+
+    if not include_deleted:
+        query = query.filter(UserCategory.is_deleted == False)
+
+    raw_categories: list[UserCategory] = query.all()
 
     categories_dict: dict[int, UserCategory] = {}
 
@@ -66,5 +71,18 @@ def create_or_update_category(user_id: int, db: Session, category_data: Category
         db.add(category)
         db.commit()
         db.refresh(category)
+
+    return category
+
+
+def delete_category(user_id: int,  category_id: int, db: Session) -> UserCategory:
+    try:
+        category: UserCategory = db.query(UserCategory).filter(UserCategory.id == category_id,
+                                                               UserCategory.user_id == user_id).one()
+        category.is_deleted = True
+        db.commit()
+    except Exception as e:
+        logger.error(f"Error deleting category: {e}")
+        raise e
 
     return category

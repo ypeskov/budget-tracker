@@ -6,7 +6,8 @@ from app.dependencies.check_token import check_token
 from app.logger_config import logger
 from app.models.UserCategory import UserCategory
 from app.schemas.category_schema import ResponseCategorySchema, GroupedCategorySchema, CategoryCreateUpdateSchema
-from app.services.categories import get_user_categories, grouped_user_categories, create_or_update_category
+from app.services.categories import get_user_categories, grouped_user_categories, create_or_update_category, \
+    delete_category
 
 router = APIRouter(
     tags=['Categories'],
@@ -51,3 +52,14 @@ def create_category(request: Request,
     except Exception as e:
         logger.error(f"Error creating category: {e}")
         raise HTTPException(status_code=400, detail=f"Error creating category: {e}")
+
+
+@router.delete('/{category_id}/', status_code=200, response_model=ResponseCategorySchema)
+def delete_category_endpoint(category_id: int, request: Request, db: Session = Depends(get_db)) -> UserCategory:
+    user_id = request.state.user['id']
+    try:
+        return delete_category(user_id, category_id, db)
+    except Exception as e:
+        logger.error(f"Error deleting category: {e}")
+        raise HTTPException(status_code=400, detail="Error deleting category")
+

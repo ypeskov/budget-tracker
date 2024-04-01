@@ -35,7 +35,9 @@
     "isDeleted": "Видалено",
     "name": "Ім'я",
     "none": "Немає",
-    "group": "Група"
+    "group": "Група",
+    "areYouSureWantDeleteCategory": "Ви впевнені, що хочете видалити категорію",
+    "deleteCategory": "Видалити категорію"
   },
   "menu": {
     "home": "Початок",
@@ -58,6 +60,7 @@
     "profile": "Профіль",
     "apply": "Застосувати",
     "categories": "Категорії",
-    "close": "Закрити"
+    "close": "Закрити",
+    "addNewCategory": "Додати нову категорію"
   }
 }
