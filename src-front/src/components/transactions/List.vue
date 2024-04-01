@@ -1,12 +1,20 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onBeforeMount, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
+
+import { Services } from '../../services/servicesConfig';
 
 const props = defineProps(['transactions', 'accountId', 'returnUrl']);
 
 const t = useI18n().t;
-const n = useI18n().n;
+
+const categories = reactive([]);
+
+onBeforeMount(async () => {
+  categories.length = 0;
+  categories.push(...await Services.categoriesService.getUserCategories());
+});
 
 const groupedTransactions = computed(() => {
   const grouped = [];
@@ -24,15 +32,15 @@ const groupedTransactions = computed(() => {
   return grouped;
 });
 
-function categoryLabel(transaction) {
+const getParentCategoryLabel = (transaction) => {
   if (transaction.category) {
-    return `${transaction.category.name}`;
-  } else if (transaction.isTransfer) {
-    return 'Transfer';
-  } else {
-    return 'Unknown';
+    const parentCategory = categories.find(category => category.id === transaction.category.parentId);
+    return parentCategory ? `[${parentCategory.name}] : ` : '';
   }
-}
+  return '';
+};
+
+const categoryLabel = transaction => transaction.category?.name || (transaction.isTransfer ? 'Transfer' : 'Unknown');
 
 const transactionClass = (transaction) => {
   if (transaction.isTransfer) {
@@ -70,7 +78,8 @@ function accountName(account) {
         }">
           <div class="col-5">
             <div class="transaction-element"><b>{{ transaction.label }}</b></div>
-            <div class="transaction-element">{{ categoryLabel(transaction) }}</div>
+            <div class="transaction-element"
+            ><b>{{ getParentCategoryLabel(transaction) }}</b>{{ categoryLabel(transaction) }}</div>
           </div>
           <div class="col-7 amount-container">
             <div>

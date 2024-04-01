@@ -7,6 +7,14 @@ const emit = defineEmits(['update:categoryId']);
 function changeCategory($event) {
   emit('update:categoryId', $event.target.value);
 }
+
+const getParentCategoryLabel = (category) => {
+  const parentCategory = props.categories.find(cat => cat.id === category.parentId);
+  return parentCategory ? `${parentCategory.name} >> ` : '';
+};
+
+const categoryLabel = category => `${getParentCategoryLabel(category)} ${category.name}`;
+
 </script>
 
 <template>
@@ -16,7 +24,7 @@ function changeCategory($event) {
   <select id="category-select" class="form-select bottom-space" @change="changeCategory"
           :value="props.transaction.categoryId">
     <option v-for="category in categories" :key="category.id" :value="category.id">
-      {{ category.name }}
+      {{ categoryLabel(category) }}
     </option>
   </select>
 </template>
