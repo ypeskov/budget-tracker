@@ -1,21 +1,27 @@
 <script setup>
 import { computed, onBeforeMount, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
 import { Services } from '../../services/servicesConfig';
+import { processError } from '../../errors/errorHandlers';
 
 const props = defineProps(['transactions', 'accountId', 'returnUrl']);
 
+const router = useRouter();
 const t = useI18n().t;
 
 const categories = reactive([]);
 
 onBeforeMount(async () => {
   categories.length = 0;
-  const tmpCategories = await Services.categoriesService.getUserCategories();
-  if (tmpCategories) {
-    categories.push(...tmpCategories);
+  try {
+    const tmpCategories = await Services.categoriesService.getUserCategories();
+    if (tmpCategories) {
+      categories.push(...tmpCategories);
+    }
+  } catch (e) {
+    await processError(e, router);
   }
 });
 

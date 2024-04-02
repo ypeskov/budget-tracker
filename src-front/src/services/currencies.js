@@ -1,5 +1,4 @@
 import { request } from './requests';
-import { HttpError } from '../errors/HttpError';
 
 export class CurrenciesService {
   _userService;
