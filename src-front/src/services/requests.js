@@ -2,20 +2,20 @@
 just a wrapper to add auth header to each request
 */
 
-import { useRouter } from 'vue-router';
 import { HttpError } from '../errors/HttpError';
 import { useUserStore } from '../stores/user';
-import { processError } from '../errors/errorHandlers';
 
 const BACKEND_HOST = import.meta.env.VITE_BACKEND_HOST;
 
 export async function request(endPoint, params = {}, services = {}) {
   const userStore = useUserStore();
-  const router = useRouter();
 
   let accessToken = userStore.accessToken;
   if (accessToken === null) {
     accessToken = localStorage.getItem('accessToken');
+  }
+  if (accessToken === null) {
+    throw new HttpError('Unauthorized', 401);
   }
   const defaultHeaders = {
     'auth-token': accessToken,
@@ -33,18 +33,18 @@ export async function request(endPoint, params = {}, services = {}) {
         return await response.json();
       }
     } catch (e) {
-      await processError(e, router);
+      throw new HttpError('An unexpected error occurred', response.status);
     }
   } else {
     if (response.status === 401) {
       services.userService.logOutUser();
-      await processError(new HttpError('Unauthorized', response.status), router);
+      throw new HttpError('Unauthorized', response.status);
     } else if ([400, 500].includes(response.status)) {
       const err = await response.json();
-      await processError(new HttpError(err.detail || 'An unexpected error occurred', response.status), router);
+      throw new HttpError(err.detail || 'An unexpected error occurred', response.status);
     } else {
       const err = await response.json();
-      await processError(new HttpError(err.detail || 'An unexpected error occurred', response.status), router);
+      throw new HttpError(err.detail || 'An unexpected error occurred', response.status);
     }
   }
 }
