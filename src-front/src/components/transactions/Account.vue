@@ -38,7 +38,7 @@ const accLabel = computed(() => {
   </label>
   <select class="form-select bottom-space" @change="changeAccount" :value="accountIdx">
     <option v-for="(acc, index) in accounts" :key="acc.id" :value="index">
-      {{ acc.name }} ({{ acc.balance }} {{ acc.currency.code }})
+      {{ acc.name }} ({{ $n(acc.balance) }} {{ acc.currency.code }})
     </option>
   </select>
 </template>

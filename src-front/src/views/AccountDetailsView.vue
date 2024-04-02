@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n';
 import { DateTime } from 'luxon';
 
 import { Services } from '../services/servicesConfig';
-import { HttpError } from '../errors/HttpError';
 import { processError } from '../errors/errorHandlers';
 
 import TransactionsListView from './TransactionsListView.vue';
