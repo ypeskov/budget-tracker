@@ -29,7 +29,6 @@ const showDeleteConfirmation = ref(false);
 let transaction = reactive({});
 let filteredCategories = ref([]);
 
-
 const itemType = ref('expense');
 transaction.isTransfer = itemType.value === 'transfer';
 
@@ -64,7 +63,11 @@ onBeforeMount(async () => {
   try {
     accounts.length = 0;
     accounts.push(...(await Services.accountsService.getAllUserAccounts()));
-    currentAccount.value = accounts[0];
+    if (props.accountId) {
+      currentAccount.value = accounts.find((item) => item.id === parseInt(props.accountId, 10));
+    } else {
+      currentAccount.value = accounts[0];
+    }
     targetAccount.value = accounts[0];
     transaction.accountId = currentAccount.value.id;
     transaction.targetAccountId = targetAccount.value.id;
