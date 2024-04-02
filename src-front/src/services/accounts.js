@@ -1,6 +1,11 @@
 import {DateTime} from 'luxon';
 
+import { useRouter } from 'vue-router';
+
 import {request} from './requests';
+import { processError} from '../errors/errorHandlers';
+
+const router = useRouter();
 
 export class AccountService {
   accountStore;
@@ -24,12 +29,20 @@ export class AccountService {
     }
 
     const accountsUrl = '/accounts/';
-    const accs = await request(accountsUrl, {}, {userService: this.userService});
-    this.accountStore.accounts.length = 0;
-    this.accountStore.accounts.push(...accs);
-    this.accountStore.lastUpdated = DateTime.now();
-    this.setShouldUpdateAccountsList(false);
-    return this.accountStore.accounts;
+    try {
+      const accs = await request(accountsUrl, {}, { userService: this.userService });
+      if (accs) {
+        this.accountStore.accounts.length = 0;
+        this.accountStore.accounts.push(...accs);
+        this.accountStore.lastUpdated = DateTime.now();
+        this.setShouldUpdateAccountsList(false);
+        return this.accountStore.accounts;
+      }
+    } catch (e) {
+      console.log(e.message);
+      await processError(e, router);
+
+    }
   }
 
   async getAccountDetails(accountId) {

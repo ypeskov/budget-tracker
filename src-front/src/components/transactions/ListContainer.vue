@@ -3,12 +3,12 @@ import { onBeforeMount, reactive, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import { Services } from '../../services/servicesConfig';
-import { HttpError } from '../../errors/HttpError';
+import { processError } from '../../errors/errorHandlers';
 import { useUserStore } from '../../stores/user';
 import Filter from '../filter/Filter.vue';
 import List from './List.vue';
 
-const props = defineProps(['accountId', 'isAccountDetails',]);
+const props = defineProps(['accountId', 'isAccountDetails']);
 
 const userStore = useUserStore();
 let transactions = reactive([]);
@@ -19,7 +19,7 @@ const router = useRouter();
 const showFilter = ref(false);
 const reset = ref(true);
 
-const returnUrlName = ref("");
+const returnUrlName = ref('');
 
 if (props.isAccountDetails) {
   returnUrlName.value = 'accountDetails';
@@ -34,13 +34,7 @@ async function fetchTransactions() {
     transactions.push(...allTransactions);
     filteredTransactions.push(...allTransactions);
   } catch (e) {
-    if (e instanceof HttpError && e.statusCode === 401) {
-      await router.push({ name: 'login' });
-      return;
-    } else {
-      console.log(e);
-    }
-    await router.push({ name: 'home' });
+    await processError(e, router);
   }
 }
 
@@ -58,12 +52,17 @@ onBeforeMount(async () => {
 
 async function reloadTransactions(event) {
   event.preventDefault();
-  const allTransactions = await Services.transactionsService.getUserTransactions({ accountId: props.accountId });
-  transactions.splice(0);
-  transactions.push(...allTransactions);
-  filteredTransactions.splice(0);
-  filteredTransactions.push(...allTransactions);
-  reset.value = true;
+
+  try {
+    const allTransactions = await Services.transactionsService.getUserTransactions({ accountId: props.accountId });
+    transactions.splice(0);
+    transactions.push(...allTransactions);
+    filteredTransactions.splice(0);
+    filteredTransactions.push(...allTransactions);
+    reset.value = true;
+  } catch (e) {
+    await processError(e, router);
+  }
 }
 
 function toggleFilter(event) {
@@ -84,35 +83,35 @@ function filterApplied(payload) {
     <div class="row">
       <div class="col sub-menu">
         <span v-if="userStore.isLoggedIn">
-          <RouterLink class="btn btn-secondary" 
-                    :to="{ 
+          <RouterLink class="btn btn-secondary"
+                      :to="{
                       name: 'transactionNew', 
                       query: {
                         returnUrl: returnUrlName,
                         accountId: props.accountId,
                       }
-                    }">{{ $t('message.new')}}
+                    }">{{ $t('message.new') }}
           </RouterLink>
         </span>
         <span>
-          <a href="" class="btn btn-secondary" @click="reloadTransactions">{{$t('message.update')}}</a>
+          <a href="" class="btn btn-secondary" @click="reloadTransactions">{{ $t('message.update') }}</a>
         </span>
         <span>
           <a href="" class="btn" :class="{ 'active-filter btn-success': !reset, 'btn-secondary': reset }"
-            @click="toggleFilter">{{$t('message.filter')}}</a>
+             @click="toggleFilter">{{ $t('message.filter') }}</a>
         </span>
       </div>
     </div>
     <div class="row">
       <div class="col" v-show="showFilter">
         <Filter @filter-applied="filterApplied" :transactions="transactions" :resetstatus="reset"
-          :is-account-details="props.isAccountDetails" />
+                :is-account-details="props.isAccountDetails" />
       </div>
     </div>
 
     <div class="row">
       <div class="col">
-        <h3>{{$t('message.yourTransactions')}}</h3>
+        <h3>{{ $t('message.yourTransactions') }}</h3>
       </div>
     </div>
     <div class="row">

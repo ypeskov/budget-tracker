@@ -2,7 +2,7 @@
 import { onBeforeMount, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { HttpError } from '../../errors/HttpError';
+import { processError } from '../../errors/errorHandlers';
 import { Services } from '../../services/servicesConfig';
 
 const props = defineProps(['selectedAccounts',])
@@ -21,15 +21,12 @@ watch(props['selectedAccounts'], (newSelectedAccounts) => {
 onBeforeMount(async () => {
   try {
     accounts.length = 0;
-    accounts.push(...(await Services.accountsService.getAllUserAccounts()));
-  } catch (e) {
-    if (e instanceof HttpError && e.statusCode === 401) {
-      router.push({ name: 'login' });
-      return;
-    } else {
-      console.log(e);
+    const tmpAccounts = await Services.accountsService.getAllUserAccounts();
+    if (tmpAccounts) {
+      accounts.push(...tmpAccounts);
     }
-    router.push({ name: 'home' });
+  } catch (e) {
+    await processError(e, router);
   }
 });
 

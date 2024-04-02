@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { DateTime } from 'luxon';
 
 import { Services } from '../services/servicesConfig';
+import { processError } from '../errors/errorHandlers';
 
 import TransactionTypeTabs from '../components/transactions/TransactionTypeTabs.vue';
 import TransactionLabel from '../components/transactions/TransactionLabel.vue';
@@ -22,10 +23,12 @@ const { t } = useI18n();
 const accounts = reactive([]);
 const currentAccount = ref(accounts[0]);
 const targetAccount = ref(accounts[0]);
-let transaction = reactive({});
 const categories = ref([]);
-let filteredCategories = ref([]);
 const showDeleteConfirmation = ref(false);
+
+let transaction = reactive({});
+let filteredCategories = ref([]);
+
 
 const itemType = ref('expense');
 transaction.isTransfer = itemType.value === 'transfer';
@@ -80,8 +83,7 @@ onBeforeMount(async () => {
 
     filterCategories();
   } catch (e) {
-    console.log(e);
-    await router.push({ name: 'home' });
+    await processError(e, router);
   }
 });
 
@@ -144,8 +146,7 @@ async function submitTransaction() {
       },
     });
   } catch (e) {
-    console.log(e);
-    await router.push({ name: 'home' });
+    await processError(e, router);
   }
 }
 
@@ -158,8 +159,7 @@ async function deleteTransaction() {
     await Services.transactionsService.deleteTransaction(transaction.id);
     await router.push({ name: 'transactions' });
   } catch (e) {
-    console.log(e);
-    await router.push({ name: 'home' });
+    await processError(e, router);
   } finally {
     showDeleteConfirmation.value = false;
   }
