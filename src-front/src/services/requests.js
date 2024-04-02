@@ -7,15 +7,17 @@ import { useUserStore } from '../stores/user';
 
 const BACKEND_HOST = import.meta.env.VITE_BACKEND_HOST;
 
-export async function request(endPoint, params = {}, services = {}) {
+export async function request(endPoint, params = {}, services = {}, authRequired = true) {
   const userStore = useUserStore();
 
   let accessToken = userStore.accessToken;
-  if (accessToken === null) {
-    accessToken = localStorage.getItem('accessToken');
-  }
-  if (accessToken === null) {
-    throw new HttpError('Unauthorized', 401);
+  if (authRequired) {
+    if (accessToken === null) {
+      accessToken = localStorage.getItem('accessToken');
+    }
+    if (accessToken === null) {
+      throw new HttpError('Unauthorized', 401);
+    }
   }
   const defaultHeaders = {
     'auth-token': accessToken,
