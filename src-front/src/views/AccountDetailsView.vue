@@ -6,6 +6,7 @@ import { DateTime } from 'luxon';
 
 import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
+import { processError } from '../errors/errorHandlers';
 
 import TransactionsListView from './TransactionsListView.vue';
 import newAccount from '../components/account/newAccount.vue';
@@ -25,16 +26,11 @@ onBeforeMount(async () => {
 async function loadAccountDetails() {
   try {
     const details = await Services.accountsService.getAccountDetails(route.params.id);
-    accountDetails = Object.assign(accountDetails, details);
-  } catch (e) {
-    if (e instanceof HttpError && e.statusCode === 401) {
-      console.log(e.message);
-      await router.push({name: 'login'});
-      return;
-    } else {
-      console.log(e);
+    if (details) {
+      accountDetails = Object.assign(accountDetails, details);
     }
-    await router.push({name: 'home'});
+  } catch (e) {
+    await processError(e, router);
   }
 }
 
@@ -69,8 +65,7 @@ const confirmDelete = async () => {
     await Services.accountsService.deleteAccount(accountDetails.id);
     await router.push({name: 'accounts'});
   } catch (e) {
-    console.error("Failed to delete account:", e);
-    // Handle error, e.g., display an error message to the user
+    await processError(e, router);
   } finally {
     showConfirmation.value = false; // Hide popup regardless of outcome
   }

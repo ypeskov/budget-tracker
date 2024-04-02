@@ -2,13 +2,16 @@
 just a wrapper to add auth header to each request
 */
 
+import { useRouter } from 'vue-router';
 import { HttpError } from '../errors/HttpError';
-import { useUserStore } from "../stores/user";
+import { useUserStore } from '../stores/user';
+import { processError } from '../errors/errorHandlers';
 
 const BACKEND_HOST = import.meta.env.VITE_BACKEND_HOST;
 
-export async function request(endPoint, params={}, services={}) {
+export async function request(endPoint, params = {}, services = {}) {
   const userStore = useUserStore();
+  const router = useRouter();
 
   let accessToken = userStore.accessToken;
   if (accessToken === null) {
@@ -18,35 +21,30 @@ export async function request(endPoint, params={}, services={}) {
     'auth-token': accessToken,
     'Content-Type': 'application/json',
   };
-  const mergedHeaders = { ...defaultHeaders, ...params.headers };
-  params.headers = mergedHeaders;
+  params.headers = { ...defaultHeaders, ...params.headers };
 
   const response = await fetch(`${BACKEND_HOST}${endPoint}`, params);
 
-if ([200, 201, 204].includes(response.status)) {
-  try {
-    if (response.status === 204) {
-      return null;
-    } else {
-      return await response.json();
+  if ([200, 201, 204].includes(response.status)) {
+    try {
+      if (response.status === 204) {
+        return null;
+      } else {
+        return await response.json();
+      }
+    } catch (e) {
+      await processError(e, router);
     }
-  } catch (e) {
-    console.log(e);
-    return null;
-  }
-} else {
-  if (response.status === 401) {
-    services.userService.logOutUser();
-    throw new HttpError('Unauthorized', 401);
-  } else if ([400, 500].includes(response.status)) {
-    const err = await response.json();
-    console.log(err.detail || 'Error occurred');
-    throw new HttpError(err.detail || 'Error occurred', response.status);
   } else {
-    const err = await response.json();
-    console.log(err.detail || 'An unexpected error occurred');
-    throw new HttpError(err.detail || 'An unexpected error occurred', response.status);
+    if (response.status === 401) {
+      services.userService.logOutUser();
+      await processError(new HttpError('Unauthorized', response.status), router);
+    } else if ([400, 500].includes(response.status)) {
+      const err = await response.json();
+      await processError(new HttpError(err.detail || 'An unexpected error occurred', response.status), router);
+    } else {
+      const err = await response.json();
+      await processError(new HttpError(err.detail || 'An unexpected error occurred', response.status), router);
+    }
   }
-}
-
 }

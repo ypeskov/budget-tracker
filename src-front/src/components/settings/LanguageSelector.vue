@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 import { Services } from '../../services/servicesConfig';
-import { HttpError } from '../../errors/HttpError';
+import { processError} from '../../errors/errorHandlers';
 
 const props = defineProps({
   closeLanguageModal: Function,
@@ -21,10 +21,7 @@ onBeforeMount(async () => {
     languages.push(...await Services.settingsService.getLanguages());
     selectedLanguage.value = languages.find((language) => language.code === locale.value)?.id;
   } catch (error) {
-    if (error instanceof HttpError) {
-      console.error(error);
-      router.push({ name: 'home' });
-    }
+    await processError(error, router);
   }
 });
 
@@ -32,10 +29,15 @@ const handleLanguageChange = () => {
   // console.log(languages.find((language) => language.id === selectedLanguage.value).name);
 };
 
-const applyAndClose = () => {
+const applyAndClose = async () => {
   locale.value = languages.find((language) => language.id === selectedLanguage.value)?.code;
   Services.userService.userStore.settings.language = locale.value;
-  Services.settingsService.saveUserSettings();
+  try {
+    await Services.settingsService.saveUserSettings();
+  } catch (error) {
+    await processError(error, router);
+  }
+
   props.closeLanguageModal();
 };
 

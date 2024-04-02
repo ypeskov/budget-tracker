@@ -13,7 +13,10 @@ const categories = reactive([]);
 
 onBeforeMount(async () => {
   categories.length = 0;
-  categories.push(...await Services.categoriesService.getUserCategories());
+  const tmpCategories = await Services.categoriesService.getUserCategories();
+  if (tmpCategories) {
+    categories.push(...tmpCategories);
+  }
 });
 
 const groupedTransactions = computed(() => {
