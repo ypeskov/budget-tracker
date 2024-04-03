@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 import UserProfile from '../components/settings/UserProfile.vue';
-import CategoriesManager   from '../components/settings/CategoriesManager.vue';
+import CategoriesManager from '../components/settings/CategoriesManager.vue';
 
 const showProfileModal = ref(false);
 const showCategoriesModal = ref(false);
@@ -39,7 +39,7 @@ const closeCategoriesModal = () => {
           <button @click="openProfileModal" class="btn btn-primary w-100">{{ $t('buttons.profile') }}</button>
         </div>
         <teleport to="body">
-          <UserProfile v-if="showProfileModal" :close-modal="closeProfileModal" />
+          <UserProfile :show-profile-modal="showProfileModal" :close-modal="closeProfileModal" />
         </teleport>
       </div>
 
@@ -52,8 +52,6 @@ const closeCategoriesModal = () => {
         </teleport>
       </div>
     </div>
-
-
   </main>
 </template>
 

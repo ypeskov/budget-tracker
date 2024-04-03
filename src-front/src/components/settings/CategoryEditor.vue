@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 
 import { Services } from '../../services/servicesConfig';
+import ModalWindow from '../utils/ModalWindow.vue';
 
 const props = defineProps({
   closeModal: Function,
@@ -67,63 +68,65 @@ async function confirmDeleteCategory() {
 </script>
 
 <template>
-  <div class="modal-overlay" @click="closeModal">
-    <div class="modal-content" @click.stop>
+  <ModalWindow :close-modal="closeModal">
+    <template #header>
       <h2>{{ $t('message.category') }}</h2>
-      <div class="container">
-        <div class="row mb-3">
-          <div class="col">
-            <label for="categoryName">{{ $t('message.name') }}</label>
-            <input type="text" id="categoryName" class="form-control" v-model="name">
-          </div>
-          <div v-if="category.children.length === 0" class="col">
-            <label for="categoryParent">{{ $t('message.group') }}</label>
-            <select id="categoryParent" class="form-control" v-model="parentId">
-              <option value="">{{ $t('message.none') }}</option>
-              <option v-for="cat in categoryOptions" :key="cat.id" :value="cat.id">
-                {{ cat.name }}
-              </option>
-            </select>
-          </div>
-        </div>
+    </template>
 
-        <div class="row mb-3">
-          <div class="col">
-            <label>
-              <input type="checkbox"
-                     v-model="isIncome"
-                     @change="updateIsIncome($event.target.checked)">{{ $t('message.isIncome') }}
-            </label>
-          </div>
-          <div class="col">
-            <label><input type="checkbox" v-model="isDeleted"> {{ $t('message.isDeleted') }}</label>
-          </div>
+    <template #main>
+      <div class="row mb-3">
+        <div class="col">
+          <label for="categoryName">{{ $t('message.name') }}</label>
+          <input type="text" id="categoryName" class="form-control" v-model="name">
         </div>
-
-        <div class="row">
-          <button class="btn btn-primary" @click="saveCategory">{{ $t('buttons.save') }}</button>
-          <button class="btn btn-danger" @click="promptDeleteCategory">{{ $t('buttons.delete') }}</button>
-          <button class="btn btn-secondary" @click="closeModal">{{ $t('buttons.cancel') }}</button>
+        <div v-if="category.children.length === 0" class="col">
+          <label for="categoryParent">{{ $t('message.group') }}</label>
+          <select id="categoryParent" class="form-control" v-model="parentId">
+            <option value="">{{ $t('message.none') }}</option>
+            <option v-for="cat in categoryOptions" :key="cat.id" :value="cat.id">
+              {{ cat.name }}
+            </option>
+          </select>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div v-if="showDeleteModal" class="modal-overlay" @click="showDeleteModal = false">
-    <div class="modal-content" @click.stop>
+      <div class="row mb-3">
+        <div class="col">
+          <label>
+            <input type="checkbox"
+                   v-model="isIncome"
+                   @change="updateIsIncome($event.target.checked)">{{ $t('message.isIncome') }}
+          </label>
+        </div>
+        <div class="col">
+          <label><input type="checkbox" v-model="isDeleted"> {{ $t('message.isDeleted') }}</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn btn-primary" @click="saveCategory">{{ $t('buttons.save') }}</button>
+        <button class="btn btn-danger" @click="promptDeleteCategory">{{ $t('buttons.delete') }}</button>
+      </div>
+    </template>
+  </ModalWindow>
+
+  <ModalWindow :close-modal="() => showDeleteModal = false" v-if="showDeleteModal">
+    <template #header>
       <h2>{{ $t('message.deleteCategory') }}?</h2>
+    </template>
+
+    <template #main>
       <p>{{ $t('message.areYouSureWantDeleteCategory') }}?</p>
       <div class="row gap-2 justify-content-center">
         <button class="btn btn-danger col-auto" @click="confirmDeleteCategory">{{ $t('buttons.delete') }}</button>
-        <button class="btn btn-secondary col-auto" @click="showDeleteModal = false">{{ $t('buttons.cancel') }}</button>
       </div>
-    </div>
-  </div>
+    </template>
+  </ModalWindow>
 
 </template>
 
 <style scoped>
-.btn-primary, .btn-secondary, .btn-danger {
+.btn-primary, .btn-danger {
   margin-top: 10px;
 }
 </style>
