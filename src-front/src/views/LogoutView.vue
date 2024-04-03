@@ -9,3 +9,9 @@ const router = useRouter();
 router.push({name: 'login'});
 
 </script>
+
+<template>
+  <div>
+    <h1>Logging out...</h1>
+  </div>
+</template>
