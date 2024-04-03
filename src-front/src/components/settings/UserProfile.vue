@@ -1,9 +1,13 @@
 <script setup>
-import LanguageSelector from './LanguageSelector.vue';
 import { ref } from 'vue';
+
+import LanguageSelector from './LanguageSelector.vue';
+import ModalWindow from '../utils/ModalWindow.vue';
 
 defineProps({
   closeModal: Function,
+  showProfileModal: Boolean,
+  'close-modal': Function,
 });
 
 const showLanguageModal = ref(false);
@@ -18,40 +22,29 @@ const openLanguageModal = () => {
 </script>
 
 <template>
-  <div class="modal-overlay" @click="closeModal">
-    <div class="modal-content" @click.stop>
-      <h2>{{ $t('message.profile') }}</h2>
-      <div class="container">
-
-        <div class="row">
-          <div class="col-12 lang-section">
-            <button @click="openLanguageModal" class="btn btn-primary w-100">{{ $t('buttons.language') }}</button>
-          </div>
-          <teleport to="body">
-            <LanguageSelector v-if="showLanguageModal" :close-language-modal="closeLanguageModal" />
-          </teleport>
-        </div>
-
-      </div>
+  <ModalWindow v-if="showProfileModal" :close-modal="closeModal">
+    <template #header>
       <div class="row">
-        <button class="btn btn-secondary" @click="closeModal">{{ $t('buttons.cancel') }}</button>
+        <h2>{{ $t('message.profile') }}</h2>
       </div>
+    </template>
 
-    </div>
-  </div>
+    <template #main>
+      <div class="row">
+        <div class="col-12 lang-section">
+          <button @click="openLanguageModal" class="btn btn-primary w-100">{{ $t('buttons.language') }}</button>
+        </div>
+      </div>
+    </template>
+  </ModalWindow>
+  <teleport to="body" v-if="showLanguageModal">
+    <LanguageSelector :close-language-modal="closeLanguageModal" />
+  </teleport>
+
 </template>
 
 <style scoped>
-.container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-}
-
-.row {
-  margin-top: 20px;
-  margin-left: 0;
-  width: 100%;
+.language-selector {
+  z-index: 1100;
 }
 </style>

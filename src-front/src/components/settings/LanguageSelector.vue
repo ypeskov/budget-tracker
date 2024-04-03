@@ -4,7 +4,8 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 import { Services } from '../../services/servicesConfig';
-import { processError} from '../../errors/errorHandlers';
+import { processError } from '../../errors/errorHandlers';
+import ModalWindow from '../utils/ModalWindow.vue';
 
 const props = defineProps({
   closeLanguageModal: Function,
@@ -44,22 +45,30 @@ const applyAndClose = async () => {
 </script>
 
 <template>
-  <div class="modal-overlay" @click="closeLanguageModal">
-    <div class="modal-content" @click.stop>
+  <ModalWindow :close-modal="props.closeLanguageModal" modal-id="language-selector">
+    <template #header>
+      <div class="row">
+        <h2>{{ $t('message.select_language') }}</h2>
+      </div>
+    </template>
+    <template #main>
       <h2>{{ $t('message.select_language') }}</h2>
       <select class="form-select mb-3" v-model="selectedLanguage" @change="handleLanguageChange">
         <option v-for="language in languages" :value="language.id" :key="language.id">{{ language.name }}</option>
       </select>
       <button class="btn btn-primary" @click="applyAndClose">{{ $t('buttons.apply') }}</button>
-      <button class="btn btn-secondary" @click="closeLanguageModal">{{ $t('buttons.cancel') }}</button>
+    </template>
 
-    </div>
-  </div>
+  </ModalWindow>
 </template>
 
 
 <style scoped>
 .btn-primary, .btn-secondary {
   margin-top: 10px;
+}
+
+.language-selector {
+  z-index: 1100;
 }
 </style>

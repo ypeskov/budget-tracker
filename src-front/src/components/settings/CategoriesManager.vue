@@ -1,8 +1,14 @@
 <script setup>
 import { defineProps, onBeforeMount, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import { Services } from '../../services/servicesConfig';
 import CategoryEditor from './CategoryEditor.vue';
+import ModalWindow from '../utils/ModalWindow.vue';
+
+defineProps({
+  closeModal: Function,
+});
 
 const { t } = useI18n();
 
@@ -10,10 +16,6 @@ const categories = reactive({});
 const categoriesForEdit = ref([]);
 const showCategoryEditor = ref(false);
 const currentCategory = ref({});
-
-defineProps({
-  closeModal: Function,
-});
 
 onBeforeMount(async () => {
   reReadCategories();
@@ -47,7 +49,7 @@ const showCategoryType = function(type) {
   return type === 'income' ? t('message.income') : t('message.expense');
 };
 
-const updateCategoryType = ({isIncome}) => {
+const updateCategoryType = ({ isIncome }) => {
   if (isIncome) {
     categoriesForEdit.value = categories.income;
   } else {
@@ -67,8 +69,14 @@ const addNewCategory = () => {
 </script>
 
 <template>
-  <div class="modal-overlay" @click="closeModal">
-    <div class="modal-content" @click.stop>
+  <ModalWindow :close-modal="closeModal">
+    <template #header>
+      <div class="row">
+        <h2>{{ t('message.categories') }}</h2>
+      </div>
+    </template>
+
+    <template #main>
       <h2>{{ $t('message.categories') }}</h2>
       <button class="btn btn-primary mb-3" @click="addNewCategory">{{ $t('buttons.addNewCategory') }}</button>
       <div class="container">
@@ -89,20 +97,17 @@ const addNewCategory = () => {
             </ul>
           </div>
         </div>
-        <div class="row">
-          <button class="btn btn-secondary" @click="closeModal">{{ $t('buttons.close') }}</button>
-        </div>
       </div>
-    </div>
-    <teleport to="body">
-      <CategoryEditor v-if="showCategoryEditor"
-                      @change-category-type="updateCategoryType"
-                      @category-updated="categoryUpdated"
-                      :category="currentCategory"
-                      :categories="categoriesForEdit"
-                      :close-modal="closeCategoryEditor" />
-    </teleport>
-  </div>
+    </template>
+  </ModalWindow>
+  <teleport to="body">
+    <CategoryEditor v-if="showCategoryEditor"
+                    @change-category-type="updateCategoryType"
+                    @category-updated="categoryUpdated"
+                    :category="currentCategory"
+                    :categories="categoriesForEdit"
+                    :close-modal="closeCategoryEditor" />
+  </teleport>
 </template>
 
 
