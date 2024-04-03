@@ -2,6 +2,10 @@
 
 const props = defineProps({
   'closeModal': Function,
+  'showCloseButton': {
+    type: Boolean,
+    default: true,
+  },
 });
 
 function closeButtonClicked() {
@@ -18,7 +22,7 @@ function closeButtonClicked() {
         <slot name="main"></slot>
       </div>
 
-      <div class="row">
+      <div v-if="showCloseButton" class="row">
         <button class="btn btn-secondary" @click="closeButtonClicked">{{ $t('buttons.cancel') }}</button>
       </div>
 

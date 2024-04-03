@@ -58,7 +58,6 @@ const applyAndClose = async () => {
       </select>
       <button class="btn btn-primary" @click="applyAndClose">{{ $t('buttons.apply') }}</button>
     </template>
-
   </ModalWindow>
 </template>
 
