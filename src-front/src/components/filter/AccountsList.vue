@@ -11,10 +11,10 @@ const router = useRouter();
 
 const accounts = reactive([]);
 
-const selectedAccounts = reactive([]);
+const selectedAccs = reactive([]);
 watch(props['selectedAccounts'], (newSelectedAccounts) => {
   if (newSelectedAccounts.length === 0) {
-    selectedAccounts.length = 0;
+    selectedAccs.length = 0;
   }
 });
 
@@ -33,15 +33,14 @@ onBeforeMount(async () => {
 
 function toggleAccountInFilter(event) {
   const accId = parseInt(event.target.value, 10);
-  const idxInSelected = selectedAccounts.indexOf(accId);
+  const idxInSelected = selectedAccs.indexOf(accId);
   if (idxInSelected === -1) {
-    selectedAccounts.push(accId);
+    selectedAccs.push(accId);
   } else {
-    selectedAccounts.splice(idxInSelected, 1);
+    selectedAccs.splice(idxInSelected, 1);
   }
-
   emit('selectedAccountsUpdated', {
-    'selectedAccounts': selectedAccounts,
+    'selectedAccounts': selectedAccs,
   });
 }
 </script>
@@ -51,8 +50,11 @@ function toggleAccountInFilter(event) {
     <div class="col">
       <div class="list-item account-item" v-for="acc in accounts" :key="acc.id">
         <span class="acc-name">
-          <input class="form-check-input" type="checkbox" :value="acc.id" 
-                @click="toggleAccountInFilter" :checked="props.selectedAccounts.includes(parseInt(acc.id, 10))" />
+          <input class="form-check-input"
+                 type="checkbox"
+                 :value="acc.id"
+                 @click="toggleAccountInFilter"
+                 :checked="props.selectedAccounts.includes(parseInt(acc.id, 10))" />
           <label class="form-check-label" for="form-check-input">{{  acc.name }}</label>
         </span>
         <span>( {{ acc.currency.code }} {{ acc.balance }} )</span>
@@ -61,12 +63,25 @@ function toggleAccountInFilter(event) {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/assets/common.scss';
+
 .account-item {
   display: flex;
   justify-content: space-between;
+  background-color: $item-background-color;
 }
+
+.account-item:hover {
+  background-color: $item-hover-background-color;
+}
+
 .form-check-input {
   margin-right: 1vw;
+}
+
+.row {
+  max-height: 10rem;
+  overflow-y: auto;
 }
 </style>

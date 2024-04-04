@@ -1,7 +1,8 @@
 @import './common.scss';
 
 .list-item:hover {
-  background-color: $main-background-selection;
+  background-color: $item-hover-background-color;
+  cursor: pointer;
 }
 .list-item {
   margin-bottom: 0.5rem;
@@ -17,7 +18,6 @@
 
 .router-link-active,
 .router-link-exact-active {
-  background-color: $main-background-selection;
   padding: 0.3rem;
   border-radius: 0.5rem;
 }

@@ -1,16 +1,14 @@
 <script setup>
-import { watch, reactive, ref } from 'vue';
+import { reactive, watch } from 'vue';
 
-import CustomHr from '../utilities/CustomHr.vue';
 import TransactionType from './TransactionType.vue';
-import AccountsList from './AccountsList.vue';
+import AccountsListContainer from '@/components/filter/AccountsListContainer.vue';
 
-const props = defineProps(['transactions', 'resetstatus', 'isAccountDetails', ]);
+const props = defineProps(['transactions', 'resetstatus', 'isAccountDetails']);
 const emit = defineEmits(['filterApplied']);
 
 let filtersApplied = {};
 const checkedAccounts = reactive([]);
-
 const transactionTypes = reactive({
   'expense': false,
   'income': false,
@@ -20,7 +18,7 @@ const transactionTypes = reactive({
 function resetFilters() {
   filtersApplied = {}; //remove all filters
   //disable all transaction types
-  for(const prop in transactionTypes) {
+  for (const prop in transactionTypes) {
     transactionTypes[prop] = false;
   }
   checkedAccounts.splice(0); //remove all selected accounts
@@ -33,8 +31,8 @@ watch(() => props['resetstatus'], (newReset) => {
   }
 });
 
-function transactionTypeChanged({newTransactionTypes}) {
-  const {expense, income, transfer} = newTransactionTypes;
+function transactionTypeChanged({ newTransactionTypes }) {
+  const { expense, income, transfer } = newTransactionTypes;
   transactionTypes.expense = expense;
   transactionTypes.income = income;
   transactionTypes.transfer = transfer;
@@ -45,7 +43,7 @@ function transactionTypeChanged({newTransactionTypes}) {
   }
 }
 
-function selectedAccountsUpdated({selectedAccounts}) {
+function selectedAccountsUpdated({ selectedAccounts }) {
   if (selectedAccounts.length > 0) {
     filtersApplied.accounts = selectedAccounts;
     checkedAccounts.splice(0);
@@ -114,18 +112,13 @@ function filterByType(transTypes) {
       </div>
     </div>
 
-    <div class="row">
-      <div class="col"><CustomHr text="Accounts" /></div>
-    </div>
-    
-    <div v-show="props.isAccountDetails===false" class="row">
-      <div class="col">
-        <AccountsList @selected-accounts-updated="selectedAccountsUpdated" :selected-accounts="checkedAccounts" />
-      </div>
-    </div>
+    <AccountsListContainer v-show="props.isAccountDetails===false"
+                           @selected-accounts-updated="selectedAccountsUpdated"
+                           :selected-accounts="checkedAccounts" />
+
     <div class="row filter-bottom-menu-row">
       <div class="col bottom-menu-container">
-        <a href="#" class="btn btn-secondary" @click="applyFilter">Apply</a>
+        <a href="#" class="btn btn-primary me-2" @click="applyFilter">Apply</a>
         <a href="#" class="btn btn-secondary" @click="resetFilters">Reset</a>
       </div>
     </div>
@@ -133,6 +126,21 @@ function filterByType(transTypes) {
 
 </template>
 
-<style scoped>
-@import './Filter.scss';
+<style lang="scss" scoped>
+@import '@/assets/common.scss';
+
+.filter-container {
+  margin-bottom: 1vh;
+  background-color: $section-background-color;
+  padding: 0.5rem;
+}
+
+.filter-bottom-menu-row {
+  margin-top: 1vh;
+}
+
+.bottom-menu-container {
+  display: flex;
+  justify-content: start;
+}
 </style>
