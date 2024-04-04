@@ -1,8 +1,10 @@
 <script setup>
 import { reactive, watch } from 'vue';
+import { DateTime } from 'luxon';
 
 import TransactionType from './TransactionType.vue';
 import AccountsListContainer from '@/components/filter/AccountsListContainer.vue';
+import DateFilter from '@/components/filter/DateFilter.vue';
 
 const props = defineProps(['transactions', 'resetstatus', 'isAccountDetails']);
 const emit = defineEmits(['filterApplied']);
@@ -22,6 +24,7 @@ function resetFilters() {
     transactionTypes[prop] = false;
   }
   checkedAccounts.splice(0); //remove all selected accounts
+
   updateFilteredTransactions(true);
 }
 
@@ -58,6 +61,33 @@ function applyFilter(event) {
   updateFilteredTransactions();
 }
 
+function filterByDates(filteredTransactions) {
+  let start, end;
+
+  if (filtersApplied.startDate) {
+    start = DateTime.fromISO(filtersApplied.startDate);
+  }
+
+  if (filtersApplied.endDate) {
+    end = DateTime.fromISO(filtersApplied.endDate).plus({ days: 1 }).startOf('day');
+  }
+
+  return filteredTransactions.filter(transaction => {
+    const transactionDate = DateTime.fromISO(transaction.dateTime);
+    if (start && end) {
+      return transactionDate >= start && transactionDate < end;
+    }
+    else if (start) {
+      return transactionDate >= start;
+    }
+    else if (end) {
+      return transactionDate < end;
+    }
+    return true;
+  });
+}
+
+
 function updateFilteredTransactions(newResetStatus = false) {
   let filteredTransactions = [...props['transactions']];
 
@@ -69,10 +99,19 @@ function updateFilteredTransactions(newResetStatus = false) {
     filteredTransactions = filterByAccounts(filteredTransactions);
   }
 
+  if (filtersApplied.startDate || filtersApplied.endDate) {
+    filteredTransactions = filterByDates(filteredTransactions);
+  }
+
   emit('filterApplied', {
     'filteredTransactions': filteredTransactions,
     'resetStatus': newResetStatus,
   });
+}
+
+function updateFilterDates({ startDate, endDate }) {
+  filtersApplied.startDate = startDate;
+  filtersApplied.endDate = endDate;
 }
 
 function filterByAccounts(TransactionsToFilter) {
@@ -106,11 +145,10 @@ function filterByType(transTypes) {
 
 <template>
   <div class="container filter-container">
-    <div class="row">
-      <div class="col">
-        <TransactionType @transaction-type-changed="transactionTypeChanged" :types="transactionTypes" />
-      </div>
-    </div>
+
+    <TransactionType @transaction-type-changed="transactionTypeChanged" :types="transactionTypes" />
+
+    <DateFilter @update-dates="updateFilterDates" />
 
     <AccountsListContainer v-show="props.isAccountDetails===false"
                            @selected-accounts-updated="selectedAccountsUpdated"
