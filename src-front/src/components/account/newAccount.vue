@@ -1,12 +1,12 @@
 <script setup>
-import {computed, onBeforeMount, reactive, ref} from 'vue';
-import {useRouter} from 'vue-router';
-import {DateTime} from 'luxon';
+import { computed, onBeforeMount, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { DateTime } from 'luxon';
 
-import {Services} from '../../services/servicesConfig';
-import {HttpError} from '../../errors/HttpError';
+import { Services } from '../../services/servicesConfig';
+import { processError } from '@/errors/errorHandlers';
 
-const props = defineProps(['accountCreated', 'closeNewAccForm', 'accountDetails',]);
+const props = defineProps(['accountCreated', 'closeNewAccForm', 'accountDetails']);
 
 const router = useRouter();
 
@@ -40,14 +40,7 @@ onBeforeMount(async () => {
     currencies.splice(0);
     currencies.push(...(await Services.currenciesService.getAllCurrencies()));
   } catch (e) {
-    if (e instanceof HttpError && e.statusCode === 401) {
-      console.log(e.message);
-      await router.push({name: 'login'});
-      return;
-    } else {
-      console.log(e);
-    }
-    await router.push({name: 'home'});
+    await processError(e, router);
   }
 });
 
@@ -69,19 +62,14 @@ async function updateAccount() {
     balance: balance.value,
     opening_date: openingDate.value,
     comment: comment.value,
-    is_hidden: isHidden.value
+    is_hidden: isHidden.value,
   };
 
   try {
     await Services.accountsService.updateAccount(updatedAccount);
     props.accountCreated();
   } catch (e) {
-    console.log(e.message);
-    if (e instanceof HttpError && e.statusCode === 401) {
-      await router.push({name: 'login'});
-    } else {
-      await router.push({name: 'home'});
-    }
+    await processError(e, router);
   }
 }
 
@@ -93,21 +81,14 @@ async function createAccount() {
     balance: balance.value,
     opening_date: openingDate.value,
     comment: comment.value,
-    is_hidden: isHidden.value
+    is_hidden: isHidden.value,
   };
 
   try {
     await Services.accountsService.createAccount(newAccount);
     props.accountCreated();
   } catch (e) {
-    if (e instanceof HttpError && e.statusCode === 401) {
-      console.log(e.message);
-      await router.push({name: 'login'});
-      return;
-    } else {
-      console.log(e);
-    }
-    await router.push({name: 'home'});
+    await processError(e, router);
   }
 }
 </script>
