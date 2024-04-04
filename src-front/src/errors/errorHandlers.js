@@ -7,5 +7,6 @@ export async function processError(e, router) {
   } else {
     console.log(e.message);
   }
+  console.log(e);
   router.push({ name: 'home' });
 }
