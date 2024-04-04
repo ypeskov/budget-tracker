@@ -5,7 +5,7 @@ import { RouterLink, useRouter } from 'vue-router';
 import { Services } from '../../services/servicesConfig';
 import { processError } from '../../errors/errorHandlers';
 import { useUserStore } from '../../stores/user';
-import Filter from '../filter/Filter.vue';
+import Filter from '../filter/TransactionsFilter.vue';
 import List from './List.vue';
 
 const props = defineProps(['accountId', 'isAccountDetails']);
