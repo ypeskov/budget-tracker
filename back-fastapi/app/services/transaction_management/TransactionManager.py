@@ -3,15 +3,13 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import NoResultFound
 from icecream import ic
 
 from app.logger_config import logger
 from app.models.Currency import Currency
 from app.models.Transaction import Transaction
 from app.models.Account import Account
-from app.models.UserCategory import UserCategory
-from app.services.errors import AccessDenied, InvalidCategory, InvalidAccount, InvalidCurrency
+from app.services.errors import AccessDenied, InvalidAccount, InvalidCurrency
 from app.services.transaction_management.NonTransferTypeTransaction import NonTransferTypeTransaction
 from app.services.transaction_management.errors import InvalidTransaction
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema

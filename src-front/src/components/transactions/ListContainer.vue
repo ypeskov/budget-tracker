@@ -6,7 +6,7 @@ import { Services } from '../../services/servicesConfig';
 import { processError } from '../../errors/errorHandlers';
 import { useUserStore } from '../../stores/user';
 import Filter from '../filter/TransactionsFilter.vue';
-import List from './List.vue';
+import ListOfTransactions from './ListOfTransactions.vue';
 
 const props = defineProps(['accountId', 'isAccountDetails']);
 
@@ -115,7 +115,7 @@ function filterApplied(payload) {
       </div>
     </div>
     <div class="row">
-      <List :transactions="filteredTransactions" :account-id="props.accountId" :return-url="returnUrlName" />
+      <ListOfTransactions :transactions="filteredTransactions" :account-id="props.accountId" :return-url="returnUrlName" />
     </div>
   </div>
 </template>
