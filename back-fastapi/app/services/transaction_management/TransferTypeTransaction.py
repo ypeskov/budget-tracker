@@ -18,7 +18,6 @@ class TransferTypeTransaction:
 
         self._transaction.account.balance -= self._transaction.amount
         self._transaction.target_account.balance += self._transaction.target_amount
-        self._transaction.new_balance = self._transaction.account.balance
         self._transaction.target_new_balance = self._transaction.target_account.balance
 
         return self
