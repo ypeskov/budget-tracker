@@ -1,19 +1,20 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
-from sqlalchemy.orm import Session
 from icecream import ic
+from pydantic import BaseModel, ConfigDict
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
 from app.logger_config import logger
+from app.models.Account import Account
 from app.models.Currency import Currency
 from app.models.Transaction import Transaction
-from app.models.Account import Account
+from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.services.errors import AccessDenied, InvalidAccount, InvalidCurrency
 from app.services.transaction_management.NonTransferTypeTransaction import NonTransferTypeTransaction
-from app.services.transaction_management.errors import InvalidTransaction
-from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.services.transaction_management.TransferTypeTransaction import TransferTypeTransaction
+from app.services.transaction_management.errors import InvalidTransaction
 
 ic.configureOutput(includeContext=True)
 
@@ -58,7 +59,7 @@ class TransactionManager:
     def __init__(self, transaction_details: UpdateTransactionSchema | CreateTransactionSchema, user_id: int,
                  db: Session):
         self.state = TransactionState(user_id=user_id, db=db, transaction_details=transaction_details)
-        self._transaction: Transaction = Transaction()
+        self._transaction: Transaction = Transaction()  # main entity for current transaction
         self._prepare_transaction().set_account(transaction_details.account_id).set_currency().set_date_time(
             transaction_details.date_time)
 
@@ -167,6 +168,13 @@ class TransactionManager:
         self.state.db.refresh(self._transaction)
         self.state.db.refresh(self._transaction.account)
 
+        if self._transaction.is_transfer:
+            update_transactions_new_balances(self._transaction.account_id, self.state.db)
+            update_transactions_new_balances(self._transaction.target_account_id, self.state.db)
+        else:
+            update_transactions_new_balances(self._transaction.account_id, self.state.db)
+
+
         return self
 
     def delete_transaction(self) -> 'TransactionManager':
@@ -190,3 +198,38 @@ class TransactionManager:
     def _process_non_transfer_type(self):
         non_transfer_transaction = NonTransferTypeTransaction(self._transaction, self.state, self.state.db)
         non_transfer_transaction.process()
+
+
+def update_transactions_new_balances(account_id: int, db: Session) -> bool:
+    """ Update all transactions new_balance field for given account_id """
+    transactions = (db.query(Transaction)
+                    .filter(Transaction.is_deleted == False)
+                    .filter(or_(Transaction.account_id == account_id,
+                                Transaction.target_account_id == account_id))
+                    .order_by(Transaction.date_time.asc())).all()
+
+    for idx, transaction in enumerate(transactions):
+        if not transaction.is_transfer:  # update non-transfer type transaction balance
+            if transaction.is_income:
+                if idx == 0:
+                    transaction.new_balance = transaction.account.initial_balance + transaction.amount
+                else:
+                    transaction.new_balance = transactions[idx - 1].new_balance + transaction.amount
+            else:
+                if idx == 0:
+                    transaction.new_balance = transaction.account.initial_balance - transaction.amount
+                else:
+                    transaction.new_balance = transactions[idx - 1].new_balance - transaction.amount
+        else:  # update transfer type transaction balance
+            if transaction.account_id == account_id:
+                if idx == 0:
+                    transaction.new_balance = transaction.account.initial_balance - transaction.amount
+                else:
+                    transaction.new_balance = transactions[idx - 1].new_balance - transaction.amount
+            #  no need to update target account balance as it should be updated
+            #  in call for this function with target_account_id
+
+        db.add(transaction)
+    db.commit()
+
+    return True
