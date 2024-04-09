@@ -115,7 +115,8 @@ function filterApplied(payload) {
       </div>
     </div>
     <div class="row">
-      <ListOfTransactions :transactions="filteredTransactions" :account-id="props.accountId" :return-url="returnUrlName" />
+      <ListOfTransactions :transactions="filteredTransactions" :account-id="props.accountId"
+                          :return-url="returnUrlName" />
     </div>
   </div>
 </template>
