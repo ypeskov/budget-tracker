@@ -29,6 +29,7 @@ class NonTransferTypeTransaction:
             self._transaction.account.balance += self._transaction.amount
         else:
             self._transaction.account.balance -= self._transaction.amount
+        self._transaction.new_balance = self._transaction.account.balance
 
         return self
 
