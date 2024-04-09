@@ -168,12 +168,11 @@ class TransactionManager:
         self.state.db.refresh(self._transaction)
         self.state.db.refresh(self._transaction.account)
 
-        if self._transaction.is_transfer:
-            update_transactions_new_balances(self._transaction.account_id, self.state.db)
-            update_transactions_new_balances(self._transaction.target_account_id, self.state.db)
-        else:
-            update_transactions_new_balances(self._transaction.account_id, self.state.db)
-
+        # if self._transaction.is_transfer:
+        #     update_transactions_new_balances(self._transaction.account_id, self.state.db)
+        #     update_transactions_new_balances(self._transaction.target_account_id, self.state.db)
+        # else:
+        #     update_transactions_new_balances(self._transaction.account_id, self.state.db)
 
         return self
 
@@ -226,8 +225,13 @@ def update_transactions_new_balances(account_id: int, db: Session) -> bool:
                     transaction.new_balance = transaction.account.initial_balance - transaction.amount
                 else:
                     transaction.new_balance = transactions[idx - 1].new_balance - transaction.amount
-            #  no need to update target account balance as it should be updated
-            #  in call for this function with target_account_id
+            elif transaction.target_account_id == account_id:
+                if idx == 0:
+                    transaction.target_new_balance \
+                        = transaction.target_account.initial_balance + transaction.target_amount
+                else:
+                    if transaction[idx - 1].is_transfer:
+                        transaction.target_new_balance = transaction[idx - 1].target_new_balance + transaction.target_amount
 
         db.add(transaction)
     db.commit()

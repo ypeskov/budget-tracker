@@ -88,14 +88,23 @@ function accountName(account) {
           <div class="col-5">
             <div class="transaction-element"><b>{{ transaction.label }}</b></div>
             <div class="transaction-element"
-            ><b>{{ getParentCategoryLabel(transaction) }}</b>{{ categoryLabel(transaction) }}</div>
+            ><b>{{ getParentCategoryLabel(transaction) }}</b>{{ categoryLabel(transaction) }}
+            </div>
           </div>
           <div class="col-7 amount-container">
-            <div>
-              <b :class="transactionClass(transaction)"
-              >{{ $n(transaction.amount, 'decimal') }}{{ transaction.currency.code }}</b>
+            <div v-if="transaction.isTransfer" :class="transactionClass(transaction)">
+              <b>{{ $n(transaction.amount, 'decimal') }}{{ transaction.currency.code }}</b> ->
+              <b>{{ $n(transaction.targetAmount, 'decimal') }}{{ transaction.targetAccount.currency.code }}</b>
             </div>
-            <div>
+            <div v-else :class="transactionClass(transaction)">
+              <b>{{ $n(transaction.amount, 'decimal') }}{{ transaction.currency.code }}</b>
+            </div>
+            <div v-if="transaction.isTransfer" :class="transactionClass(transaction)">
+              <span class="acc-name">{{ accountName(transaction.account) }} ({{ $n(transaction.newBalance, 'decimal')
+                }})</span> -> <span class="acc-name">{{ accountName(transaction.targetAccount)
+              }} ({{ $n(transaction.targetNewBalance, 'decimal') }})</span>
+            </div>
+            <div v-else :class="transactionClass(transaction)">
               <span class="acc-name">{{ accountName(transaction.account) }}</span>
               | {{ $n(transaction.newBalance, 'decimal') }}
             </div>
@@ -142,6 +151,7 @@ function accountName(account) {
 }
 
 .transfer-transaction {
+  font-size: 0.7em;
 }
 
 .income-transaction {
