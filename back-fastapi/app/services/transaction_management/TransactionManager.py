@@ -84,6 +84,7 @@ class TransactionManager:
 
     def _prepare_transaction(self) -> 'TransactionManager':
         if self.transaction_details.id is not None:
+            ic(self.transaction_details)
             self._transaction = self.db.query(Transaction).filter_by(id=self.transaction_details.id).one_or_none()
             self.prev_transaction_state = copy.deepcopy(self._transaction)
 
@@ -96,14 +97,16 @@ class TransactionManager:
                     f'User {self.user_id} tried to update transaction [{self._transaction.id}] of user '
                     + f'{self._transaction.user_id}')
                 raise AccessDenied()
+
             self.is_update = True
         else:
             self._transaction.user_id = self.user_id
-            self._transaction.amount = self.transaction_details.amount
-            self._transaction.label = self.transaction_details.label
-            self._transaction.notes = self.transaction_details.notes
-            self._transaction.is_income = self.transaction_details.is_income
-            self._transaction.is_transfer = self.transaction_details.is_transfer
+
+        self._transaction.amount = self.transaction_details.amount
+        self._transaction.label = self.transaction_details.label
+        self._transaction.notes = self.transaction_details.notes
+        self._transaction.is_income = self.transaction_details.is_income
+        self._transaction.is_transfer = self.transaction_details.is_transfer
 
         return self
 
