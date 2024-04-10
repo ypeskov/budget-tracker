@@ -29,16 +29,17 @@ class TransferTypeTransaction:
                                                              self._db,
                                                              self._is_update)
         src_account_transaction.process()
-        target_transaction = copy.deepcopy(self._transaction)
+        target_transaction: Transaction = copy.deepcopy(self._transaction)
         self._db.add(self._transaction)
         self._db.flush()
-        self._db.expunge(self._transaction.currency)
-        self._db.expunge(self._transaction.account)
 
+        if self._is_update:
+            target_transaction = self._db.query(Transaction).filter_by(id=self._transaction.linked_transaction_id).one()
+            self._prev_transaction_state = copy.deepcopy(target_transaction)
         target_transaction.account_id = transaction_details.target_account_id
+        target_transaction.account = self._db.query(Account).filter_by(id=transaction_details.target_account_id).one()
         target_transaction.amount = transaction_details.target_amount
         target_transaction.linked_transaction_id = self._transaction.id
-        target_transaction.account = self._db.query(Account).filter_by(id=target_transaction.account_id).one()
         target_transaction.is_income = not self._transaction.is_income
         target_transaction.currency_id = target_transaction.account.currency_id
         target_transaction.currency = self._db.query(Currency).filter_by(id=target_transaction.currency_id).one()

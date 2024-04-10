@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from icecream import ic
 
 from app.logger_config import logger
+from app.models.Account import Account
 from app.models.UserCategory import UserCategory
 from app.models.Transaction import Transaction
 from app.services.errors import InvalidCategory, AccessDenied
@@ -34,7 +35,8 @@ class NonTransferTypeTransaction:
                 raise AccessDenied()
 
         #  remove previous transaction amount from account balance
-        self.correct_prev_balance()
+        if self._is_update:
+            self.correct_prev_balance()
 
         if self._transaction.is_income:
             self._transaction.account.balance += self._transaction.amount
@@ -45,11 +47,11 @@ class NonTransferTypeTransaction:
         return self
 
     def correct_prev_balance(self):
-        if self._is_update:
-            if self._prev_transaction_state.is_income:
-                self._transaction.account.balance -= self._prev_transaction_state.amount
-            else:
-                self._transaction.account.balance += self._prev_transaction_state.amount
+        prev_account = self._db.query(Account).filter_by(id=self._prev_transaction_state.account_id).one()
+        if self._prev_transaction_state.is_income:
+            prev_account.balance -= self._prev_transaction_state.amount
+        else:
+            prev_account.balance += self._prev_transaction_state.amount
 
 
 def is_category_valid(category: UserCategory, is_income: bool) -> bool:
