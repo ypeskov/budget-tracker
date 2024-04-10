@@ -42,7 +42,7 @@ class NonTransferTypeTransaction:
         else:
             self._transaction.account.balance -= self._transaction.amount
 
-        update_transactions_new_balances(self._transaction.account_id, self._db)
+        # update_transactions_new_balances(self._transaction.account_id, self._db)
 
         return self
 
@@ -63,27 +63,4 @@ def is_category_valid(category: UserCategory, is_income: bool) -> bool:
     return True
 
 
-def update_transactions_new_balances(account_id: int, db: Session) -> bool:
-    """ Update all transactions new_balance field for given account_id """
-    transactions = (db.query(Transaction)
-                    .filter(Transaction.is_deleted == False)
-                    .filter(Transaction.account_id == account_id)
-                    .order_by(Transaction.date_time.asc())
-                    .all())
 
-    for idx, transaction in enumerate(transactions):
-        if transaction.is_income:
-            if idx == 0:
-                transaction.new_balance = transaction.account.initial_balance + transaction.amount
-            else:
-                transaction.new_balance = transactions[idx - 1].new_balance + transaction.amount
-        else:
-            if idx == 0:
-                transaction.new_balance = transaction.account.initial_balance - transaction.amount
-            else:
-                transaction.new_balance = transactions[idx - 1].new_balance - transaction.amount
-
-        db.add(transaction)
-    db.commit()
-
-    return True
