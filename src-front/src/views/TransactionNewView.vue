@@ -182,20 +182,28 @@ async function deleteTransaction() {
             <Account :transaction="transaction" @account-changed="changeAccount" account-type="src"
                      :accounts="accounts" />
 
-            <TransactionAmount :label="t('message.amount')" type="src"
-                               :transaction="transaction" @amount-changed="amountChanged"
+            <TransactionAmount :label="t('message.amount')"
+                               type="src"
+                               :transaction="transaction"
+                               @amount-changed="amountChanged"
                                :current-account="currentAccount" />
 
-            <Account v-if="transaction.isTransfer === true" @account-changed="changeAccount" account-type="target"
-                     :transaction="transaction" :accounts="accounts" />
+            <Account v-if="transaction.isTransfer === true"
+                     @account-changed="changeAccount"
+                     account-type="target"
+                     :transaction="transaction"
+                     :accounts="accounts" />
 
-            <TransactionAmount v-if="itemType === 'transfer'" type="target" :label="t('message.amount')"
-                               @amount-changed="amountChanged" :transaction="transaction"
+            <TransactionAmount v-if="itemType === 'transfer'"
+                               type="target"
+                               :label="t('message.amount')"
+                               @amount-changed="amountChanged"
+                               :transaction="transaction"
                                :current-account="targetAccount" />
 
-            <ExchangeRate v-if="itemType === 'transfer'" :amount-src="transaction.amount"
-                          :currency-src="currentAccount.currency.code" :currency-target="targetAccount.currency.code"
-                          :target-amount="transaction.targetAmount" />
+<!--            <ExchangeRate v-if="itemType === 'transfer'" :amount-src="transaction.amount"-->
+<!--                          :currency-src="currentAccount.currency.code" :currency-target="XXX"-->
+<!--                          :target-amount="0" />-->
 
             <Category v-if="!transaction.isTransfer"
                       :transaction="transaction"

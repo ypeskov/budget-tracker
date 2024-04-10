@@ -68,3 +68,6 @@ class Transaction(Base):
             f'exchange_rate={self.exchange_rate}, is_transfer={self.is_transfer}, is_income = {self.is_income}, ' + \
             f'linked_transaction_id={self.linked_transaction_id}, target_amount={self.target_amount}, ' + \
             f'is_deleted = {self.is_deleted}, created_at = {self.created_at}, updated_at = {self.updated_at})'
+
+
+from app.models.Account import Account
