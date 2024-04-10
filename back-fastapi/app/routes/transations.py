@@ -28,13 +28,13 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
     try:
         transaction = create_transaction(transaction_dto, request.state.user['id'], db)
     except AccessDenied:
-        logger.exception(f'Access denied')
+        logger.error(f'Access denied')
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     except InvalidCategory:
-        logger.exception(f'Invalid category: {transaction_dto}')
+        logger.error(f'Invalid category: {transaction_dto}')
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid category")
     except InvalidAccount:
-        logger.exception(f'Invalid account: {transaction_dto}')
+        logger.error(f'Invalid account: {transaction_dto}')
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account")
     except Exception as e:  # pragma: no cover
         logger.exception(e)
@@ -69,6 +69,12 @@ def update_transaction(transaction_details: UpdateTransactionSchema,
     except InvalidTransaction as e:
         logger.error(f'Error updating transaction: {e.detail}')
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
+    except AccessDenied as e:
+        logger.error(f'Error updating transaction: Access denied')
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+    except InvalidCategory:
+        logger.error(f'Invalid category: {transaction_details}')
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid category")
     except HTTPException as e:
         logger.error(f'Error updating transaction: {e.detail}')
         if e.status_code == status.HTTP_404_NOT_FOUND:

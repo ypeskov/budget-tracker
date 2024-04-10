@@ -1,17 +1,17 @@
+import copy
 from datetime import datetime, timezone
-from decimal import Decimal
 
 from icecream import ic
-from pydantic import BaseModel, ConfigDict
 from sqlalchemy import or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
 from app.models.Account import Account
 from app.models.Currency import Currency
 from app.models.Transaction import Transaction
+from app.models.UserCategory import UserCategory
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
-from app.services.errors import AccessDenied, InvalidAccount, InvalidCurrency
+from app.services.errors import AccessDenied, InvalidAccount, InvalidCurrency, InvalidCategory
 from app.services.transaction_management.NonTransferTypeTransaction import NonTransferTypeTransaction
 from app.services.transaction_management.TransferTypeTransaction import TransferTypeTransaction
 from app.services.transaction_management.errors import InvalidTransaction
@@ -19,85 +19,38 @@ from app.services.transaction_management.errors import InvalidTransaction
 ic.configureOutput(includeContext=True)
 
 
-class TransactionState(BaseModel):
-    user_id: int
-    db: Session
-    transaction_details: UpdateTransactionSchema | CreateTransactionSchema
-    is_update: bool = False
-    prev_account_id: int | None = None
-    prev_account: Account | None = None
-    prev_new_balance: Decimal = Decimal(0.0)
-    prev_amount: Decimal = Decimal(0.0)
-    prev_target_account_id: int | None = None
-    prev_target_new_balance: Decimal = Decimal(0.0)
-    prev_target_amount: Decimal = Decimal(0.0)
-    prev_is_transfer: bool = False
-    prev_is_income: bool = False
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-
-def check_account_ownership(user_id: int, account_id: int | None, db: Session):
-    """ Check if account belongs to user """
-    if account_id is None:
-        raise InvalidAccount()
-
-    account: Account = db.query(Account).filter_by(id=account_id).one_or_none()  # type: ignore
-    if account is None:
-        logger.error(f'Account {account_id} not found')
-        raise InvalidAccount()
-
-    if account.user_id != user_id:
-        logger.error(
-            f'User {user_id} tried to create transaction with not own account {account_id}')
-        raise AccessDenied()
-
-    return True
-
-
 class TransactionManager:
-    def __init__(self, transaction_details: UpdateTransactionSchema | CreateTransactionSchema, user_id: int,
+    def __init__(self,
+                 transaction_details: UpdateTransactionSchema | CreateTransactionSchema,
+                 user_id: int,
                  db: Session):
-        self.state = TransactionState(user_id=user_id, db=db, transaction_details=transaction_details)
-        self._transaction: Transaction = Transaction()  # main entity for current transaction
-        self._prepare_transaction().set_account(transaction_details.account_id).set_currency().set_date_time(
-            transaction_details.date_time)
 
-        self._transaction.amount = transaction_details.amount
-        self._transaction.label = transaction_details.label
-        self._transaction.notes = transaction_details.notes
+        self.user_id = user_id
+        self.db = db
+        self.transaction_details = transaction_details
+        self._transaction = Transaction()  # main entity for current transaction
+        self.prev_transaction_state = Transaction()  # remember state of transaction before update
+        self.is_update = True if transaction_details.id is not None else False
 
-        if transaction_details.is_transfer is True:
-            self.set_account(transaction_details.target_account_id, 'target_')
-            self._transaction.is_transfer = True
-            self._transaction.exchange_rate = transaction_details.exchange_rate
-            self._transaction.target_amount = transaction_details.target_amount  # type: ignore
-            self._transaction.category_id = None
-        else:
-            self._transaction.is_transfer = False
-            self._transaction.category_id = transaction_details.category_id
-            self._transaction.is_income = transaction_details.is_income
+        self._prepare_transaction()
+        self._set_account(self.transaction_details.account_id)
+        self._set_currency(self.transaction_details.account_id)
+        self._set_date_time(self.transaction_details.date_time)
+        if not transaction_details.is_transfer:
+            self._set_category(self.transaction_details.category_id)
 
-    def set_date_time(self, date_time: datetime | None = None) -> 'TransactionManager':
-        if self._transaction.date_time is None:
-            self._transaction.date_time = datetime.now(timezone.utc)
-        else:
-            self._transaction.date_time = date_time
-
+    def _set_date_time(self, date_time: datetime | None = None) -> 'TransactionManager':
+        self._transaction.date_time = date_time or datetime.now(timezone.utc)
         return self
 
-    def set_currency(self, currency_id: int | None = None) -> 'TransactionManager':
-        if currency_id is None:
-            currency_id = self.state.transaction_details.currency_id
+    def _set_currency(self, account_id: int) -> 'TransactionManager':
+        account = self.db.query(Account).filter_by(id=account_id).one_or_none()
+        if account is None:
+            logger.error(f'Account {self.transaction_details.account_id} not found')
+            raise InvalidAccount()
+        currency_id = account.currency_id
 
-        if currency_id is None:
-            account = self.state.db.query(Account).filter_by(id=self.state.transaction_details.account_id).one_or_none()
-            if account is None:
-                logger.error(f'Account {self.state.transaction_details.account_id} not found')
-                raise InvalidAccount()
-            currency_id = account.currency_id
-
-        currency = self.state.db.query(Currency).filter_by(id=currency_id).one_or_none()
+        currency = self.db.query(Currency).filter_by(id=currency_id).one_or_none()
         if currency is None:
             logger.error(f'Currency {currency_id} not found')
             raise InvalidCurrency()
@@ -107,50 +60,57 @@ class TransactionManager:
 
         return self
 
-    def set_account(self, account_id: int | None = None, account_prefix: str = '') -> 'TransactionManager':
-        try:
-            check_account_ownership(self.state.user_id, account_id, self.state.db)
-            setattr(self._transaction, f'{account_prefix}account_id', account_id)
-            account = self.state.db.query(Account).filter_by(id=account_id).one_or_none()
-            setattr(self._transaction, f'{account_prefix}account', account)
-        except AccessDenied as e:
-            logger.error(f'Access denied. user_id={self.state.user_id}, account_id={account_id}')
-            raise e
+    def _set_account(self, account_id: int) -> 'TransactionManager':
+        account = self.db.query(Account).filter_by(id=account_id).one()
+        if account.user_id != self.user_id:
+            logger.error(f'User {self.user_id} tried to create transaction with not own account {account_id}')
+            raise AccessDenied()
+        self._transaction.account_id = account.id
+        self._transaction.account = account
+
+        return self
+
+    def _set_category(self, category_id: int) -> 'TransactionManager':
+        category = self.db.query(UserCategory).filter_by(id=category_id).one_or_none()
+        if category is None:
+            logger.error(f'Category {category_id} not found')
+            raise InvalidCategory()
+        if category.user_id != self.user_id:
+            logger.error(f'User {self.user_id} tried to create transaction with not own category {category_id}')
+            raise AccessDenied()
+        self._transaction.category_id = category.id
+        self._transaction.category = category
+
         return self
 
     def _prepare_transaction(self) -> 'TransactionManager':
-        transaction_details = self.state.transaction_details
-
-        if transaction_details.id is not None:
-            self._transaction = self.state.db.query(Transaction).filter_by(
-                id=transaction_details.id).one_or_none()  # type: ignore
+        if self.transaction_details.id is not None:
+            self._transaction = (self.db.query(Transaction)
+                                 .options(joinedload(Transaction.account),
+                                          joinedload(Transaction.category),
+                                          joinedload(Transaction.currency))
+                                 .filter_by(id=self.transaction_details.id).one_or_none())
+            self.prev_transaction_state = copy.deepcopy(self._transaction)
 
             if self._transaction is None:
-                logger.error(f'Transaction {transaction_details.id} not found')
-                raise InvalidTransaction(detail=f'Transaction {transaction_details.id} not found')
+                logger.error(f'Transaction {self.transaction_details.id} not found')
+                raise InvalidTransaction(detail=f'Transaction {self.transaction_details.id} not found')
 
-            if self.state.user_id != self._transaction.user_id:
+            if self.user_id != self._transaction.user_id:
                 logger.error(
-                    f'User {self.state.user_id} tried to update self._transaction {self._transaction.id} of user '
+                    f'User {self.user_id} tried to update transaction [{self._transaction.id}] of user '
                     + f'{self._transaction.user_id}')
                 raise AccessDenied()
 
-            self.state.is_update = True
-            self.state.prev_amount = self._transaction.amount
-            self.state.prev_account_id = self._transaction.account_id
-            self.state.prev_new_balance = self._transaction.new_balance
-            self.state.prev_account = self._transaction.account
-            self.state.prev_target_account_id = self._transaction.target_account_id
-            self.state.prev_target_new_balance = self._transaction.target_new_balance
-            self.state.prev_target_amount = self._transaction.target_amount
-            self.state.prev_is_transfer = self._transaction.is_transfer
-            self.state.prev_is_income = self._transaction.is_income
+            # self.is_update = True
         else:
-            self.state.is_update = False
-            self.state.prev_amount = Decimal(0.0)
-            self.state.prev_target_amount = Decimal(0.0)
+            self._transaction.user_id = self.user_id
 
-            self._transaction.user_id = self.state.user_id
+        self._transaction.amount = self.transaction_details.amount
+        self._transaction.label = self.transaction_details.label
+        self._transaction.notes = self.transaction_details.notes
+        self._transaction.is_income = self.transaction_details.is_income
+        self._transaction.is_transfer = self.transaction_details.is_transfer
 
         return self
 
@@ -162,17 +122,8 @@ class TransactionManager:
             self._process_transfer_type()
         else:
             self._process_non_transfer_type()
-        self.state.db.add(self._transaction)
-        self.state.db.add(self._transaction.account)
-        self.state.db.commit()
-        self.state.db.refresh(self._transaction)
-        self.state.db.refresh(self._transaction.account)
-
-        # if self._transaction.is_transfer:
-        #     update_transactions_new_balances(self._transaction.account_id, self.state.db)
-        #     update_transactions_new_balances(self._transaction.target_account_id, self.state.db)
-        # else:
-        #     update_transactions_new_balances(self._transaction.account_id, self.state.db)
+            self.db.add(self._transaction)
+        self.db.commit()
 
         return self
 
@@ -182,7 +133,7 @@ class TransactionManager:
             transfer_type_transaction.update_acc_prev_transfer()
         else:
             non_transfer_transaction = NonTransferTypeTransaction(self._transaction, self.state, self.state.db)
-            non_transfer_transaction.update_acc_prev_nontransfer()
+            non_transfer_transaction.correct_prev_balance()
 
         self._transaction.is_deleted = True
         self.state.db.add(self._transaction)
@@ -191,12 +142,19 @@ class TransactionManager:
         return self
 
     def _process_transfer_type(self) -> None:
-        transfer_type_transaction = TransferTypeTransaction(self._transaction, self.state, self.state.db)
-        transfer_type_transaction.process()
+        transfer_type_transaction = TransferTypeTransaction(self._transaction,
+                                                            self.prev_transaction_state,
+                                                            self.db,
+                                                            is_update=self.is_update)
+        transfer_type_transaction.process(self.transaction_details)
 
-    def _process_non_transfer_type(self):
-        non_transfer_transaction = NonTransferTypeTransaction(self._transaction, self.state, self.state.db)
+    def _process_non_transfer_type(self) -> 'TransactionManager':
+        non_transfer_transaction = NonTransferTypeTransaction(self._transaction,
+                                                              self.prev_transaction_state,
+                                                              self.db,
+                                                              is_update=self.is_update)
         non_transfer_transaction.process()
+        return self
 
 
 def update_transactions_new_balances(account_id: int, db: Session) -> bool:
@@ -231,7 +189,8 @@ def update_transactions_new_balances(account_id: int, db: Session) -> bool:
                         = transaction.target_account.initial_balance + transaction.target_amount
                 else:
                     if transaction[idx - 1].is_transfer:
-                        transaction.target_new_balance = transaction[idx - 1].target_new_balance + transaction.target_amount
+                        transaction.target_new_balance = transaction[
+                                                             idx - 1].target_new_balance + transaction.target_amount
 
         db.add(transaction)
     db.commit()

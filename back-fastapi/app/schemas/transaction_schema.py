@@ -13,7 +13,7 @@ from pydantic.alias_generators import to_camel
 class CreateTransactionSchema(BaseModel):
     id: int | None = None
     user_id: int | None = None
-    currency_id: int | None = None
+    # currency_id: int | None = None
     account_id: int
     target_account_id: int | None = None
     category_id: int | None = None
@@ -24,7 +24,7 @@ class CreateTransactionSchema(BaseModel):
         lambda x: float(x), return_type=float, when_used='json'
     )] | None = None
     label: str = ''
-    notes: str = ''
+    notes: str | None = ''
     date_time: datetime | None = None
     exchange_rate: Annotated[Decimal | None, PlainSerializer(
         lambda x: float(x), return_type=float, when_used='json'
@@ -39,7 +39,7 @@ class CreateTransactionSchema(BaseModel):
 
 class UpdateTransactionSchema(CreateTransactionSchema):
     id: int
-    currency_id: int
+    # currency_id: int
     user_id: int
 
     model_config = ConfigDict(from_attributes=True,
@@ -55,13 +55,14 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     account: AccountResponseSchema
     new_balance: Annotated[Decimal, PlainSerializer(
         lambda x: float(x), return_type=float, when_used='json'
-    )]
+    )] | None = None
     target_account: AccountResponseSchema | None = None
     target_new_balance: Annotated[Decimal, PlainSerializer(
         lambda x: float(x), return_type=float, when_used='json'
     )] | None = None
     currency: CurrencyResponseSchema
     category: ResponseCategorySchema | None = None
+    linked_transaction_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,
