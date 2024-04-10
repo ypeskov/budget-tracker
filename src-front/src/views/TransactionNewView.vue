@@ -175,7 +175,10 @@ async function deleteTransaction() {
       <div class="row">
         <div class="col">
           <form @submit.prevent="submitTransaction">
-            <TransactionTypeTabs @type-changed="changeItemType" :transaction="transaction" :item-type="itemType" />
+            <TransactionTypeTabs @type-changed="changeItemType"
+                                 :is-edit="props.isEdit"
+                                 :transaction="transaction"
+                                 :item-type="itemType" />
 
             <TransactionLabel :transaction="transaction" />
 

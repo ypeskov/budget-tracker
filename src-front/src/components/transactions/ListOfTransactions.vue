@@ -59,6 +59,13 @@ const transactionClass = (transaction) => {
   }
 };
 
+const balanceClass = (transaction) => {
+  if (transaction.newBalance !== null) {
+    return transaction.newBalance >= 0 ? 'income-transaction' : 'expense-transaction';
+  }
+  return '';
+};
+
 function accountName(account) {
   if (account.isDeleted) {
     return `${account.name} (${t('message.deleted')})`;
@@ -93,7 +100,7 @@ function accountName(account) {
             <div :class="transactionClass(transaction)">
               <b>{{ $n(transaction.amount, 'decimal') }}{{ transaction.currency.code }}</b>
             </div>
-            <div :class="transactionClass(transaction)">
+            <div :class="balanceClass(transaction)">
               <span class="acc-name">{{ accountName(transaction.account) }}</span>
               | <span v-if="transaction.newBalance !== null">{{ $n(transaction.newBalance, 'decimal') }}</span>
                 <span v-else>--</span>

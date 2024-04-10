@@ -65,9 +65,7 @@ def get_transactions(user_id: int, db: Session, params=None, include_deleted=Fal
         stmt = stmt.filter(Transaction.currency_id.in_(params['currencies']))
 
     if 'accounts' in params:
-        stmt = stmt.filter(
-            or_(Transaction.account_id.in_(params['accounts']),
-                (Transaction.target_account_id.in_(params['accounts']))))
+        stmt = stmt.filter(Transaction.account_id.in_(params['accounts']))
 
     page = 1
     if 'page' in params:
