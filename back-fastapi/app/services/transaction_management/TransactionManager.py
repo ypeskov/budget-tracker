@@ -125,12 +125,15 @@ class TransactionManager:
             self.db.add(self._transaction)
         self.db.commit()
 
+        update_transactions_new_balances(self._transaction.account_id, self.db)
+        if self._transaction.is_transfer:
+            update_transactions_new_balances(self.transaction_details.target_account_id, self.db)  # type: ignore
+
         return self
 
     def delete_transaction(self) -> 'TransactionManager':
         if self._transaction.is_transfer:
             transfer_type_transaction = TransferTypeTransaction(self._transaction, self.state, self.state.db)
-            transfer_type_transaction.update_acc_prev_transfer()
         else:
             non_transfer_transaction = NonTransferTypeTransaction(self._transaction, self.state, self.state.db)
             non_transfer_transaction.correct_prev_balance()
@@ -156,3 +159,28 @@ class TransactionManager:
         non_transfer_transaction.process()
         return self
 
+
+def update_transactions_new_balances(account_id: int, db: Session) -> bool:
+    """ Update all transactions new_balance field for given account_id """
+    transactions = (db.query(Transaction)
+                    .filter(Transaction.is_deleted == False)
+                    .filter(Transaction.account_id == account_id)
+                    .order_by(Transaction.date_time.asc())
+                    .all())
+
+    for idx, transaction in enumerate(transactions):
+        if transaction.is_income:
+            if idx == 0:
+                transaction.new_balance = transaction.account.initial_balance + transaction.amount
+            else:
+                transaction.new_balance = transactions[idx - 1].new_balance + transaction.amount
+        else:
+            if idx == 0:
+                transaction.new_balance = transaction.account.initial_balance - transaction.amount
+            else:
+                transaction.new_balance = transactions[idx - 1].new_balance - transaction.amount
+
+        db.add(transaction)
+    db.commit()
+
+    return True
