@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from icecream import ic
 from sqlalchemy import or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
 from app.models.Account import Account
@@ -24,13 +24,13 @@ class TransactionManager:
                  transaction_details: UpdateTransactionSchema | CreateTransactionSchema,
                  user_id: int,
                  db: Session):
-        # self.state = TransactionState(user_id=user_id, db=db, transaction_details=transaction_details)
+
         self.user_id = user_id
         self.db = db
         self.transaction_details = transaction_details
         self._transaction = Transaction()  # main entity for current transaction
-        self.prev_transaction_state = Transaction()  # previous state of transaction
-        self.is_update = False
+        self.prev_transaction_state = Transaction()  # remember state of transaction before update
+        self.is_update = True if transaction_details.id is not None else False
 
         self._prepare_transaction()
         self._set_account(self.transaction_details.account_id)
@@ -57,7 +57,6 @@ class TransactionManager:
 
         self._transaction.currency_id = currency.id
         self._transaction.currency = currency
-        self.db.expunge(currency)
 
         return self
 
@@ -68,7 +67,6 @@ class TransactionManager:
             raise AccessDenied()
         self._transaction.account_id = account.id
         self._transaction.account = account
-        self.db.expunge(account)
 
         return self
 
@@ -87,8 +85,11 @@ class TransactionManager:
 
     def _prepare_transaction(self) -> 'TransactionManager':
         if self.transaction_details.id is not None:
-            ic(self.transaction_details)
-            self._transaction = self.db.query(Transaction).filter_by(id=self.transaction_details.id).one_or_none()
+            self._transaction = (self.db.query(Transaction)
+                                 .options(joinedload(Transaction.account),
+                                          joinedload(Transaction.category),
+                                          joinedload(Transaction.currency))
+                                 .filter_by(id=self.transaction_details.id).one_or_none())
             self.prev_transaction_state = copy.deepcopy(self._transaction)
 
             if self._transaction is None:
@@ -101,7 +102,7 @@ class TransactionManager:
                     + f'{self._transaction.user_id}')
                 raise AccessDenied()
 
-            self.is_update = True
+            # self.is_update = True
         else:
             self._transaction.user_id = self.user_id
 
@@ -110,8 +111,7 @@ class TransactionManager:
         self._transaction.notes = self.transaction_details.notes
         self._transaction.is_income = self.transaction_details.is_income
         self._transaction.is_transfer = self.transaction_details.is_transfer
-        for inst in self.db:
-            ic(inst)
+
         return self
 
     def get_transaction(self) -> Transaction:
@@ -123,14 +123,7 @@ class TransactionManager:
         else:
             self._process_non_transfer_type()
             self.db.add(self._transaction)
-            self.db.add(self._transaction.account)
         self.db.commit()
-
-        # if self._transaction.is_transfer:
-        #     update_transactions_new_balances(self._transaction.account_id, self.state.db)
-        #     update_transactions_new_balances(self._transaction.target_account_id, self.state.db)
-        # else:
-        #     update_transactions_new_balances(self._transaction.account_id, self.state.db)
 
         return self
 
