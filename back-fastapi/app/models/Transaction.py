@@ -66,4 +66,5 @@ class Transaction(Base):
             f'target_account_id={self.target_account_id}, category_id={self.category_id}, amount={self.amount}, ' + \
             f'label="{self.label}", notes="{self.notes}", date_time={self.date_time}, currency_id={self.currency_id}, ' + \
             f'exchange_rate={self.exchange_rate}, is_transfer={self.is_transfer}, is_income = {self.is_income}, ' + \
+            f'linked_transaction_id={self.linked_transaction_id}, target_amount={self.target_amount}, ' + \
             f'is_deleted = {self.is_deleted}, created_at = {self.created_at}, updated_at = {self.updated_at})'
