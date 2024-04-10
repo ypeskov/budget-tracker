@@ -52,9 +52,7 @@ const getParentCategoryLabel = (transaction) => {
 const categoryLabel = transaction => transaction.category?.name || (transaction.isTransfer ? 'Transfer' : 'Unknown');
 
 const transactionClass = (transaction) => {
-  if (transaction.isTransfer) {
-    return 'transfer-transaction';
-  } else if (transaction.isIncome) {
+  if (transaction.isIncome) {
     return 'income-transaction';
   } else {
     return 'expense-transaction';
@@ -92,21 +90,12 @@ function accountName(account) {
             </div>
           </div>
           <div class="col-7 amount-container">
-            <div v-if="transaction.isTransfer" :class="transactionClass(transaction)">
-              <b>{{ $n(transaction.amount, 'decimal') }}{{ transaction.currency.code }}</b> ->
-              <b>{{ $n(transaction.targetAmount, 'decimal') }}{{ transaction.targetAccount.currency.code }}</b>
-            </div>
-            <div v-else :class="transactionClass(transaction)">
+            <div :class="transactionClass(transaction)">
               <b>{{ $n(transaction.amount, 'decimal') }}{{ transaction.currency.code }}</b>
             </div>
-            <div v-if="transaction.isTransfer" :class="transactionClass(transaction)">
-              <span class="acc-name">{{ accountName(transaction.account) }} ({{ $n(transaction.newBalance, 'decimal')
-                }})</span> -> <span class="acc-name">{{ accountName(transaction.targetAccount)
-              }} ({{ $n(transaction.targetNewBalance, 'decimal') }})</span>
-            </div>
-            <div v-else :class="transactionClass(transaction)">
+            <div :class="transactionClass(transaction)">
               <span class="acc-name">{{ accountName(transaction.account) }}</span>
-              | {{ $n(transaction.newBalance, 'decimal') }}
+              | {{ $n(0, 'decimal') }}
             </div>
           </div>
         </RouterLink>
