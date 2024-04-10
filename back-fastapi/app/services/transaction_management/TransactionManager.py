@@ -2,7 +2,7 @@ import copy
 from datetime import datetime, timezone
 
 from icecream import ic
-from sqlalchemy import or_
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
@@ -156,43 +156,3 @@ class TransactionManager:
         non_transfer_transaction.process()
         return self
 
-
-def update_transactions_new_balances(account_id: int, db: Session) -> bool:
-    """ Update all transactions new_balance field for given account_id """
-    transactions = (db.query(Transaction)
-                    .filter(Transaction.is_deleted == False)
-                    .filter(or_(Transaction.account_id == account_id,
-                                Transaction.target_account_id == account_id))
-                    .order_by(Transaction.date_time.asc())).all()
-
-    for idx, transaction in enumerate(transactions):
-        if not transaction.is_transfer:  # update non-transfer type transaction balance
-            if transaction.is_income:
-                if idx == 0:
-                    transaction.new_balance = transaction.account.initial_balance + transaction.amount
-                else:
-                    transaction.new_balance = transactions[idx - 1].new_balance + transaction.amount
-            else:
-                if idx == 0:
-                    transaction.new_balance = transaction.account.initial_balance - transaction.amount
-                else:
-                    transaction.new_balance = transactions[idx - 1].new_balance - transaction.amount
-        else:  # update transfer type transaction balance
-            if transaction.account_id == account_id:
-                if idx == 0:
-                    transaction.new_balance = transaction.account.initial_balance - transaction.amount
-                else:
-                    transaction.new_balance = transactions[idx - 1].new_balance - transaction.amount
-            elif transaction.target_account_id == account_id:
-                if idx == 0:
-                    transaction.target_new_balance \
-                        = transaction.target_account.initial_balance + transaction.target_amount
-                else:
-                    if transaction[idx - 1].is_transfer:
-                        transaction.target_new_balance = transaction[
-                                                             idx - 1].target_new_balance + transaction.target_amount
-
-        db.add(transaction)
-    db.commit()
-
-    return True

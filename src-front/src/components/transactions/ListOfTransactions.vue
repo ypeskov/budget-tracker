@@ -95,7 +95,9 @@ function accountName(account) {
             </div>
             <div :class="transactionClass(transaction)">
               <span class="acc-name">{{ accountName(transaction.account) }}</span>
-              | {{ $n(0, 'decimal') }}
+              | <span v-if="transaction.newBalance !== null">{{ $n(transaction.newBalance, 'decimal') }}</span>
+                <span v-else>--</span>
+
             </div>
           </div>
         </RouterLink>
