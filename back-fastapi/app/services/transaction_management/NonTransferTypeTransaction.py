@@ -19,21 +19,23 @@ class NonTransferTypeTransaction:
         self._is_update = is_update
 
     def process(self) -> 'NonTransferTypeTransaction':
-        try:
-            category = self._db.query(UserCategory).filter_by(id=self._transaction.category_id).one()
-            if not is_category_valid(category, self._transaction.is_income):
+        if not self._transaction.is_transfer:
+            try:
+                category = self._db.query(UserCategory).filter_by(id=self._transaction.category_id).one()
+                if not is_category_valid(category, self._transaction.is_income):
+                    raise InvalidCategory()
+            except NoResultFound:
+                logger.error(f'Invalid category {self._transaction.category_id}')
                 raise InvalidCategory()
-        except NoResultFound:
-            logger.error(f'Invalid category {self._transaction.category_id}')
-            raise InvalidCategory()
 
-        if category.user_id != self._transaction.user_id:
-            logger.error(f'User {self._transaction.user_id} tried to update transaction {self._transaction.id} ' +
-                         f'with not own category {self._transaction.category_id}')
-            raise AccessDenied()
+            if category.user_id != self._transaction.user_id:
+                logger.error(f'User {self._transaction.user_id} tried to update transaction {self._transaction.id} ' +
+                             f'with not own category {self._transaction.category_id}')
+                raise AccessDenied()
 
-        #  self.update_acc_prev_nontransfer()
-        ic(self._transaction)
+        #  remove previous transaction amount from account balance
+        self.correct_prev_balance()
+
         if self._transaction.is_income:
             self._transaction.account.balance += self._transaction.amount
         else:
@@ -42,13 +44,12 @@ class NonTransferTypeTransaction:
 
         return self
 
-    def update_acc_prev_nontransfer(self):
+    def correct_prev_balance(self):
         if self._is_update:
-            if self.state.prev_is_income:
-                self.state.prev_account.balance -= self.state.prev_amount  # type: ignore
+            if self._prev_transaction_state.is_income:
+                self._transaction.account.balance -= self._prev_transaction_state.amount
             else:
-                self.state.prev_account.balance += self.state.prev_amount  # type: ignore
-            self.state.db.add(self.state.prev_account)
+                self._transaction.account.balance += self._prev_transaction_state.amount
 
 
 def is_category_valid(category: UserCategory, is_income: bool) -> bool:

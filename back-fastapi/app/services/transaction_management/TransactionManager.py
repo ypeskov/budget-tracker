@@ -36,7 +36,8 @@ class TransactionManager:
         self._set_account(self.transaction_details.account_id)
         self._set_currency(self.transaction_details.account_id)
         self._set_date_time(self.transaction_details.date_time)
-        self._set_category(self.transaction_details.category_id)
+        if not transaction_details.is_transfer:
+            self._set_category(self.transaction_details.category_id)
 
     def _set_date_time(self, date_time: datetime | None = None) -> 'TransactionManager':
         self._transaction.date_time = date_time or datetime.now(timezone.utc)
@@ -56,6 +57,7 @@ class TransactionManager:
 
         self._transaction.currency_id = currency.id
         self._transaction.currency = currency
+        self.db.expunge(currency)
 
         return self
 
@@ -66,6 +68,7 @@ class TransactionManager:
             raise AccessDenied()
         self._transaction.account_id = account.id
         self._transaction.account = account
+        self.db.expunge(account)
 
         return self
 
@@ -107,7 +110,8 @@ class TransactionManager:
         self._transaction.notes = self.transaction_details.notes
         self._transaction.is_income = self.transaction_details.is_income
         self._transaction.is_transfer = self.transaction_details.is_transfer
-
+        for inst in self.db:
+            ic(inst)
         return self
 
     def get_transaction(self) -> Transaction:
@@ -118,11 +122,9 @@ class TransactionManager:
             self._process_transfer_type()
         else:
             self._process_non_transfer_type()
-        self.db.add(self._transaction)
-        self.db.add(self._transaction.account)
+            self.db.add(self._transaction)
+            self.db.add(self._transaction.account)
         self.db.commit()
-        self.db.refresh(self._transaction)
-        self.db.refresh(self._transaction.account)
 
         # if self._transaction.is_transfer:
         #     update_transactions_new_balances(self._transaction.account_id, self.state.db)
@@ -138,7 +140,7 @@ class TransactionManager:
             transfer_type_transaction.update_acc_prev_transfer()
         else:
             non_transfer_transaction = NonTransferTypeTransaction(self._transaction, self.state, self.state.db)
-            non_transfer_transaction.update_acc_prev_nontransfer()
+            non_transfer_transaction.correct_prev_balance()
 
         self._transaction.is_deleted = True
         self.state.db.add(self._transaction)
@@ -147,8 +149,11 @@ class TransactionManager:
         return self
 
     def _process_transfer_type(self) -> None:
-        transfer_type_transaction = TransferTypeTransaction(self._transaction, self.state, self.state.db)
-        transfer_type_transaction.process()
+        transfer_type_transaction = TransferTypeTransaction(self._transaction,
+                                                            self.prev_transaction_state,
+                                                            self.db,
+                                                            is_update=self.is_update)
+        transfer_type_transaction.process(self.transaction_details)
 
     def _process_non_transfer_type(self) -> 'TransactionManager':
         non_transfer_transaction = NonTransferTypeTransaction(self._transaction,

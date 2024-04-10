@@ -4,12 +4,16 @@ from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import NoResultFound
 
+from icecream import ic
+
 from app.logger_config import logger
 from app.models.Transaction import Transaction
 from app.services.errors import AccessDenied
 from app.services.transaction_management.TransactionManager import TransactionManager
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.services.transaction_management.errors import InvalidTransaction
+
+ic.configureOutput(includeContext=True)
 
 
 def create_transaction(transaction_details: CreateTransactionSchema, user_id: int, db: Session) -> Transaction:
@@ -19,7 +23,6 @@ def create_transaction(transaction_details: CreateTransactionSchema, user_id: in
     :param db: SqlAlchemy Session
     :return: Transaction
     """
-
     transaction_manager: TransactionManager = TransactionManager(transaction_details, user_id, db)
     transaction: Transaction = transaction_manager.process().get_transaction()
 
@@ -100,7 +103,6 @@ def update(transaction_details: UpdateTransactionSchema, user_id: int, db: Sessi
     """
     This function updates transaction. It is used in PUT method of /transactions/{transaction_id} endpoint
     """
-
     transaction_manager: TransactionManager = TransactionManager(transaction_details, user_id, db)
     transaction: Transaction = transaction_manager.process().get_transaction()
 

@@ -62,6 +62,7 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     )] | None = None
     currency: CurrencyResponseSchema
     category: ResponseCategorySchema | None = None
+    linked_transaction_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,
