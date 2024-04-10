@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 
-const props = defineProps(['itemType']);
+const props = defineProps(['itemType', 'transaction', 'isEdit']);
 const emit = defineEmits(['typeChanged']);
 
 const currentItem = ref(props.itemType);
@@ -13,7 +13,9 @@ function changeItemType($event) {
 </script>
 
 <template>
-  <ul @click="changeItemType" class="nav nav-pills bottom-space top-space">
+  <ul @click="changeItemType"
+      class="nav nav-pills bottom-space top-space"
+      v-if="!isEdit || (isEdit && !transaction.isTransfer)">
     <li class="nav-item">
       <a
         id="expense-item"
