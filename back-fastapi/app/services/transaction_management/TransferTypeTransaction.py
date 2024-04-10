@@ -9,7 +9,7 @@ from app.models.Transaction import Transaction
 from app.services.CurrencyProcessor import CurrencyProcessor
 from .NonTransferTypeTransaction import NonTransferTypeTransaction
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
-from ...models.Currency import Currency
+from app.models.Currency import Currency
 
 ic.configureOutput(includeContext=True)
 
@@ -56,18 +56,3 @@ class TransferTypeTransaction:
 
         return self
 
-    def update_acc_prev_transfer(self):
-        if self.state.prev_is_transfer:
-            prev_target_account = self.state.db.query(Account).filter_by(id=self.state.prev_target_account_id).one()
-            prev_target_account.balance -= self.state.prev_target_amount
-
-            prev_account = self.state.db.query(Account).filter_by(id=self.state.prev_account_id).one()
-            prev_account.balance += self.state.prev_amount
-            self.state.db.add(prev_target_account)
-            self.state.db.add(prev_account)
-            self.state.db.commit()
-        else:
-            if self.state.prev_is_income:
-                self._transaction.account.balance -= self.state.prev_amount
-            else:
-                self._transaction.account.balance += self.state.prev_amount
