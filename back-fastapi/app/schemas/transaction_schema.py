@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Annotated
 
 from app.schemas.account_schema import AccountResponseSchema
-from app.schemas.currency_schema import CurrencyResponseSchema
 from app.schemas.user_schema import UserResponse
 from app.schemas.category_schema import ResponseCategorySchema
 from pydantic import ConfigDict, BaseModel, PlainSerializer
@@ -45,7 +44,6 @@ class UpdateTransactionSchema(CreateTransactionSchema):
 class ResponseTransactionSchema(CreateTransactionSchema):
     id: int
     user_id: int
-    # currency_id: int | None = None
     user: UserResponse
     account: AccountResponseSchema
     new_balance: Annotated[Decimal, PlainSerializer(

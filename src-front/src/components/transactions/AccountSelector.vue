@@ -1,11 +1,15 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps(['transaction', 'accounts', 'accountType']);
+import { Services } from '../../services/servicesConfig';
+
+const props = defineProps(['transaction', 'accounts', 'accountType', 'linkedTransaction']);
 const emit = defineEmits(['accountChanged']);
 
 const t = useI18n().t;
+
+
 
 function changeAccount($event) {
   const acc = props.accounts[$event.target.value];
@@ -19,7 +23,10 @@ const accountIdx = computed(() => {
   if (props.accountType === 'src') {
     return props.accounts.findIndex((item) => item.id === props.transaction.accountId);
   } else {
-    return props.accounts.findIndex((item) => item.id === props.transaction.targetAccountId);
+    if (props.transaction.linkedTransactionId === undefined) {
+      return 0;
+    }
+    return props.accounts.findIndex((item) => item.id === props.linkedTransaction.accountId);
   }
 });
 
@@ -30,6 +37,8 @@ const accLabel = computed(() => {
     return t('message.targetAccount');
   }
 });
+
+
 </script>
 
 <template>
