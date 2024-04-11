@@ -82,6 +82,7 @@ def get_transaction_details(transaction_id: int, user_id: int, db: Session) -> T
         transaction: Transaction = (db.query(Transaction)  # type: ignore
                                     .filter_by(id=transaction_id)
                                     .options(joinedload(Transaction.user),
+                                             joinedload(Transaction.linked_transaction),
                                              joinedload(Transaction.account))
                                     .one())
     except NoResultFound:

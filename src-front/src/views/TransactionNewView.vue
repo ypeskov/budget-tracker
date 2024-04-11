@@ -11,7 +11,7 @@ import TransactionTypeTabs from '../components/transactions/TransactionTypeTabs.
 import TransactionLabel from '../components/transactions/TransactionLabel.vue';
 import TransactionAmount from '../components/transactions/TransactionAmount.vue';
 import Category from '../components/transactions/Category.vue';
-import Account from '../components/transactions/Account.vue';
+import AccountSelector from '../components/transactions/AccountSelector.vue';
 import ExchangeRate from '../components/transactions/ExchangeRate.vue';
 import TransactionDateTime from '../components/transactions/TransactionDateTIme.vue';
 
@@ -25,6 +25,7 @@ const currentAccount = ref(accounts[0]);
 const targetAccount = ref(accounts[0]);
 const categories = ref([]);
 const showDeleteConfirmation = ref(false);
+let targetTransaction = reactive({});
 
 let transaction = reactive({});
 let filteredCategories = ref([]);
@@ -82,6 +83,8 @@ onBeforeMount(async () => {
       if (targetAccount.value === undefined) {
         targetAccount.value = accounts[0];
       }
+
+      await getLinkedTransaction(transaction);
     }
 
     filterCategories();
@@ -89,6 +92,11 @@ onBeforeMount(async () => {
     await processError(e, router);
   }
 });
+
+async function getLinkedTransaction(transaction) {
+  const linkedTransaction = await Services.transactionsService.getTransactionDetails(transaction.linkedTransactionId);
+  targetTransaction = Object.assign(targetTransaction, linkedTransaction);
+}
 
 function filterCategories() {
   const isIncome = itemType.value === 'income';
@@ -182,33 +190,39 @@ async function deleteTransaction() {
 
             <TransactionLabel :transaction="transaction" />
 
-            <Account :transaction="transaction" @account-changed="changeAccount" account-type="src"
-                     :accounts="accounts" />
+            <AccountSelector :transaction="transaction"
+                             @account-changed="changeAccount"
+                             account-type="src"
+                             :linked-transaction="targetTransaction"
+                             :accounts="accounts" />
 
             <TransactionAmount :label="t('message.amount')"
                                type="src"
                                :transaction="transaction"
                                @amount-changed="amountChanged"
+                               :linked-transaction="targetTransaction"
                                :current-account="currentAccount" />
 
-            <Account v-if="transaction.isTransfer === true"
-                     @account-changed="changeAccount"
-                     account-type="target"
-                     :transaction="transaction"
-                     :accounts="accounts" />
+            <AccountSelector v-if="transaction.isTransfer === true"
+                             @account-changed="changeAccount"
+                             account-type="target"
+                             :linked-transaction="targetTransaction"
+                             :transaction="transaction"
+                             :accounts="accounts" />
 
             <TransactionAmount v-if="itemType === 'transfer'"
                                type="target"
                                :label="t('message.amount')"
                                @amount-changed="amountChanged"
                                :transaction="transaction"
+                               :linked-transaction="targetTransaction"
                                :current-account="targetAccount" />
 
             <ExchangeRate v-if="itemType === 'transfer'"
                           :currency-src-code="currentAccount.currency.code"
                           :src-amount="transaction.amount"
                           :currency-target-code="targetAccount.currency.code"
-                          :target-amount="transaction.targetAmount" />
+                          :target-amount="targetTransaction.amount" />
 
             <Category v-if="!transaction.isTransfer"
                       :transaction="transaction"
