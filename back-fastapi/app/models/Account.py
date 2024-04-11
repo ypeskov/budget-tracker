@@ -35,8 +35,6 @@ class Account(Base):
     account_type: Mapped[AccountType] = relationship()
     currency: Mapped[Currency] = relationship()
     transactions: Mapped['Transaction'] = relationship(back_populates='account', foreign_keys='Transaction.account_id')
-    target_transactions: Mapped['Transaction'] = relationship(back_populates='target_account',
-                                                              foreign_keys='[Transaction.target_account_id]')
 
     is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

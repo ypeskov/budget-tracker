@@ -34,30 +34,12 @@ class TransactionManager:
 
         self._prepare_transaction()
         self._set_account(self.transaction_details.account_id)
-        self._set_currency(self.transaction_details.account_id)
         self._set_date_time(self.transaction_details.date_time)
         if not transaction_details.is_transfer:
             self._set_category(self.transaction_details.category_id)
 
     def _set_date_time(self, date_time: datetime | None = None) -> 'TransactionManager':
         self._transaction.date_time = date_time or datetime.now(timezone.utc)
-        return self
-
-    def _set_currency(self, account_id: int) -> 'TransactionManager':
-        account = self.db.query(Account).filter_by(id=account_id).one_or_none()
-        if account is None:
-            logger.error(f'Account {self.transaction_details.account_id} not found')
-            raise InvalidAccount()
-        currency_id = account.currency_id
-
-        currency = self.db.query(Currency).filter_by(id=currency_id).one_or_none()
-        if currency is None:
-            logger.error(f'Currency {currency_id} not found')
-            raise InvalidCurrency()
-
-        self._transaction.currency_id = currency.id
-        self._transaction.currency = currency
-
         return self
 
     def _set_account(self, account_id: int) -> 'TransactionManager':
@@ -87,8 +69,7 @@ class TransactionManager:
         if self.transaction_details.id is not None:
             self._transaction = (self.db.query(Transaction)
                                  .options(joinedload(Transaction.account),
-                                          joinedload(Transaction.category),
-                                          joinedload(Transaction.currency))
+                                          joinedload(Transaction.category))
                                  .filter_by(id=self.transaction_details.id).one_or_none())
             self.prev_transaction_state = copy.deepcopy(self._transaction)
 
