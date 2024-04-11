@@ -1,16 +1,15 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select
-from sqlalchemy import or_, and_
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy.exc import NoResultFound
-
 from icecream import ic
+from sqlalchemy import or_, and_
+from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
 from app.models.Transaction import Transaction
+from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.services.errors import AccessDenied
 from app.services.transaction_management.TransactionManager import TransactionManager
-from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.services.transaction_management.errors import InvalidTransaction
 
 ic.configureOutput(includeContext=True)
@@ -32,10 +31,9 @@ def create_transaction(transaction_details: CreateTransactionSchema, user_id: in
 def get_transactions(user_id: int, db: Session, params=None, include_deleted=False) -> list[Transaction]:
     if params is None:
         params = dict()
-    stmt = (db.query(Transaction).options(joinedload(Transaction.account),
-                                          joinedload(Transaction.target_account),
-                                          joinedload(Transaction.category),
-                                          joinedload(Transaction.currency))
+    stmt = (db.query(Transaction)
+            .options(joinedload(Transaction.account),
+                     joinedload(Transaction.category))
             .filter_by(user_id=user_id)
             .order_by(Transaction.date_time.desc()))
 
@@ -62,7 +60,7 @@ def get_transactions(user_id: int, db: Session, params=None, include_deleted=Fal
             stmt = stmt.filter(or_(*type_filters))
 
     if 'currencies' in params:
-        stmt = stmt.filter(Transaction.currency_id.in_(params['currencies']))
+        stmt = stmt.filter(Transaction.account.currency_id.in_(params['currencies']))
 
     if 'accounts' in params:
         stmt = stmt.filter(Transaction.account_id.in_(params['accounts']))
@@ -81,11 +79,11 @@ def get_transactions(user_id: int, db: Session, params=None, include_deleted=Fal
 
 def get_transaction_details(transaction_id: int, user_id: int, db: Session) -> Transaction:
     try:
-        transaction: Transaction = db.query(Transaction).filter_by(id=transaction_id).options(  # type: ignore
-            joinedload(Transaction.user),
-            joinedload(Transaction.account),
-            joinedload(Transaction.target_account),
-            joinedload(Transaction.currency)).one()
+        transaction: Transaction = (db.query(Transaction)  # type: ignore
+                                    .filter_by(id=transaction_id)
+                                    .options(joinedload(Transaction.user),
+                                             joinedload(Transaction.account))
+                                    .one())
     except NoResultFound:
         logger.error(f'Transaction {transaction_id} not found')
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Transaction not found')

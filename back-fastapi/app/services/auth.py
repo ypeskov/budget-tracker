@@ -81,8 +81,7 @@ def get_jwt_token(user_login: UserLoginSchema, db: Session):
     """
     Authenticate user and generate JWT.
     """
-    user = db.query(User).filter(
-        User.email == user_login.email).first()  # type: ignore
+    user: User = db.query(User).filter(User.email == user_login.email).first()  # type: ignore
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email")
 

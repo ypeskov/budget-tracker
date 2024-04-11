@@ -98,7 +98,7 @@ function accountName(account) {
           </div>
           <div class="col-7 amount-container">
             <div :class="transactionClass(transaction)">
-              <b>{{ $n(transaction.amount, 'decimal') }}{{ transaction.currency.code }}</b>
+              <b>{{ $n(transaction.amount, 'decimal') }}{{ transaction.account.currency.code }}</b>
             </div>
             <div :class="balanceClass(transaction)">
               <span class="acc-name">{{ accountName(transaction.account) }}</span>
