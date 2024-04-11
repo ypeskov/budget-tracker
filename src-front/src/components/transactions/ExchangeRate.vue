@@ -1,21 +1,21 @@
 <script setup>
 import { computed } from 'vue';
 
-const props = defineProps(['amountSrc', 'targetAmount', 'currencySrc', 'currencyTarget']);
+const props = defineProps(['srcAmount', 'targetAmount', 'currencySrcCode', 'currencyTargetCode']);
 
 const exchangeRate = computed(() => {
-  return props.targetAmount / props.amountSrc;
+  return props.targetAmount / props.srcAmount;
 });
 
 const reversedExchangedRate = computed(() => {
-  return props.amountSrc / props.targetAmount;
+  return props.srcAmount / props.targetAmount;
 });
 
 </script>
 
 <template>
-  <div>{{ currencySrc }} / {{ currencyTarget }}: {{ exchangeRate.toFixed(4) }}</div>
-  <div class="mb-2">{{ currencyTarget }} / {{ currencySrc }}: ({{ reversedExchangedRate.toFixed(4) }})</div>
+  <div>{{ currencySrcCode }} / {{ currencyTargetCode }}: {{ exchangeRate.toFixed(4) }}</div>
+  <div class="mb-2">{{ currencyTargetCode }} / {{ currencySrcCode }}: ({{ reversedExchangedRate.toFixed(4) }})</div>
 </template>
 
 <style scoped></style>

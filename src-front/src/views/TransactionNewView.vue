@@ -204,9 +204,11 @@ async function deleteTransaction() {
                                :transaction="transaction"
                                :current-account="targetAccount" />
 
-<!--            <ExchangeRate v-if="itemType === 'transfer'" :amount-src="transaction.amount"-->
-<!--                          :currency-src="currentAccount.currency.code" :currency-target="XXX"-->
-<!--                          :target-amount="0" />-->
+            <ExchangeRate v-if="itemType === 'transfer'"
+                          :currency-src-code="currentAccount.currency.code"
+                          :src-amount="transaction.amount"
+                          :currency-target-code="targetAccount.currency.code"
+                          :target-amount="transaction.targetAmount" />
 
             <Category v-if="!transaction.isTransfer"
                       :transaction="transaction"
