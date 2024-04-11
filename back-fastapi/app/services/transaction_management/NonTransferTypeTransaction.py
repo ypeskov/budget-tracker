@@ -42,8 +42,6 @@ class NonTransferTypeTransaction:
         else:
             self._transaction.account.balance -= self._transaction.amount
 
-        # update_transactions_new_balances(self._transaction.account_id, self._db)
-
         return self
 
     def correct_prev_balance(self):
