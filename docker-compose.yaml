@@ -2,9 +2,11 @@ services:
   back:
     container_name: "back"
     platform: "linux/amd64"
-    build: 
+    build:
       context: "./back-fastapi"
       dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+    env_file:
+      - ${APP_ENV_FILE:-./back-fastapi/.env}
     ports:
       - 8000:8000
       - 5678:5678
@@ -12,18 +14,12 @@ services:
     volumes:
       - ./back-fastapi:/app
     restart: always
-    # command: ["sh", "-c", "python -m debugpy --wait-for-client --listen 0.0.0.0:5678 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
-    environment:
-      - DEBUG=True
-      - DB_HOST=db-budgeter
-      - DB_PORT=5432
-      - PYTHONPATH=/app:$PYTHONPATH
     depends_on:
       - db-budgeter
 
   front:
     container_name: "front"
-    build: 
+    build:
       context: "./src-front"
       dockerfile: "../dockerfiles/Dockerfile.front.dev"
     ports:
@@ -32,10 +28,10 @@ services:
     volumes:
       - ./src-front:/app
       - /app/node_modules
-    # environment:
+      # environment:
       # REACT_APP_API_URL: ${REACT_APP_API_URL}
-#    depends_on:
-#      - back
+  #    depends_on:
+  #      - back
   
   db-budgeter:
     image: postgres:15.3-bullseye
@@ -55,3 +51,36 @@ services:
     restart: always
     ports:
       - 8080:8080
+
+  redis-budgeter:
+    image: redis:alpine
+    container_name: redis-budgeter
+    restart: always
+
+  celery-budgeter:
+    container_name: "celery-budgeter"
+    platform: "linux/amd64"
+    build:
+      context: "./back-fastapi"
+      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+    env_file:
+      - ${APP_ENV_FILE:-./back-fastapi/.env}
+    command: celery -A app.celery worker -l info
+    volumes:
+      - ./back-fastapi:/app
+    depends_on:
+      - redis-budgeter
+
+  celery-beat:
+    container_name: "celery-beat"
+    platform: "linux/amd64"
+    env_file:
+      - ${APP_ENV_FILE:-./back-fastapi/.env}
+    build:
+      context: "./back-fastapi"
+      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+    command: celery -A app.celery beat -l info
+    volumes:
+      - ./back-fastapi:/app
+    depends_on:
+      - redis-budgeter
