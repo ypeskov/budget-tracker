@@ -84,7 +84,9 @@ onBeforeMount(async () => {
         targetAccount.value = accounts[0];
       }
 
-      await getLinkedTransaction(transaction);
+      if (transaction.linkedTransactionId) {
+        await getLinkedTransaction(transaction);
+      }
     }
 
     filterCategories();
