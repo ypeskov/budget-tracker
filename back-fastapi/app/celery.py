@@ -10,15 +10,11 @@ celery_app.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis:
 celery_app.conf.broker_connection_retry_on_startup = True
 celery_app.conf.broker_connection_max_retries = 5
 
+celery_app.autodiscover_tasks(['app.tasks'])
+
 # celery_app.conf.beat_schedule = {
 #     "send-email-every-5-seconds": {
-#         "task": "app.celery.send_email",
+#         "task": "app.tasks.tasks.send_email",
 #         "schedule": 10.0,
 #     },
 # }
-
-
-@celery_app.task
-def send_email():
-    print("Sending email...")
-    return "Email sent!"
