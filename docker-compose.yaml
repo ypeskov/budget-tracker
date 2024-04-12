@@ -34,8 +34,8 @@ services:
       - /app/node_modules
     # environment:
       # REACT_APP_API_URL: ${REACT_APP_API_URL}
-    depends_on:
-      - back
+#    depends_on:
+#      - back
   
   db-budgeter:
     image: postgres:15.3-bullseye

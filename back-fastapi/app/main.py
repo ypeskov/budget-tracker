@@ -1,3 +1,11 @@
+# import debugpy
+# debugpy.listen(('0.0.0.0', 5678))
+# debugpy.wait_for_client()
+# print("Debugger is attached!")
+
+# import pydevd_pycharm
+# pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
