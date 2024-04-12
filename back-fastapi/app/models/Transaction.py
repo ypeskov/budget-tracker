@@ -24,18 +24,16 @@ class Transaction(Base):
     account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id', ondelete='CASCADE'), index=True)
     amount: Mapped[Decimal] = mapped_column(default=Decimal(0), nullable=False)
     new_balance: Mapped[Decimal] = mapped_column(nullable=True, )
-    # currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'),
-    #                                          index=True, nullable=True)
     category_id: Mapped[int | None] = mapped_column(ForeignKey('user_categories.id', ondelete='CASCADE'),
                                                     index=True, nullable=True)
     label: Mapped[str] = mapped_column(String(LABEL_MAX_LENGTH), index=True, nullable=True, default='')
-    notes: Mapped[str] = mapped_column(nullable=True)
-    date_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True, nullable=True)
     is_income: Mapped[bool] = mapped_column(default=False)
     is_transfer: Mapped[bool] = mapped_column(nullable=False, default=False, server_default='f')
     linked_transaction_id: Mapped[int | None] = mapped_column(ForeignKey('transactions.id', ondelete='CASCADE'),
                                                               index=True, nullable=True)
     base_currency_amount: Mapped[Decimal] = mapped_column(nullable=True)
+    notes: Mapped[str] = mapped_column(nullable=True)
+    date_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True, nullable=True)
 
     user: Mapped[User] = relationship(backref='transactions')
     account: Mapped['Account'] = relationship('Account', foreign_keys="Transaction.account_id")
