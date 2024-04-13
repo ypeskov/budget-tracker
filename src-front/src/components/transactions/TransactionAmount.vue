@@ -34,7 +34,7 @@ function changeAmount($value) {
                @input="changeAmount"
                :value="amount"
                class="form-control"
-               pattern="[0-9]*"
+               pattern="[0-9.]*"
                inputmode="decimal" />
       </div>
       <div class="col-2 currency">{{ currentAccount?.currency?.code }}</div>
