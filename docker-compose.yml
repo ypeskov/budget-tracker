@@ -1,0 +1,106 @@
+services:
+  back:
+    container_name: "back"
+    platform: "linux/amd64"
+    build:
+      context: "./back-fastapi"
+      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+    env_file:
+      - ${APP_ENV_FILE:-./back-fastapi/.env}
+    ports:
+      - 8000:8000
+      - 5678:5678
+    tty: true
+    volumes:
+      - ./back-fastapi:/app
+    restart: always
+    depends_on:
+      - db-budgeter
+
+  front:
+    container_name: "front"
+    build:
+      context: "./src-front"
+      dockerfile: "../dockerfiles/Dockerfile.front.dev"
+    ports:
+      - 5173:5173
+    tty: true
+    volumes:
+      - ./src-front:/app
+      - /app/node_modules
+      # environment:
+      # REACT_APP_API_URL: ${REACT_APP_API_URL}
+  #    depends_on:
+  #      - back
+  
+  db-budgeter:
+    image: postgres:15.3-bullseye
+    container_name: Postgres-budgeter
+    restart: always
+    environment:
+      # POSTGRES_USER: urlshortener
+      POSTGRES_PASSWORD: budgeter
+    ports:
+      - 5432:5432
+    volumes:
+      - ./dbdata:/var/lib/postgresql/data
+
+  adminer-budgeter:
+    image: adminer
+    container_name: Adminer-budgeter
+    restart: always
+    ports:
+      - 8080:8080
+
+  redis-budgeter:
+    image: redis:alpine
+    container_name: redis-budgeter
+    command: redis-server --bind 0.0.0.0
+    ports:
+      - 6379:6379
+    restart: always
+
+  celery-budgeter:
+    container_name: "celery-budgeter"
+    platform: "linux/amd64"
+    build:
+      context: "./back-fastapi"
+      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+    env_file:
+      - ${APP_ENV_FILE:-./back-fastapi/.env}
+    command: celery -A app.celery worker -l info
+    volumes:
+      - ./back-fastapi:/app
+    depends_on:
+      - redis-budgeter
+
+  celery-beat:
+    container_name: "celery-beat"
+    platform: "linux/amd64"
+    env_file:
+      - ${APP_ENV_FILE:-./back-fastapi/.env}
+    build:
+      context: "./back-fastapi"
+      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+    command: celery -A app.celery beat -l info
+    volumes:
+      - ./back-fastapi:/app
+    depends_on:
+      - redis-budgeter
+
+  dashboard-celery:
+    container_name: "dashboard-celery"
+    build:
+      context: "./back-fastapi"
+      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+    env_file:
+      - ${APP_ENV_FILE:-./back-fastapi/.env}
+    command: celery --broker=redis://redis-budgeter:6379/0 flower --port=5555
+    ports:
+      - 5556:5555
+    depends_on:
+      - back
+      - redis-budgeter
+      - celery-budgeter
+      - celery-beat
+

@@ -16,3 +16,5 @@ dbdata/
 **/__pycache__/
 **/venv/
 .coverage
+
+celerybeat-schedule

@@ -10,12 +10,15 @@ const amount = computed(() => {
   } else if (props.type === 'target') {
     return props.linkedTransaction.amount;
   }
-})
+});
 
 function changeAmount($value) {
+  let value = $value.target.value;
+  value = value.replace(',', '.').replace(/[^0-9.]+/g, '');
+  const updatedAmount = value;
   emit('amountChanged', {
     amountType: props.type,
-    amount: parseFloat($value.target.value)
+    amount: parseFloat(updatedAmount) || 0,
   });
 }
 </script>
@@ -27,10 +30,12 @@ function changeAmount($value) {
         <label for="amount" class="form-label">
           {{ label }}
         </label>
-        <input type="number"
-               @keyup="changeAmount"
+        <input type="text"
+               @input="changeAmount"
                :value="amount"
-               class="form-control" id="amount" step="0.01" />
+               class="form-control"
+               pattern="[0-9]*"
+               inputmode="decimal" />
       </div>
       <div class="col-2 currency">{{ currentAccount?.currency?.code }}</div>
     </div>

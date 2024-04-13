@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 # target_metadata = mymodel.Base.metadata
 from app.database import Base
 from app.models import Account, AccountType, DefaultCategory, UserCategory, Currency, Transaction, User, Language, \
-    UserSettings
+    UserSettings, ExchangeRateHistory
 target_metadata = [Base.metadata]
 
 env = os.environ.get("ENV")
