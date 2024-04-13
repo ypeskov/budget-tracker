@@ -88,8 +88,8 @@ services:
     depends_on:
       - redis-budgeter
 
-  dashboard:
-    container_name: "dashboard"
+  dashboard-celery:
+    container_name: "dashboard-celery"
     build:
       context: "./back-fastapi"
       dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
