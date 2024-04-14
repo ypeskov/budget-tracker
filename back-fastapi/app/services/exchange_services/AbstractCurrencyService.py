@@ -11,5 +11,5 @@ class AbstractCurrencyService(ABC):
         self.rates = None
 
     @abstractmethod
-    def get_currency_rates(self, date: str):
+    def get_currency_rates(self, date: str) -> dict:
         pass

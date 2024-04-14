@@ -23,7 +23,7 @@ class CurrencyBeaconService(AbstractCurrencyService):
         self.api_key = API_KEY
         self.api_version = API_VERSION
 
-    def make_request(self, method: str, **kwargs):
+    def make_request(self, method: str, **kwargs) -> dict:
         params = '&'.join([f'{key}={value}' for key, value in kwargs.items()])
         url = f'{self.api_url}/{self.api_version}/{method}?api_key={self.api_key}&{params}'
         response = request('GET', url)

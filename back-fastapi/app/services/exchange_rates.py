@@ -34,7 +34,7 @@ def update_exchange_rates(db: Session, when: date) -> ExchangeRateHistory:
     """ Add/Update exchange rates for defined date"""
     try:
         currency_service: AbstractCurrencyService = CurrencyBeaconService()
-        prev_exchange_rates: ExchangeRateHistory = db.query(ExchangeRateHistory).filter(  # noqa
+        prev_exchange_rates: ExchangeRateHistory = db.query(ExchangeRateHistory).filter(  # type: ignore
             ExchangeRateHistory.actual_date == when).one_or_none()
         if prev_exchange_rates:
             db.delete(prev_exchange_rates)
