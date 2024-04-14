@@ -54,9 +54,17 @@ function closeNewAccForm() {
     <div class="container">
       <div class="row">
         <div class="col sub-menu">
-          <a href="" class="btn btn-secondary" @click="updateAccountsList">{{ $t('message.update') }}</a>
           <a href="" class="btn btn-secondary" @click.prevent="showNewAccForm=!showNewAccForm">
-            {{ $t('message.newAccount') }}
+            <img src="/images/icons/new-icon.svg"
+                 :title="$t('message.newAccount')"
+                 :alt="$t('message.newAccount')" />
+          </a>
+          <a href=""
+             class="btn btn-secondary"
+             @click="updateAccountsList">
+            <img src="/images/icons/refresh-icon.svg"
+                 :title="$t('message.refresh')"
+                 :alt="$t('message.refresh')" />
           </a>
         </div>
       </div>
