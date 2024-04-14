@@ -51,20 +51,50 @@ const goToSettings = () => {
         <div class="col">
           <nav>
               <span>
-                <RouterLink :to="{ name: 'home' }">{{ $t('menu.home') }}</RouterLink>
+                <RouterLink :to="{ name: 'home' }">
+                  <img src="/images/icons/home-icon.svg"
+                       class="main-menu-icon"
+                       :title="$t('menu.home')"
+                       :alt="$t('menu.home')">
+                </RouterLink>
               </span>
             <span v-if="userStore.isLoggedIn">
-                <RouterLink :to="{ name: 'accounts' }">{{ $t('menu.accounts') }}</RouterLink>
+                <RouterLink :to="{ name: 'accounts' }">
+                  <img src="/images/icons/accounts-icon.svg"
+                       class="main-menu-icon"
+                       :title="$t('menu.accounts')"
+                       :alt="$t('menu.accounts')">
+                </RouterLink>
               </span>
             <span v-if="userStore.isLoggedIn">
-                <RouterLink :to="{ name: 'transactions' }">{{ $t('menu.transactions') }}</RouterLink>
+                <RouterLink :to="{ name: 'transactions' }">
+                  <img src="/images/icons/transactions-icon.svg"
+                       class="main-menu-icon"
+                       :title="$t('menu.transactions')"
+                       :alt="$t('menu.accounts')">
+                </RouterLink>
               </span>
             <span v-if="!userStore.isLoggedIn">
-                <RouterLink :to="{ name: 'login' }">{{ $t('menu.login') }}</RouterLink>
-                <RouterLink :to="{ name: 'register' }">{{ $t('menu.register') }}</RouterLink>
+                <RouterLink :to="{ name: 'login' }">
+                  <img src="/images/icons/enter-icon.svg"
+                       class="main-menu-icon"
+                       :title="$t('menu.login')"
+                       :alt="$t('menu.login')">
+                </RouterLink>
+                <RouterLink :to="{ name: 'register' }">
+                  <img src="/images/icons/register-icon.svg"
+                       class="main-menu-icon"
+                       :title="$t('menu.register')"
+                       :alt="$t('menu.register')">
+                </RouterLink>
               </span>
             <span v-else>
-                <RouterLink :to="{ name: 'logout' }">{{ $t('menu.logout') }}</RouterLink>
+                <RouterLink :to="{ name: 'logout' }">
+                  <img src="/images/icons/exit-icon.svg"
+                       class="main-menu-icon"
+                       :title="$t('menu.logout')"
+                       :alt="$t('menu.logout')">
+                </RouterLink>
               </span>
           </nav>
         </div>
