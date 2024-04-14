@@ -2,7 +2,7 @@ from datetime import datetime,date
 
 from sqlalchemy import Integer, DateTime, Date, func, Boolean, String
 from sqlalchemy.schema import UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.database import Base
