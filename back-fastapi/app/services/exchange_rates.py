@@ -39,7 +39,7 @@ def update_exchange_rates(db: Session, when: date) -> ExchangeRateHistory:
         if prev_exchange_rates:
             db.delete(prev_exchange_rates)
             db.flush()
-        exchange_rates = ExchangeRateHistory(**currency_service.get_currency_rates(when.isoformat()))
+        exchange_rates = ExchangeRateHistory(**currency_service.get_currency_rates(when.isoformat()))  # noqa
         db.add(exchange_rates)
         db.commit()
         return exchange_rates

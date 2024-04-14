@@ -6,7 +6,6 @@ from sqlalchemy import String, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
-from app.models.Currency import Currency
 from app.models.User import User
 from app.models.UserCategory import UserCategory
 
