@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
-from app.schemas.ReportsSchema import FlowOneAccountInputSchema, FlowOneAccountOutputSchema
+from app.schemas.reports_schema import FlowOneAccountInputSchema, FlowOneAccountOutputSchema
 from app.services.errors import AccessDenied
 from app.services.reports import get_account_flow
 
