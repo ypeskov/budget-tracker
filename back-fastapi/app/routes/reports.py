@@ -18,7 +18,7 @@ router = APIRouter(
 )
 
 
-@router.get('/flow-one-account', response_model=FlowOneAccountOutputSchema)
+@router.post('/flow-one-account', response_model=FlowOneAccountOutputSchema)
 def spent_one_account(request: Request,
                       input_data: FlowOneAccountInputSchema,
                       db: Session = Depends(get_db)) -> dict:
