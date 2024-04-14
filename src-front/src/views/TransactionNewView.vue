@@ -98,6 +98,7 @@ onBeforeMount(async () => {
 async function getLinkedTransaction(transaction) {
   const linkedTransaction = await Services.transactionsService.getTransactionDetails(transaction.linkedTransactionId);
   targetTransaction = Object.assign(targetTransaction, linkedTransaction);
+  transaction.targetAmount = linkedTransaction.amount;
 }
 
 function filterCategories() {
