@@ -11,13 +11,13 @@ from app.models.ExchangeRateHistory import ExchangeRateHistory
 ic.configureOutput(includeContext=True)
 
 router = APIRouter(
-    tags=['EchangeRates'],
+    tags=['ExchangeRates'],
     prefix='/exchange-rates',
     dependencies=[Depends(check_token)]
 )
 
 
-@router.get('/exchange_rates')
+@router.get('/')
 def get_exchange_rates(request: Request, db: Session = Depends(get_db)):
     """ Get all exchange rates """
     try:
@@ -28,7 +28,7 @@ def get_exchange_rates(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to get exchange rates')
 
 
-@router.get('/update_exchange_rates')
+@router.get('/update')
 def update_exchange_rates(request: Request, db: Session = Depends(get_db)):
     """ Update exchange rates """
     try:

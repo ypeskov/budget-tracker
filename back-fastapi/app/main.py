@@ -16,6 +16,7 @@ from app.routes.transations import router as transaction_router
 from app.routes.categories import router as category_router
 from app.routes.currencies import router as currency_router
 from app.routes.user_settings import router as settings_router
+from app.routes.exchange_rates import router as exchange_rates_router
 
 from icecream import install
 install()
@@ -38,6 +39,7 @@ app.include_router(transaction_router)
 app.include_router(category_router)
 app.include_router(currency_router)
 app.include_router(settings_router)
+app.include_router(exchange_rates_router)
 
 if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8000)
