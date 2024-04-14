@@ -1,15 +1,13 @@
 import copy
 
+from icecream import ic
 from sqlalchemy.orm import Session
 
-from icecream import ic
-
 from app.models.Account import Account
-from app.models.Transaction import Transaction
-from app.services.CurrencyProcessor import CurrencyProcessor
-from .NonTransferTypeTransaction import NonTransferTypeTransaction
-from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.models.Currency import Currency
+from app.models.Transaction import Transaction
+from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
+from .NonTransferTypeTransaction import NonTransferTypeTransaction
 
 ic.configureOutput(includeContext=True)
 
@@ -23,7 +21,6 @@ class TransferTypeTransaction:
 
     def process(self,
                 transaction_details: UpdateTransactionSchema | CreateTransactionSchema) -> 'TransferTypeTransaction':
-
         src_account_transaction = NonTransferTypeTransaction(self._transaction,
                                                              self._prev_transaction_state,
                                                              self._db,
@@ -36,7 +33,7 @@ class TransferTypeTransaction:
         if self._is_update:
             target_transaction = self._db.query(Transaction).filter_by(id=self._transaction.linked_transaction_id).one()
             self._prev_transaction_state = copy.deepcopy(target_transaction)
-        target_transaction.account_id = transaction_details.target_account_id
+        target_transaction.account_id = transaction_details.target_account_id  # type: ignore
         target_transaction.account = self._db.query(Account).filter_by(id=transaction_details.target_account_id).one()
         target_transaction.amount = transaction_details.target_amount
         target_transaction.linked_transaction_id = self._transaction.id
@@ -55,4 +52,3 @@ class TransferTypeTransaction:
         self._transaction.linked_transaction_id = target_transaction.id
 
         return self
-
