@@ -2,14 +2,18 @@ from pydantic_settings import SettingsConfigDict, BaseSettings
 
 
 class Settings(BaseSettings):
-    db_user: str = 'username'
-    db_password: str = 'userpassword'
-    db_host: str = 'db-budgeter'
-    db_name: str = 'dbname'
-    db_port: int = 5432
+    DB_USER: str = 'username'
+    DB_PASSWORD: str = 'userpassword'
+    DB_HOST: str = 'db-budgeter'
+    DB_NAME: str = 'dbname'
+    DB_PORT: int = 5432
 
     CELERY_BROKER_URL: str = 'redis://redis-budgeter:6379'
     CELERY_RESULT_BACKEND: str = 'redis://redis-budgeter:6379'
+
+    CURRENCYBEACON_API_URL: str = ''
+    CURRENCYBEACON_API_KEY: str = 'currencybeaconapikey'
+    CURRENCYBEACON_API_VERSION: str = 'v1'
 
     TEST_LOG_FILE: str = 'test.log'
 

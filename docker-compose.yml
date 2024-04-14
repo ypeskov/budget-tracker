@@ -10,6 +10,8 @@ services:
     ports:
       - 8000:8000
       - 5678:5678
+    environment:
+      - DB_HOST=db-budgeter
     tty: true
     volumes:
       - ./back-fastapi:/app
