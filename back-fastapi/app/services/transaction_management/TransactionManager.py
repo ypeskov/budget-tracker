@@ -7,11 +7,10 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
 from app.models.Account import Account
-from app.models.Currency import Currency
 from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
-from app.services.errors import AccessDenied, InvalidAccount, InvalidCurrency, InvalidCategory
+from app.services.errors import AccessDenied, InvalidCategory
 from app.services.transaction_management.NonTransferTypeTransaction import NonTransferTypeTransaction
 from app.services.transaction_management.TransferTypeTransaction import TransferTypeTransaction
 from app.services.transaction_management.errors import InvalidTransaction
