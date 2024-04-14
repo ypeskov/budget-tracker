@@ -14,6 +14,7 @@ class UserBase(BaseModel):
 
 
 class UserRegistration(UserBase):
+    id: int | None = None
     first_name: str = ''
     last_name: str = ''
     password: str = password_field
