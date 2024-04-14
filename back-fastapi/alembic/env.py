@@ -23,12 +23,12 @@ if env == "prod":
     load_dotenv(".env.prod")
 else:
     load_dotenv(".env")
-db_user = os.environ.get("db_user")
-db_password = os.environ.get("db_password")
-db_host = os.environ.get("db_host")
-db_name = os.environ.get("db_name")
-db_port = os.environ.get("db_port")
-connection_string = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_HOST = os.environ.get("DB_HOST")
+DB_NAME = os.environ.get("DB_NAME")
+DB_PORT = os.environ.get("DB_PORT")
+connection_string = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

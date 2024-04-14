@@ -1,8 +1,8 @@
-"""exchange_rates table created
+"""add table exchange_rates
 
-Revision ID: f128aead0048
+Revision ID: 4b0af92d44a5
 Revises: aa6f55d2c0c3
-Create Date: 2024-04-14 10:42:51.914059
+Create Date: 2024-04-14 13:14:26.532398
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'f128aead0048'
+revision = '4b0af92d44a5'
 down_revision = 'aa6f55d2c0c3'
 branch_labels = None
 depends_on = None
@@ -22,10 +22,13 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('rates', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('actual_date', sa.Date(), nullable=False),
+    sa.Column('base_currency_code', sa.String(length=3), nullable=False),
+    sa.Column('service_name', sa.String(length=50), nullable=False),
     sa.Column('is_deleted', sa.Boolean(), server_default='f', nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('service_name', 'actual_date', name='unique_service_date')
     )
     op.create_index(op.f('ix_exchange_rates_actual_date'), 'exchange_rates', ['actual_date'], unique=False)
     # ### end Alembic commands ###
