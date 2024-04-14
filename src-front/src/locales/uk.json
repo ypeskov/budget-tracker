@@ -37,7 +37,8 @@
     "none": "Немає",
     "group": "Група",
     "areYouSureWantDeleteCategory": "Ви впевнені, що хочете видалити категорію",
-    "deleteCategory": "Видалити категорію"
+    "deleteCategory": "Видалити категорію",
+    "refresh": "Оновити"
   },
   "menu": {
     "home": "Початок",

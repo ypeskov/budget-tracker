@@ -7,7 +7,6 @@ import { useUserStore } from './stores/user';
 import { UserService } from './services/users';
 
 const router = useRouter();
-const t = useI18n().t;
 const { locale } = useI18n();
 
 const userStore = useUserStore();
@@ -40,7 +39,9 @@ const goToSettings = () => {
       <div class="col header-row">
         <div>{{ $t('message.anotherBudgeter') }}</div>
         <div v-if="userStore.isLoggedIn" class="settings-icon" @click="goToSettings">
-          <img src="/images/icons/settings.svg" :alt="t('message.settings')">
+          <img src="/images/icons/settings-icon.svg"
+               :title="$t('message.settings')"
+               :alt="$t('message.settings')">
         </div>
       </div>
 

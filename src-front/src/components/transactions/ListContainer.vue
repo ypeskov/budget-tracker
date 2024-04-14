@@ -90,16 +90,28 @@ function filterApplied(payload) {
                         returnUrl: returnUrlName,
                         accountId: props.accountId,
                       }
-                    }">{{ $t('message.new') }}
+                    }">
+            <img src="/images/icons/new-icon.svg"
+                 :title="$t('message.new')"
+                 :alt="$t('message.new')" />
           </RouterLink>
         </span>
         <span>
-          <a href="" class="btn btn-secondary" @click="reloadTransactions">{{ $t('message.update') }}</a>
+          <a href="" class="btn" :class="{ 'active-filter btn-success': !reset, 'btn-secondary': reset }"
+             @click="toggleFilter">
+            <img src="/images/icons/filter-icon.svg"
+                 :title="$t('message.filter')"
+                 :alt="$t('message.filter')" />
+            </a>
         </span>
         <span>
-          <a href="" class="btn" :class="{ 'active-filter btn-success': !reset, 'btn-secondary': reset }"
-             @click="toggleFilter">{{ $t('message.filter') }}</a>
+          <a href="" class="btn btn-secondary" @click="reloadTransactions">
+            <img src="/images/icons/refresh-icon.svg"
+                 :title="$t('message.refresh')"
+                 :alt="$t('message.refresh')" />
+          </a>
         </span>
+
       </div>
     </div>
     <div class="row">

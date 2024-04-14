@@ -37,7 +37,8 @@
     "none": "No category",
     "group": "Group",
     "areYouSureWantDeleteCategory": "Are you sure you want to delete this category",
-    "deleteCategory": "Delete category"
+    "deleteCategory": "Delete category",
+    "refresh": "Refresh"
   },
   "menu": {
     "home": "Home",
