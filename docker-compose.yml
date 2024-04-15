@@ -1,43 +1,41 @@
 services:
-  back:
-    container_name: "back"
+  api-orgfin:
+    container_name: "api-orgfin"
     platform: "linux/amd64"
     build:
       context: "./back-fastapi"
-      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+      dockerfile: "../docker/Dockerfile.back-fastapi.dev"
+      tags:
+        - "api-orgfin:${TAG:-latest}"
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     ports:
       - 8000:8000
       - 5678:5678
     environment:
-      - DB_HOST=db-budgeter
+      - DB_HOST=db-orgfin
     tty: true
     volumes:
       - ./back-fastapi:/app
     restart: always
     depends_on:
-      - db-budgeter
+      - db-orgfin
 
-  front:
-    container_name: "front"
+  front-orgfin:
+    container_name: "front-orgfin"
     build:
       context: "./src-front"
-      dockerfile: "../dockerfiles/Dockerfile.front.dev"
+      dockerfile: "../docker/Dockerfile.front.dev"
     ports:
       - 5173:5173
     tty: true
     volumes:
       - ./src-front:/app
       - /app/node_modules
-      # environment:
-      # REACT_APP_API_URL: ${REACT_APP_API_URL}
-  #    depends_on:
-  #      - back
-  
-  db-budgeter:
+
+  db-orgfin:
     image: postgres:15.3-bullseye
-    container_name: Postgres-budgeter
+    container_name: Postgres-orgfin
     restart: always
     environment:
       # POSTGRES_USER: urlshortener
@@ -47,62 +45,62 @@ services:
     volumes:
       - ./dbdata:/var/lib/postgresql/data
 
-  adminer-budgeter:
+  adminer-orgfin:
     image: adminer
-    container_name: Adminer-budgeter
+    container_name: Adminer-orgfin
     restart: always
     ports:
       - 8080:8080
 
-  redis-budgeter:
+  redis-orgfin:
     image: redis:alpine
-    container_name: redis-budgeter
+    container_name: redis-orgfin
     command: redis-server --bind 0.0.0.0
     ports:
       - 6379:6379
     restart: always
 
-  celery-budgeter:
-    container_name: "celery-budgeter"
+  celery-orgfin:
+    container_name: "celery-orgfin"
     platform: "linux/amd64"
     build:
       context: "./back-fastapi"
-      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+      dockerfile: "../docker/Dockerfile.back-fastapi.dev"
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     command: celery -A app.celery worker -l info
     volumes:
       - ./back-fastapi:/app
     depends_on:
-      - redis-budgeter
+      - redis-orgfin
 
-  celery-beat:
+  celery-beat-orgfin:
     container_name: "celery-beat"
     platform: "linux/amd64"
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     build:
       context: "./back-fastapi"
-      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+      dockerfile: "../docker/Dockerfile.back-fastapi.dev"
     command: celery -A app.celery beat -l info
     volumes:
       - ./back-fastapi:/app
     depends_on:
-      - redis-budgeter
+      - redis-orgfin
 
-  dashboard-celery:
-    container_name: "dashboard-celery"
+  dashboard-redis-celery:
+    container_name: "dashboard-redis-celery"
     build:
       context: "./back-fastapi"
-      dockerfile: "../dockerfiles/Dockerfile.back-fastapi.dev"
+      dockerfile: "../docker/Dockerfile.back-fastapi.dev"
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
-    command: celery --broker=redis://redis-budgeter:6379/0 flower --port=5555
+    command: celery --broker=redis://redis-orgfin:6379/0 flower --port=5555
     ports:
       - 5556:5555
     depends_on:
-      - back
-      - redis-budgeter
-      - celery-budgeter
-      - celery-beat
+      - api-orgfin
+      - redis-orgfin
+      - celery-orgfin
+      - celery-beat-orgfin
 

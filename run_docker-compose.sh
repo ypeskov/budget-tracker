@@ -2,12 +2,12 @@
 
 if [ $# -eq 0 ]; then
   echo "Starting services without back app..."
-  docker-compose up db-budgeter \
-                    adminer-budgeter \
-                    front \
-                    redis-budgeter \
-                    celery-budgeter \
-                    celery-beat \
+  docker-compose up db-orgfin \
+                    adminer-orgfin \
+                    front-orgfin \
+                    redis-orgfin \
+                    celery-orgfin \
+                    celery-beat-orgfin \
                     dashboard-celery
 elif [ "$1" == "full" ]; then
   echo "Starting all services..."

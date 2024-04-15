@@ -1,0 +1,38 @@
+services:
+  api-orgfin:
+    container_name: "api-orgfin"
+    image: "ypeskov/api-orgfin:latest"
+    env_file:
+      - ${APP_ENV_FILE:-./back-fastapi/.env}
+    ports:
+      - 8000:8000
+    tty: true
+    restart: always
+
+  redis-orgfin:
+    image: redis:alpine
+    container_name: redis-orgfin
+    command: redis-server --bind 0.0.0.0
+    ports:
+      - 6379:6379
+    restart: always
+
+  celery-orgfin:
+    container_name: "celery-orgfin"
+    image: "ypeskov/api-orgfin:latest"
+    env_file:
+      - ${APP_ENV_FILE:-./back-fastapi/.env}
+    command: celery -A app.celery worker -l info
+    depends_on:
+      - redis-orgfin
+    restart: always
+
+  celery-beat-orgfin:
+    container_name: "celery-beat-orgfin"
+    image: "ypeskov/api-orgfin:latest"
+    env_file:
+      - ${APP_ENV_FILE:-./back-fastapi/.env}
+    command: celery -A app.celery beat -l info
+    depends_on:
+      - redis-orgfin
+    restart: always
