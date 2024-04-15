@@ -1,12 +1,11 @@
 services:
   api-orgfin:
-    container_name: "ypeskov/api-orgfin"
+    container_name: "api-orgfin"
     platform: "linux/amd64"
     build:
       context: "./back-fastapi"
-      dockerfile: "../docker/Dockerfile.back-fastapi.dev"
-      tags:
-        - "api-orgfin:${TAG:-latest}"
+      dockerfile: "./Dockerfile"
+      target: ${TARGET:-dev}
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     ports:
@@ -65,7 +64,8 @@ services:
     platform: "linux/amd64"
     build:
       context: "./back-fastapi"
-      dockerfile: "../docker/Dockerfile.back-fastapi.dev"
+      dockerfile: "./Dockerfile"
+      target: ${TARGET:-dev}
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     command: celery -A app.celery worker -l info
@@ -75,13 +75,14 @@ services:
       - redis-orgfin
 
   celery-beat-orgfin:
-    container_name: "celery-beat"
+    container_name: "celery-beat-orgfin"
     platform: "linux/amd64"
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     build:
       context: "./back-fastapi"
-      dockerfile: "../docker/Dockerfile.back-fastapi.dev"
+      dockerfile: "./Dockerfile"
+      target: ${TARGET:-dev}
     command: celery -A app.celery beat -l info
     volumes:
       - ./back-fastapi:/app
@@ -92,7 +93,8 @@ services:
     container_name: "dashboard-redis-celery"
     build:
       context: "./back-fastapi"
-      dockerfile: "../docker/Dockerfile.back-fastapi.dev"
+      dockerfile: "./Dockerfile"
+      target: ${TARGET:-dev}
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     command: celery --broker=redis://redis-orgfin:6379/0 flower --port=5555
