@@ -31,11 +31,10 @@ elif [[ $1 == "push" ]]; then
     docker push ypeskov/api-orgfin:${2:-latest}
 
     echo "Updating docker-compose.yaml"
-    sed -i '' "s|ypeskov/api-orgfin:[^[:space:]]*|ypeskov/api-orgfin:${2:-latest}|g" ./docker-compose.prod.yaml
-    echo "Updated docker-compose.prod.yaml: $(grep -o "ypeskov/api-orgfin:[^[:space:]]*" ./docker-compose.prod.yaml)"
-    echo "Pushing to server"
-    scp ./docker-compose.prod.yaml projects@peskov.info:budget/docker-compose.prod.yaml
-    echo "Server updated. Please log in to and run run.sh to apply changes."
+    sed -i '' "s|ypeskov/api-orgfin:[^[:space:]]*|ypeskov/api-orgfin:${2:-latest}|g" ../docker-compose.prod.yml
+    echo "Updated docker-compose.prod.yaml: $(grep -o "ypeskov/api-orgfin:[^[:space:]]*" ../docker-compose.prod.yml)"
+    echo "Commit to git and push to GitHub to apply changes."
+    echo "Run deploy_full.sh on the server to apply changes."
 
     echo "${2:-latest}" > version.txt
 else
