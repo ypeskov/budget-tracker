@@ -5,7 +5,7 @@ git pull
 
 echo "Pull the Docker images from Docker Hub and restart the containers in docker-compose.prod.yaml."
 docker-compose -f docker-compose.prod.yml down &&\
-docker-compose up -f docker-compose.prod.yml -d
+docker-compose -f docker-compose.prod.yml up -d
 
 echo "Building the front-end and restart front-end"
 cd src-front && bash build.sh
