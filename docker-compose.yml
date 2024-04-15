@@ -1,6 +1,6 @@
 services:
   api-orgfin:
-    container_name: "api-orgfin"
+    container_name: "ypeskov/api-orgfin"
     platform: "linux/amd64"
     build:
       context: "./back-fastapi"
