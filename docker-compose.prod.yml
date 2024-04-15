@@ -1,12 +1,15 @@
 services:
   api-orgfin:
     container_name: "api-orgfin"
-    image: "ypeskov/api-orgfin:latest"
+    image: "ypeskov/api-orgfin:0.5"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
-      - ${APP_ENV_FILE:-./back-fastapi/.env}
+      - ${APP_ENV_FILE:-./back-fastapi/.env.prod}
     ports:
       - 8000:8000
     tty: true
+    command: "gunicorn app.main:app -w 3 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
     restart: always
 
   redis-orgfin:
@@ -19,9 +22,9 @@ services:
 
   celery-orgfin:
     container_name: "celery-orgfin"
-    image: "ypeskov/api-orgfin:latest"
+    image: "ypeskov/api-orgfin:0.5"
     env_file:
-      - ${APP_ENV_FILE:-./back-fastapi/.env}
+      - ${APP_ENV_FILE:-./back-fastapi/.env.prod}
     command: celery -A app.celery worker -l info
     depends_on:
       - redis-orgfin
@@ -29,9 +32,9 @@ services:
 
   celery-beat-orgfin:
     container_name: "celery-beat-orgfin"
-    image: "ypeskov/api-orgfin:latest"
+    image: "ypeskov/api-orgfin:0.5"
     env_file:
-      - ${APP_ENV_FILE:-./back-fastapi/.env}
+      - ${APP_ENV_FILE:-./back-fastapi/.env.prod}
     command: celery -A app.celery beat -l info
     depends_on:
       - redis-orgfin
