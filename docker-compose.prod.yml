@@ -2,6 +2,7 @@ services:
   api-orgfin:
     container_name: "api-orgfin"
     image: "ypeskov/api-orgfin:0.2"
+    network_mode: host
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env.prod}
     ports:
