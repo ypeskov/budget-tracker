@@ -8,7 +8,7 @@ if [ $# -eq 0 ]; then
                     redis-orgfin \
                     celery-orgfin \
                     celery-beat-orgfin \
-                    dashboard-celery
+                    dashboard-redis-celery
 elif [ "$1" == "full" ]; then
   echo "Starting all services..."
   docker-compose up
