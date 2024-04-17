@@ -10,7 +10,7 @@ services:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     ports:
       - 8000:8000
-      - 5678:5678
+      - 5679:5678
     environment:
       - DB_HOST=db-orgfin
     tty: true
@@ -55,8 +55,6 @@ services:
     image: redis:alpine
     container_name: redis-orgfin
     command: redis-server --bind 0.0.0.0
-    ports:
-      - 6379:6379
     restart: always
 
   celery-orgfin:

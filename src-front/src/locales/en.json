@@ -46,7 +46,8 @@
     "transactions": "Transactions",
     "logout": "Logout",
     "login": "Login",
-    "register": "Register"
+    "register": "Register",
+    "reports": "Reports"
   },
   "buttons": {
     "login": "Login",
@@ -62,6 +63,8 @@
     "apply": "Apply",
     "categories": "Categories",
     "close": "Close",
-    "addNewCategory": "Add new category"
+    "addNewCategory": "Add new category",
+    "cashFlowReport": "Cash flow report",
+    "balanceReport": "Balance report"
   }
 }

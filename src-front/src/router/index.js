@@ -70,6 +70,24 @@ const router = createRouter({
       component: () => import('../views/TransactionsListView.vue'),
     },
     {
+      path: '/reports',
+      name: 'reports',
+      meta: {
+        requiresAuth: true,
+        requiresUnAuth: false,
+      },
+      component: () => import('../views/ReportsView.vue'),
+    },
+    {
+      path: '/reports/cashflow',
+      name: 'reports-cashflow',
+      meta: {
+        requiresAuth: true,
+        requiresUnAuth: false,
+      },
+      component: () => import('../views/CashFlowReportView.vue'),
+    },
+    {
       path: '/transactions/:id',
       name: 'transactionDetails',
       meta: {
