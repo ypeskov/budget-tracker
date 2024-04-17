@@ -10,7 +10,7 @@ services:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     ports:
       - 8000:8000
-      - 5678:5678
+      - 5679:5678
     environment:
       - DB_HOST=db-orgfin
     tty: true

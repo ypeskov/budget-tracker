@@ -63,6 +63,8 @@
     "apply": "Застосувати",
     "categories": "Категорії",
     "close": "Закрити",
-    "addNewCategory": "Додати нову категорію"
+    "addNewCategory": "Додати нову категорію",
+    "cashFlowReport": "Звіт по грошовому потоку",
+    "balanceReport": "Звіт по балансу"
   }
 }

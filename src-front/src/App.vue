@@ -75,7 +75,7 @@ const goToSettings = () => {
               </RouterLink>
             </span>
             <span v-if="userStore.isLoggedIn">
-              <RouterLink :to="{ name: 'transactions' }">
+              <RouterLink :to="{ name: 'reports' }">
                 <img src="/images/icons/reports-icon.svg"
                      class="main-menu-icon"
                      :title="$t('menu.reports')"
