@@ -15,6 +15,9 @@ class CashFlowReportInputSchema(BaseModel):
 
 
 class CashFlowReportOutputSchema(BaseModel):
+    account_id: int
+    account_name: str
+    currency: str
     total_income: float
     total_expenses: float
     net_flow: float
