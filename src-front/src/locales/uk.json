@@ -46,7 +46,8 @@
     "transactions": "Транзакції",
     "logout": "Вийти",
     "login": "Вхід",
-    "register": "Реєстрація"
+    "register": "Реєстрація",
+    "reports": "Звіти"
   },
   "buttons": {
     "login": "Вхід",

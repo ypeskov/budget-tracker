@@ -16,8 +16,8 @@ services:
     image: redis:alpine
     container_name: redis-orgfin
     command: redis-server --bind 0.0.0.0
-    ports:
-      - 6379:6379
+#    ports:
+#      - 6379:6379
     restart: always
 
   celery-orgfin:

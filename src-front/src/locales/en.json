@@ -46,7 +46,8 @@
     "transactions": "Transactions",
     "logout": "Logout",
     "login": "Login",
-    "register": "Register"
+    "register": "Register",
+    "reports": "Reports"
   },
   "buttons": {
     "login": "Login",
