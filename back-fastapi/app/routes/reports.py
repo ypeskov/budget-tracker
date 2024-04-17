@@ -18,7 +18,7 @@ router = APIRouter(
 )
 
 
-@router.post('/flow-one-account', response_model=list[CashFlowReportOutputSchema])
+@router.post('/cashflow/', response_model=list[CashFlowReportOutputSchema])
 def cash_flow(request: Request,
               input_data: CashFlowReportInputSchema,
               db: Session = Depends(get_db)) -> list[dict]:
