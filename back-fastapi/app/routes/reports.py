@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
-from app.schemas.reports_schema import FlowOneAccountInputSchema, FlowOneAccountOutputSchema
+from app.schemas.reports_schema import CashFlowReportInputSchema, CashFlowReportOutputSchema
 from app.services.errors import AccessDenied
-from app.services.reports import get_account_flow
+from app.services.reports import get_cash_flows
 
 ic.configureOutput(includeContext=True)
 
@@ -18,17 +18,17 @@ router = APIRouter(
 )
 
 
-@router.post('/flow-one-account', response_model=FlowOneAccountOutputSchema)
-def spent_one_account(request: Request,
-                      input_data: FlowOneAccountInputSchema,
-                      db: Session = Depends(get_db)) -> dict:
+@router.post('/flow-one-account', response_model=list[CashFlowReportOutputSchema])
+def cash_flow(request: Request,
+              input_data: CashFlowReportInputSchema,
+              db: Session = Depends(get_db)) -> list[dict]:
     """ Get all expenses for one account within a given time period """
     try:
-        result: dict = get_account_flow(request.state.user['id'],
-                                        db,
-                                        input_data.account_id,
-                                        input_data.start_date,
-                                        input_data.end_date)
+        result: list[dict] = get_cash_flows(request.state.user['id'],
+                                            db,
+                                            input_data.account_ids,
+                                            input_data.start_date,
+                                            input_data.end_date)
         return result
     except AccessDenied as e:
         logger.exception(e)

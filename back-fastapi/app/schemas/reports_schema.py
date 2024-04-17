@@ -4,8 +4,8 @@ from pydantic import ConfigDict, BaseModel
 from pydantic.alias_generators import to_camel
 
 
-class FlowOneAccountInputSchema(BaseModel):
-    account_id: int
+class CashFlowReportInputSchema(BaseModel):
+    account_ids: list[int]
     start_date: datetime | None = None
     end_date: datetime | None = None
 
@@ -14,7 +14,7 @@ class FlowOneAccountInputSchema(BaseModel):
                               alias_generator=to_camel)
 
 
-class FlowOneAccountOutputSchema(BaseModel):
+class CashFlowReportOutputSchema(BaseModel):
     total_income: float
     total_expenses: float
     net_flow: float

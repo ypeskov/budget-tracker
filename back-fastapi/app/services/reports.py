@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from icecream import ic
 from sqlalchemy.orm import Session
@@ -11,20 +12,22 @@ from app.models.Account import Account
 ic.configureOutput(includeContext=True)
 
 
-def get_account_flow(user_id: int,
-                     db: Session,
-                     account_id: int,
-                     start_date: datetime | None,
-                     end_date: datetime | None) -> dict:
-    """ Get all expenses for one account within a given time period """
-    account = db.query(Account).filter(Account.id == account_id).one()
-    if account.user_id != user_id:
-        raise AccessDenied(f'User {user_id} does not have access to account {account_id}')
+def get_cash_flows(user_id: int,
+                   db: Session,
+                   account_ids:list[int],
+                   start_date: datetime | None,
+                   end_date: datetime | None) -> list[dict]:
+    """ Get all expenses for accounts within a given time period """
+    accounts = (db.query(Account)
+                .filter(Account.id.in_(account_ids))
+                .filter(Account.user_id == user_id)
+                .all())
 
     query = db.query(
+        Transaction.account_id,
         func.sum(func.coalesce(Transaction.amount, 0)).filter(Transaction.is_income == True).label('total_income'),
         func.sum(func.coalesce(Transaction.amount, 0)).filter(Transaction.is_income == False).label('total_expenses')
-    ).filter(Transaction.account_id == account_id)
+    ).filter(Transaction.account_id.in_(account_ids))
 
     filters = []
     if start_date:
@@ -35,14 +38,21 @@ def get_account_flow(user_id: int,
     if filters:
         query = query.filter(*filters)
 
-    result = query.one()
+    query = query.group_by(Transaction.account_id)
+    results = query.all()
 
-    total_income = result.total_income or 0
-    total_expenses = result.total_expenses or 0
-    net_flow = total_income - total_expenses
+    cash_flows = []
+    for result in results:
+        ic(result)
+        account_id, total_income, total_expenses = result
+        total_income = Decimal(total_income or 0)
+        total_expenses = Decimal(total_expenses or 0)
+        net_flow = total_income - total_expenses
+        cash_flows.append({
+            'account_id': account_id,
+            'total_income': total_income,
+            'total_expenses': total_expenses,
+            'net_flow': net_flow
+        })
 
-    return {
-        'total_income': total_income,
-        'total_expenses': total_expenses,
-        'net_flow': net_flow,
-    }
+    return cash_flows
