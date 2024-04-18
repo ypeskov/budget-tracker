@@ -2,7 +2,6 @@ import copy
 from datetime import datetime, timezone
 
 from icecream import ic
-
 from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
@@ -112,15 +111,28 @@ class TransactionManager:
         return self
 
     def delete_transaction(self) -> 'TransactionManager':
+        direct_transaction_type = NonTransferTypeTransaction(self._transaction,
+                                                             self.prev_transaction_state,
+                                                             self.db)
+        direct_transaction_type.correct_prev_balance()
+
+        #  if transaction is transfer, we need to delete linked transaction too
         if self._transaction.is_transfer:
-            transfer_type_transaction = TransferTypeTransaction(self._transaction, self.state, self.state.db)
-        else:
-            non_transfer_transaction = NonTransferTypeTransaction(self._transaction, self.state, self.state.db)
-            non_transfer_transaction.correct_prev_balance()
+            indirect_transaction_id = self._transaction.linked_transaction_id
+            indirect_transaction = (self.db.query(Transaction)
+                                    .filter_by(id=indirect_transaction_id)
+                                    .one())
+            prev_indirect_transaction_state = copy.deepcopy(indirect_transaction)
+            indirect_transaction.is_deleted = True
+            indirect_transaction_type = NonTransferTypeTransaction(indirect_transaction,
+                                                                   prev_indirect_transaction_state,
+                                                                   self.db)
+            indirect_transaction_type.correct_prev_balance()
+            self.db.add(indirect_transaction)
 
         self._transaction.is_deleted = True
-        self.state.db.add(self._transaction)
-        self.state.db.commit()
+        self.db.add(self._transaction)
+        self.db.commit()
 
         return self
 

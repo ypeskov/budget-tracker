@@ -91,7 +91,7 @@ def delete_transaction(transaction_id: int, request: Request,
     """ Delete transaction """
     try:
         transaction = delete(transaction_id, request.state.user['id'], db)
-        return transaction
+        return ResponseTransactionSchema.validate(transaction)
     except InvalidTransaction as e:
         logger.error(f'Error deleting transaction: {e.detail}')
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
