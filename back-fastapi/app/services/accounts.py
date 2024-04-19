@@ -1,9 +1,9 @@
-from datetime import datetime
 from datetime import UTC
+from datetime import datetime
 
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import Session
 
 from app.models.Account import Account
 from app.models.AccountType import AccountType
@@ -31,14 +31,17 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
         account_dto.opening_date = datetime.now(UTC)
 
     if hasattr(account_dto, 'id'):
-        account = db.execute(select(Account).where(Account.id == account_dto.id)).scalar_one_or_none()
+        account = (db.execute(select(Account)
+                   .where(Account.id == account_dto.id, Account.user_id == user_id))
+                   .scalar_one_or_none())
         if account is None:
             raise InvalidAccount()
         if account:
             account.user = existing_user
             account.account_type = account_type
             account.currency = currency
-            account.initial_balance = account_dto.initial_balance
+            if account_dto.initial_balance:
+                account.initial_balance = account_dto.initial_balance
             account.balance = account_dto.balance
             account.opening_date = account_dto.opening_date
             account.is_hidden = account_dto.is_hidden
