@@ -4,6 +4,7 @@ import { CategoriesService } from './categories';
 import { TransactionsService } from './transactions';
 import { CurrenciesService } from './currencies';
 import { SettingsService } from './settings';
+import { ReportsService} from '@/services/reports';
 
 import { useUserStore } from '../stores/user';
 import { useAccountStore } from '../stores/account';
@@ -17,6 +18,7 @@ const categoriesService = new CategoriesService(userService);
 const transactionsService = new TransactionsService(userService, accountsService);
 const currenciesService = new CurrenciesService(userService);
 const settingsService = new SettingsService(userService);
+const reportsService = new ReportsService(userService);
 
 userService.injectServices({
   accountsService,
@@ -24,6 +26,7 @@ userService.injectServices({
   transactionsService,
   currenciesService,
   settingsService,
+  reportsService,
 });
 
 export const Services = {
@@ -33,5 +36,6 @@ export const Services = {
   transactionsService,
   currenciesService,
   settingsService,
+  reportsService,
 };
 
