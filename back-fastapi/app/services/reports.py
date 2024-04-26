@@ -21,17 +21,15 @@ def get_cash_flows(user_id: int,
                    period: str = 'monthly') -> list[dict]:
     """ Get all cash flow transactions for accounts within a given time period and additional account information """
 
-    CurrencyAlias = aliased(Currency)
-
     accounts = db.query(
         Account.id,
         Account.name,
-        CurrencyAlias.code.label("currency")
+        Currency.code.label("currency")
     ).filter(
         Account.id.in_(account_ids),
         Account.user_id == user_id
     ).join(
-        CurrencyAlias, Account.currency_id == CurrencyAlias.id
+        Currency, Account.currency_id == Currency.id
     ).all()
 
     account_info = {account.id: {"name": account.name, "currency": account.currency} for account in accounts}

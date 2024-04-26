@@ -38,7 +38,8 @@
     "group": "Group",
     "areYouSureWantDeleteCategory": "Are you sure you want to delete this category",
     "deleteCategory": "Delete category",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "cashFlowReport": "Cash flow report"
   },
   "menu": {
     "home": "Home",

@@ -38,7 +38,8 @@
     "group": "Група",
     "areYouSureWantDeleteCategory": "Ви впевнені, що хочете видалити категорію",
     "deleteCategory": "Видалити категорію",
-    "refresh": "Оновити"
+    "refresh": "Оновити",
+    "cashFlowReport": "Звіт по грошовому потоку"
   },
   "menu": {
     "home": "Початок",

@@ -1,96 +1,109 @@
 <script setup>
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, reactive, ref } from 'vue';
 import { Bar } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip } from 'chart.js';
 
 import { Services } from '@/services/servicesConfig';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
-const chartData = ref({
+const loaded = ref(false);
+
+const chartData = reactive({
   labels: [],
   datasets: [
     {
       label: 'Total Income',
       backgroundColor: 'rgba(72,234,12,0.83)',
-      data: []
+      data: [],
     },
     {
       label: 'Total Expenses',
       backgroundColor: 'rgba(245,28,70,0.83)',
-      data: []
+      data: [],
     },
     {
       label: 'Net Flow',
       backgroundColor: 'rgba(12,53,199,0.82)',
-      data: []
-    }
-  ]
+      data: [],
+    },
+  ],
 });
 
-const chartOptions = ref({
+const chartOptions = reactive({
   responsive: true,
   maintainAspectRatio: false,
   scales: {
     y: {
-      beginAtZero: true
-    }
-  }
+      beginAtZero: true,
+    },
+  },
 });
 
-const accountsData = [
-  {
-    "accountId": 17,
-    "accountName": "DSK Main",
-    "currency": "BGN",
-    "totalIncome": 0.0,
-    "totalExpenses": 3008.44,
-    "netFlow": -3008.44,
-    "period": "2024-03"
-  },
-  {
-    "accountId": 17,
-    "accountName": "DSK Main",
-    "currency": "BGN",
-    "totalIncome": 14313.44,
-    "totalExpenses": 9655.0,
-    "netFlow": 4658.44,
-    "period": "2024-04"
-  },
-  {
-    "accountId": 18,
-    "accountName": "DSK Virtual",
-    "currency": "BGN",
-    "totalIncome": 0.0,
-    "totalExpenses": 0.0,
-    "netFlow": 0.0,
-    "period": "2024-04"
-  }
-];
-
-accountsData.forEach(item => {
-  chartData.value.labels.push(item.period + ' (' + item.accountName + ')');
-  chartData.value.datasets[0].data.push(item.totalIncome);
-  chartData.value.datasets[1].data.push(item.totalExpenses);
-  chartData.value.datasets[2].data.push(item.netFlow);
-});
+const accounts = reactive([]);
+const accountIdx = ref(0);
 
 onBeforeMount(async () => {
+  accounts.push(...(await Services.accountsService.getAllUserAccounts()));
+  await getAccountData(accounts[accountIdx.value].id);
+});
+
+async function getAccountData(accountId) {
   const cashFlowReport = await Services.reportsService
     .getReport('cashflow', {
-      accountIds: [17, 18, 19],
-      period: 'daily',
+      accountIds: [accountId],
+      period: 'monthly',
     });
-  console.log(cashFlowReport);
+  cashFlowReport.forEach(item => {
+    chartData.labels.push(item.period + ' (' + item.accountName + ')');
+    chartData.datasets[0].data.push(item.totalIncome);
+    chartData.datasets[1].data.push(item.totalExpenses);
+    chartData.datasets[2].data.push(item.netFlow);
+  });
+  loaded.value = true;
+}
 
-});
+function clearChartData() {
+  chartData.labels = [];
+  chartData.datasets[0].data = [];
+  chartData.datasets[1].data = [];
+  chartData.datasets[2].data = [];
+}
+
+async function changeAccount($event) {
+  accountIdx.value = parseInt($event.target.value, 10);
+  loaded.value = false;
+  clearChartData();
+  await getAccountData(accounts[$event.target.value].id);
+  accountIdx.value = parseInt($event.target.value, 10);
+}
 
 </script>
 
 <template>
   <main>
-    <div>
-      <Bar :data="chartData" :options="chartOptions" />
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1>{{ $t('message.cashFlowReport') }}</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <select class="form-select bottom-space"
+                  @change="changeAccount"
+                  :value="accountIdx">
+            <option v-for="(acc, index) in accounts" :key="acc.id" :value="index">
+              {{ acc.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <Bar v-if="loaded" :data="chartData" :options="chartOptions" />
+        </div>
+      </div>
     </div>
   </main>
 </template>

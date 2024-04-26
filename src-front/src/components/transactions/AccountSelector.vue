@@ -1,15 +1,11 @@
 <script setup>
-import { computed, reactive } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-
-import { Services } from '../../services/servicesConfig';
 
 const props = defineProps(['transaction', 'accounts', 'accountType', 'linkedTransaction']);
 const emit = defineEmits(['accountChanged']);
 
 const t = useI18n().t;
-
-
 
 function changeAccount($event) {
   const acc = props.accounts[$event.target.value];
