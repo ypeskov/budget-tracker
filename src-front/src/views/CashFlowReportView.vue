@@ -57,7 +57,7 @@ async function getAccountData(accountId) {
   cashFlowReport.forEach(item => {
     chartData.labels.push(item.period + ' (' + item.accountName + ')');
     chartData.datasets[0].data.push(item.totalIncome);
-    chartData.datasets[1].data.push(item.totalExpenses);
+    chartData.datasets[1].data.push(-1 * item.totalExpenses);  // Change sign to show expenses as negative values
     chartData.datasets[2].data.push(item.netFlow);
   });
   loaded.value = true;
