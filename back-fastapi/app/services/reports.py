@@ -1,9 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from icecream import ic
-from sqlalchemy import case, and_, extract
-from sqlalchemy.orm import Session, aliased
+from sqlalchemy import case, and_
+from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
 from app.models.Account import Account
@@ -62,7 +62,7 @@ def get_cash_flows(user_id: int,
     if start_date:
         additional_filters.append(Transaction.date_time >= start_date)
     if end_date:
-        additional_filters.append(Transaction.date_time <= end_date)
+        additional_filters.append(Transaction.date_time <= (end_date + timedelta(days=1)))
 
     if additional_filters:
         query = query.filter(*additional_filters)
