@@ -39,7 +39,12 @@
     "areYouSureWantDeleteCategory": "Ви впевнені, що хочете видалити категорію",
     "deleteCategory": "Видалити категорію",
     "refresh": "Оновити",
-    "cashFlowReport": "Звіт по грошовому потоку"
+    "cashFlowReport": "Звіт по грошовому потоку",
+    "startDate": "Дата початку",
+    "endDate": "Дата закінчення",
+    "period": "Період",
+    "monthly": "Щомісяця",
+    "daily": "Щоденно"
   },
   "menu": {
     "home": "Початок",
