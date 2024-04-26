@@ -28,7 +28,8 @@ def cash_flow(request: Request,
                                             db,
                                             input_data.account_ids,
                                             input_data.start_date,
-                                            input_data.end_date)
+                                            input_data.end_date,
+                                            input_data.period)
         return result
     except AccessDenied as e:
         logger.exception(e)

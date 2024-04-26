@@ -8,6 +8,7 @@ class CashFlowReportInputSchema(BaseModel):
     account_ids: list[int]
     start_date: datetime | None = None
     end_date: datetime | None = None
+    period: str
 
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,
@@ -21,6 +22,7 @@ class CashFlowReportOutputSchema(BaseModel):
     total_income: float
     total_expenses: float
     net_flow: float
+    period: str | None = None
 
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,
