@@ -7,14 +7,14 @@ const emit = defineEmits(['amountChanged']);
 const amount = computed(() => {
   if (props.type === 'src') {
     return props.transaction.amount;
-  } else if (props.type === 'target') {
+  } else  {
     return props.linkedTransaction.amount;
   }
 });
 
 function changeAmount($value) {
   let value = $value.target.value;
-  value = value.replace(',', '.').replace(/[^0-9.]+/g, '');
+  value = value.replace(',', '.');
   const updatedAmount = value;
   emit('amountChanged', {
     amountType: props.type,

@@ -25,8 +25,8 @@ const currentAccount = ref(accounts[0]);
 const targetAccount = ref(accounts[0]);
 const categories = ref([]);
 const showDeleteConfirmation = ref(false);
-let targetTransaction = reactive({});
 
+let targetTransaction = reactive({});
 let transaction = reactive({});
 let filteredCategories = ref([]);
 
@@ -50,6 +50,7 @@ function amountChanged({ amountType, amount }) {
   if (amountType === 'src') {
     transaction.amount = amount;
   } else {
+    targetTransaction.amount = amount;
     transaction.targetAmount = amount;
   }
 }
