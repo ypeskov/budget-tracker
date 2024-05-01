@@ -26,7 +26,7 @@ async function submitLogin() {
     loginEmail.value = '';
     loginPassword.value = '';
     locale.value = userStore.settings.language;
-    await router.push('/');
+    await router.push({name: 'accounts'});
   } catch (error) {
     if (error instanceof HttpError && error.statusCode === 401) {
       console.log(error.message);

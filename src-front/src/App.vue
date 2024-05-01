@@ -50,7 +50,7 @@ const goToSettings = () => {
       <div class="row nav-row">
         <div class="col">
           <nav>
-            <span>
+            <span v-if="!userStore.isLoggedIn">
               <RouterLink :to="{ name: 'home' }">
                 <img src="/images/icons/home-icon.svg"
                      class="main-menu-icon"
