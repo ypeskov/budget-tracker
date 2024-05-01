@@ -56,6 +56,7 @@ def get_cash_flows(user_id: int,
         .filter(Account.user_id == user_id, Account.id.in_(account_ids))
         .filter(Account.user_id == user_id, Account.id.in_(account_ids))
         .group_by(Account.id, func.to_char(Transaction.date_time, period_str))
+        .order_by(Account.id, label)
     )
 
     additional_filters = []
