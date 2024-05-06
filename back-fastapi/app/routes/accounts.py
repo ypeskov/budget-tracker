@@ -28,9 +28,9 @@ def add_account(account_dto: CreateAccountSchema, request: Request, db: Session 
 
 
 @router.get('/', response_model=list[AccountResponseSchema] | None)
-def get_accounts(request: Request, db: Session = Depends(get_db)):
+def get_accounts(request: Request, includeHidden: bool | None, db: Session = Depends(get_db)):
     try:
-        return get_user_accounts(request.state.user['id'], db)
+        return get_user_accounts(request.state.user['id'], db, include_hidden=includeHidden)
     except InvalidUser as e:
         logger.exception(f'Error getting user accounts: {e}')
         raise HTTPException(status_code=400, detail=str(e))

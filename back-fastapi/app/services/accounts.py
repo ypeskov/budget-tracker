@@ -1,9 +1,11 @@
 from datetime import UTC
 from datetime import datetime
 
-from sqlalchemy import asc, select
+from sqlalchemy import asc, select, or_
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
+
+from icecream import ic
 
 from app.models.Account import Account
 from app.models.AccountType import AccountType
@@ -11,6 +13,9 @@ from app.models.Currency import Currency
 from app.models.User import User
 from app.schemas.account_schema import CreateAccountSchema, UpdateAccountSchema
 from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied
+
+
+ic.configureOutput(includeContext=True)
 
 
 def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_id: int, db: Session) -> Account:
@@ -72,10 +77,14 @@ def get_user_accounts(user_id: int,
 
     if not include_deleted:
         query = query.filter(Account.is_deleted == False)
-    if not include_hidden:
+
+    if include_hidden:
+        query = query.filter(or_(Account.is_hidden == False, Account.is_hidden == True))
+    else:
         query = query.filter(Account.is_hidden == False)
 
     accounts = query.all()
+
     return accounts
 
 

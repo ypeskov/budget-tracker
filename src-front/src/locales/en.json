@@ -44,7 +44,8 @@
     "endDate": "End date",
     "period": "Period",
     "monthly": "Monthly",
-    "daily": "Daily"
+    "daily": "Daily",
+    "showHiddenAccounts": "Show hidden accounts"
   },
   "menu": {
     "home": "Home",
