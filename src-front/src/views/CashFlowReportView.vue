@@ -48,7 +48,7 @@ const endDate = ref(DateTime.now().toISODate()); // 'YYYY-MM-DD'
 const period = ref('monthly');
 
 onBeforeMount(async () => {
-  accounts.push(...(await Services.accountsService.getAllUserAccounts()));
+  accounts.push(...(await Services.accountsService.getUserAccounts()));
   await getAccountData(accounts[accountIdx.value].id);
 });
 

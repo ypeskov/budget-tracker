@@ -14,7 +14,7 @@ export class AccountService {
     this.userService = userService;
   }
 
-  async getAllUserAccounts() {
+  async getUserAccounts(includeHidden = false) {1
     // need to make more clever logic of account list update from server
     const currentTime = DateTime.now();
     const deltaFromLastUpdate = currentTime - this.accountStore.lastUpdated;
@@ -24,12 +24,12 @@ export class AccountService {
       return this.accountStore.accounts;
     }
 
-    const accountsUrl = '/accounts/';
+    const accountsUrl = `/accounts/?includeHidden=${includeHidden ? 'true' : 'false'}`;
 
-    const accs = await request(accountsUrl, {}, { userService: this.userService });
-    if (accs) {
+    const accounts = await request(accountsUrl, {}, { userService: this.userService });
+    if (accounts) {
       this.accountStore.accounts.length = 0;
-      this.accountStore.accounts.push(...accs);
+      this.accountStore.accounts.push(...accounts);
       this.accountStore.lastUpdated = DateTime.now();
       this.setShouldUpdateAccountsList(false);
       return this.accountStore.accounts;

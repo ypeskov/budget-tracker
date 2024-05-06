@@ -19,11 +19,11 @@ onBeforeMount(async () => {
   }
 });
 
-async function reReadAllAccounts() {
+async function reReadAllAccounts( includeHidden = false) {
   Services.accountsService.setShouldUpdateAccountsList(true);
   accounts.length = 0;
   try {
-    const tmpAccounts = await Services.accountsService.getAllUserAccounts();
+    const tmpAccounts = await Services.accountsService.getUserAccounts(includeHidden);
     if (tmpAccounts) {
       accounts.push(...tmpAccounts);
     }
@@ -47,19 +47,31 @@ async function accountCreated() {
 function closeNewAccForm() {
   showNewAccForm.value = false;
 }
+
+function toggleHiddenAccounts(event) {
+  reReadAllAccounts(event.target.checked);
+}
 </script>
 
 <template>
   <main>
     <div class="container">
       <div class="row">
+        <div class="col">
+          <label class="btn btn-secondary">
+            <input type="checkbox" @change="toggleHiddenAccounts">
+            {{ $t('message.showHiddenAccounts') }}
+          </label>
+        </div>
         <div class="col sub-menu">
-          <a href="" class="btn btn-secondary" @click.prevent="showNewAccForm=!showNewAccForm">
+          <a href="javascript:void(0);"
+             class="btn btn-secondary"
+             @click.prevent="showNewAccForm=!showNewAccForm">
             <img src="/images/icons/new-icon.svg"
                  :title="$t('message.newAccount')"
                  :alt="$t('message.newAccount')" />
           </a>
-          <a href=""
+          <a href="javascript:void(0);"
              class="btn btn-secondary"
              @click="updateAccountsList">
             <img src="/images/icons/refresh-icon.svg"

@@ -21,7 +21,7 @@ watch(props['selectedAccounts'], (newSelectedAccounts) => {
 onBeforeMount(async () => {
   try {
     accounts.length = 0;
-    const tmpAccounts = await Services.accountsService.getAllUserAccounts();
+    const tmpAccounts = await Services.accountsService.getUserAccounts();
     if (tmpAccounts) {
       accounts.push(...tmpAccounts);
     }
