@@ -1,12 +1,23 @@
 from sqlalchemy.orm import Session
 
+from icecream import ic
+
 from app.logger_config import logger
 from app.models.UserCategory import UserCategory
 from app.schemas.category_schema import GroupedCategorySchema, CategoryCreateUpdateSchema
 
+ic.configureOutput(includeContext=True)
 
-def get_user_categories(user_id: int, db: Session) -> list[UserCategory]:
-    return db.query(UserCategory).filter_by(user_id=user_id).all()
+
+def get_user_categories(user_id: int, db: Session, include_deleted: bool = False) -> list[UserCategory]:
+    query = db.query(UserCategory).filter_by(user_id=user_id)
+
+    if not include_deleted:
+        query = query.filter(UserCategory.is_deleted == False)
+
+    categories = query.all()
+
+    return categories
 
 
 def grouped_user_categories(user_id: int, db: Session, include_deleted: bool = False) -> GroupedCategorySchema:
@@ -53,7 +64,6 @@ def grouped_user_categories(user_id: int, db: Session, include_deleted: bool = F
 
 
 def create_or_update_category(user_id: int, db: Session, category_data: CategoryCreateUpdateSchema) -> UserCategory:
-    logger.info(category_data.dict())
     if category_data.id:
         try:
             category: UserCategory = db.query(UserCategory).filter(UserCategory.id == category_data.id,

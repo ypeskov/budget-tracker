@@ -8,13 +8,15 @@ import { ReportsService} from '@/services/reports';
 
 import { useUserStore } from '../stores/user';
 import { useAccountStore } from '../stores/account';
+import { useCategoriesStore } from '../stores/categories';
 
 const userStore = useUserStore();
 const accountStore = useAccountStore();
+const categoriesStore = useCategoriesStore();
 
 const userService = new UserService(userStore);
 const accountsService = new AccountService(accountStore, userService);
-const categoriesService = new CategoriesService(userService);
+const categoriesService = new CategoriesService(categoriesStore, userService);
 const transactionsService = new TransactionsService(userService, accountsService);
 const currenciesService = new CurrenciesService(userService);
 const settingsService = new SettingsService(userService);
