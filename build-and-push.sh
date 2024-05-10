@@ -33,6 +33,7 @@ elif [[ $1 == "push" ]]; then
     echo "Updating docker-compose.yaml"
     sed -i '' "s|ypeskov/api-orgfin:[^[:space:]]*|ypeskov/api-orgfin:${2:-latest}|g" ../docker-compose.prod.yml
     echo "Updated docker-compose.prod.yaml: $(grep -o "ypeskov/api-orgfin:[^[:space:]]*" ../docker-compose.prod.yml)"
+    echo "=================================== ATTENTION ==================================="
     echo "Commit to git and push to GitHub to apply changes."
     echo "Run deploy_full.sh on the server to apply changes."
 
