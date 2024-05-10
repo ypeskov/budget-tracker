@@ -7,17 +7,20 @@ export class AccountService {
   accountStore;
   userService;
 
-  timeToCacheAccountsList = 600000; // miliseconds aka 10 minutes
+  timeToCacheAccountsList = 600000 * 6; // 60 minutes
 
   constructor(accountStore, userService) {
     this.accountStore = accountStore;
     this.userService = userService;
   }
 
-  async getUserAccounts(includeHidden = false) {1
-    // need to make more clever logic of account list update from server
+  async getUserAccounts(includeHidden = false, shouldUpdate = false) {
     const currentTime = DateTime.now();
     const deltaFromLastUpdate = currentTime - this.accountStore.lastUpdated;
+
+    if (shouldUpdate) {
+      this.setShouldUpdateAccountsList(true);
+    }
 
     if (!this.accountStore.shouldUpdate
       && (this.accountStore.accounts.length > 0 && deltaFromLastUpdate < this.timeToCacheAccountsList)) {

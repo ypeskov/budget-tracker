@@ -10,6 +10,7 @@ const router = useRouter();
 
 let accounts = reactive([]);
 const showNewAccForm = ref(false);
+const showHiddenAccounts = ref(false);
 
 onBeforeMount(async () => {
   try {
@@ -19,11 +20,10 @@ onBeforeMount(async () => {
   }
 });
 
-async function reReadAllAccounts( includeHidden = false) {
-  Services.accountsService.setShouldUpdateAccountsList(true);
+async function reReadAllAccounts(shouldUpdate = false) {
   accounts.length = 0;
   try {
-    const tmpAccounts = await Services.accountsService.getUserAccounts(includeHidden);
+    const tmpAccounts = await Services.accountsService.getUserAccounts(showHiddenAccounts.value, shouldUpdate);
     if (tmpAccounts) {
       accounts.push(...tmpAccounts);
     }
@@ -36,7 +36,7 @@ async function updateAccountsList(event) {
   if (event) {
     event.preventDefault();
   }
-  await reReadAllAccounts();
+  await reReadAllAccounts(true);
 }
 
 async function accountCreated() {
@@ -49,7 +49,8 @@ function closeNewAccForm() {
 }
 
 function toggleHiddenAccounts(event) {
-  reReadAllAccounts(event.target.checked);
+  showHiddenAccounts.value = event.target.checked;
+  reReadAllAccounts(true);
 }
 </script>
 
