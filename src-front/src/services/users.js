@@ -4,6 +4,7 @@ import { request } from './requests';
 export class UserService {
   userStore;
   accountsService;
+  categoriesService;
 
   constructor(userStore) {
     this.userStore = userStore;
@@ -35,7 +36,8 @@ export class UserService {
       if (data.accessToken) {
         this.userStore.accessToken = data.accessToken;
         await this.getUserProfile(this.userStore.accessToken);
-        await this.accountsService.getAllUserAccounts();
+        await this.accountsService.getUserAccounts();
+        await this.categoriesService.getUserCategories(true);
       } else {
         console.log('No access token in response!');
       }
