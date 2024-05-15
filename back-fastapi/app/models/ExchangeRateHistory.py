@@ -6,7 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.database import Base
-from app.models.Currency import Currency
 
 
 class ExchangeRateHistory(Base):

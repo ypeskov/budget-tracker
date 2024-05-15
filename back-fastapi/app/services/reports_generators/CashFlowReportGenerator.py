@@ -10,7 +10,7 @@ from app.models.Currency import Currency
 from app.models.Transaction import Transaction
 
 
-class CashFlowGenerator:
+class CashFlowReportGenerator:
     def __init__(self, user_id, db: Session = None):
         self._db = db
         self.user_id = user_id
