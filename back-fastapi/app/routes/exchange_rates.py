@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -44,6 +44,29 @@ def update_rates(db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail='Error while fetching data')
     except Exception as e:  # pragma: no cover
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail='Unable to update exchange rates')
+
+
+@router.get('/update/from/{start_date}/to/{end_date}/',
+            status_code=status.HTTP_200_OK,
+            response_model=ExchangeRateSchema)
+def update_rates_from_to(start_date: date, end_date: date, db: Session = Depends(get_db)):
+    """ Update exchange rates from start_date to end_date """
+    logger.info(f'Updating exchange rates from {start_date} to {end_date}')
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                        detail='This feature is turned off for now. Please use /update/ endpoint.')
+    try:
+        for single_date in range((end_date - start_date).days + 1):
+            exchange_rates: ExchangeRateHistory = update_exchange_rates(db, when=start_date)
+            start_date += timedelta(days=1)
+        return exchange_rates
+    except ErrorFetchingData as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail='Error while fetching data')
+    except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail='Unable to update exchange rates')
