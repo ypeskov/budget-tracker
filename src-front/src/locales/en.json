@@ -48,7 +48,8 @@
     "showHiddenAccounts": "Show hidden accounts",
     "prevDate": "Previous date",
     "currentDate": "Current date",
-    "didntExist": "Didn't exist"
+    "didntExist": "Didn't exist",
+    "totalBalance": "Total balance"
   },
   "menu": {
     "home": "Home",

@@ -48,7 +48,8 @@
     "showHiddenAccounts": "Показати приховані рахунки",
     "prevDate": "Попередня дата",
     "currentDate": "Поточна дата",
-    "didntExist": "Не існувало"
+    "didntExist": "Не існувало",
+    "totalBalance": "Загальний баланс"
   },
   "menu": {
     "home": "Початок",

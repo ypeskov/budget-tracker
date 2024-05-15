@@ -1,7 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 
-defineProps(['balanceData']);
+defineProps(['balanceData', 'totalBalance', 'baseCurrencyCode']);
 
 const t = useI18n().t;
 
@@ -30,10 +30,29 @@ const accountName = (name) => {
     </div>
     <div class="account-balance-original">{{ $n(balance.balance, 'decimal') }} {{ balance.currencyCode }}</div>
   </div>
+
+  <hr>
+
+  <div class="account-total-balance">
+    <div class="account-name">{{ $t('message.totalBalance') }}</div>
+    <div class="account-balance-base" :class="baseBalanceClass(totalBalance)">
+      {{ $n(totalBalance, 'decimal') }} {{ baseCurrencyCode }}
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">
 @import '../../assets/common.scss';
+
+.account-total-balance {
+  display: grid;
+  grid-template-areas: "account-name account-balance-base";
+  grid-template-columns: 1fr 1fr;
+  background-color: #516fa2;
+  padding: 5px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
 
 .account-item {
   display: grid;

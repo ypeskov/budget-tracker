@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive, ref } from 'vue';
+import { onBeforeMount, reactive, ref, watch } from 'vue';
 import { DateTime } from 'luxon';
 
 import { Services } from '@/services/servicesConfig';
@@ -11,22 +11,37 @@ const prevBalanceData = reactive([]);
 const currentBalanceData = reactive([]);
 const accounts = reactive([]);
 const selectedAccountIds = reactive([17, 18, 19, 20, 31]);
+const totalPrevBalance = ref(0);
+const totalCurrentBalance = ref(0);
 
-onBeforeMount(async () => {
-  accounts.push(...(await Services.accountsService.getUserAccounts()));
-  prevDate.value = DateTime.now().minus({ month: 1 }).toISODate();
-  currentDate.value = DateTime.now().toISODate();
-  await updateBalanceData(prevDate, prevBalanceData);
-  await updateBalanceData(currentDate, currentBalanceData);
-});
-
-const updateBalanceData = async (balanceDate, balancesData) => {
-  balancesData.length = 0;
-  balancesData.push(...(await Services.reportsService.getReport('balance', {
+const updateBalanceData = async (balanceDate, balancesData, totalBalance) => {
+  const data = await Services.reportsService.getReport('balance', {
     'account_ids': selectedAccountIds,
     'balanceDate': balanceDate.value,
-  })));
+  });
+  balancesData.length = 0;
+  balancesData.push(...data);
+
+  totalBalance.value = balancesData.reduce((acc, item) => acc + item.baseCurrencyBalance, 0);
 };
+
+onBeforeMount(async () => {
+  const userAccounts = await Services.accountsService.getUserAccounts();
+  accounts.push(...userAccounts);
+
+  prevDate.value = DateTime.now().minus({ month: 1 }).toISODate();
+  currentDate.value = DateTime.now().toISODate();
+});
+
+watch(prevDate, async (newVal) => {
+  prevDate.value = DateTime.fromISO(newVal).toISODate();
+  await updateBalanceData(prevDate, prevBalanceData, totalPrevBalance);
+});
+
+watch(currentDate, async (newVal) => {
+  currentDate.value = DateTime.fromISO(newVal).toISODate();
+  await updateBalanceData(currentDate, currentBalanceData, totalCurrentBalance);
+});
 
 </script>
 
@@ -57,10 +72,14 @@ const updateBalanceData = async (balanceDate, balancesData) => {
 
       <div class="row nowrap-row">
         <div class="col-12 col-md-6 mb-3 mb-md-0">
-          <BalancesList :balance-data="prevBalanceData" />
+          <BalancesList :balance-data="prevBalanceData"
+                        :base-currency-code="currentBalanceData[0]?.baseCurrencyCode || '---'"
+                        :total-balance="totalPrevBalance"/>
         </div>
         <div class="col-12 col-md-6">
-          <BalancesList :balance-data="currentBalanceData" />
+          <BalancesList :balance-data="currentBalanceData"
+                        :base-currency-code="currentBalanceData[0]?.baseCurrencyCode || '---'"
+                        :total-balance="totalCurrentBalance" />
         </div>
       </div>
     </div>
@@ -73,6 +92,7 @@ const updateBalanceData = async (balanceDate, balancesData) => {
   flex-wrap: nowrap;
   overflow-x: auto;
 }
+
 .col-12.col-md-6 {
   flex: 0 0 auto;
   width: 50%;
