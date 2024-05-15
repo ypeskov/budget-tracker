@@ -30,7 +30,7 @@ const i18n = createI18n({
       decimal: {
         style: 'decimal',
         minimumFractionDigits: 2,
-        maximumFractionDigits: 4
+        maximumFractionDigits: 2
       }
     },
     uk: {
@@ -41,7 +41,7 @@ const i18n = createI18n({
       decimal: {
         style: 'decimal',
         minimumFractionDigits: 2,
-        maximumFractionDigits: 4
+        maximumFractionDigits: 2
       }
     },
   }

@@ -69,14 +69,17 @@ class BalanceReportGenerator:
             result = next((r for r in self.raw_results if r.account_id == account_id), None)
             balance = result.new_balance if result else 0
             account_name = result.name if result else ''
-            currency_code = result.code if result else None
+            currency_code = result.code if result else ''
 
             # calculate in the same currency
-            base_currency_balance = calc_amount(balance,
-                                                result.code,
-                                                balance_date,
-                                                self.user_base_currency.code,
-                                                self.db)
+            if balance != 0:
+                base_currency_balance = calc_amount(balance,
+                                                    currency_code,
+                                                    balance_date,
+                                                    self.user_base_currency.code,
+                                                    self.db)
+            else:
+                base_currency_balance = 0
 
             balance_data.append({"account_id": account_id,
                                  "account_name": account_name,

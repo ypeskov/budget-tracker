@@ -31,7 +31,7 @@ class CashFlowReportOutputSchema(BaseModel):
 
 class BalanceReportInputSchema(BaseModel):
     account_ids: list[int]
-    balance_date: date | None = None
+    balance_date: date
 
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,

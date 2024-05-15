@@ -46,6 +46,8 @@ def balance_report(request: Request,
                    input_data: BalanceReportInputSchema,
                    db: Session = Depends(get_db)) -> list[dict]:
     """ Get all expenses for one account within a given time period """
+    logger.info(f"Getting balance report for user_id: {request.state.user['id']}, "
+                f"account_ids: {input_data.account_ids}, date: {input_data.balance_date}")
     try:
         result: list[dict] = get_balance_report(request.state.user['id'],
                                                 db,

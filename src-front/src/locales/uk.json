@@ -45,7 +45,10 @@
     "period": "Період",
     "monthly": "Щомісяця",
     "daily": "Щоденно",
-    "showHiddenAccounts": "Показати приховані рахунки"
+    "showHiddenAccounts": "Показати приховані рахунки",
+    "prevDate": "Попередня дата",
+    "currentDate": "Поточна дата",
+    "didntExist": "Не існувало"
   },
   "menu": {
     "home": "Початок",
