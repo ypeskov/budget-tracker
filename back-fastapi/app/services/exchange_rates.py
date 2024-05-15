@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from app.logger_config import logger
 from app.models.ExchangeRateHistory import ExchangeRateHistory
 from app.services.exchange_services.CurrencyBeacon import CurrencyBeaconService
-from app.services.exchange_services.AbstractCurrencyService import AbstractCurrencyService
 
 ic.configureOutput(includeContext=True)
 
@@ -32,10 +31,11 @@ def get_exchange_rates(db: Session, when: date | str = '') -> ExchangeRateHistor
 
 def update_exchange_rates(db: Session, when: date) -> ExchangeRateHistory:
     """ Add/Update exchange rates for defined date"""
+    logger.info(f'Updating exchange rates for {when}')
     try:
-        currency_service: AbstractCurrencyService = CurrencyBeaconService()
-        prev_exchange_rates: ExchangeRateHistory = db.query(ExchangeRateHistory).filter(  # type: ignore
-            ExchangeRateHistory.actual_date == when).one_or_none()
+        currency_service: CurrencyBeaconService = CurrencyBeaconService()
+        prev_exchange_rates: ExchangeRateHistory = db.query(ExchangeRateHistory).filter(
+            ExchangeRateHistory.actual_date == when).one_or_none()  # noqa
         if prev_exchange_rates:
             db.delete(prev_exchange_rates)
             db.flush()

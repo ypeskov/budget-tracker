@@ -45,7 +45,11 @@
     "period": "Period",
     "monthly": "Monthly",
     "daily": "Daily",
-    "showHiddenAccounts": "Show hidden accounts"
+    "showHiddenAccounts": "Show hidden accounts",
+    "prevDate": "Previous date",
+    "currentDate": "Current date",
+    "didntExist": "Didn't exist",
+    "totalBalance": "Total balance"
   },
   "menu": {
     "home": "Home",

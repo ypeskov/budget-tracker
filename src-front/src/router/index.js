@@ -87,6 +87,15 @@ const router = createRouter({
       },
       component: () => import('../views/CashFlowReportView.vue'),
     },
+        {
+      path: '/reports/balance',
+      name: 'reports-balance',
+      meta: {
+        requiresAuth: true,
+        requiresUnAuth: false,
+      },
+      component: () => import('../views/BalanceReportView.vue'),
+    },
     {
       path: '/transactions/:id',
       name: 'transactionDetails',
