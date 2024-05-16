@@ -53,7 +53,6 @@ def calc_amount(src_amount: Decimal,
     ).limit(1).subquery()
 
     exchange_rates = db.query(subquery.c.rates).one()
-    ic(exchange_rates.rates)
 
     if currency_code_from == user_base_currency_code:
         return src_amount

@@ -46,7 +46,8 @@ const accountName = (name) => {
 
 .account-total-balance {
   display: grid;
-  grid-template-areas: "account-name account-balance-base";
+  grid-template-areas: "account-name account-name"
+                       "account-balance-base account-balance-base";
   grid-template-columns: 1fr 1fr;
   background-color: #516fa2;
   padding: 5px;
@@ -83,7 +84,7 @@ const accountName = (name) => {
 }
 
 .negative-balance {
-  color: red;
+  color: #781919;
 }
 
 .account-balance-original {

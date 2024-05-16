@@ -28,6 +28,8 @@ const updateBalanceData = async (balanceDate, balancesData, totalBalance) => {
 onBeforeMount(async () => {
   const userAccounts = await Services.accountsService.getUserAccounts();
   accounts.push(...userAccounts);
+  selectedAccountIds.length = 0;
+  selectedAccountIds.push(...userAccounts.map((account) => account.id));
 
   prevDate.value = DateTime.now().minus({ month: 1 }).toISODate();
   currentDate.value = DateTime.now().toISODate();
