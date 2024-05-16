@@ -46,7 +46,14 @@ def calc_amount(src_amount: Decimal,
      user_base_currency_code: user base currency code
      db: database session
      """
-    exchange_rates = db.query(ExchangeRateHistory.rates).filter(ExchangeRateHistory.actual_date == calc_date).one()
+    subquery = db.query(ExchangeRateHistory).filter(
+        ExchangeRateHistory.actual_date <= calc_date
+    ).order_by(
+        ExchangeRateHistory.actual_date.desc()
+    ).limit(1).subquery()
+
+    exchange_rates = db.query(subquery.c.rates).one()
+    ic(exchange_rates.rates)
 
     if currency_code_from == user_base_currency_code:
         return src_amount
