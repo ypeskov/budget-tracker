@@ -20,7 +20,7 @@ const accountIdx = computed(() => {
 
 <template>
   <label for="label" class="form-label">
-    {{ label }}{{ accountId }}
+    {{ label }}
   </label>
   <select class="form-select bottom-space" @change="changeAccount" :value="accountIdx">
     <option v-for="(acc, index) in accounts" :key="acc.id" :value="index">
