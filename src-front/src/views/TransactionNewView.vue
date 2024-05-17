@@ -41,14 +41,11 @@ transaction.isTransfer = itemType.value === 'transfer';
 const returnUrlName = ref('');
 
 function changeAccount({ accountType, accountId }) {
-  console.log(srcAccountId.value, targetAccountId.value, {...transaction});
   if (accountType === 'src') {
     srcAccountId.value = accountId;
   } else if (accountType === 'target') {
     targetAccountId.value = accountId;
   }
-  console.log('-------------------')
-  console.log(srcAccountId.value, targetAccountId.value, {...transaction});
   if (targetAccountId.value === transaction.accountId || srcAccountId.value === transaction.targetAccountId) {
     transaction.isIncome = !transaction.isIncome;
   }
@@ -74,6 +71,7 @@ onBeforeMount(async () => {
   }
 
   try {
+    categories.value = await Services.categoriesService.getUserCategories();
     accounts.length = 0;
     accounts.push(...(await Services.accountsService.getUserAccounts()));
     if (props.accountId) {
@@ -81,16 +79,21 @@ onBeforeMount(async () => {
     } else {
       currentAccount.value = accounts[0];
     }
-    srcAccountId.value = currentAccount.value.id;
-
     targetAccount.value = accounts[0];
 
-    categories.value = await Services.categoriesService.getUserCategories();
-
     if (props.isEdit) {
-      const details = await Services.transactionsService.getTransactionDetails(route.params.id);
+      let details = await Services.transactionsService.getTransactionDetails(route.params.id);
       transaction = Object.assign(transaction, details);
       itemType.value = transaction.isTransfer ? 'transfer' : transaction.isIncome ? 'income' : 'expense';
+
+      // !!!!!!!
+      // if we have an income part of transfer, we load and edit the expense part
+      // it allows to simplify logic and UI
+      if (transaction.isTransfer && transaction.isIncome) {
+        details = await Services.transactionsService.getTransactionDetails(transaction.linkedTransactionId);
+        transaction = Object.assign(transaction, details);
+      }
+
       srcAccountId.value = transaction.accountId;
       srcAmount.value = transaction.amount;
       currentAccount.value = accounts.find((item) => item.id === srcAccountId.value);
@@ -110,17 +113,8 @@ async function getLinkedTransaction(transaction) {
   const linkedTransaction = await Services.transactionsService.getTransactionDetails(transaction.linkedTransactionId);
   targetTransaction = Object.assign(targetTransaction, linkedTransaction);
 
-  if (transaction.isTransfer) {
-    if (transaction.isIncome === false) {
-      targetAccountId.value = linkedTransaction.accountId;
-      targetAmount.value = linkedTransaction.amount;
-    } else {
-      srcAccountId.value = linkedTransaction.accountId;
-      targetAccountId.value = transaction.accountId;
-      targetAmount.value = transaction.amount;
-      srcAmount.value = linkedTransaction.amount;
-    }
-  }
+  targetAccountId.value = linkedTransaction.accountId;
+  targetAmount.value = linkedTransaction.amount;
 }
 
 function filterCategories() {
@@ -172,7 +166,6 @@ async function submitTransaction() {
 
   try {
     if (props.isEdit) {
-      console.log('transaction', {...transaction});
       await Services.transactionsService.updateTransaction(transaction);
     } else {
       await Services.transactionsService.addTransaction(transaction);
