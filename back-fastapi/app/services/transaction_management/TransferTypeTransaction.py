@@ -36,6 +36,7 @@ class TransferTypeTransaction:
         target_transaction.account_id = transaction_details.target_account_id  # type: ignore
         target_transaction.account = self._db.query(Account).filter_by(id=transaction_details.target_account_id).one()
         target_transaction.amount = transaction_details.target_amount
+        target_transaction.label = transaction_details.label
         target_transaction.linked_transaction_id = self._transaction.id
         target_transaction.is_income = not self._transaction.is_income
         target_transaction.currency_id = target_transaction.account.currency_id
