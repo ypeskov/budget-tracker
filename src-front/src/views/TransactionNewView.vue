@@ -240,9 +240,9 @@ async function deleteTransaction() {
 
             <ExchangeRate v-if="itemType === 'transfer'"
                           :currency-src-code="currentAccount.currency.code"
-                          :src-amount="transaction.amount"
+                          :src-amount="srcAmount"
                           :currency-target-code="targetAccount.currency.code"
-                          :target-amount="targetTransaction.amount" />
+                          :target-amount="targetAmount" />
 
             <Category v-if="!transaction.isTransfer"
                       :transaction="transaction"
