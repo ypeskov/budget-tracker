@@ -1,11 +1,8 @@
 <script setup>
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const props = defineProps(['transaction', 'accounts', 'accountType', 'linkedTransaction']);
+const props = defineProps(['accounts', 'label', 'accountType', 'accountId']);
 const emit = defineEmits(['accountChanged']);
-
-const t = useI18n().t;
 
 function changeAccount($event) {
   const acc = props.accounts[$event.target.value];
@@ -16,30 +13,14 @@ function changeAccount($event) {
 }
 
 const accountIdx = computed(() => {
-  if (props.accountType === 'src') {
-    return props.accounts.findIndex((item) => item.id === props.transaction.accountId);
-  } else {
-    if (props.transaction.linkedTransactionId === undefined) {
-      return 0;
-    }
-    return props.accounts.findIndex((item) => item.id === props.linkedTransaction.accountId);
-  }
+  return props.accounts.findIndex((acc) => acc.id === props.accountId);
 });
-
-const accLabel = computed(() => {
-  if (props.accountType === 'src') {
-    return t('message.account');
-  } else {
-    return t('message.targetAccount');
-  }
-});
-
 
 </script>
 
 <template>
   <label for="label" class="form-label">
-    {{ accLabel }}
+    {{ label }}{{ accountId }}
   </label>
   <select class="form-select bottom-space" @change="changeAccount" :value="accountIdx">
     <option v-for="(acc, index) in accounts" :key="acc.id" :value="index">

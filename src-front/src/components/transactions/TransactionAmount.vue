@@ -6,8 +6,18 @@ const emit = defineEmits(['amountChanged']);
 
 const amount = computed(() => {
   if (props.type === 'src') {
+    if (props.transaction.isTransfer && props.transaction.isIncome === false) {
+      return props.transaction.amount;
+    } else if (props.transaction.isTransfer && props.transaction.isIncome === true) {
+      return props.linkedTransaction.amount;
+    }
     return props.transaction.amount;
   } else  {
+    if (props.transaction.isTransfer && props.transaction.isIncome === true) {
+      return props.transaction.amount;
+    } else if (props.transaction.isTransfer && props.transaction.isIncome === false) {
+      return props.linkedTransaction.amount;
+    }
     return props.linkedTransaction.amount;
   }
 });
