@@ -71,6 +71,8 @@ onBeforeMount(async () => {
       currentAccount = accounts[0];
     }
     targetAccount = accounts[0];
+    transaction.accountId = currentAccount.id;
+    transaction.targetAccountId = targetAccount.id;
 
     if (props.isEdit) {
       let details = await Services.transactionsService.getTransactionDetails(route.params.id);
