@@ -4,10 +4,11 @@ if [ $# -eq 0 ]; then
   echo "Starting services without back app..."
   docker-compose up db-orgfin \
                     redis-orgfin \
+                    dashboard-redis-celery
 #                    adminer-orgfin \
 #                    celery-orgfin \
 #                    celery-beat-orgfin \
-                    dashboard-redis-celery
+
 elif [ "$1" == "full" ]; then
   echo "Starting all services..."
   docker-compose up
