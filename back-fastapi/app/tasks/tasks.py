@@ -8,7 +8,7 @@ from app.config import Settings
 settings = Settings()
 
 
-@celery_app.task(bind=True, max_retries=24, default_retry_delay=20)
+@celery_app.task(bind=True, max_retries=24, default_retry_delay=600)
 def daily_update_exchange_rates(task):
     db = next(get_db())
 
