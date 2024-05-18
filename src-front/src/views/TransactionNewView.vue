@@ -20,20 +20,14 @@ const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 
-const accounts = reactive([]);
-const currentAccount = ref(accounts[0]);
-const targetAccount = ref(accounts[0]);
-const categories = ref([]);
+let accounts = reactive([]);
+let currentAccount = reactive({});
+let targetAccount = reactive({});
+let categories = reactive([]);
 const showDeleteConfirmation = ref(false);
 
-const srcAccountId = ref(null);
-const targetAccountId = ref(null);
-const srcAmount = ref(null);
-const targetAmount = ref(null);
-
-let targetTransaction = reactive({});
 let transaction = reactive({});
-let filteredCategories = ref([]);
+let filteredCategories = reactive([]);
 
 const itemType = ref('expense');
 transaction.isTransfer = itemType.value === 'transfer';
@@ -42,24 +36,21 @@ const returnUrlName = ref('');
 
 function changeAccount({ accountType, accountId }) {
   if (accountType === 'src') {
-    srcAccountId.value = accountId;
+    transaction.accountId = accountId;
   } else if (accountType === 'target') {
-    targetAccountId.value = accountId;
-  }
-  if (targetAccountId.value === transaction.accountId || srcAccountId.value === transaction.targetAccountId) {
-    transaction.isIncome = !transaction.isIncome;
+    transaction.targetAccountId = accountId;
   }
 }
 
 function amountChanged({ amountType, amount }) {
   if (transaction.isTransfer) {
     if (amountType === 'src') {
-      srcAmount.value = amount;
+      transaction.amount = amount;
     } else {
-      targetAmount.value = amount;
+      transaction.targetAmount = amount;
     }
   } else {
-    srcAmount.value = amount;
+    transaction.amount = amount;
   }
 }
 
@@ -71,17 +62,15 @@ onBeforeMount(async () => {
   }
 
   try {
-    categories.value = await Services.categoriesService.getUserCategories();
+    categories = await Services.categoriesService.getUserCategories();
     accounts.length = 0;
     accounts.push(...(await Services.accountsService.getUserAccounts()));
     if (props.accountId) {
-      currentAccount.value = accounts.find((item) => item.id === parseInt(props.accountId, 10));
+      currentAccount = accounts.find((item) => item.id === parseInt(props.accountId, 10));
     } else {
-      currentAccount.value = accounts[0];
+      currentAccount = accounts[0];
     }
-    targetAccount.value = accounts[0];
-    srcAccountId.value = currentAccount.value.id;
-    targetAccountId.value = targetAccount.value.id;
+    targetAccount = accounts[0];
 
     if (props.isEdit) {
       let details = await Services.transactionsService.getTransactionDetails(route.params.id);
@@ -90,15 +79,13 @@ onBeforeMount(async () => {
 
       // !!!!!!!
       // if we have an income part of transfer, we load and edit the expense part
-      // it allows to simplify logic and UI
+      // it allows to simplify MUCH logic and UI
       if (transaction.isTransfer && transaction.isIncome) {
         details = await Services.transactionsService.getTransactionDetails(transaction.linkedTransactionId);
         transaction = Object.assign(transaction, details);
       }
 
-      srcAccountId.value = transaction.accountId;
-      srcAmount.value = transaction.amount;
-      currentAccount.value = accounts.find((item) => item.id === srcAccountId.value);
+      currentAccount = accounts.find((item) => item.id === transaction.accountId);
 
       if (transaction.linkedTransactionId) {
         await getLinkedTransaction(transaction);
@@ -113,20 +100,18 @@ onBeforeMount(async () => {
 
 async function getLinkedTransaction(transaction) {
   const linkedTransaction = await Services.transactionsService.getTransactionDetails(transaction.linkedTransactionId);
-  targetTransaction = Object.assign(targetTransaction, linkedTransaction);
-
-  targetAccountId.value = linkedTransaction.accountId;
-  targetAmount.value = linkedTransaction.amount;
+  transaction.targetAccountId = linkedTransaction.accountId;
+  transaction.targetAmount = linkedTransaction.amount;
 }
 
 function filterCategories() {
   const isIncome = itemType.value === 'income';
   // filter categories by income/expense
-  filteredCategories.value = categories.value.filter((item) => item.isIncome === isIncome);
+  filteredCategories = categories.filter((item) => item.isIncome === isIncome);
 
   // if the current category is not in the filtered categories, set the first one from the filtered list
-  if (!filteredCategories.value.some((item) => item.id === transaction.categoryId)) {
-    transaction.categoryId = filteredCategories.value[0].id;
+  if (!filteredCategories.some((item) => item.id === transaction.categoryId)) {
+    transaction.categoryId = filteredCategories[0].id;
   }
 
   updateTransactionProperties(itemType.value);
@@ -138,7 +123,7 @@ function updateTransactionProperties(type) {
     transaction.isTransfer = true;
   } else {
     transaction.targetAccountId = null;
-    targetAmount.value = null;
+    transaction.targetAmount = null;
     transaction.isTransfer = false;
     transaction.categoryId = transaction.categoryId || filteredCategories.value[0].id;
     transaction.isIncome = itemType.value === 'income';
@@ -161,11 +146,6 @@ function dateTimeChanged({ date, time }) {
 }
 
 async function submitTransaction() {
-  transaction.accountId = srcAccountId.value;
-  transaction.amount = srcAmount.value;
-  transaction.targetAccountId = targetAccountId.value;
-  transaction.targetAmount = targetAmount.value;
-
   try {
     if (props.isEdit) {
       await Services.transactionsService.updateTransaction(transaction);
@@ -215,34 +195,34 @@ async function deleteTransaction() {
             <AccountSelector @account-changed="changeAccount"
                              :label="$t('message.account')"
                              account-type="src"
-                             :accountId="srcAccountId"
+                             :accountId="transaction.accountId"
                              :accounts="accounts" />
 
             <TransactionAmount :label="t('message.amount')"
                                type="src"
                                @amount-changed="amountChanged"
-                               :amount="srcAmount"
+                               :amount="transaction.amount"
                                :current-account="currentAccount" />
 
             <AccountSelector v-if="itemType === 'transfer'"
                              @account-changed="changeAccount"
                              :label="$t('message.targetAccount')"
                              account-type="target"
-                             :accountId="targetAccountId"
+                             :accountId="transaction.targetAccountId"
                              :accounts="accounts" />
 
             <TransactionAmount v-if="itemType === 'transfer'"
                                type="target"
                                :label="t('message.amount')"
                                @amount-changed="amountChanged"
-                               :amount="targetAmount"
+                               :amount="transaction.targetAmount"
                                :current-account="targetAccount" />
 
             <ExchangeRate v-if="itemType === 'transfer'"
                           :currency-src-code="currentAccount.currency.code"
-                          :src-amount="srcAmount"
+                          :src-amount="transaction.amount"
                           :currency-target-code="targetAccount.currency.code"
-                          :target-amount="targetAmount" />
+                          :target-amount="transaction.targetAmount" />
 
             <Category v-if="!transaction.isTransfer"
                       :transaction="transaction"
