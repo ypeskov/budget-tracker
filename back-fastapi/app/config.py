@@ -17,4 +17,7 @@ class Settings(BaseSettings):
 
     TEST_LOG_FILE: str = 'test.log'
 
+    DAILY_UPDATE_EXCHANGE_RATES_HOUR: str = '13'
+    DAILY_UPDATE_EXCHANGE_RATES_MINUTE: str = '00'
+
     model_config = SettingsConfigDict(env_file=('.env', '.env.local', '.env.prod'))
