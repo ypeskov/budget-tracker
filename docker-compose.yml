@@ -54,6 +54,8 @@ services:
   redis-orgfin:
     image: redis:alpine
     container_name: redis-orgfin
+    ports:
+      - 6379:6379
     command: redis-server --bind 0.0.0.0
     restart: always
 
