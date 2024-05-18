@@ -1,9 +1,13 @@
 <script setup>
 import { onBeforeMount, reactive, ref, watch } from 'vue';
 import { DateTime } from 'luxon';
+import { useRouter } from 'vue-router';
 
 import { Services } from '@/services/servicesConfig';
+import { processError } from '@/errors/errorHandlers';
 import BalancesList from '@/components/reports/BalancesList.vue';
+
+const router = useRouter();
 
 const prevDate = ref('');
 const currentDate = ref('');
@@ -26,7 +30,13 @@ const updateBalanceData = async (balanceDate, balancesData, totalBalance) => {
 };
 
 onBeforeMount(async () => {
-  const userAccounts = await Services.accountsService.getUserAccounts();
+  let userAccounts = [];
+  try {
+    userAccounts = await Services.accountsService.getUserAccounts();
+  } catch (e) {
+    console.error(e);
+    await processError(e, router);
+  }
   accounts.push(...userAccounts);
   selectedAccountIds.length = 0;
   selectedAccountIds.push(...userAccounts.map((account) => account.id));
