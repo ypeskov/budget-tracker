@@ -14,7 +14,7 @@ celery_app.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis:
 
 celery_app.conf.broker_connection_retry_on_startup = True
 celery_app.conf.broker_connection_max_retries = 5
-celery_app.conf.beat_max_loop_interval = 10
+celery_app.conf.beat_max_loop_interval = 300
 
 celery_app.conf.update(
     timezone='Europe/Sofia',
