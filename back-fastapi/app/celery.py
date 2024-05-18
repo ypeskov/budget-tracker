@@ -17,6 +17,6 @@ celery_app.autodiscover_tasks(['app.tasks'])
 celery_app.conf.beat_schedule = {
     "update-exchange-rates-daily": {
         "task": "app.tasks.tasks.daily_update_exchange_rates",
-        "schedule": crontab(hour='10', minute='30'),
+        "schedule": crontab(hour='11', minute='00'),
     },
 }
