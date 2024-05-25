@@ -26,9 +26,7 @@ export class SettingsService {
     return await request(saveUserSettingsUrl,
       {
         method: 'POST',
-        body: JSON.stringify({
-          settings: settings,
-        }),
+        body: JSON.stringify(settings),
       },
       { userService: this.userService });
   }

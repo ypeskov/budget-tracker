@@ -8,7 +8,6 @@ import ModalWindow from '../utils/ModalWindow.vue';
 defineProps({
   closeModal: Function,
   showProfileModal: Boolean,
-  'close-modal': Function,
 });
 
 const showLanguageModal = ref(false);
@@ -52,7 +51,7 @@ const openCurrencyModal = () => {
     </template>
   </ModalWindow>
   <teleport to="body" v-if="showLanguageModal">
-    <LanguageSelector :close-language-modal="closeLanguageModal" />
+    <LanguageSelector :close-language-modal="closeLanguageModal" :close-modal="closeLanguageModal" />
   </teleport>
 
   <teleport to="body" v-if="showCurrencyModal">
