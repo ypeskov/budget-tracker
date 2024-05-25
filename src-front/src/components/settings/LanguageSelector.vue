@@ -45,14 +45,13 @@ const applyAndClose = async () => {
 </script>
 
 <template>
-  <ModalWindow :close-modal="props.closeLanguageModal" modal-id="language-selector">
+  <ModalWindow :close-modal="props.cl" modal-id="language-selector">
     <template #header>
       <div class="row">
         <h2>{{ $t('message.select_language') }}</h2>
       </div>
     </template>
     <template #main>
-      <h2>{{ $t('message.select_language') }}</h2>
       <select class="form-select mb-3" v-model="selectedLanguage" @change="handleLanguageChange">
         <option v-for="language in languages" :value="language.id" :key="language.id">{{ language.name }}</option>
       </select>

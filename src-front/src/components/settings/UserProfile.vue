@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 
 import LanguageSelector from './LanguageSelector.vue';
+import BaseCurrencyManager from './BaseCurrencyManager.vue';
 import ModalWindow from '../utils/ModalWindow.vue';
 
 defineProps({
@@ -11,13 +12,22 @@ defineProps({
 });
 
 const showLanguageModal = ref(false);
+const showCurrencyModal = ref(false);
 
 const closeLanguageModal = () => {
   showLanguageModal.value = false;
 };
 
+const closeCurrencyModal = () => {
+  showCurrencyModal.value = false;
+};
+
 const openLanguageModal = () => {
   showLanguageModal.value = true;
+};
+
+const openCurrencyModal = () => {
+  showCurrencyModal.value = true;
 };
 </script>
 
@@ -32,7 +42,11 @@ const openLanguageModal = () => {
     <template #main>
       <div class="row">
         <div class="col-12 lang-section">
-          <button @click="openLanguageModal" class="btn btn-primary w-100">{{ $t('buttons.language') }}</button>
+          <button @click="openLanguageModal" class="btn btn-primary w-100 mb-2">{{ $t('buttons.language') }}</button>
+        </div>
+
+        <div class="col-12 currency-section">
+          <button @click="openCurrencyModal" class="btn btn-primary w-100">{{ $t('buttons.baseCurrency') }}</button>
         </div>
       </div>
     </template>
@@ -40,6 +54,11 @@ const openLanguageModal = () => {
   <teleport to="body" v-if="showLanguageModal">
     <LanguageSelector :close-language-modal="closeLanguageModal" />
   </teleport>
+
+  <teleport to="body" v-if="showCurrencyModal">
+    <BaseCurrencyManager :close-currency-modal="closeCurrencyModal" />
+  </teleport>
+
 
 </template>
 

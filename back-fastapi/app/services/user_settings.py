@@ -1,8 +1,14 @@
 from sqlalchemy.orm import Session
 
+from icecream import ic
+
 from app.logger_config import logger
 from app.models.Language import Language
 from app.models.UserSettings import UserSettings
+from app.models.User import User
+from app.models.Currency import Currency
+
+ic.configureOutput(includeContext=True)
 
 
 def get_languages(db: Session) -> list[Language]:
@@ -48,3 +54,20 @@ def save_user_settings(user_id: int, settings: dict, db: Session) -> UserSetting
         raise e
 
     return user_settings
+
+
+def get_base_currency(user_id: int, db: Session):
+    currency = db.query(Currency).join(User, User.base_currency_id == Currency.id).filter(User.id == user_id).one()
+
+    return currency
+
+
+def update_base_currency(user_id: int, currency_id: int, db: Session) -> Currency:
+    currency = db.query(Currency).filter(Currency.id == currency_id).one()
+    user = db.query(User).filter(User.id == user_id).one()
+    user.base_currency_id = currency.id
+    db.commit()
+    db.refresh(user)
+
+    return currency
+

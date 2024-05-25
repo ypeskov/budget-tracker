@@ -40,4 +40,21 @@ export class SettingsService {
 
     return user;
   }
+
+  async getBaseCurrency() {
+    const baseCurrencyUrl = `${settingsPrefixUrl}/base-currency/`;
+    return await request(baseCurrencyUrl, {}, { userService: this.userService });
+  }
+
+  async setBaseCurrency(currency) {
+    const setBaseCurrencyUrl = `${settingsPrefixUrl}/base-currency/`;
+    return await request(setBaseCurrencyUrl,
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          currencyId: currency.id,
+        }),
+      },
+      { userService: this.userService });
+  }
 }

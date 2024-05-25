@@ -49,7 +49,9 @@
     "prevDate": "Попередня дата",
     "currentDate": "Поточна дата",
     "didntExist": "Не існувало",
-    "totalBalance": "Загальний баланс"
+    "totalBalance": "Загальний баланс",
+    "selectBaseCurrency": "Виберіть базову валюту",
+    "currentCurency": "Поточна валюта"
   },
   "menu": {
     "home": "Початок",
@@ -76,6 +78,7 @@
     "close": "Закрити",
     "addNewCategory": "Додати нову категорію",
     "cashFlowReport": "Звіт по грошовому потоку",
-    "balanceReport": "Звіт по балансу"
+    "balanceReport": "Звіт по балансу",
+    "baseCurrency": "Базова валюта"
   }
 }
