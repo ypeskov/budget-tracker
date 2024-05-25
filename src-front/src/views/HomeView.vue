@@ -1,7 +1,13 @@
 <script setup>
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router';
 import { useUserStore } from '../stores/user';
+
+const router = useRouter();
 const userStore = useUserStore();
+
+if (userStore.user.email) {
+  router.push({ name: 'accounts' });
+}
 
 
 </script>
