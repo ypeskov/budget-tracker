@@ -7,7 +7,7 @@ from app.dependencies.check_token import check_token
 from app.logger_config import logger
 from app.schemas.currency_schema import CurrencyResponseSchema
 from app.schemas.language_schema import LanguageSchema
-from app.schemas.settings_schema import BaseCurrencyInputSchema
+from app.schemas.settings_schema import BaseCurrencyInputSchema, UserSettingsSchema
 from app.services.user_settings import get_languages, get_user_settings, save_user_settings, \
     get_base_currency, update_base_currency
 from app.services.settings.validator import validate_settings
@@ -46,13 +46,11 @@ def get_settings(request: Request, db: Session = Depends(get_db)):
 
 
 @router.post('/')
-async def store_settings(request: Request, db: Session = Depends(get_db)):
+async def store_settings(request: Request, new_settings: UserSettingsSchema, db: Session = Depends(get_db)):
     """ Create user settings """
     try:
-        new_settings = await request.json()
-        validate_settings(existing_settings, new_settings)
-
-        saved_settings = save_user_settings(request.state.user['id'], new_settings, db)
+        validate_settings(existing_settings, new_settings.dict())
+        saved_settings = save_user_settings(request.state.user['id'], new_settings.dict(), db)
         return saved_settings
     except UnknownSettingsKeyError as e:
         logger.exception(e)

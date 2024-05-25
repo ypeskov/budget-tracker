@@ -7,3 +7,10 @@ class BaseCurrencyInputSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True,
                               alias_generator=to_camel)
+
+
+class UserSettingsSchema(BaseModel):
+    language: str
+
+    model_config = ConfigDict(from_attributes=True,
+                              alias_generator=to_camel)
