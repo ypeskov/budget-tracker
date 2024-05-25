@@ -18,3 +18,5 @@ class Currency(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
                                                  onupdate=func.now(), nullable=False)
 
+    def __repr__(self):
+        return f'<Currency id: {self.id}, code: {self.code}, name: {self.name}>'

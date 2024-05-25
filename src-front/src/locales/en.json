@@ -49,7 +49,9 @@
     "prevDate": "Previous date",
     "currentDate": "Current date",
     "didntExist": "Didn't exist",
-    "totalBalance": "Total balance"
+    "totalBalance": "Total balance",
+    "selectBaseCurrency": "Select base currency",
+    "currentCurency": "Current currency"
   },
   "menu": {
     "home": "Home",
@@ -76,6 +78,7 @@
     "close": "Close",
     "addNewCategory": "Add new category",
     "cashFlowReport": "Cash flow report",
-    "balanceReport": "Balance report"
+    "balanceReport": "Balance report",
+    "baseCurrency": "Base currency"
   }
 }
