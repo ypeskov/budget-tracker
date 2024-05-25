@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
-from app.schemas.language_schema import LanguageSchema
 from app.schemas.currency_schema import CurrencyResponseSchema
+from app.schemas.language_schema import LanguageSchema
+from app.schemas.settings_schema import BaseCurrencyInputSchema
 from app.services.user_settings import get_languages, get_user_settings, save_user_settings, \
     get_base_currency, update_base_currency
 
@@ -64,11 +65,12 @@ async def base_currency(request: Request, db: Session = Depends(get_db)):
 
 
 @router.put('/base-currency/', response_model=CurrencyResponseSchema)
-async def set_base_currency(request: Request, db: Session = Depends(get_db)):
+async def set_base_currency(request: Request,
+                            input_data: BaseCurrencyInputSchema,
+                            db: Session = Depends(get_db)):
     """ Set user base currency """
     try:
-        body = await request.json()
-        currency_id = body.get('currencyId')
+        currency_id = input_data.currency_id
         if currency_id is None:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail='currencyId is required')
         return update_base_currency(request.state.user['id'], currency_id, db)
