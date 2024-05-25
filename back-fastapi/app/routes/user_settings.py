@@ -10,6 +10,9 @@ from app.schemas.language_schema import LanguageSchema
 from app.schemas.settings_schema import BaseCurrencyInputSchema
 from app.services.user_settings import get_languages, get_user_settings, save_user_settings, \
     get_base_currency, update_base_currency
+from app.services.settings.validator import validate_settings
+from app.services.settings.errors import UnknownSettingsKeyError, MissingSettingsKeyError, IncorrectSettingsTypeError
+from app.services.settings.available_settings import existing_settings
 
 ic.configureOutput(includeContext=True)
 
@@ -46,9 +49,20 @@ def get_settings(request: Request, db: Session = Depends(get_db)):
 async def store_settings(request: Request, db: Session = Depends(get_db)):
     """ Create user settings """
     try:
-        saved_settings = save_user_settings(request.state.user['id'],
-                                            (await request.json())['settings'], db)
+        new_settings = await request.json()
+        validate_settings(existing_settings, new_settings)
+
+        saved_settings = save_user_settings(request.state.user['id'], new_settings, db)
         return saved_settings
+    except UnknownSettingsKeyError as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f'Unknown settings key: {e.key}')
+    except MissingSettingsKeyError as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f'Missing settings key: {e.key}')
+    except IncorrectSettingsTypeError as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f'Incorrect settings type: {e.key}')
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to get user settings')
