@@ -2,6 +2,8 @@ from pydantic_settings import SettingsConfigDict, BaseSettings
 
 
 class Settings(BaseSettings):
+    ENVIRONMENT: str = 'prod'
+
     DB_USER: str = 'username'
     DB_PASSWORD: str = 'userpassword'
     DB_HOST: str = 'db-budgeter'
@@ -19,5 +21,7 @@ class Settings(BaseSettings):
 
     DAILY_UPDATE_EXCHANGE_RATES_HOUR: str = '13'
     DAILY_UPDATE_EXCHANGE_RATES_MINUTE: str = '00'
+
+    DB_BACKUP_DIR: str = 'backup'
 
     model_config = SettingsConfigDict(env_file=('.env', '.env.local', '.env.prod'))
