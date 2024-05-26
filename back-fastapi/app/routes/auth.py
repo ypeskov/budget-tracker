@@ -20,8 +20,7 @@ router = APIRouter(
 
 
 @router.post("/register/", response_model=UserResponse)
-def register_user(user_request: UserRegistration,
-                  db: Session = Depends(get_db)):
+def register_user(user_request: UserRegistration, db: Session = Depends(get_db)):
     user = create_users(user_request, db)
     return user
 
