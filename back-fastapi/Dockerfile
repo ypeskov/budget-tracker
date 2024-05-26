@@ -31,8 +31,6 @@ WORKDIR /app
 
 COPY ./requirements.txt /app/
 
-#RUN apt-get update && apt-get install -y gcc libpq-dev postgresql-client && apt-get clean
-
 RUN apt-get update && apt-get install -y wget gnupg2 lsb-release
 
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
