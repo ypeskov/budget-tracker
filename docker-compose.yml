@@ -44,12 +44,12 @@ services:
     volumes:
       - ./dbdata:/var/lib/postgresql/data
 
-  adminer-orgfin:
-    image: adminer
-    container_name: Adminer-orgfin
-    restart: always
-    ports:
-      - 8080:8080
+#  adminer-orgfin:
+#    image: adminer
+#    container_name: Adminer-orgfin
+#    restart: always
+#    ports:
+#      - 8080:8080
 
   redis-orgfin:
     image: redis:alpine

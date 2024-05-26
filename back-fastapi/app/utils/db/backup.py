@@ -27,6 +27,7 @@ def backup_postgres_db(env_name: str,
     command = [
         "pg_dump",
         "-h", host,
+        "-p", str(port),
         "-U", user,
         "-d", dbname,
         "-F", "p",
@@ -50,5 +51,5 @@ def backup_postgres_db(env_name: str,
         logger.error(f"Error creating backup of DB [{dbname}]: {e.stderr}")
         raise e
     except Exception as e:
-        logger.exception(e)
+        logger.error(e.strerror)
         raise e
