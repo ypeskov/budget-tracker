@@ -25,6 +25,8 @@ services:
     image: ypeskov/api-orgfin:0.46
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env.prod}
+    volumes:
+      - ../orgfin/backup:/app/backup
     command: celery -A app.celery worker -l info
     depends_on:
       - redis-orgfin
