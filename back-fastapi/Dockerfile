@@ -31,7 +31,16 @@ WORKDIR /app
 
 COPY ./requirements.txt /app/
 
-RUN apt-get update && apt-get install -y gcc libpq-dev postgresql-client && apt-get clean
+#RUN apt-get update && apt-get install -y gcc libpq-dev postgresql-client && apt-get clean
+
+RUN apt-get update && apt-get install -y wget gnupg2 lsb-release
+
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && apt-get update \
+    && apt-get install -y gcc libpq-dev postgresql-client-16 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir -r requirements.txt
 
