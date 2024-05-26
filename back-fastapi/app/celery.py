@@ -26,10 +26,18 @@ celery_app.autodiscover_tasks(['app.tasks'])
 update_exchange_rates_hour = settings.DAILY_UPDATE_EXCHANGE_RATES_HOUR
 update_exchange_rates_minute = settings.DAILY_UPDATE_EXCHANGE_RATES_MINUTE
 
+db_backup_hour = settings.DAILY_DB_BACKUP_HOUR
+db_backup_minute = settings.DAILY_DB_BACKUP_MINUTE
+
 celery_app.conf.beat_schedule = {
     "update-exchange-rates-daily": {
         "task": "app.tasks.tasks.daily_update_exchange_rates",
         "schedule": crontab(hour=update_exchange_rates_hour,
                             minute=update_exchange_rates_minute),
+    },
+    "create-db-backup": {
+        "task": "app.tasks.tasks.make_db_backup",
+        "schedule": crontab(hour=db_backup_hour,
+                            minute=db_backup_minute),
     },
 }

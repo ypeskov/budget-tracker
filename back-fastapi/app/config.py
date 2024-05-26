@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     DAILY_UPDATE_EXCHANGE_RATES_HOUR: str = '13'
     DAILY_UPDATE_EXCHANGE_RATES_MINUTE: str = '00'
 
+    DAILY_DB_BACKUP_HOUR: str = '14'
+    DAILY_DB_BACKUP_MINUTE: str = '00'
+
     DB_BACKUP_DIR: str = 'backup'
 
     model_config = SettingsConfigDict(env_file=('.env', '.env.local', '.env.prod'))
