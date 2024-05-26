@@ -47,7 +47,7 @@ def backup_postgres_db(env_name: str,
 
         return True
     except subprocess.CalledProcessError as e:
-        logger.error(f"Error creating backup of DB [{dbname}]: {e}")
+        logger.error(f"Error creating backup of DB [{dbname}]: {e.stderr}")
         raise e
     except Exception as e:
         logger.exception(e)
