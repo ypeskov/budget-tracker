@@ -1,13 +1,16 @@
 <script setup>
 import { onBeforeMount, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 import { Bar } from 'vue-chartjs';
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip } from 'chart.js';
 
 import { Services } from '@/services/servicesConfig';
+import { processError } from '@/errors/errorHandlers';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
+const router = useRouter();
 const loaded = ref(false);
 
 const chartData = reactive({
@@ -49,7 +52,11 @@ const period = ref('monthly');
 
 onBeforeMount(async () => {
   accounts.push(...(await Services.accountsService.getUserAccounts()));
-  await getAccountData(accounts[accountIdx.value].id);
+  try {
+    await getAccountData(accounts[accountIdx.value].id);
+  } catch (e) {
+    await processError(e, router);
+  }
 });
 
 async function updateChartData() {

@@ -34,7 +34,6 @@ onBeforeMount(async () => {
   try {
     userAccounts = await Services.accountsService.getUserAccounts();
   } catch (e) {
-    console.error(e);
     await processError(e, router);
   }
   accounts.push(...userAccounts);
