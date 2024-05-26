@@ -51,7 +51,10 @@
     "didntExist": "Не існувало",
     "totalBalance": "Загальний баланс",
     "selectBaseCurrency": "Виберіть базову валюту",
-    "currentCurency": "Поточна валюта"
+    "currentCurency": "Поточна валюта",
+    "totalIncome": "Загальний дохід",
+    "totalExpenses": "Загальні витрати",
+    "netFlow": "Чистий потік"
   },
   "menu": {
     "home": "Початок",

@@ -51,7 +51,10 @@
     "didntExist": "Didn't exist",
     "totalBalance": "Total balance",
     "selectBaseCurrency": "Select base currency",
-    "currentCurency": "Current currency"
+    "currentCurency": "Current currency",
+    "totalIncome": "Total income",
+    "totalExpenses": "Total expense",
+    "netFlow": "Net flow"
   },
   "menu": {
     "home": "Home",

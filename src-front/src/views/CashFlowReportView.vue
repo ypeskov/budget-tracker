@@ -33,6 +33,7 @@ const chartData = reactive({
     },
   ],
 });
+const rawData = reactive([]);
 
 const chartOptions = reactive({
   responsive: true,
@@ -75,18 +76,19 @@ async function getAccountData(accountId) {
   if (endDate.value !== '') {
     filters.endDate = endDate.value;
   }
-  const cashFlowReport = await Services.reportsService
-    .getReport('cashflow', filters);
+  const cashFlowReport = await Services.reportsService.getReport('cashflow', filters);
   cashFlowReport.forEach(item => {
     chartData.labels.push(item.period + ' (' + item.accountName + ')');
     chartData.datasets[0].data.push(item.totalIncome);
     chartData.datasets[1].data.push(-1 * item.totalExpenses);  // Change sign to show expenses as negative values
     chartData.datasets[2].data.push(item.netFlow);
   });
+  rawData.push(...cashFlowReport);
   loaded.value = true;
 }
 
 function clearChartData() {
+  rawData.splice(0);
   chartData.labels = [];
   chartData.datasets[0].data = [];
   chartData.datasets[1].data = [];
@@ -176,6 +178,25 @@ async function changePeriod($event) {
           <Bar v-if="loaded" :data="chartData" :options="chartOptions" />
         </div>
       </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="period-item">
+            <div class="period-cell table-header">{{ $t('message.period') }}</div>
+            <div class="name-cell table-header">{{ $t('message.account') }}</div>
+            <div class="income-cell table-header">{{ $t('message.totalIncome') }}</div>
+            <div class="expense-cell table-header">{{ $t('message.totalExpenses') }}</div>
+            <div class="net-flow-cell table-header">{{ $t('message.netFlow') }}</div>
+          </div>
+          <div class="period-item" v-for="(item, index) in rawData" :key="index">
+            <div class="period-cell">{{ item.period }}</div>
+            <div class="name-cell">{{ item.accountName }}</div>
+            <div class="income-cell">{{ $n(item.totalIncome, 'decimal') }}</div>
+            <div class="expense-cell">{{ $n(item.totalExpenses, 'decimal') }}</div>
+            <div class="net-flow-cell">{{ $n(item.netFlow, 'decimal') }}</div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </template>
@@ -183,5 +204,30 @@ async function changePeriod($event) {
 <style scoped>
 .row {
   margin: 1rem 1rem;
+}
+.period-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.5rem 0;
+}
+
+.period-item:hover {
+  background-color: #f0f0f0;
+}
+
+.period-cell, .name-cell {
+  text-align: left;
+  width: 15%;
+}
+
+.income-cell, .expense-cell, .net-flow-cell {
+  text-align: right;
+  width: 15%;
+}
+
+.table-header {
+  text-align: center;
+  font-weight: bold;
+  border-bottom: 2px solid black;
 }
 </style>
