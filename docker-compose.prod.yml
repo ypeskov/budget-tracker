@@ -8,6 +8,8 @@ services:
       - ${APP_ENV_FILE:-./back-fastapi/.env.prod}
     ports:
       - 8000:8000
+    volumes:
+      - ./backup:/app/backup
     tty: true
     command: "gunicorn app.main:app -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
     restart: always
