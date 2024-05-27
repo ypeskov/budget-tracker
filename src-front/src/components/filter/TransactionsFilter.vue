@@ -125,17 +125,17 @@ function filterByAccounts(TransactionsToFilter) {
 function filterByType(transTypes) {
   return props['transactions'].filter(trans => {
     if (transTypes.expense === true) {
-      if (trans.is_income === false && trans.is_transfer === false) {
+      if (trans.isIncome === false && trans.isTransfer === false) {
         return true;
       }
     }
     if (transTypes.income === true) {
-      if (trans.is_income === true && trans.is_transfer === false) {
+      if (trans.isIncome === true && trans.isTransfer === false) {
         return true;
       }
     }
     if (transTypes.transfer === true) {
-      if (trans.is_transfer === true) {
+      if (trans.isTransfer === true) {
         return true;
       }
     }
