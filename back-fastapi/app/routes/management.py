@@ -1,5 +1,4 @@
 import os
-
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,8 +7,8 @@ from icecream import ic
 from app.config import Settings
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
+from app.tasks.tasks import send_email
 from app.utils.db.backup import backup_postgres_db
-from app.utils.email import send_html_email
 
 ic.configureOutput(includeContext=True)
 
@@ -40,13 +39,13 @@ async def backup_db():
                            password=settings.DB_PASSWORD,
                            backup_dir=backup_dir)
 
-        await send_html_email(subject='Database backup',
-                              recipients=settings.DB_BACKUP_NOTIFICATION_EMAILS,
-                              template_name='backup_created.html',
-                              template_body={
-                                  'env_name': settings.ENVIRONMENT,
-                                  'db_name': settings.DB_NAME,
-                              })
+        send_email.delay(subject='Database backup created',
+                         recipients=settings.DB_BACKUP_NOTIFICATION_EMAILS,
+                         template_name='backup_created.html',
+                         template_body={
+                             'env_name': settings.ENVIRONMENT,
+                             'db_name': settings.DB_NAME,
+                         })
 
         return {'message': 'Backup of the database is successfully created'}
     except Exception as e:
