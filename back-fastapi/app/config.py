@@ -1,4 +1,5 @@
 from pydantic_settings import SettingsConfigDict, BaseSettings
+from pydantic import Field
 
 
 class Settings(BaseSettings):
@@ -26,5 +27,16 @@ class Settings(BaseSettings):
     DAILY_DB_BACKUP_MINUTE: str = '00'
 
     DB_BACKUP_DIR: str = 'backup'
+    DB_BACKUP_NOTIFICATION_EMAILS: list[str] = Field(..., alias='DB_BACKUP_NOTIFICATION_EMAILS')
+
+    MAIL_USERNAME: str = "example@example.com"
+    MAIL_PASSWORD: str = "*************"
+    MAIL_FROM: str = "example@example.com"
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = "smtp.gmail.com"
+    MAIL_FROM_NAME: str = "OrgFin.run Team"
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
+    USE_CREDENTIALS: bool = True
 
     model_config = SettingsConfigDict(env_file=('.env', '.env.local', '.env.prod'))

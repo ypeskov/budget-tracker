@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Backup Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333333;
+        }
+        p {
+            color: #666666;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Backup Notification</h1>
+        <p>Dear Team,</p>
+        <p>This is to inform you that a backup for the database <strong>{{ db_name }}</strong> has been successfully generated in the <strong>{{ env_name }}</strong> environment.</p>
+        <p>Project: Orgfin.run</p>
+        <p>If you have any questions or need further assistance, please contact the support team.</p>
+        <p>Best regards,</p>
+        <p>The Orgfin.run Team</p>
+        <div class="footer">
+            <p>&copy; 2024 Orgfin.run. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
