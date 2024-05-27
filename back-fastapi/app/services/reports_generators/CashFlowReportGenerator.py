@@ -88,14 +88,19 @@ class CashFlowReportGenerator:
             self._db.query(
                 Account.id.label('account_id'),
                 func.to_char(Transaction.date_time, self.period_str).label(self.label),
-                func.coalesce(func.sum(case((Transaction.is_income == True, Transaction.amount), else_=0))
-                              .filter(Transaction.is_deleted == False), 0).label('total_income'),
-                func.coalesce(func.sum(case((Transaction.is_income == False, Transaction.amount), else_=0))
-                              .filter(Transaction.is_deleted == False), 0).label('total_expenses')
+                func.coalesce(
+                    func.sum(
+                        case((Transaction.is_income == True, Transaction.amount), else_=0)
+                    ).filter(Transaction.is_deleted == False, Transaction.is_transfer == False), 0
+                ).label('total_income'),
+                func.coalesce(
+                    func.sum(
+                        case((Transaction.is_income == False, Transaction.amount), else_=0)
+                    ).filter(Transaction.is_deleted == False, Transaction.is_transfer == False), 0
+                ).label('total_expenses')
             )
             .outerjoin(Transaction,
                        and_(Account.id == Transaction.account_id, Transaction.account_id.in_(self.account_ids)))
-            .filter(Account.user_id == self.user_id, Account.id.in_(self.account_ids))
             .filter(Account.user_id == self.user_id, Account.id.in_(self.account_ids))
             .group_by(Account.id, func.to_char(Transaction.date_time, self.period_str))
             .order_by(Account.id, self.label)
