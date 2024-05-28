@@ -27,7 +27,8 @@ class Settings(BaseSettings):
     DAILY_DB_BACKUP_MINUTE: str = '00'
 
     DB_BACKUP_DIR: str = 'backup'
-    DB_BACKUP_NOTIFICATION_EMAILS: list[str] = Field(..., alias='DB_BACKUP_NOTIFICATION_EMAILS')
+
+    ADMINS_NOTIFICATION_EMAILS: list[str] = Field(..., alias='ADMINS_NOTIFICATION_EMAILS')
 
     MAIL_USERNAME: str = "example@example.com"
     MAIL_PASSWORD: str = "*************"

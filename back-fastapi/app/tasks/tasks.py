@@ -25,7 +25,13 @@ def daily_update_exchange_rates(task):
         raise task.retry(exc=e)
 
     now = datetime.now()
-    print(f"Exchange rates updated at {now}")
+    send_email.delay(subject='Exchange rates updated',
+                     recipients=settings.ADMINS_NOTIFICATION_EMAILS,
+                     template_name='exchange_rates_updated.html',
+                     template_body={
+                         'updated_at': now,
+                         'env_name': settings.ENVIRONMENT,
+                     })
 
     return f"Exchange rates updated at {now}"
 
@@ -49,7 +55,7 @@ def make_db_backup(task):
                            backup_dir=backup_dir)
 
         send_email.delay(subject='Database backup created',
-                         recipients=settings.DB_BACKUP_NOTIFICATION_EMAILS,
+                         recipients=settings.ADMINS_NOTIFICATION_EMAILS,
                          template_name='backup_created.html',
                          template_body={
                              'env_name': settings.ENVIRONMENT,
