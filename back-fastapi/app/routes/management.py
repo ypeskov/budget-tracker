@@ -40,7 +40,7 @@ async def backup_db():
                            backup_dir=backup_dir)
 
         send_email.delay(subject='Database backup created',
-                         recipients=settings.DB_BACKUP_NOTIFICATION_EMAILS,
+                         recipients=settings.ADMINS_NOTIFICATION_EMAILS,
                          template_name='backup_created.html',
                          template_body={
                              'env_name': settings.ENVIRONMENT,
