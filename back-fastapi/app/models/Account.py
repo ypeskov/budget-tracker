@@ -30,6 +30,7 @@ class Account(Base):
     opening_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     comment: Mapped[str] = mapped_column(nullable=True)
     is_hidden: Mapped[bool] = mapped_column(default=False)
+    show_in_reports: Mapped[bool] = mapped_column(default=True, nullable=True)
 
     user: Mapped[User] = relationship(backref="accounts", passive_deletes=True)
     account_type: Mapped[AccountType] = relationship()
