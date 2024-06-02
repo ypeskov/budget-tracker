@@ -54,7 +54,8 @@
     "currentCurency": "Поточна валюта",
     "totalIncome": "Загальний дохід",
     "totalExpenses": "Загальні витрати",
-    "netFlow": "Чистий потік"
+    "netFlow": "Чистий потік",
+    "showInReports": "Показати в звітах"
   },
   "menu": {
     "home": "Початок",

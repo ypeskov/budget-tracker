@@ -17,6 +17,7 @@ const balance = ref(0);
 const openingDate = ref(DateTime.now().toFormat("yyyy-LL-dd'T'HH:mm"));
 const comment = ref('');
 const isHidden = ref(false);
+const showInReports = ref(false);
 
 if (props.accountDetails) {
   accountType.value = props.accountDetails.accountTypeId;
@@ -26,6 +27,7 @@ if (props.accountDetails) {
   openingDate.value = new DateTime(props.accountDetails.openingDate).toFormat("yyyy-LL-dd'T'HH:mm");
   comment.value = props.accountDetails.comment;
   isHidden.value = props.accountDetails.isHidden;
+  showInReports.value = props.accountDetails.showInReports;
 }
 
 const accountTypes = reactive([]);
@@ -63,6 +65,7 @@ async function updateAccount() {
     opening_date: openingDate.value,
     comment: comment.value,
     is_hidden: isHidden.value,
+    show_in_reports: showInReports.value,
   };
 
   try {
@@ -145,6 +148,12 @@ async function createAccount() {
         <label for="is_hidden">Is Hidden:</label>
         <input type="checkbox" id="is_hidden" v-model="isHidden">
       </div>
+
+      <div class="form-group">
+        <label for="show-in-reports">{{ $t('message.showInReports') }}</label>
+        <input type="checkbox" id="show-in-reports" v-model="showInReports">
+      </div>
+
       <button type="submit">{{ formSubmitLabel }}</button>
     </form>
   </div>

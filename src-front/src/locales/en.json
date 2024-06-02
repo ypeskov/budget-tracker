@@ -54,7 +54,8 @@
     "currentCurency": "Current currency",
     "totalIncome": "Total income",
     "totalExpenses": "Total expense",
-    "netFlow": "Net flow"
+    "netFlow": "Net flow",
+    "showInReports": "Show in reports"
   },
   "menu": {
     "home": "Home",

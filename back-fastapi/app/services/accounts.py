@@ -50,6 +50,7 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
             account.balance = account_dto.balance
             account.opening_date = account_dto.opening_date
             account.is_hidden = account_dto.is_hidden
+            account.show_in_reports = account_dto.show_in_reports
             account.name = account_dto.name
             account.comment = account_dto.comment
     else:
