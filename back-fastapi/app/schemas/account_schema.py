@@ -23,6 +23,7 @@ class CreateAccountSchema(BaseModel):
     opening_date: datetime | None = None
     comment: str = ""
     is_hidden: bool = False
+    show_in_reports: bool = True
 
     model_config = ConfigDict(populate_by_name=True,
                               alias_generator=to_camel)
@@ -36,6 +37,7 @@ class UpdateAccountSchema(CreateAccountSchema):
     opening_date: datetime
     comment: str
     is_hidden: bool
+    show_in_reports: bool
 
     model_config = ConfigDict(populate_by_name=True,
                               alias_generator=to_camel)
