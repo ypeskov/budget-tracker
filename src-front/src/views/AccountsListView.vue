@@ -106,6 +106,11 @@ function balanceClass(balance) {
             <div class="col account-balance" :class="balanceClass(acc.balance)">
               <b>{{ $n(acc.balance, 'decimal') }}</b> {{ acc.currency.code }}
             </div>
+            <div class="col-1 ">
+              <span v-if="acc.showInReports"
+                    :title="$t('message.showInReports')"
+                    class="badge bg-success">&#10003;</span>
+            </div>
           </div>
         </RouterLink>
       </div>
