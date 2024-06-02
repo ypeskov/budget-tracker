@@ -31,7 +31,7 @@ def get_balance_report(user_id: int,
                        account_ids: list[int],
                        balance_date: date | None) -> list[dict]:
     """ Get balance for accounts on a given date """
-    balance_report_generator = BalanceReportGenerator(user_id, account_ids, db, balance_date)
+    balance_report_generator = BalanceReportGenerator(user_id, db, balance_date)
     balance_data: list[dict] = balance_report_generator.prepare_raw_data().get_balances()
 
     return balance_data
