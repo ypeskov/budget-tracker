@@ -91,7 +91,10 @@ class CashFlowReportGenerator:
             else:
                 expenses_sum[period] += expenses_in_period
 
-            net_flow.setdefault(period, income_sum[period] - expenses_sum[period])
+            if period not in net_flow:
+                net_flow.setdefault(period, income_sum[period] - expenses_sum[period])
+            else:
+                net_flow[period] += income_sum[period] - expenses_sum[period]
 
         cash_flow = {
             'total_income': income_sum,
