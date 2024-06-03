@@ -5,7 +5,6 @@ from pydantic.alias_generators import to_camel
 
 
 class CashFlowReportInputSchema(BaseModel):
-    account_ids: list[int]
     start_date: datetime | None = None
     end_date: datetime | None = None
     period: str
@@ -16,13 +15,10 @@ class CashFlowReportInputSchema(BaseModel):
 
 
 class CashFlowReportOutputSchema(BaseModel):
-    account_id: int
-    account_name: str
     currency: str
-    total_income: float
-    total_expenses: float
-    net_flow: float
-    period: str | None = None
+    total_income: dict[str, float]
+    total_expenses: dict[str, float]
+    net_flow: dict[str, float]
 
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,

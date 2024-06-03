@@ -19,18 +19,17 @@ router = APIRouter(
 )
 
 
-@router.post('/cashflow/', response_model=list[CashFlowReportOutputSchema])
+@router.post('/cashflow/', response_model=CashFlowReportOutputSchema)
 def cash_flow(request: Request,
               input_data: CashFlowReportInputSchema,
               db: Session = Depends(get_db)) -> list[dict]:
     """ Get all expenses for one account within a given time period """
     logger.info(f"Getting cash flow report for user_id: {request.state.user['id']}, "
-                f"account_ids: {input_data.account_ids}, start_date: {input_data.start_date}, "
+                f"start_date: {input_data.start_date}, "
                 f"end_date: {input_data.end_date}, period: {input_data.period}")
     try:
         result: list[dict] = get_cash_flows(request.state.user['id'],
                                             db,
-                                            input_data.account_ids,
                                             input_data.start_date,
                                             input_data.end_date,
                                             input_data.period)
