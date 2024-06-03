@@ -33,7 +33,7 @@ const chartData = reactive({
     },
   ],
 });
-const rawData = reactive([]);
+let cashFlowReport = reactive({});
 
 const chartOptions = reactive({
   responsive: true,
@@ -45,16 +45,13 @@ const chartOptions = reactive({
   },
 });
 
-const accounts = reactive([]);
-const accountIdx = ref(0);
 const startDate = ref('');
 const endDate = ref(DateTime.now().toISODate()); // 'YYYY-MM-DD'
 const period = ref('monthly');
 
 onBeforeMount(async () => {
-  accounts.push(...(await Services.accountsService.getUserAccounts()));
   try {
-    await getAccountData(accounts[accountIdx.value].id);
+    await getReportData();
   } catch (e) {
     await processError(e, router);
   }
@@ -62,12 +59,11 @@ onBeforeMount(async () => {
 
 async function updateChartData() {
   clearChartData();
-  await getAccountData(accounts[accountIdx.value].id);
+  await getReportData();
 }
 
-async function getAccountData(accountId) {
+async function getReportData() {
   const filters = {
-    accountIds: [accountId],
     period: period.value,
   };
   if (startDate.value !== '') {
@@ -76,31 +72,24 @@ async function getAccountData(accountId) {
   if (endDate.value !== '') {
     filters.endDate = endDate.value;
   }
-  const cashFlowReport = await Services.reportsService.getReport('cashflow', filters);
-  cashFlowReport.forEach(item => {
-    chartData.labels.push(item.period + ' (' + item.accountName + ')');
-    chartData.datasets[0].data.push(item.totalIncome);
-    chartData.datasets[1].data.push(-1 * item.totalExpenses);  // Change sign to show expenses as negative values
-    chartData.datasets[2].data.push(item.netFlow);
-  });
-  rawData.push(...cashFlowReport);
+  cashFlowReport = await Services.reportsService.getReport('cashflow', filters);
+
+  for(let period in cashFlowReport.netFlow) {
+    chartData.labels.push(period);
+    chartData.datasets[0].data.push(cashFlowReport.totalIncome[period]);
+    chartData.datasets[1].data.push(-1 * cashFlowReport.totalExpenses[period]);
+    chartData.datasets[2].data.push(cashFlowReport.netFlow[period]);
+  }
+
   loaded.value = true;
 }
 
 function clearChartData() {
-  rawData.splice(0);
+  // cashFlowReport = reactive({});
   chartData.labels = [];
   chartData.datasets[0].data = [];
   chartData.datasets[1].data = [];
   chartData.datasets[2].data = [];
-}
-
-async function changeAccount($event) {
-  accountIdx.value = parseInt($event.target.value, 10);
-  loaded.value = false;
-  clearChartData();
-  await getAccountData(accounts[$event.target.value].id);
-  accountIdx.value = parseInt($event.target.value, 10);
 }
 
 async function changeDate() {
@@ -124,18 +113,6 @@ async function changePeriod($event) {
       <div class="row">
         <div class="col">
           <h1>{{ $t('message.cashFlowReport') }}</h1>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col">
-          <select class="form-select bottom-space"
-                  @change="changeAccount"
-                  :value="accountIdx">
-            <option v-for="(acc, index) in accounts" :key="acc.id" :value="index">
-              {{ acc.name }}, {{ acc.currency.code }}
-            </option>
-          </select>
         </div>
       </div>
 
@@ -183,17 +160,21 @@ async function changePeriod($event) {
         <div class="col">
           <div class="period-item">
             <div class="period-cell table-header">{{ $t('message.period') }}</div>
-            <div class="name-cell table-header">{{ $t('message.account') }}</div>
             <div class="income-cell table-header">{{ $t('message.totalIncome') }}</div>
             <div class="expense-cell table-header">{{ $t('message.totalExpenses') }}</div>
             <div class="net-flow-cell table-header">{{ $t('message.netFlow') }}</div>
           </div>
-          <div class="period-item" v-for="(item, index) in rawData" :key="index">
-            <div class="period-cell">{{ item.period }}</div>
-            <div class="name-cell">{{ item.accountName }}</div>
-            <div class="income-cell">{{ $n(item.totalIncome, 'decimal') }}</div>
-            <div class="expense-cell">{{ $n(item.totalExpenses, 'decimal') }}</div>
-            <div class="net-flow-cell">{{ $n(item.netFlow, 'decimal') }}</div>
+          <div class="period-item" v-for="(item, index) in cashFlowReport.netFlow" :key="index">
+            <div class="period-cell">{{ index }}</div>
+            <div class="income-cell">
+              {{ $n(cashFlowReport.totalIncome[index], 'decimal') }} {{ cashFlowReport.currency}}
+            </div>
+            <div class="expense-cell">
+              {{ $n(cashFlowReport.totalExpenses[index], 'decimal') }} {{ cashFlowReport.currency}}
+            </div>
+            <div class="net-flow-cell">
+              {{ $n(cashFlowReport.netFlow[index], 'decimal') }} {{ cashFlowReport.currency}}
+            </div>
           </div>
         </div>
       </div>

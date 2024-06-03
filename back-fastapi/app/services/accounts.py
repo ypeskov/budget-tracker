@@ -74,7 +74,7 @@ def get_user_accounts(user_id: int,
                       db: Session,
                       include_deleted: bool = False,
                       include_hidden: bool = False) -> list[Account]:
-    query = db.query(Account).filter_by(user_id=user_id).order_by(asc(Account.id))
+    query = db.query(Account).filter_by(user_id=user_id).order_by(asc(Account.name))
 
     if not include_deleted:
         query = query.filter(Account.is_deleted == False)

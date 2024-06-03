@@ -1,13 +1,19 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from decimal import Decimal
 
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from sqlalchemy import case, and_
 
+from icecream import ic
+
 from app.models.Account import Account
 from app.models.Currency import Currency
 from app.models.Transaction import Transaction
+from app.models.User import User
+from app.services.CurrencyProcessor import calc_amount
+
+ic.configureOutput(includeContext=True)
 
 
 class CashFlowReportGenerator:
@@ -23,8 +29,7 @@ class CashFlowReportGenerator:
 
         self._accounts_info = None
 
-    def set_parameters(self, account_ids, period='monthly', start_date=None, end_date=None):
-        self.account_ids = account_ids
+    def set_parameters(self, period='monthly', start_date=None, end_date=None):
         self.period = period
         self.start_date = start_date
         self.end_date = end_date
@@ -40,36 +45,62 @@ class CashFlowReportGenerator:
             Account.name,
             Currency.code.label("currency")
         ).filter(
-            Account.id.in_(self.account_ids),
+            Account.show_in_reports == True,
             Account.user_id == self.user_id
         ).join(
             Currency, Account.currency_id == Currency.id
         ).all()
+        self.account_ids = [account.id for account in accounts]
 
         self._accounts_info = {account.id: {"name": account.name, "currency": account.currency} for account in accounts}
 
     def get_cash_flows(self):
         cash_flows = []
         prepared_results = self.prepare_data()
+
+        today = datetime.now().date()
+        user = self._db.query(User).filter(User.id == self.user_id).one()
+
+        income_sum = {}
+        expenses_sum = {}
+        net_flow = {}
+
         for result in prepared_results:
             account_id, period, total_income, total_expenses = result
-            total_income = Decimal(total_income or 0)
-            total_expenses = Decimal(total_expenses or 0)
-            net_flow = total_income - total_expenses
+            income_in_period = Decimal(calc_amount(
+                total_income or 0,
+                self._accounts_info[account_id]["currency"],
+                today,
+                user.base_currency.code,
+                self._db
+            ))
+            if period not in income_sum:
+                income_sum.setdefault(period, income_in_period)
+            else:
+                income_sum[period] += income_in_period
 
-            cash_flow = {
-                'account_id': account_id,
-                'account_name': self._accounts_info[account_id]["name"],
-                'currency': self._accounts_info[account_id]["currency"],
-                'total_income': total_income,
-                'total_expenses': total_expenses,
-                'net_flow': net_flow,
-                'period': period,
-            }
+            expenses_in_period = Decimal(calc_amount(
+                total_expenses or 0,
+                self._accounts_info[account_id]["currency"],
+                today,
+                user.base_currency.code,
+                self._db
+            ))
+            if period not in expenses_sum:
+                expenses_sum.setdefault(period, expenses_in_period)
+            else:
+                expenses_sum[period] += expenses_in_period
 
-            cash_flows.append(cash_flow)
+            net_flow.setdefault(period, income_sum[period] - expenses_sum[period])
 
-        return cash_flows
+        cash_flow = {
+            'total_income': income_sum,
+            'total_expenses': expenses_sum,
+            'net_flow': net_flow,
+            'currency': user.base_currency.code,
+        }
+
+        return cash_flow
 
     def set_label(self):
         if self.period == 'monthly':

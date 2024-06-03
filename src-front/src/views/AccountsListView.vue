@@ -52,6 +52,10 @@ function toggleHiddenAccounts(event) {
   showHiddenAccounts.value = event.target.checked;
   reReadAllAccounts(true);
 }
+
+function balanceClass(balance) {
+  return balance < 0 ? 'text-danger' : 'text-success';
+}
 </script>
 
 <template>
@@ -99,8 +103,13 @@ function toggleHiddenAccounts(event) {
             <div class="col-5 account-name">
               {{ acc.name }}
             </div>
-            <div class="col account-balance">
+            <div class="col account-balance" :class="balanceClass(acc.balance)">
               <b>{{ $n(acc.balance, 'decimal') }}</b> {{ acc.currency.code }}
+            </div>
+            <div class="col-1 account-marks">
+              <span v-if="acc.showInReports"
+                    :title="$t('message.showInReports')"
+                    class="badge bg-success">&#10003;</span>
             </div>
           </div>
         </RouterLink>
@@ -109,7 +118,7 @@ function toggleHiddenAccounts(event) {
   </main>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 @import '../assets/main.scss';
 
 .account-name {
@@ -125,5 +134,9 @@ function toggleHiddenAccounts(event) {
 .list-item > a {
   text-decoration: none;
   color: black;
+}
+
+.account-marks {
+  text-align: right;
 }
 </style>
