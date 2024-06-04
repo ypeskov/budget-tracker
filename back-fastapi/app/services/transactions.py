@@ -52,7 +52,7 @@ def get_transactions(user_id: int, db: Session, params: dict = None, include_del
             expense_or_income.append(Transaction.is_income == True)
         if len(expense_or_income) > 0:
             if 'categories' not in params:
-                type_filters.append(or_(*expense_or_income))
+                type_filters.append(and_(or_(*expense_or_income), Transaction.is_transfer == False))
             else:
                 type_filters.append(and_(or_(*expense_or_income), Transaction.category_id.in_(params['categories'])))
 
@@ -82,6 +82,7 @@ def get_transactions(user_id: int, db: Session, params: dict = None, include_del
     if 'per_page' in params:
         per_page = int(params['per_page'])
     offset = (page - 1) * per_page
+
     transactions: list[Transaction] = stmt.offset(offset).limit(per_page).all()  # type: ignore
 
     return transactions
