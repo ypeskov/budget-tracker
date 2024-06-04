@@ -9,8 +9,8 @@ export class TransactionsService {
     this.accountService = accountService;
   }
 
-  async getUserTransactions(filters={}) {
-    let transactionsUrl = '/transactions/?per_page=1000';
+  async getUserTransactions(page = 1, perPage = 20, filters={}) {
+    let transactionsUrl = `/transactions/?per_page=${perPage}&page=${page}`;
 
     if (filters.accountId) {
       transactionsUrl += `&accounts=${filters.accountId}`;

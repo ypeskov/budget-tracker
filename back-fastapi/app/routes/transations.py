@@ -49,7 +49,12 @@ def get_user_transactions(request: Request, db: Session = Depends(get_db)):
     params = dict(request.query_params)
     prepare_filters(params)
 
-    return get_transactions(request.state.user['id'], db, dict(params))
+    try:
+        transactions = get_transactions(request.state.user['id'], db, dict(params))
+        return transactions
+    except Exception as e:  # pragma: no cover
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to get transactions')
 
 
 @router.get('/{transaction_id}', response_model=ResponseTransactionSchema)

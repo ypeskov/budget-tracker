@@ -87,7 +87,7 @@ const router = createRouter({
       },
       component: () => import('../views/CashFlowReportView.vue'),
     },
-        {
+    {
       path: '/reports/balance',
       name: 'reports-balance',
       meta: {
