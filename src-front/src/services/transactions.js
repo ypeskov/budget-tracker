@@ -12,10 +12,24 @@ export class TransactionsService {
   async getUserTransactions(page = 1, perPage = 20, filters={}) {
     let transactionsUrl = `/transactions/?per_page=${perPage}&page=${page}`;
 
-    if (filters.accountId) {
+    if (filters.accountId && filters.accountId.length > 0) {
       transactionsUrl += `&accounts=${filters.accountId}`;
     }
-    
+
+    const transactionTypes =  Object.keys(filters.transactionTypes)
+      .filter((key) => filters.transactionTypes[key] === true);
+    if (transactionTypes.length > 0) {
+      transactionsUrl += `&types=${transactionTypes.join(',')}`;
+    }
+
+    if (filters.fromDate) {
+      transactionsUrl += `&from_date=${filters.fromDate}`;
+    }
+
+    if (filters.toDate) {
+      transactionsUrl += `&to_date=${filters.toDate}`;
+    }
+
     return await request(transactionsUrl, {}, {userService: this.userService});
   }
 

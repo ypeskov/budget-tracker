@@ -1,12 +1,11 @@
 <script setup>
-import { reactive, watch } from 'vue';
-import { DateTime } from 'luxon';
+import { onMounted, reactive, watch } from 'vue';
 
 import TransactionType from './TransactionType.vue';
 import AccountsListContainer from '@/components/filter/AccountsListContainer.vue';
 import DateFilter from '@/components/filter/DateFilter.vue';
 
-const props = defineProps(['transactions', 'resetstatus', 'isAccountDetails']);
+const props = defineProps(['transactions', 'resetstatus', 'isAccountDetails', 'accountId']);
 const emit = defineEmits(['filterApplied']);
 
 let filtersApplied = {};
@@ -31,6 +30,13 @@ function resetFilters() {
 watch(() => props['resetstatus'], (newReset) => {
   if (newReset) {
     resetFilters();
+  }
+});
+
+watch(() => props['accountId'], (newAccountId) => {
+  if (newAccountId) {
+    checkedAccounts.splice(0);
+    checkedAccounts.push(newAccountId);
   }
 });
 
@@ -61,50 +67,13 @@ function applyFilter(event) {
   updateFilteredTransactions();
 }
 
-function filterByDates(filteredTransactions) {
-  let start, end;
-
-  if (filtersApplied.startDate) {
-    start = DateTime.fromISO(filtersApplied.startDate);
-  }
-
-  if (filtersApplied.endDate) {
-    end = DateTime.fromISO(filtersApplied.endDate).plus({ days: 1 }).startOf('day');
-  }
-
-  return filteredTransactions.filter(transaction => {
-    const transactionDate = DateTime.fromISO(transaction.dateTime);
-    if (start && end) {
-      return transactionDate >= start && transactionDate < end;
-    }
-    else if (start) {
-      return transactionDate >= start;
-    }
-    else if (end) {
-      return transactionDate < end;
-    }
-    return true;
-  });
-}
-
-
 function updateFilteredTransactions(newResetStatus = false) {
-  let filteredTransactions = [...props['transactions']];
-
-  if (filtersApplied.transactionTypes) {
-    filteredTransactions = filterByType(filtersApplied.transactionTypes);
-  }
-
-  if (filtersApplied?.accounts?.length > 0) {
-    filteredTransactions = filterByAccounts(filteredTransactions);
-  }
-
-  if (filtersApplied.startDate || filtersApplied.endDate) {
-    filteredTransactions = filterByDates(filteredTransactions);
-  }
+  filtersApplied.accounts = checkedAccounts;
+  filtersApplied.fromDate = filtersApplied.startDate;
+  filtersApplied.toDate = filtersApplied.endDate;
 
   emit('filterApplied', {
-    'filteredTransactions': filteredTransactions,
+    'filterParams': filtersApplied,
     'resetStatus': newResetStatus,
   });
 }
@@ -114,38 +83,10 @@ function updateFilterDates({ startDate, endDate }) {
   filtersApplied.endDate = endDate;
 }
 
-function filterByAccounts(TransactionsToFilter) {
-  return TransactionsToFilter.filter(transaction => {
-    if (filtersApplied.accounts.includes(transaction.account.id)) {
-      return true;
-    }
-  });
-}
-
-function filterByType(transTypes) {
-  return props['transactions'].filter(trans => {
-    if (transTypes.expense === true) {
-      if (trans.isIncome === false && trans.isTransfer === false) {
-        return true;
-      }
-    }
-    if (transTypes.income === true) {
-      if (trans.isIncome === true && trans.isTransfer === false) {
-        return true;
-      }
-    }
-    if (transTypes.transfer === true) {
-      if (trans.isTransfer === true) {
-        return true;
-      }
-    }
-  });
-}
 </script>
 
 <template>
   <div class="container filter-container">
-
     <TransactionType @transaction-type-changed="transactionTypeChanged" :types="transactionTypes" />
 
     <DateFilter @update-dates="updateFilterDates" />
