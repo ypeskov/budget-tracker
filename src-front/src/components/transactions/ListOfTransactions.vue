@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeMount, reactive } from 'vue';
+import { computed, onBeforeMount, onUnmounted, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRouter } from 'vue-router';
 
@@ -7,6 +7,7 @@ import { Services } from '../../services/servicesConfig';
 import { processError } from '../../errors/errorHandlers';
 
 const props = defineProps(['transactions', 'accountId', 'returnUrl']);
+const emit = defineEmits(['loadMore']);
 
 const router = useRouter();
 const t = useI18n().t;
@@ -14,7 +15,10 @@ const t = useI18n().t;
 const categories = reactive([]);
 
 onBeforeMount(async () => {
-  categories.length = 0;
+  await fetchCategories();
+});
+
+async function fetchCategories() {
   try {
     const tmpCategories = await Services.categoriesService.getUserCategories();
     if (tmpCategories) {
@@ -23,20 +27,26 @@ onBeforeMount(async () => {
   } catch (e) {
     await processError(e, router);
   }
-});
+}
+
+async function loadMoreTransactions() {
+  emit('loadMore');
+}
 
 const groupedTransactions = computed(() => {
   const grouped = [];
   let lastDate = null;
 
-  props.transactions.forEach(transaction => {
-    const transactionDate = transaction.dateTime.split('T')[0];
-    if (lastDate !== transactionDate) {
-      grouped.push({ date: transactionDate, transactions: [] });
-      lastDate = transactionDate;
-    }
-    grouped[grouped.length - 1].transactions.push(transaction);
-  });
+  if (props.transactions) {
+    props.transactions.forEach(transaction => {
+      const transactionDate = transaction.dateTime.split('T')[0];
+      if (lastDate !== transactionDate) {
+        grouped.push({ date: transactionDate, transactions: [] });
+        lastDate = transactionDate;
+      }
+      grouped[grouped.length - 1].transactions.push(transaction);
+    });
+  }
 
   return grouped;
 });
@@ -73,6 +83,19 @@ function accountName(account) {
     return account.name;
   }
 }
+
+function handleScroll(event) {
+  const { scrollTop, clientHeight, scrollHeight } = event.target.scrollingElement;
+  if (scrollTop + clientHeight >= scrollHeight - 50) {
+    loadMoreTransactions();
+  }
+}
+
+window.addEventListener('scroll', handleScroll);
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <template>
@@ -103,13 +126,14 @@ function accountName(account) {
             <div :class="balanceClass(transaction)">
               <span class="acc-name">{{ accountName(transaction.account) }}</span>
               | <span v-if="transaction.newBalance !== null">{{ $n(transaction.newBalance, 'decimal') }}</span>
-                <span v-else>--</span>
+              <span v-else>--</span>
 
             </div>
           </div>
         </RouterLink>
       </div>
     </div>
+
   </div>
   <div v-else>
     No transactions found
@@ -159,4 +183,5 @@ function accountName(account) {
 .expense-transaction {
   color: red;
 }
+
 </style>

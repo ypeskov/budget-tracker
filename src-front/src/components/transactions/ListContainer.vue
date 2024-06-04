@@ -11,8 +11,14 @@ import ListOfTransactions from './ListOfTransactions.vue';
 const props = defineProps(['accountId', 'isAccountDetails']);
 
 const userStore = useUserStore();
+
 let transactions = reactive([]);
 let filteredTransactions = reactive([]);
+
+const loading = ref(false);
+const noMoreTransactions = ref(false);
+const page = ref(1);
+const perPage = ref(20);
 
 const router = useRouter();
 
@@ -30,9 +36,8 @@ if (props.isAccountDetails) {
 async function fetchTransactions() {
   try {
     transactions.splice(0);
-    const allTransactions = await Services.transactionsService.getUserTransactions({ accountId: props.accountId });
-    transactions.push(...allTransactions);
-    filteredTransactions.push(...allTransactions);
+    filteredTransactions.splice(0);
+    await loadMoreTransactions();
   } catch (e) {
     await processError(e, router);
   }
@@ -52,13 +57,12 @@ onBeforeMount(async () => {
 
 async function reloadTransactions(event) {
   event.preventDefault();
+  page.value = 1;
 
   try {
-    const allTransactions = await Services.transactionsService.getUserTransactions({ accountId: props.accountId });
     transactions.splice(0);
-    transactions.push(...allTransactions);
     filteredTransactions.splice(0);
-    filteredTransactions.push(...allTransactions);
+    await loadMoreTransactions();
     reset.value = true;
   } catch (e) {
     await processError(e, router);
@@ -68,6 +72,27 @@ async function reloadTransactions(event) {
 function toggleFilter(event) {
   event.preventDefault();
   showFilter.value = !showFilter.value;
+}
+
+async function loadMoreTransactions() {
+  if (loading.value || noMoreTransactions.value) return;
+  loading.value = true;
+
+  try {
+    const newTransactions = await Services.transactionsService
+      .getUserTransactions(page.value, perPage.value, { accountId: props.accountId });
+    if (newTransactions.length < perPage.value) {
+      noMoreTransactions.value = true;
+    }
+
+    transactions.push(...newTransactions);
+    filteredTransactions.push(...newTransactions);
+    page.value++;
+  } catch (e) {
+    await processError(e, router);
+  } finally {
+    loading.value = false;
+  }
 }
 
 function filterApplied(payload) {
@@ -127,8 +152,20 @@ function filterApplied(payload) {
       </div>
     </div>
     <div class="row">
-      <ListOfTransactions :transactions="filteredTransactions" :account-id="props.accountId"
+      <ListOfTransactions :transactions="filteredTransactions"
+                          @load-more="loadMoreTransactions"
+                          :account-id="props.accountId"
                           :return-url="returnUrlName" />
+      <div v-if="loading" class="loading">Loading...</div>
     </div>
   </div>
 </template>
+
+<style scoped lang="scss">
+@import '../../assets/main.scss';
+
+.loading {
+  text-align: center;
+  padding: 20px;
+}
+</style>
