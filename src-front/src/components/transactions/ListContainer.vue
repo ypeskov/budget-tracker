@@ -13,7 +13,6 @@ const props = defineProps(['accountId', 'isAccountDetails']);
 const userStore = useUserStore();
 
 let transactions = reactive([]);
-let filteredTransactions = reactive([]);
 
 const loading = ref(false);
 const noMoreTransactions = ref(false);
@@ -22,6 +21,16 @@ const perPage = ref(20);
 
 const router = useRouter();
 
+const filterParams = reactive({
+  transactionTypes: {
+    expense: false,
+    income: false,
+    transfer: false,
+  },
+  accounts: [],
+  fromDate: '',
+  toDate: '',
+});
 const showFilter = ref(false);
 const reset = ref(true);
 
@@ -36,7 +45,6 @@ if (props.isAccountDetails) {
 async function fetchTransactions() {
   try {
     transactions.splice(0);
-    filteredTransactions.splice(0);
     await loadMoreTransactions();
   } catch (e) {
     await processError(e, router);
@@ -45,6 +53,7 @@ async function fetchTransactions() {
 
 watch(() => props.accountId, (newAccountId) => {
   if (newAccountId) {
+    filterParams.accounts = [newAccountId];
     fetchTransactions();
   }
 });
@@ -55,13 +64,26 @@ onBeforeMount(async () => {
   }
 });
 
+function resetFilters() {
+  page.value = 1;
+  filterParams.transactionTypes = {
+    expense: false,
+    income: false,
+    transfer: false,
+  };
+  filterParams.accounts = [];
+  filterParams.fromDate = '';
+  filterParams.toDate = '';
+
+  noMoreTransactions.value = false;
+}
+
 async function reloadTransactions(event) {
   event.preventDefault();
-  page.value = 1;
+  resetFilters();
 
   try {
     transactions.splice(0);
-    filteredTransactions.splice(0);
     await loadMoreTransactions();
     reset.value = true;
   } catch (e) {
@@ -80,13 +102,18 @@ async function loadMoreTransactions() {
 
   try {
     const newTransactions = await Services.transactionsService
-      .getUserTransactions(page.value, perPage.value, { accountId: props.accountId });
+      .getUserTransactions(page.value, perPage.value, {
+        accountId: filterParams.accounts,
+        transactionTypes: filterParams.transactionTypes,
+        fromDate: filterParams.fromDate,
+        toDate: filterParams.toDate,
+      });
+
     if (newTransactions.length < perPage.value) {
       noMoreTransactions.value = true;
     }
 
     transactions.push(...newTransactions);
-    filteredTransactions.push(...newTransactions);
     page.value++;
   } catch (e) {
     await processError(e, router);
@@ -95,9 +122,22 @@ async function loadMoreTransactions() {
   }
 }
 
-function filterApplied(payload) {
-  filteredTransactions.splice(0);
-  filteredTransactions.push(...payload.filteredTransactions);
+async function filterApplied(payload) {
+  if (payload.resetStatus === true) {
+    resetFilters();
+  } else {
+    page.value = 1;
+    noMoreTransactions.value = false;
+    filterParams.transactionTypes = { ...payload.filterParams.transactionTypes };
+    filterParams.accounts = [...payload.filterParams.accounts].join(',');
+    filterParams.fromDate = payload.filterParams.startDate;
+    filterParams.toDate = payload.filterParams.toDate;
+  }
+
+  transactions.splice(0);
+
+  await loadMoreTransactions();
+
   reset.value = payload.resetStatus;
   showFilter.value = false;
 }
@@ -141,7 +181,10 @@ function filterApplied(payload) {
     </div>
     <div class="row">
       <div class="col" v-show="showFilter">
-        <Filter @filter-applied="filterApplied" :transactions="transactions" :resetstatus="reset"
+        <Filter @filter-applied="filterApplied"
+                :accountId="props.accountId"
+                :transactions="transactions"
+                :resetstatus="reset"
                 :is-account-details="props.isAccountDetails" />
       </div>
     </div>
@@ -152,7 +195,7 @@ function filterApplied(payload) {
       </div>
     </div>
     <div class="row">
-      <ListOfTransactions :transactions="filteredTransactions"
+      <ListOfTransactions :transactions="transactions"
                           @load-more="loadMoreTransactions"
                           :account-id="props.accountId"
                           :return-url="returnUrlName" />

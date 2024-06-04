@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime
+
 from fastapi import HTTPException, status
 from icecream import ic
 from sqlalchemy import or_, and_
@@ -31,8 +33,7 @@ def create_transaction(transaction_details: CreateTransactionSchema, user_id: in
 def get_transactions(user_id: int, db: Session, params: dict = None, include_deleted=False) -> list[Transaction]:
     if params is None:
         params = dict()
-    if params is None:
-        params = dict()
+
     stmt = (db.query(Transaction)
             .options(joinedload(Transaction.account),
                      joinedload(Transaction.category))
@@ -66,6 +67,13 @@ def get_transactions(user_id: int, db: Session, params: dict = None, include_del
 
     if 'accounts' in params:
         stmt = stmt.filter(Transaction.account_id.in_(params['accounts']))
+
+    if 'from_date' in params:
+        stmt = stmt.filter(Transaction.date_time >= params['from_date'])
+
+    if 'to_date' in params:
+        stmt = stmt.filter(Transaction.date_time < datetime.strptime(params['to_date'], "%Y-%m-%d")
+                           .date() + timedelta(days=1))
 
     page = 1
     if 'page' in params:
