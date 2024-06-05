@@ -5,10 +5,8 @@ from sqlalchemy import DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
-
-if TYPE_CHECKING:  # pragma: no cover
-    from app.models.UserCategory import UserCategory
-    from app.models.Currency import Currency
+from app.models import Currency
+from app.models import UserCategory
 
 DEFAULT_CURRENCY_CODE = 'USD'
 
@@ -21,11 +19,11 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(index=True, nullable=True)
     last_name: Mapped[str] = mapped_column(index=True, nullable=True)
     password_hash: Mapped[str] = mapped_column()
-    is_active: Mapped[str] = mapped_column(server_default='t', default=True)
+    is_active: Mapped[bool] = mapped_column(server_default='t', default=True)
     base_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
 
-    base_currency: Mapped['Currency'] = relationship()
-    categories: Mapped[list['UserCategory']] = relationship(back_populates="user", passive_deletes=True)
+    base_currency: Mapped[Currency.Currency] = relationship()
+    categories: Mapped[list[UserCategory.UserCategory]] = relationship(back_populates="user", passive_deletes=True)
 
     is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

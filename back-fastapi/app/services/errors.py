@@ -20,3 +20,7 @@ class AccessDenied(Exception):
 
 class InvalidCategory(Exception):
     pass
+
+
+class UserNotActivated(Exception):
+    pass

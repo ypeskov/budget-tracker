@@ -30,7 +30,12 @@ async function submitLogin() {
   } catch (error) {
     if (error instanceof HttpError && error.statusCode === 401) {
       console.log(error.message);
-      alert(t('message.invalidCredentials'));
+      if (error.message === 'User not activated') {
+        alert(t('message.userNotActivated'));
+        return;
+      } else {
+        alert(t('message.invalidCredentials'));
+      }
       return;
     } else {
       console.log('Something went wrong');

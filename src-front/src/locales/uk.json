@@ -55,7 +55,10 @@
     "totalIncome": "Загальний дохід",
     "totalExpenses": "Загальні витрати",
     "netFlow": "Чистий потік",
-    "showInReports": "Показати в звітах"
+    "showInReports": "Показати в звітах",
+    "userNotActivated": "Користувач не активований",
+    "errorDuringActivation": "Помилка під час активації",
+    "accountActivated": "Рахунок активовано"
   },
   "menu": {
     "home": "Початок",

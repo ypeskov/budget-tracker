@@ -42,12 +42,26 @@ export class UserService {
         console.log('No access token in response!');
       }
     } catch (e) {
-      console.log(e);
       if (e instanceof HttpError && e.statusCode === 401) {
-        console.log('Wrong email or password!');
+        if (e.message === 'User not activated') {
+          console.log('User not activated!');
+        } else {
+          console.log('Wrong email or password!');
+        }
       }
       throw e;
     }
+  }
+
+  async activateUser(token) {
+    const activatePath = '/auth/activate/';
+
+    return await request(
+      `${activatePath}${token}/`,
+      { userService: this },
+      false,
+      false
+    );
   }
 
   async getUserProfile(accessToken) {

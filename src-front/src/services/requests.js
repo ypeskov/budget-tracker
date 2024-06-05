@@ -40,7 +40,12 @@ export async function request(endPoint, params = {}, services = {}, authRequired
   } else {
     if (response.status === 401) {
       services.userService.logOutUser();
-      throw new HttpError('Unauthorized', response.status);
+      const body = await response.json();
+      if (body.detail === 'User not activated') {
+        throw new HttpError('User not activated', response.status);
+      } else {
+        throw new HttpError('Unauthorized', response.status);
+      }
     } else if ([400, 500].includes(response.status)) {
       const err = await response.json();
       throw new HttpError(err.detail || 'An unexpected error occurred', response.status);

@@ -7,6 +7,8 @@ from app.celery import celery_app
 from app.config import Settings
 from app.database import get_db
 from app.logger_config import logger
+from app.models.ActivationToken import ActivationToken
+from app.models.User import User
 from app.services.exchange_rates import update_exchange_rates as update_exchange_rates
 from app.tasks.errors import BackupPostgresDbError
 from app.utils.db.backup import backup_postgres_db
@@ -87,3 +89,25 @@ def send_email(task, subject: str, recipients: list[str], template_name: str, te
         task.retry(exc=e)
     finally:
         loop.close()
+
+
+@celery_app.task(bind=True, max_retries=10, default_retry_delay=600)
+def send_activation_email(task, user_id: int):
+    db = next(get_db())
+    user = db.query(User).filter(User.id == user_id).one()
+    activation_token = db.query(ActivationToken).filter(ActivationToken.user_id == user_id).one()
+
+    try:
+        send_email.delay(subject='Activate your account',
+                         recipients=[user.email],
+                         template_name='activation_email.html',
+                         template_body={
+                             'url': f'{settings.FRONTEND_URL}/activate',
+                             'first_name': user.first_name,
+                             'activation_token': activation_token.token,
+                         })
+
+        return True
+    except Exception as e:
+        logger.exception(e)
+        task.retry(exc=e)

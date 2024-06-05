@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Activation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333333;
+        }
+        p {
+            color: #666666;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007BFF;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Email Activation</h1>
+        <p>Dear {{ first_name }},</p>
+        <p>Thank you for registering with us. To complete your registration, please click the button below to activate your email address:</p>
+        <p><a href="{{ url }}/{{ activation_token }}" class="button">Activate Email</a></p>
+        <p>If the button above does not work, please copy and paste the following link into your web browser:</p>
+        <p>{{ url }}/{{ activation_token }}</p>
+        <p>If you have any questions or need further assistance, please contact our support team.</p>
+        <p>Best regards,</p>
+        <p>The Orgfin.run Team</p>
+        <div class="footer">
+            <p>&copy; 2024 Orgfin.run. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

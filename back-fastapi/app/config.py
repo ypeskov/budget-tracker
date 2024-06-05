@@ -4,6 +4,7 @@ from pydantic import Field
 
 class Settings(BaseSettings):
     ENVIRONMENT: str = 'prod'
+    FRONTEND_URL: str = 'https://orgfin.run'
 
     DB_USER: str = 'username'
     DB_PASSWORD: str = 'userpassword'
