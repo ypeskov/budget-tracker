@@ -53,6 +53,27 @@ def balance_report(request: Request,
     try:
         result: list[dict] = get_balance_report(request.state.user['id'],
                                                 db,
+                                                [],
+                                                input_data.balance_date)
+        return result
+    except AccessDenied as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Access denied')
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error generting report')
+
+
+@router.post('/balance/non-hidden/', response_model=list[BalanceReportOutputSchema])
+def balance_report_non_hidden(request: Request,
+                              input_data: BalanceReportInputSchema,
+                              db: Session = Depends(get_db)) -> list[dict]:
+    """ Get all expenses for one account within a given time period """
+    logger.info(f"Getting balance report for NON HIDDEN accounts user_id: {request.state.user['id']}, "
+                f"account_ids: {input_data.account_ids}, date: {input_data.balance_date}")
+    try:
+        result: list[dict] = get_balance_report(request.state.user['id'],
+                                                db,
                                                 input_data.account_ids,
                                                 input_data.balance_date)
         return result
