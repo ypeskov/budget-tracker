@@ -1,3 +1,4 @@
+import secrets
 from datetime import timedelta, datetime, UTC
 
 import jwt
@@ -9,8 +10,10 @@ from app.models.User import User, DEFAULT_CURRENCY_CODE
 from app.models.Currency import Currency
 from app.models.DefaultCategory import DefaultCategory
 from app.models.UserCategory import UserCategory
+from app.models.ActivationToken import ActivationToken
 from app.schemas.user_schema import UserRegistration, UserLoginSchema
 from app.services.user_settings import generate_initial_settings
+from app.tasks.tasks import send_activation_email
 
 # Password hashing configuration
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -20,6 +23,9 @@ SECRET_KEY = "your-secret-key"
 
 # JWT expiration time (30 minutes in this example)
 ACCESS_TOKEN_EXPIRE_MINUTES = 180
+
+ACTIVATION_TOKEN_LENGTH = 16
+ACTIVATION_TOKEN_EXPIRES_HOURS = 24
 
 
 def copy_categories(default_category: DefaultCategory,
@@ -64,17 +70,41 @@ def create_users(user_request: UserRegistration, db: Session):
         last_name=user_request.last_name,
         password_hash=hashed_password,
         base_currency=currency,
-        is_active=True)
+        is_active=False)
     if user_request.id is not None:
         new_user.id = user_request.id
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    generate_initial_settings(new_user.id, db)
 
+    create_activation_token(new_user.id, db)
+    generate_initial_settings(new_user.id, db)
     copy_all_categories(new_user.id, db)
 
+    send_activation_email.delay(new_user.id)
+
     return new_user
+
+
+def create_activation_token(user_id: int, db: Session):
+    """
+    Create activation token for user.
+    """
+
+    token = secrets.token_hex(ACTIVATION_TOKEN_LENGTH)
+    expires_at = datetime.now(UTC) + timedelta(hours=ACTIVATION_TOKEN_EXPIRES_HOURS)
+
+    activation_token = ActivationToken(
+        user_id=user_id,
+        token=token,
+        expires_at=expires_at
+    )
+
+    db.add(activation_token)
+    db.commit()
+    db.refresh(activation_token)
+
+    return activation_token
 
 
 def get_jwt_token(user_login: UserLoginSchema, db: Session):
