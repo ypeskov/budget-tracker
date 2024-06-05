@@ -19,7 +19,7 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(index=True, nullable=True)
     last_name: Mapped[str] = mapped_column(index=True, nullable=True)
     password_hash: Mapped[str] = mapped_column()
-    is_active: Mapped[str] = mapped_column(server_default='t', default=True)
+    is_active: Mapped[bool] = mapped_column(server_default='t', default=True)
     base_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
 
     base_currency: Mapped[Currency.Currency] = relationship()

@@ -6,6 +6,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 
+from icecream import ic
+
 from app.models.User import User, DEFAULT_CURRENCY_CODE
 from app.models.Currency import Currency
 from app.models.DefaultCategory import DefaultCategory
@@ -14,6 +16,9 @@ from app.models.ActivationToken import ActivationToken
 from app.schemas.user_schema import UserRegistration, UserLoginSchema
 from app.services.user_settings import generate_initial_settings
 from app.tasks.tasks import send_activation_email
+from app.services.errors import UserNotActivated
+
+ic.configureOutput(includeContext=True)
 
 # Password hashing configuration
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -115,6 +120,9 @@ def get_jwt_token(user_login: UserLoginSchema, db: Session):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email")
 
+    if not user.is_active:
+        raise UserNotActivated
+
     if not pwd_context.verify(user_login.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
 
@@ -143,3 +151,26 @@ def create_access_token(data: dict, expires_delta: timedelta):
 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
     return encoded_jwt
+
+
+def activate_user(token: str, db: Session) -> bool:
+    """
+    Activate user by token.
+    """
+    activation_token = db.query(ActivationToken).filter(
+        ActivationToken.token == token).first()  # type: ignore
+    if not activation_token:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token not found")
+
+    if activation_token.expires_at < datetime.now(UTC):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token expired")
+
+    user = db.query(User).filter(User.id == activation_token.user_id).first()  # type: ignore
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    user.is_active = True
+    db.delete(activation_token)
+    db.commit()
+
+    return True

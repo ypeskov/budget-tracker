@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import HomeView from '../views/HomeView.vue';
-import { useUserStore } from '../stores/user';
+import HomeView from '@/views/HomeView.vue';
+import { useUserStore } from '@/stores/user';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,7 +22,7 @@ const router = createRouter({
         requiresAuth: false,
         requiresUnAuth: true,
       },
-      component: () => import('../views/LoginView.vue'),
+      component: () => import('@/views/LoginView.vue'),
     },
     {
       path: '/logout',
@@ -31,7 +31,7 @@ const router = createRouter({
         requiresAuth: false,
         requiresUnAuth: false,
       },
-      component: () => import('../views/LogoutView.vue'),
+      component: () => import('@/views/LogoutView.vue'),
     },
     {
       path: '/register',
@@ -40,7 +40,7 @@ const router = createRouter({
         requiresAuth: false,
         requiresUnAuth: false,
       },
-      component: () => import('../views/RegisterView.vue'),
+      component: () => import('@/views/RegisterView.vue'),
     },
     {
       path: '/accounts/:id',
@@ -49,7 +49,16 @@ const router = createRouter({
         requiresAuth: true,
         requiresUnAuth: false,
       },
-      component: () => import('../views/AccountDetailsView.vue'),
+      component: () => import('@/views/AccountDetailsView.vue'),
+    },
+    {
+      path: "/activate/:token",
+      name: 'userActivate',
+      meta: {
+        requiresAuth: false,
+        requiresUnAuth: false,
+      },
+      component: () => import('@/views/UserActivateView.vue'),
     },
     {
       path: '/accounts',

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from icecream import ic
@@ -8,8 +8,9 @@ from app.logger_config import logger
 from app.schemas.user_schema import UserRegistration, UserLoginSchema, UserResponse
 from app.schemas.token_schema import Token
 from app.dependencies.check_token import check_token
-from app.services.auth import create_users, get_jwt_token
+from app.services.auth import create_users, get_jwt_token, activate_user
 from app.services.user_settings import get_user_settings
+from app.services.errors import UserNotActivated
 
 ic.configureOutput(includeContext=True)
 
@@ -31,6 +32,9 @@ def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)):
         token: str = get_jwt_token(user_login, db)
 
         return token
+    except UserNotActivated as e:
+        logger.error(f"Error while logging in user: '{user_login.email}': {e}")
+        raise HTTPException(status_code=401, detail="User not activated")
     except HTTPException as e:
         logger.error(f"Error while logging in user: '{user_login.email}': {e.detail}")
         raise HTTPException(status_code=401, detail="Invalid credentials. See logs for details")
@@ -50,3 +54,19 @@ def get_profile(user=Depends(check_token), db: Session = Depends(get_db)) -> dic
         logger.exception(e)
         raise HTTPException(status_code=500, detail="Internal server error. See logs for details")
 
+
+@router.get('/activate/{token}')
+def activate(token: str, db: Session = Depends(get_db)) -> bool:
+    try:
+        activate_user(token, db)
+
+        return True
+    except HTTPException as e:
+        logger.error(f"Error while activating user: {e.detail}")
+        if e.status_code == 404:
+            raise HTTPException(status_code=404, detail="Token not found")
+        if e.status_code == 400:
+            raise HTTPException(status_code=400, detail="Token expired")
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=500, detail="Internal server error. See logs for details")

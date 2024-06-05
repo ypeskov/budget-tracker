@@ -55,7 +55,10 @@
     "totalIncome": "Total income",
     "totalExpenses": "Total expense",
     "netFlow": "Net flow",
-    "showInReports": "Show in reports"
+    "showInReports": "Show in reports",
+    "userNotActivated": "User not activated",
+    "errorDuringActivation": "Error during activation",
+    "accountActivated": "Account activated"
   },
   "menu": {
     "home": "Home",
