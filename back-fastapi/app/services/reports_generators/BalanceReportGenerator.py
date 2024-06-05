@@ -14,7 +14,8 @@ ic.configureOutput(includeContext=True)
 
 
 class BalanceReportGenerator:
-    def __init__(self, user_id: int, db: Session, balance_date: date = None):
+    def __init__(self, user_id: int, account_ids: list = list(), db: Session = None, balance_date: date = None):
+        self.account_ids = account_ids
         self.user_id = user_id
         self.db = db
 
@@ -30,19 +31,23 @@ class BalanceReportGenerator:
     def prepare_raw_data(self) -> 'BalanceReportGenerator':
         AccountAlias = aliased(Account)
 
+        filters = [
+            Transaction.user_id == self.user_id,
+            Transaction.date_time < self.balance_date + timedelta(days=1)
+        ]
+
+        if self.account_ids:
+            filters.append(Transaction.account_id.in_(self.account_ids))
+        else:
+            filters.append(AccountAlias.show_in_reports == True)
+
         subquery = (
             self.db.query(
                 Transaction.account_id,
                 func.max(Transaction.date_time).label('max_date_time')
             )
             .join(AccountAlias, AccountAlias.id == Transaction.account_id)
-            .filter(
-                and_(
-                    Transaction.user_id == self.user_id,
-                    Transaction.date_time < self.balance_date + timedelta(days=1),
-                    AccountAlias.show_in_reports == True
-                )
-            )
+            .filter(and_(*filters))
             .group_by(Transaction.account_id)
             .subquery()
         )

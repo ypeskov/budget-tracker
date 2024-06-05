@@ -5,12 +5,16 @@ import { RouterLink, useRouter } from 'vue-router';
 import { Services } from '../services/servicesConfig';
 import { processError } from '../errors/errorHandlers';
 import newAccount from '../components/account/newAccount.vue';
+import { DateTime } from 'luxon';
 
 const router = useRouter();
 
 let accounts = reactive([]);
 const showNewAccForm = ref(false);
 const showHiddenAccounts = ref(false);
+const totalBalance = ref(0);
+const baseCurrencyCode = ref('');
+const today = DateTime.now().toISODate();
 
 onBeforeMount(async () => {
   try {
@@ -26,6 +30,17 @@ async function reReadAllAccounts(shouldUpdate = false) {
     const tmpAccounts = await Services.accountsService.getUserAccounts(showHiddenAccounts.value, shouldUpdate);
     if (tmpAccounts) {
       accounts.push(...tmpAccounts);
+    }
+
+    const accountIds = accounts.map((acc) => acc.id);
+    const accountBalancesInBaseCurrency = await Services.reportsService
+      .getReport('balance/non-hidden', {
+        accountIds: accountIds,
+        'balanceDate': today,
+      });
+    if (accountBalancesInBaseCurrency) {
+      totalBalance.value = accountBalancesInBaseCurrency.reduce((acc, item) => acc + item.baseCurrencyBalance, 0);
+      baseCurrencyCode.value = accountBalancesInBaseCurrency[0].baseCurrencyCode;
     }
   } catch (e) {
     await processError(e, router);
@@ -94,7 +109,10 @@ function balanceClass(balance) {
 
       <div class="row">
         <div class="col">
-          <div><b>{{ $t('message.yourAccounts') }}</b> (Total balance: <b>No idea</b>)</div>
+          <div>
+            <b>{{ $t('message.yourAccounts') }}</b>
+            (Total balance: {{ $n(totalBalance, 'decimal') }} {{ baseCurrencyCode }})
+          </div>
         </div>
       </div>
       <div v-for="acc in accounts" :key="acc.id" class="list-item">
