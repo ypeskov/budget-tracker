@@ -111,7 +111,7 @@ function balanceClass(balance) {
         <div class="col">
           <div>
             <b>{{ $t('message.yourAccounts') }}</b>
-            (Total balance: {{ $n(totalBalance, 'decimal') }} {{ baseCurrencyCode }})
+            ( {{ $t('message.totalBalance') }}: {{ $n(totalBalance, 'decimal') }} {{ baseCurrencyCode }})
           </div>
         </div>
       </div>
