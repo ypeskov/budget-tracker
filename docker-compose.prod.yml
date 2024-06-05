@@ -1,7 +1,7 @@
 services:
   api-orgfin:
     container_name: "api-orgfin"
-    image: ypeskov/api-orgfin:0.59
+    image: ypeskov/api-orgfin:0.60
     extra_hosts:
       - "host.docker.internal:host-gateway"
     env_file:
@@ -22,7 +22,7 @@ services:
 
   celery-orgfin:
     container_name: "celery-orgfin"
-    image: ypeskov/api-orgfin:0.59
+    image: ypeskov/api-orgfin:0.60
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env.prod}
     volumes:
@@ -34,7 +34,7 @@ services:
 
   celery-beat-orgfin:
     container_name: celery-beat-orgfin
-    image: ypeskov/api-orgfin:0.59
+    image: ypeskov/api-orgfin:0.60
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env.prod}
     command: celery -A app.celery beat -l info
