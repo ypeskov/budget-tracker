@@ -57,7 +57,7 @@ export class UserService {
     const activatePath = '/auth/activate/';
 
     return await request(
-      `${activatePath}${token}/`,
+      `${activatePath}${token}`,
       { userService: this },
       false,
       false
