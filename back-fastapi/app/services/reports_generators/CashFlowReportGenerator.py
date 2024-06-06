@@ -138,7 +138,7 @@ class CashFlowReportGenerator:
                        and_(Account.id == Transaction.account_id, Transaction.account_id.in_(self.account_ids)))
             .filter(Account.user_id == self.user_id, Account.id.in_(self.account_ids))
             .group_by(Account.id, func.to_char(Transaction.date_time, self.period_str))
-            .order_by(Account.id, self.label)
+            .order_by(self.label)
         )
 
         additional_filters = []
