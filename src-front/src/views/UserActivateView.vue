@@ -34,10 +34,12 @@ onBeforeMount(async () => {
         <p>Loading...</p>
       </div>
       <div v-else>
-        <p>{{ $t('message.accountActivated') }}</p>
-      </div>
-      <div v-if="error" class="error-msg">
-        <p>{{ $t('message.errorDuringActivation') }}: {{ errorMessage }}</p>
+        <div v-if="!error" class="alert alert-success">
+          <p>{{ $t('message.accountActivated') }}</p>
+        </div>
+        <div v-if="error" class="alert alert-danger">
+          <p>{{ $t('message.errorDuringActivation') }}: {{ errorMessage }}</p>
+        </div>
       </div>
     </div>
   </div>
