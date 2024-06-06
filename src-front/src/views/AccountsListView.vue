@@ -38,7 +38,8 @@ async function reReadAllAccounts(shouldUpdate = false) {
         accountIds: accountIds,
         'balanceDate': today,
       });
-    if (accountBalancesInBaseCurrency) {
+
+    if (accountBalancesInBaseCurrency.length > 0) {
       totalBalance.value = accountBalancesInBaseCurrency.reduce((acc, item) => acc + item.baseCurrencyBalance, 0);
       baseCurrencyCode.value = accountBalancesInBaseCurrency[0].baseCurrencyCode;
     }
