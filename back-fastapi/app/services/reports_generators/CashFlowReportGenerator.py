@@ -144,8 +144,17 @@ class CashFlowReportGenerator:
         additional_filters = []
         if self.start_date:
             additional_filters.append(Transaction.date_time >= self.start_date)
+        else:
+            # get start date 12 months ago in case of monthly report and 30 days ago in case of daily report
+            if self.period == 'monthly':
+                additional_filters.append(Transaction.date_time >= (datetime.now() - timedelta(days=365)))
+            elif self.period == 'daily':
+                additional_filters.append(Transaction.date_time >= (datetime.now() - timedelta(days=30)))
+
         if self.end_date:
             additional_filters.append(Transaction.date_time <= (self.end_date + timedelta(days=1)))
+        else:
+            additional_filters.append(Transaction.date_time <= (datetime.now() + timedelta(days=1)))
 
         if additional_filters:
             query = query.filter(*additional_filters)
