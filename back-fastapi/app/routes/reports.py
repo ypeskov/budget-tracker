@@ -7,7 +7,7 @@ from app.dependencies.check_token import check_token
 from app.logger_config import logger
 from app.schemas.reports_schema import (CashFlowReportInputSchema, CashFlowReportOutputSchema,
                                         BalanceReportInputSchema, BalanceReportOutputSchema,
-                                        ExpensesReportInputSchema)
+                                        ExpensesReportInputSchema, ExpensesReportOutputItemSchema)
 from app.services.errors import AccessDenied
 from app.services.reports import get_cash_flows, get_balance_report, get_expenses_by_categories
 
@@ -85,7 +85,7 @@ def balance_report_non_hidden(request: Request,
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error generting report')
 
 
-@router.post('/expenses-by-categories/')
+@router.post('/expenses-by-categories/', response_model=dict[int, ExpensesReportOutputItemSchema])
 def expenses_by_categories(request: Request,
                            input_data: ExpensesReportInputSchema,
                            db: Session = Depends(get_db)) -> dict:
@@ -97,6 +97,7 @@ def expenses_by_categories(request: Request,
                                                   input_data.start_date,
                                                   input_data.end_date,
                                                   input_data.categories)
+
         return result
     except Exception as e:
         logger.exception(e)

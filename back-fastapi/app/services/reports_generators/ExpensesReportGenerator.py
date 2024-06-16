@@ -115,8 +115,8 @@ class ExpensesReportGenerator:
         flat_categories = {}
 
         for category in structured_categories.values():
-            flat_categories[category['id']] = {
-                'id': category['id'],
+            flat_categories[int(category['id'])] = {
+                'id': int(category['id']),
                 'name': category['name'],
                 'parent_id': None,
                 'parent_name': None,
@@ -124,8 +124,8 @@ class ExpensesReportGenerator:
             }
 
             for child in category['children']:
-                flat_categories[child['id']] = {
-                    'id': child['id'],
+                flat_categories[int(child['id'])] = {
+                    'id': int(child['id']),
                     'name': child['name'],
                     'parent_id': child['parent_id'],
                     'parent_name': child['parent_name'],

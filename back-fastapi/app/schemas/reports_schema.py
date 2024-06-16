@@ -1,4 +1,5 @@
 from datetime import datetime, date
+from decimal import Decimal
 
 from pydantic import ConfigDict, BaseModel
 from pydantic.alias_generators import to_camel
@@ -18,6 +19,18 @@ class ExpensesReportInputSchema(BaseModel):
     start_date: datetime
     end_date: datetime
     categories: list[int]
+
+    model_config = ConfigDict(from_attributes=True,
+                              populate_by_name=True,
+                              alias_generator=to_camel)
+
+
+class ExpensesReportOutputItemSchema(BaseModel):
+    id: int
+    name: str
+    parent_id: int | None = None
+    parent_name: str | None = None
+    total_expenses: Decimal = 0
 
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,
