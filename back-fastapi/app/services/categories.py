@@ -24,7 +24,7 @@ def grouped_user_categories(user_id: int, db: Session, include_deleted: bool = F
     query = db.query(UserCategory).filter(UserCategory.user_id == user_id)
 
     if not include_deleted:
-        query = query.filter(UserCategory.is_deleted == False)
+        query = query.filter(UserCategory.is_deleted == False).order_by(UserCategory.name)
 
     raw_categories: list[UserCategory] = query.all()
 

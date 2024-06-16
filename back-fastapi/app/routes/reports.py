@@ -5,10 +5,11 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
-from app.schemas.reports_schema import CashFlowReportInputSchema, CashFlowReportOutputSchema, BalanceReportInputSchema, \
-    BalanceReportOutputSchema
+from app.schemas.reports_schema import (CashFlowReportInputSchema, CashFlowReportOutputSchema,
+                                        BalanceReportInputSchema, BalanceReportOutputSchema,
+                                        ExpensesReportInputSchema, ExpensesReportOutputItemSchema)
 from app.services.errors import AccessDenied
-from app.services.reports import get_cash_flows, get_balance_report
+from app.services.reports import get_cash_flows, get_balance_report, get_expenses_by_categories
 
 ic.configureOutput(includeContext=True)
 
@@ -79,6 +80,25 @@ def balance_report_non_hidden(request: Request,
     except AccessDenied as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Access denied')
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error generting report')
+
+
+@router.post('/expenses-by-categories/', response_model=dict[int, ExpensesReportOutputItemSchema])
+def expenses_by_categories(request: Request,
+                           input_data: ExpensesReportInputSchema,
+                           db: Session = Depends(get_db)) -> dict:
+    """ Get all expenses within a given time period """
+    logger.info(f"Getting expenses by categories for user_id: {request.state.user['id']}")
+    try:
+        result: dict = get_expenses_by_categories(request.state.user['id'],
+                                                  db,
+                                                  input_data.start_date,
+                                                  input_data.end_date,
+                                                  input_data.categories)
+
+        return result
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error generting report')
