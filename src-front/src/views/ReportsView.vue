@@ -16,6 +16,12 @@ import { RouterLink } from 'vue-router';
           <button class="btn btn-secondary">{{ $t('buttons.balanceReport')}}</button>
         </RouterLink>
       </div>
+
+      <div class="row">
+        <RouterLink :to="{ name: 'reports-expenses' }">
+          <button class="btn btn-secondary">{{ $t('buttons.expensesReport')}}</button>
+        </RouterLink>
+      </div>
     </div>
 
   </main>

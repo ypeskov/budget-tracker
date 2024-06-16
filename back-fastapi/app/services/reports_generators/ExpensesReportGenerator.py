@@ -30,7 +30,7 @@ class ExpensesReportGenerator:
         self._user_categories_with_expenses = {}
 
     def prepare_data(self):
-        user_categories = self._get_user_categories()
+        user_categories = self._get_flat_user_categories()
 
         categories_ids = user_categories.keys()
 
@@ -63,8 +63,10 @@ class ExpensesReportGenerator:
         base_currency: Currency = user.base_currency
 
         for row in result:
+            # Calculate amount in base currency
             transaction_amount = calc_amount(row.amount, row.currency, self.start_date, base_currency.code, self._db)
             user_categories[row.category_id]['total_expenses'] += transaction_amount
+            user_categories[row.category_id]['currency_code'] = base_currency.code
 
         self._user_categories_with_expenses = user_categories
 
@@ -73,7 +75,8 @@ class ExpensesReportGenerator:
     def get_expenses(self):
         return self._user_categories_with_expenses
 
-    def _get_user_categories(self):
+    def _get_flat_user_categories(self):
+        """ Get all user categories in a flat structure ordered by name and children go right after their parent """
         parent_alias = aliased(UserCategory)
 
         query = (
@@ -126,7 +129,7 @@ class ExpensesReportGenerator:
             for child in category['children']:
                 flat_categories[int(child['id'])] = {
                     'id': int(child['id']),
-                    'name': child['name'],
+                    'name': f"{category['name']} >> {child['name']}",
                     'parent_id': child['parent_id'],
                     'parent_name': child['parent_name'],
                     'total_expenses': 0,

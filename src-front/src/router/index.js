@@ -105,6 +105,15 @@ const router = createRouter({
       },
       component: () => import('../views/BalanceReportView.vue'),
     },
+        {
+      path: '/reports/expenses',
+      name: 'reports-expenses',
+      meta: {
+        requiresAuth: true,
+        requiresUnAuth: false,
+      },
+      component: () => import('@/views/ExpensesReportView.vue'),
+    },
     {
       path: '/transactions/:id',
       name: 'transactionDetails',

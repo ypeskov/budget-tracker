@@ -58,7 +58,8 @@
     "showInReports": "Show in reports",
     "userNotActivated": "User not activated",
     "errorDuringActivation": "Error during activation",
-    "accountActivated": "Account activated"
+    "accountActivated": "Account activated",
+    "noData": "No data"
   },
   "menu": {
     "home": "Home",
@@ -86,6 +87,7 @@
     "addNewCategory": "Add new category",
     "cashFlowReport": "Cash flow report",
     "balanceReport": "Balance report",
-    "baseCurrency": "Base currency"
+    "baseCurrency": "Base currency",
+    "expensesReport": "Expenses report"
   }
 }
