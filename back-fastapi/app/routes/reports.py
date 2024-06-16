@@ -43,7 +43,6 @@ def cash_flow(request: Request,
 
 
 @router.post('/balance/', response_model=list[BalanceReportOutputSchema])
-# @router.post('/balance/')
 def balance_report(request: Request,
                    input_data: BalanceReportInputSchema,
                    db: Session = Depends(get_db)) -> list[dict]:
