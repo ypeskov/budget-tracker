@@ -85,7 +85,7 @@ def balance_report_non_hidden(request: Request,
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error generting report')
 
 
-@router.post('/expenses-by-categories/', response_model=dict[int, ExpensesReportOutputItemSchema])
+@router.post('/expenses-by-categories/', response_model=list[ExpensesReportOutputItemSchema])
 def expenses_by_categories(request: Request,
                            input_data: ExpensesReportInputSchema,
                            db: Session = Depends(get_db)) -> dict:

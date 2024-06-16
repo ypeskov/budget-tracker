@@ -27,7 +27,7 @@ class ExpensesReportGenerator:
         self.end_date = end_date
         self.categories_ids = categories_ids
 
-        self._user_categories_with_expenses = {}
+        self._user_categories_with_expenses = []
 
     def prepare_data(self):
         user_categories = self._get_flat_user_categories()
@@ -68,7 +68,7 @@ class ExpensesReportGenerator:
             user_categories[row.category_id]['total_expenses'] += transaction_amount
             user_categories[row.category_id]['currency_code'] = base_currency.code
 
-        self._user_categories_with_expenses = user_categories
+        self._user_categories_with_expenses = list(user_categories.values())
 
         return self
 
@@ -90,6 +90,7 @@ class ExpensesReportGenerator:
             .where(
                 UserCategory.user_id == self.user_id,
                 UserCategory.is_deleted == False,
+                UserCategory.is_income == False,
                 )
             .order_by(UserCategory.name)
         )
@@ -124,6 +125,7 @@ class ExpensesReportGenerator:
                 'parent_id': None,
                 'parent_name': None,
                 'total_expenses': 0,
+                'isParent': True,
             }
 
             for child in category['children']:
@@ -133,6 +135,7 @@ class ExpensesReportGenerator:
                     'parent_id': child['parent_id'],
                     'parent_name': child['parent_name'],
                     'total_expenses': 0,
+                    'is_parent': False,
                 }
 
         return flat_categories

@@ -13,6 +13,7 @@ const userStore = useUserStore();
 const startDate = ref(DateTime.now().toISODate()); // 'YYYY-MM-DD'
 const endDate = ref(DateTime.now().toISODate()); // 'YYYY-MM-DD'
 let expensesReportData = reactive({});
+const currentIteration = ref(0);
 
 async function getReportData() {
   const filters = {
@@ -56,30 +57,46 @@ async function changeDate() {
       <div class="row">
         <div class="col">
           <div class="date-section">
-            <label for="transaction-date">{{ $t('message.startDate') }}</label>
-            <input id="transaction-date"
-                   type="date"
-                   class="form-control"
-                   v-model="startDate"
-                   @change="changeDate" />
-
-            <label for="transaction-date">{{ $t('message.endDate') }}</label>
-            <input id="transaction-date"
-                   type="date"
-                   class="form-control"
-                   v-model="endDate"
-                   @change="changeDate" />
+            <div>
+              <label for="transaction-date">{{ $t('message.startDate') }}</label>
+              <input id="transaction-date"
+                     type="date"
+                     class="form-control"
+                     v-model="startDate"
+                     @change="changeDate" />
+            </div>
+            <div>
+              <label for="transaction-date">{{ $t('message.endDate') }}</label>
+              <input id="transaction-date"
+                     type="date"
+                     class="form-control"
+                     v-model="endDate"
+                     @change="changeDate" />
+            </div>
           </div>
 
           <div class="report-section">
             <div v-if="Object.keys(expensesReportData).length > 0">
-              <div v-for="category in expensesReportData" :key="category.id" class="category-item-container">
-                <div>
-                  <span class="category-name">{{ category.name }}</span>
+              <span style="display: none;">{{ sum = 0 }}</span>
+
+              <div v-for="(category, idx) in expensesReportData" :key="category.id" class="category-item-container">
+                <div v-if="category.isParent && idx > 0" class="prev-sum">
+                  {{ $n(sum, 'decimal') }}&nbsp;{{ category.currencyCode ?? userStore.baseCurrency }}
+                  {{ sum = 0 }}
                 </div>
-                <div class="category-expense-amount">
-                  <div class="category-expenses">{{ $n(parseFloat(category.totalExpenses), 'decimal') }}</div>
-                  <div class="expenses-currency">{{ category.currencyCode ?? userStore.baseCurrency  }}</div>
+
+                <div class="data-transaction-container">
+                  <div>
+                    <span class="category-name">{{ category.name }}</span>
+                  </div>
+                  <div class="category-expense-amount">
+                    <div class="category-expenses">{{ $n(parseFloat(category.totalExpenses), 'decimal') }}</div>
+                    <div class="expenses-currency">{{ category.currencyCode ?? userStore.baseCurrency }}</div>
+                  </div>
+
+                  <span style="display: none;">
+                    {{ sum += parseFloat(category.totalExpenses) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -90,24 +107,6 @@ async function changeDate() {
 
         </div>
 
-        <div class="col">
-          <div class="date-section">
-            <label for="transaction-date">{{ $t('message.startDate') }}</label>
-            <input id="transaction-date"
-                   type="date"
-                   class="form-control"
-                   v-model="startDate"
-                   @change="changeDate" />
-
-            <label for="transaction-date">{{ $t('message.endDate') }}</label>
-            <input id="transaction-date"
-                   type="date"
-                   class="form-control"
-                   v-model="endDate"
-                   @change="changeDate" />
-          </div>
-        </div>
-
       </div>
     </div>
   </main>
@@ -116,19 +115,36 @@ async function changeDate() {
 <style scoped lang="scss">
 @import '@/assets/common.scss';
 
-.category-item-container {
+.date-section {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
 }
 
-.category-item-container:hover {
+.prev-sum {
+  text-align: right;
+  font-weight: bold;
+  margin-bottom: 15px;
+  margin-right: 10px;
+}
+
+.data-transaction-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  border: 1px solid;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.data-transaction-container:hover {
   background-color: $item-hover-background-color;
 }
 
 .category-expense-amount {
   display: flex;
   justify-content: space-between;
+
 }
 
 .category-expense-amount > div {
