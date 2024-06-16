@@ -5,6 +5,7 @@ from icecream import ic
 
 from app.database import get_db
 from app.logger_config import logger
+from app.models.User import User
 from app.schemas.user_schema import UserRegistration, UserLoginSchema, UserResponse
 from app.schemas.token_schema import Token
 from app.dependencies.check_token import check_token
@@ -47,7 +48,9 @@ def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)):
 def get_profile(user=Depends(check_token), db: Session = Depends(get_db)) -> dict:
     try:
         user_settings = get_user_settings(user['id'], db)
+        fullUser = db.query(User).filter(User.id == user['id']).one()
         user['settings'] = user_settings.as_dict()['settings']
+        user['baseCurrency'] = fullUser.base_currency.code
 
         return user
     except Exception as e:

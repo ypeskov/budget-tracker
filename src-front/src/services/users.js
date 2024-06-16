@@ -82,10 +82,13 @@ export class UserService {
     this.userStore.isLoggedIn = isLoggedIn;
     this.userStore.accessToken = accessToken;
     this.userStore.settings = Object.assign(this.userStore.settings, userProfile.settings);
+    this.userStore.baseCurrency = userProfile.baseCurrency;
 
     localStorage.setItem('user', JSON.stringify(this.userStore.user));
     localStorage.setItem('isLoggedIn', this.userStore.isLoggedIn);
     localStorage.setItem('accessToken', this.userStore.accessToken);
+    localStorage.setItem('settings', JSON.stringify(this.userStore.settings));
+    localStorage.setItem('baseCurrency', this.userStore.baseCurrency);
   }
 
   logOutUser() {

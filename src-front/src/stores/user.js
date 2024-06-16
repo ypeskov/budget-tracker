@@ -9,6 +9,7 @@ export const useUserStore = defineStore('user', () => {
   const currencies = reactive([]);
   const categories = reactive([]);
   const settings = reactive({});
+  const baseCurrency = ref(null);
 
   return {
     user,
@@ -17,5 +18,6 @@ export const useUserStore = defineStore('user', () => {
     currencies,
     categories,
     settings,
+    baseCurrency,
   };
 });

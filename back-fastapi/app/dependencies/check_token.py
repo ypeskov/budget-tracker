@@ -3,6 +3,10 @@ from typing import Annotated
 import jwt
 from fastapi import Header, Request, HTTPException, status
 
+from icecream import ic
+
+ic.configureOutput(includeContext=True)
+
 SECRET_KEY = "your-secret-key"
 
 

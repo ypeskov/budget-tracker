@@ -58,7 +58,8 @@
     "showInReports": "Показати в звітах",
     "userNotActivated": "Користувач не активований",
     "errorDuringActivation": "Помилка під час активації",
-    "accountActivated": "Рахунок активовано"
+    "accountActivated": "Рахунок активовано",
+    "noData": "Немає даних"
   },
   "menu": {
     "home": "Початок",
@@ -86,6 +87,7 @@
     "addNewCategory": "Додати нову категорію",
     "cashFlowReport": "Звіт по грошовому потоку",
     "balanceReport": "Звіт по балансу",
-    "baseCurrency": "Базова валюта"
+    "baseCurrency": "Базова валюта",
+    "expensesReport": "Звіт по витратам"
   }
 }

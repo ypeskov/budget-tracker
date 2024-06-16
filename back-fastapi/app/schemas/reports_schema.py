@@ -31,6 +31,8 @@ class ExpensesReportOutputItemSchema(BaseModel):
     parent_id: int | None = None
     parent_name: str | None = None
     total_expenses: Decimal = 0
+    currency_code: str | None = None
+    is_parent: bool = False
 
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,
