@@ -7,6 +7,7 @@ from app.logger_config import logger
 
 from app.services.reports_generators.CashFlowReportGenerator import CashFlowReportGenerator
 from app.services.reports_generators.BalanceReportGenerator import BalanceReportGenerator
+from app.services.reports_generators.ExpensesReportGenerator import ExpensesReportGenerator
 
 ic.configureOutput(includeContext=True)
 
@@ -36,3 +37,14 @@ def get_balance_report(user_id: int,
     return balance_data
 
 
+def get_expenses_by_categories(user_id: int,
+                               db: Session,
+                               start_date: datetime,
+                               end_date: datetime,
+                               categories_ids: list = None) -> dict:
+    """ Get all expenses within a given time period """
+
+    expenses_report_generator = ExpensesReportGenerator(user_id, db, start_date, end_date, categories_ids)
+    expenses = expenses_report_generator.prepare_data().get_expenses()
+
+    return expenses

@@ -14,6 +14,16 @@ class CashFlowReportInputSchema(BaseModel):
                               alias_generator=to_camel)
 
 
+class ExpensesReportInputSchema(BaseModel):
+    start_date: datetime
+    end_date: datetime
+    categories: list[int]
+
+    model_config = ConfigDict(from_attributes=True,
+                              populate_by_name=True,
+                              alias_generator=to_camel)
+
+
 class CashFlowReportOutputSchema(BaseModel):
     currency: str
     total_income: dict[str, float]
