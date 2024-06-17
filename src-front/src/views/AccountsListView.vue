@@ -119,13 +119,13 @@ function balanceClass(balance) {
       <div v-for="acc in accounts" :key="acc.id" class="list-item">
         <RouterLink class="account-link" :to="{name: 'accountDetails', params: {id: acc.id}}">
           <div class="row account-item">
-            <div class="col-5 account-name">
+            <div class="col-4 account-name">
               {{ acc.name }}
             </div>
             <div class="col account-balance" :class="balanceClass(acc.balance)">
               <b>{{ $n(acc.balance, 'decimal') }}</b> {{ acc.currency.code }}
             </div>
-            <div class="col-1 account-marks">
+            <div class="col-2 account-marks">
               <span v-if="acc.showInReports"
                     :title="$t('message.showInReports')"
                     class="badge bg-success">&#10003;</span>
