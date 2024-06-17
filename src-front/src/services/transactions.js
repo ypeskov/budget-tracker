@@ -16,6 +16,10 @@ export class TransactionsService {
       transactionsUrl += `&accounts=${filters.accountId}`;
     }
 
+    if (filters.categories && filters.categories.length > 0) {
+      transactionsUrl += `&categories=${filters.categories}`;
+    }
+
     const transactionTypes =  Object.keys(filters.transactionTypes)
       .filter((key) => filters.transactionTypes[key] === true);
     if (transactionTypes.length > 0) {

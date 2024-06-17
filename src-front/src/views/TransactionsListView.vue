@@ -10,7 +10,7 @@ const props = defineProps(['accountId', 'isAccountDetails',]);
   </main>
 </template>
 
-<style scoped>
+<style scoped  lang="scss">
 @import '../assets/main.scss';
 
 .transaction-element {

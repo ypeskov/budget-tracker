@@ -1,11 +1,12 @@
 <script setup>
-import { onMounted, reactive, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 
 import TransactionType from './TransactionType.vue';
 import AccountsListContainer from '@/components/filter/AccountsListContainer.vue';
 import DateFilter from '@/components/filter/DateFilter.vue';
+import CategoriesFilter from '@/components/filter/CategoriesFilter.vue';
 
-const props = defineProps(['transactions', 'resetstatus', 'isAccountDetails', 'accountId']);
+const props = defineProps(['transactions', 'initialCategories', 'resetstatus', 'isAccountDetails', 'accountId']);
 const emit = defineEmits(['filterApplied']);
 
 let filtersApplied = {};
@@ -15,6 +16,8 @@ const transactionTypes = reactive({
   'income': false,
   'transfer': false,
 });
+const showCategoriesModal = ref(false);
+const categories = reactive([...props['initialCategories']]);
 
 function resetFilters() {
   filtersApplied = {}; //remove all filters
@@ -23,6 +26,7 @@ function resetFilters() {
     transactionTypes[prop] = false;
   }
   checkedAccounts.splice(0); //remove all selected accounts
+  categories.splice(0); //remove all selected categories
 
   updateFilteredTransactions(true);
 }
@@ -62,6 +66,13 @@ function selectedAccountsUpdated({ selectedAccounts }) {
   }
 }
 
+function categoriesUpdated(payload) {
+  categories.splice(0);
+  categories.push(...payload);
+  filtersApplied.categories = categories;
+  closeCategoriesModal();
+}
+
 function applyFilter(event) {
   event.preventDefault();
   updateFilteredTransactions();
@@ -71,6 +82,7 @@ function updateFilteredTransactions(newResetStatus = false) {
   filtersApplied.accounts = checkedAccounts;
   filtersApplied.fromDate = filtersApplied.startDate;
   filtersApplied.toDate = filtersApplied.endDate;
+  filtersApplied.categories = categories;
 
   emit('filterApplied', {
     'filterParams': filtersApplied,
@@ -83,6 +95,14 @@ function updateFilterDates({ startDate, endDate }) {
   filtersApplied.endDate = endDate;
 }
 
+function openCategoriesModal() {
+  showCategoriesModal.value = true;
+}
+
+function closeCategoriesModal() {
+  showCategoriesModal.value = false;
+}
+
 </script>
 
 <template>
@@ -91,9 +111,27 @@ function updateFilterDates({ startDate, endDate }) {
 
     <DateFilter @update-dates="updateFilterDates" />
 
-    <AccountsListContainer v-show="props.isAccountDetails===false"
-                           @selected-accounts-updated="selectedAccountsUpdated"
-                           :selected-accounts="checkedAccounts" />
+    <div class="row">
+      <div class="col">
+        <AccountsListContainer v-show="props.isAccountDetails===false"
+                               @selected-accounts-updated="selectedAccountsUpdated"
+                               :selected-accounts="checkedAccounts" />
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-12 profile-section">
+        <button @click.stop="openCategoriesModal" class="btn btn-primary w-100">{{ $t('buttons.categories') }}</button>
+      </div>
+      <teleport to="body">
+        <CategoriesFilter v-if="showCategoriesModal"
+                          :initial-categories="categories"
+                          @categories-updated="categoriesUpdated"
+                          :close-modal="closeCategoriesModal" />
+      </teleport>
+    </div>
+
 
     <div class="row filter-bottom-menu-row">
       <div class="col bottom-menu-container">
@@ -121,5 +159,9 @@ function updateFilterDates({ startDate, endDate }) {
 .bottom-menu-container {
   display: flex;
   justify-content: start;
+}
+
+.row {
+  margin-bottom: 1vh;
 }
 </style>

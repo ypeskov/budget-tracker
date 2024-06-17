@@ -41,7 +41,7 @@ def get_transactions(user_id: int, db: Session, params: dict = None, include_del
             .order_by(Transaction.date_time.desc()))
 
     if not include_deleted:
-        stmt = stmt.filter(Transaction.is_deleted == False)  # noqa: E712
+        stmt = stmt.filter(Transaction.is_deleted == False)
 
     if 'types' in params:
         type_filters = []
@@ -74,6 +74,9 @@ def get_transactions(user_id: int, db: Session, params: dict = None, include_del
     if 'to_date' in params:
         stmt = stmt.filter(Transaction.date_time < datetime.strptime(params['to_date'], "%Y-%m-%d")
                            .date() + timedelta(days=1))
+
+    if 'categories' in params:
+        stmt = stmt.filter(Transaction.category_id.in_(params['categories']))
 
     page = 1
     if 'page' in params:
