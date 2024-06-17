@@ -92,7 +92,7 @@ async function changeDate() {
                 }">
                   <div class="data-transaction-container">
                     <div>
-                      <span class="category-name">{{ category.name }} {{ $n(sum, 'decimal') }}</span>
+                      <span class="category-name">{{ category.name }}</span>
                     </div>
                     <div class="category-expense-amount">
                       <div class="category-expenses">{{ $n(parseFloat(category.totalExpenses), 'decimal') }}</div>
