@@ -2,7 +2,7 @@
 
 import { onBeforeMount, reactive, ref } from 'vue';
 import { DateTime } from 'luxon';
-import { useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { processError } from '@/errors/errorHandlers';
 import { Services } from '@/services/servicesConfig';
 import { useUserStore } from '@/stores/user';
@@ -38,7 +38,6 @@ onBeforeMount(async () => {
 });
 
 async function changeDate() {
-  console.log('changeDate');
   if (startDate.value !== '' && endDate.value !== '') {
     await getReportData();
   }
@@ -84,19 +83,26 @@ async function changeDate() {
                   {{ sum = 0 }}
                 </div>
 
-                <div class="data-transaction-container">
-                  <div>
-                    <span class="category-name">{{ category.name }}</span>
-                  </div>
-                  <div class="category-expense-amount">
-                    <div class="category-expenses">{{ $n(parseFloat(category.totalExpenses), 'decimal') }}</div>
-                    <div class="expenses-currency">{{ category.currencyCode ?? userStore.baseCurrency }}</div>
-                  </div>
+                <RouterLink class="row-category-expenses" :to="{
+                  name: 'transactions',
+                  query: {
+                    categories: category.id,
+                  }
+                }">
+                  <div class="data-transaction-container">
+                    <div>
+                      <span class="category-name">{{ category.name }}</span>
+                    </div>
+                    <div class="category-expense-amount">
+                      <div class="category-expenses">{{ $n(parseFloat(category.totalExpenses), 'decimal') }}</div>
+                      <div class="expenses-currency">{{ category.currencyCode ?? userStore.baseCurrency }}</div>
+                    </div>
 
-                  <span style="display: none;">
-                    {{ sum += parseFloat(category.totalExpenses) }}
-                  </span>
-                </div>
+                    <span style="display: none;">
+                      {{ sum += parseFloat(category.totalExpenses) }}
+                    </span>
+                  </div>
+                </RouterLink>
               </div>
             </div>
             <div v-else>
@@ -134,6 +140,10 @@ async function changeDate() {
   border: 1px solid;
   border-radius: 5px;
   padding: 10px;
+}
+
+.row-category-expenses {
+  text-decoration: none;
 }
 
 .data-transaction-container:hover {

@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive, ref, watch } from 'vue';
+import { onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import { Services } from '../../services/servicesConfig';
@@ -8,7 +8,7 @@ import { useUserStore } from '../../stores/user';
 import Filter from '../filter/TransactionsFilter.vue';
 import ListOfTransactions from './ListOfTransactions.vue';
 
-const props = defineProps(['accountId', 'isAccountDetails']);
+const props = defineProps(['accountId', 'isAccountDetails', 'initialCategories']);
 
 const userStore = useUserStore();
 
@@ -32,6 +32,11 @@ const filterParams = reactive({
   toDate: '',
   categories: [],
 });
+
+if (props.initialCategories) {
+  filterParams.categories = props.initialCategories;
+}
+
 const showFilter = ref(false);
 const reset = ref(true);
 
@@ -73,7 +78,7 @@ function resetFilters() {
   filterParams.accounts = [];
   filterParams.fromDate = '';
   filterParams.toDate = '';
-  filterParams.categories.splice(0);
+  filterParams.categories = [];
 
   noMoreTransactions.value = false;
 }
