@@ -108,7 +108,7 @@ const confirmDelete = async () => {
       </div>
     </div>
 
-    <TransactionsListView :account-id="accountDetails.id" :is-account-details="true" />
+    <TransactionsListView :account-id="route.params.id" :is-account-details="true" />
 
     <div v-if="showConfirmation" class="confirmation-popup-overlay">
       <div class="confirmation-popup">

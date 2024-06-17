@@ -86,7 +86,7 @@ function accountName(account) {
 
 function handleScroll(event) {
   const { scrollTop, clientHeight, scrollHeight } = event.target.scrollingElement;
-  if (scrollTop + clientHeight >= scrollHeight - 50) {
+  if (scrollTop + clientHeight >= scrollHeight - 200) {
     loadMoreTransactions();
   }
 }

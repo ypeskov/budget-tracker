@@ -59,9 +59,7 @@ watch(() => props.accountId, (newAccountId) => {
 });
 
 onBeforeMount(async () => {
-  if (!props.isAccountDetails) {
-    await fetchTransactions();
-  }
+  await fetchTransactions();
 });
 
 function resetFilters() {
@@ -101,6 +99,9 @@ async function loadMoreTransactions() {
   loading.value = true;
 
   try {
+    if (props.accountId) {
+      filterParams.accounts = [props.accountId];
+    }
     const newTransactions = await Services.transactionsService
       .getUserTransactions(page.value, perPage.value, {
         accountId: filterParams.accounts,
