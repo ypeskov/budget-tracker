@@ -10,10 +10,9 @@ import { useUserStore } from '@/stores/user';
 const router = useRouter();
 const userStore = useUserStore();
 
-const startDate = ref(DateTime.now().toISODate()); // 'YYYY-MM-DD'
+const startDate = ref(DateTime.now().startOf('month').toISODate()); // 'YYYY-MM-DD'
 const endDate = ref(DateTime.now().toISODate()); // 'YYYY-MM-DD'
 let expensesReportData = reactive({});
-const currentIteration = ref(0);
 
 async function getReportData() {
   const filters = {
