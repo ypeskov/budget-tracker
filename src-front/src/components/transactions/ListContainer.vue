@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive, ref, watch } from 'vue';
+import { onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import { Services } from '../../services/servicesConfig';
@@ -8,7 +8,7 @@ import { useUserStore } from '../../stores/user';
 import Filter from '../filter/TransactionsFilter.vue';
 import ListOfTransactions from './ListOfTransactions.vue';
 
-const props = defineProps(['accountId', 'isAccountDetails']);
+const props = defineProps(['accountId', 'isAccountDetails', 'initialCategories']);
 
 const userStore = useUserStore();
 
@@ -30,7 +30,13 @@ const filterParams = reactive({
   accounts: [],
   fromDate: '',
   toDate: '',
+  categories: [],
 });
+
+if (props.initialCategories) {
+  filterParams.categories = props.initialCategories;
+}
+
 const showFilter = ref(false);
 const reset = ref(true);
 
@@ -72,6 +78,7 @@ function resetFilters() {
   filterParams.accounts = [];
   filterParams.fromDate = '';
   filterParams.toDate = '';
+  filterParams.categories = [];
 
   noMoreTransactions.value = false;
 }
@@ -108,6 +115,7 @@ async function loadMoreTransactions() {
         transactionTypes: filterParams.transactionTypes,
         fromDate: filterParams.fromDate,
         toDate: filterParams.toDate,
+        categories: filterParams.categories,
       });
 
     if (newTransactions.length < perPage.value) {
@@ -133,6 +141,7 @@ async function filterApplied(payload) {
     filterParams.accounts = [...payload.filterParams.accounts].join(',');
     filterParams.fromDate = payload.filterParams.startDate;
     filterParams.toDate = payload.filterParams.toDate;
+    filterParams.categories = [...payload.filterParams.categories];
   }
 
   transactions.splice(0);
@@ -185,6 +194,7 @@ async function filterApplied(payload) {
         <Filter @filter-applied="filterApplied"
                 :accountId="props.accountId"
                 :transactions="transactions"
+                :initial-categories="filterParams.categories"
                 :resetstatus="reset"
                 :is-account-details="props.isAccountDetails" />
       </div>

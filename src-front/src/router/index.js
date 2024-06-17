@@ -52,7 +52,7 @@ const router = createRouter({
       component: () => import('@/views/AccountDetailsView.vue'),
     },
     {
-      path: "/activate/:token",
+      path: '/activate/:token',
       name: 'userActivate',
       meta: {
         requiresAuth: false,
@@ -76,6 +76,9 @@ const router = createRouter({
         requiresAuth: true,
         requiresUnAuth: false,
       },
+      props: route => ({
+        categories: route.query.categories,
+      }),
       component: () => import('../views/TransactionsListView.vue'),
     },
     {
@@ -105,7 +108,7 @@ const router = createRouter({
       },
       component: () => import('../views/BalanceReportView.vue'),
     },
-        {
+    {
       path: '/reports/expenses',
       name: 'reports-expenses',
       meta: {
@@ -124,7 +127,7 @@ const router = createRouter({
       props: route => ({
         isEdit: true,
         returnUrl: route.query.returnUrl,
-        accountId: route.query.accountId, 
+        accountId: route.query.accountId,
       }),
       component: () => import('../views/TransactionNewView.vue'),
     },
@@ -135,9 +138,9 @@ const router = createRouter({
         requiresAuth: true,
         requiresUnAuth: false,
       },
-      props: route => ({ 
+      props: route => ({
         returnUrl: route.query.returnUrl,
-        accountId: route.query.accountId, 
+        accountId: route.query.accountId,
       }),
       component: () => import('../views/TransactionNewView.vue'),
     },
@@ -158,11 +161,11 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     next({ name: 'login' });
   } else if (to.meta.requiresUnAuth && userStore.isLoggedIn) {
-    next({name: 'home'});
+    next({ name: 'home' });
   } else {
     next();
   }
-  
+
 });
 
 export default router;

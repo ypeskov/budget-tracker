@@ -110,7 +110,6 @@ const addNewCategory = () => {
   </teleport>
 </template>
 
-
 <style scoped>
 .list-group-item {
   padding: 0.5rem 1.25rem;
