@@ -74,13 +74,14 @@ async function changeDate() {
           </div>
 
           <div class="report-section">
+            <span style="display: none;">{{ sum = 0 }}</span>
             <div v-if="Object.keys(expensesReportData).length > 0">
-              <span style="display: none;">{{ sum = 0 }}</span>
+
 
               <div v-for="(category, idx) in expensesReportData" :key="category.id" class="category-item-container">
                 <div v-if="category.isParent && idx > 0" class="prev-sum">
-                  {{ $n(sum, 'decimal') }}&nbsp;{{ category.currencyCode ?? userStore.baseCurrency }}
-                  {{ sum = 0 }}
+                  {{ $n(sum, 'decimal') }}&nbsp;{{ userStore.baseCurrency }}
+                  <span style="display: none;">{{ sum = 0 }}</span>
                 </div>
 
                 <RouterLink class="row-category-expenses" :to="{
@@ -91,18 +92,17 @@ async function changeDate() {
                 }">
                   <div class="data-transaction-container">
                     <div>
-                      <span class="category-name">{{ category.name }}</span>
+                      <span class="category-name">{{ category.name }} {{ $n(sum, 'decimal') }}</span>
                     </div>
                     <div class="category-expense-amount">
                       <div class="category-expenses">{{ $n(parseFloat(category.totalExpenses), 'decimal') }}</div>
                       <div class="expenses-currency">{{ category.currencyCode ?? userStore.baseCurrency }}</div>
                     </div>
 
-                    <span style="display: none;">
-                      {{ sum += parseFloat(category.totalExpenses) }}
-                    </span>
+
                   </div>
                 </RouterLink>
+                <span style="display: none;">{{ sum += parseFloat(category.totalExpenses) }}</span>
               </div>
             </div>
             <div v-else>
