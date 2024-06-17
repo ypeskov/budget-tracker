@@ -18,7 +18,7 @@ const today = DateTime.now().toISODate();
 
 onBeforeMount(async () => {
   try {
-    await reReadAllAccounts();
+    await reReadAllAccounts(true);
   } catch (e) {
     await processError(e, router);
   }
