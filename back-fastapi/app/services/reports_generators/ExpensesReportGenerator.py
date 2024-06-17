@@ -53,7 +53,6 @@ class ExpensesReportGenerator:
                 Transaction.is_transfer == False,
                 Transaction.category_id.in_(categories_ids),
             )
-            .group_by(UserCategory.parent_id, UserCategory.name, UserCategory.id, Currency.code, Transaction.amount)
             .order_by(UserCategory.name, UserCategory.parent_id)
         )
 
