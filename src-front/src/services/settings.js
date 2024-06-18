@@ -1,5 +1,6 @@
 import { toRaw } from 'vue';
 import { request } from './requests';
+import { useUserStore } from '@/stores/user';
 
 const settingsPrefixUrl = '/settings';
 
@@ -45,8 +46,9 @@ export class SettingsService {
   }
 
   async setBaseCurrency(currency) {
+    const userStore = useUserStore();
     const setBaseCurrencyUrl = `${settingsPrefixUrl}/base-currency/`;
-    return await request(setBaseCurrencyUrl,
+    const newCurrency = await request(setBaseCurrencyUrl,
       {
         method: 'PUT',
         body: JSON.stringify({
@@ -54,5 +56,10 @@ export class SettingsService {
         }),
       },
       { userService: this.userService });
+
+    localStorage.setItem('baseCurrency', newCurrency.code);
+    userStore.baseCurrency = newCurrency.code;
+
+    return newCurrency;
   }
 }
