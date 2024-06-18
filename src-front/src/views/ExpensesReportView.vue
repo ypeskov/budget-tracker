@@ -12,7 +12,44 @@ const userStore = useUserStore();
 
 const startDate = ref(DateTime.now().startOf('month').toISODate()); // 'YYYY-MM-DD'
 const endDate = ref(DateTime.now().toISODate()); // 'YYYY-MM-DD'
-let expensesReportData = reactive({});
+const hideEmptyCategories = ref(false);
+let expensesReportData = reactive([]);
+
+let groupSum = 0;
+let currentParentId = null;
+let start = true;
+
+function isNewGroup(category) {
+  if (category.parentId === null) {
+    currentParentId = category.id;
+    return true;
+  }
+
+  if (currentParentId !== category.parentId) {
+    currentParentId = category.parentId;
+    return true;
+  }
+
+  return false;
+}
+function makeNotStart() {
+  start = false;
+}
+function isStart() {
+  return start;
+}
+
+function addGroupSum(category) {
+  groupSum += parseFloat(category.totalExpenses);
+}
+
+function getCurrentGroupSum() {
+  return groupSum;
+}
+
+function resetGroupSum() {
+  groupSum = 0;
+}
 
 async function getReportData() {
   const filters = {
@@ -24,9 +61,14 @@ async function getReportData() {
   if (endDate.value !== '') {
     filters.endDate = endDate.value;
   }
+  filters.hideEmptyCategories = hideEmptyCategories.value;
 
   const tmpData = await Services.reportsService.getReport('expenses-by-categories', filters);
-  expensesReportData = Object.assign(expensesReportData, tmpData);
+
+  expensesReportData.splice(0);
+  expensesReportData.push(...tmpData);
+  start = true;
+  groupSum = 0;
 }
 
 onBeforeMount(async () => {
@@ -41,6 +83,10 @@ async function changeDate() {
   if (startDate.value !== '' && endDate.value !== '') {
     await getReportData();
   }
+}
+
+async function changeHideEmptyCategories() {
+  await getReportData();
 }
 
 </script>
@@ -72,17 +118,27 @@ async function changeDate() {
                      @change="changeDate" />
             </div>
           </div>
+          <div class="filter-section">
+            <div class="hide-empty-categories">
+              <input type="checkbox"
+                     id="hide-empty-categories"
+                     v-model="hideEmptyCategories"
+                     @change="changeHideEmptyCategories" />
+              <label for="hide-empty-categories">{{ $t('message.hideEmptyCategories') }}</label>
+            </div>
+            <div class="larger-first"></div>
+          </div>
 
           <div class="report-section">
-            <span style="display: none;">{{ sum = 0 }}</span>
             <div v-if="Object.keys(expensesReportData).length > 0">
 
-
-              <div v-for="(category, idx) in expensesReportData" :key="category.id" class="category-item-container">
-                <div v-if="category.isParent && idx > 0" class="prev-sum">
-                  {{ $n(sum, 'decimal') }}&nbsp;{{ userStore.baseCurrency }}
-                  <span style="display: none;">{{ sum = 0 }}</span>
+              <div v-for="(category) in expensesReportData" :key="category.id" class="category-item-container">
+                <div v-if="isNewGroup(category) && !isStart()" class="prev-sum">
+                  {{ $n(getCurrentGroupSum(), 'decimal') }}&nbsp;{{ userStore.baseCurrency }}
+                  {{ resetGroupSum() }}
+                  {{ addGroupSum(category) }}
                 </div>
+                <div v-else>{{ makeNotStart(category) }}{{ addGroupSum(category) }}</div>
 
                 <RouterLink class="row-category-expenses" :to="{
                   name: 'transactions',
@@ -96,16 +152,16 @@ async function changeDate() {
                     <div>
                       <span class="category-name">{{ category.name }}</span>
                     </div>
+
                     <div class="category-expense-amount">
                       <div class="category-expenses">{{ $n(parseFloat(category.totalExpenses), 'decimal') }}</div>
                       <div class="expenses-currency">{{ category.currencyCode ?? userStore.baseCurrency }}</div>
                     </div>
 
-
                   </div>
                 </RouterLink>
-                <span style="display: none;">{{ sum += parseFloat(category.totalExpenses) }}</span>
               </div>
+              <div class="prev-sum">{{ $n(getCurrentGroupSum(), 'decimal') }}&nbsp;{{ userStore.baseCurrency }}</div>
             </div>
             <div v-else>
               <span>{{ $t('message.noData') }}</span>

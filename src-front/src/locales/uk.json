@@ -59,7 +59,8 @@
     "userNotActivated": "Користувач не активований",
     "errorDuringActivation": "Помилка під час активації",
     "accountActivated": "Рахунок активовано",
-    "noData": "Немає даних"
+    "noData": "Немає даних",
+    "hideEmptyCategories": "Приховати порожні категорії"
   },
   "menu": {
     "home": "Початок",
