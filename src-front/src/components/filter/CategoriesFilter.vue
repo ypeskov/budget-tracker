@@ -38,15 +38,16 @@ function updateSelectedCategories(event) {
     </template>
 
     <template #main>
-      <div v-for="category in userCategories" :key="category.id">
+      <div v-for="category in userCategories" :key="category.id" class="form-check form-switch">
         <input type="checkbox"
+               class="form-check-input"
                :id="category.id"
                @change="updateSelectedCategories"
                v-model="selectedCategories"
                :value="category.id" />
         <label :for="category.id">{{ category.name }}</label>
       </div>
-      <button @click="applyCategories">{{ $t('buttons.apply') }}</button>
+      <button class="btn btn-primary" @click="applyCategories">{{ $t('buttons.apply') }}</button>
     </template>
   </ModalWindow>
 

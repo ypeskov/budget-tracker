@@ -32,9 +32,11 @@ function isNewGroup(category) {
 
   return false;
 }
+
 function makeNotStart() {
   start = false;
 }
+
 function isStart() {
   return start;
 }
@@ -119,13 +121,16 @@ async function changeHideEmptyCategories() {
             </div>
           </div>
           <div class="filter-section">
-            <div class="hide-empty-categories">
-              <input type="checkbox"
+            <div class="hide-empty-categories form-check form-switch mb-3">
+              <input class="form-check-input"
+                     type="checkbox"
                      id="hide-empty-categories"
                      v-model="hideEmptyCategories"
                      @change="changeHideEmptyCategories" />
-              <label for="hide-empty-categories">{{ $t('message.hideEmptyCategories') }}</label>
+              <label class="form-check-label" for="hide-empty-categories">{{ $t('message.hideEmptyCategories')
+                }}</label>
             </div>
+
             <div class="larger-first"></div>
           </div>
 
