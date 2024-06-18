@@ -1,7 +1,7 @@
 <script setup>
 import ListContainer from '../components/transactions/ListContainer.vue';
 
-const props = defineProps(['accountId', 'isAccountDetails', 'categories']);
+const props = defineProps(['accountId', 'isAccountDetails', 'categories', 'startDate', 'endDate']);
 
 </script>
 
@@ -9,11 +9,13 @@ const props = defineProps(['accountId', 'isAccountDetails', 'categories']);
   <main>
     <ListContainer :account-id="props.accountId"
                    :initial-categories="props.categories"
+                   :start-date="props.startDate"
+                   :end-date="props.endDate"
                    :is-account-details="!!props.isAccountDetails" />
   </main>
 </template>
 
-<style scoped  lang="scss">
+<style scoped lang="scss">
 @import '../assets/main.scss';
 
 .transaction-element {

@@ -88,6 +88,8 @@ async function changeDate() {
                   name: 'transactions',
                   query: {
                     categories: category.id,
+                    startDate: startDate,
+                    endDate: endDate
                   }
                 }">
                   <div class="data-transaction-container">

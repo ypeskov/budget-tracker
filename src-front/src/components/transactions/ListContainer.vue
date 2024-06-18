@@ -8,7 +8,7 @@ import { useUserStore } from '../../stores/user';
 import Filter from '../filter/TransactionsFilter.vue';
 import ListOfTransactions from './ListOfTransactions.vue';
 
-const props = defineProps(['accountId', 'isAccountDetails', 'initialCategories']);
+const props = defineProps(['accountId', 'isAccountDetails', 'initialCategories', 'startDate', 'endDate']);
 
 const userStore = useUserStore();
 
@@ -28,14 +28,10 @@ const filterParams = reactive({
     transfer: false,
   },
   accounts: [],
-  fromDate: '',
-  toDate: '',
-  categories: [],
+  fromDate: props.startDate || '',
+  toDate: props.endDate || '',
+  categories: props.initialCategories || [],
 });
-
-if (props.initialCategories) {
-  filterParams.categories = props.initialCategories;
-}
 
 const showFilter = ref(false);
 const reset = ref(true);
