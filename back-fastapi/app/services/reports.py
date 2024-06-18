@@ -41,10 +41,16 @@ def get_expenses_by_categories(user_id: int,
                                db: Session,
                                start_date: datetime,
                                end_date: datetime,
-                               categories_ids: list = None) -> dict:
+                               categories_ids: list = None,
+                               hide_empty_categories: bool = False) -> dict:
     """ Get all expenses within a given time period """
 
-    expenses_report_generator = ExpensesReportGenerator(user_id, db, start_date, end_date, categories_ids)
+    expenses_report_generator = ExpensesReportGenerator(user_id,
+                                                        db,
+                                                        start_date,
+                                                        end_date,
+                                                        categories_ids,
+                                                        hide_empty_categories)
     expenses = expenses_report_generator.prepare_data().get_expenses()
 
     return expenses

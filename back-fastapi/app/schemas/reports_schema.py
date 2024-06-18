@@ -19,6 +19,7 @@ class ExpensesReportInputSchema(BaseModel):
     start_date: datetime
     end_date: datetime
     categories: list[int]
+    hide_empty_categories: bool = False
 
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,

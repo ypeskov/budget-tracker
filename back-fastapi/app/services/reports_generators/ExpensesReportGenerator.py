@@ -20,12 +20,14 @@ class ExpensesReportGenerator:
                  db: Session = None,
                  start_date: datetime = None,
                  end_date: datetime = None,
-                 categories_ids: list = None):
+                 categories_ids: list = None,
+                 hide_empty_categories: bool = False):
         self._db = db
         self.user_id = user_id
         self.start_date = start_date
         self.end_date = end_date
         self.categories_ids = categories_ids
+        self.hide_empty_categories = hide_empty_categories
 
         self._user_categories_with_expenses = []
 
@@ -68,6 +70,11 @@ class ExpensesReportGenerator:
             user_categories[row.category_id]['currency_code'] = base_currency.code
 
         self._user_categories_with_expenses = list(user_categories.values())
+
+        if self.hide_empty_categories:
+            self._user_categories_with_expenses = [category for category
+                                                   in self._user_categories_with_expenses
+                                                   if category['total_expenses'] > 0]
 
         return self
 

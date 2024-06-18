@@ -96,7 +96,8 @@ def expenses_by_categories(request: Request,
                                                   db,
                                                   input_data.start_date,
                                                   input_data.end_date,
-                                                  input_data.categories)
+                                                  input_data.categories,
+                                                  input_data.hide_empty_categories)
 
         return result
     except Exception as e:

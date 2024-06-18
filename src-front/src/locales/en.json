@@ -59,7 +59,8 @@
     "userNotActivated": "User not activated",
     "errorDuringActivation": "Error during activation",
     "accountActivated": "Account activated",
-    "noData": "No data"
+    "noData": "No data",
+    "hideEmptyCategories": "Hide empty categories"
   },
   "menu": {
     "home": "Home",
