@@ -78,6 +78,8 @@ const router = createRouter({
       },
       props: route => ({
         categories: route.query.categories,
+        startDate: route.query.startDate,
+        endDate: route.query.endDate,
       }),
       component: () => import('../views/TransactionsListView.vue'),
     },
