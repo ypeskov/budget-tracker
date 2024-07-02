@@ -10,10 +10,10 @@ from app.models.User import User
 
 
 class PeriodEnum(Enum):
-    DAILY = 'day'
-    WEEKLY = 'week'
-    MONTHLY = 'month'
-    YEARLY = 'year'
+    DAILY = 'daily'
+    WEEKLY = 'weekly'
+    MONTHLY = 'monthly'
+    YEARLY = 'yearly'
     CUSTOM = 'custom'
 
 

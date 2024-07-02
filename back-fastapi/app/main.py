@@ -23,6 +23,7 @@ from app.routes.user_settings import router as settings_router
 from app.routes.exchange_rates import router as exchange_rates_router
 from app.routes.reports import router as reports_router
 from app.routes.management import router as management_router
+from app.routes.budgets import router as budgets_router
 
 from icecream import install
 install()
@@ -48,6 +49,7 @@ app.include_router(settings_router)
 app.include_router(exchange_rates_router)
 app.include_router(reports_router)
 app.include_router(management_router)
+app.include_router(budgets_router)
 
 if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8000)
