@@ -34,7 +34,8 @@ class Budget(Base):
 
     user: Mapped[User] = relationship(backref="budgets", passive_deletes=True)
 
-    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
+    is_archived: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
                                                  onupdate=func.now(), nullable=False)

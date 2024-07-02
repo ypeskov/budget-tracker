@@ -22,18 +22,9 @@ def new_budget(request: Request, input_dto: NewBudgetInputSchema, db: Session = 
     """ Add new budget """
     logger.info(f"Adding new budget for user_id: {request.state.user['id']}")
     try:
-        budget = create_new_budget(
-            user_id=request.state.user['id'],
-            db=db,
-            name=input_dto.name,
-            target_amount=input_dto.target_amount,
-            period=input_dto.period,
-            repeat=input_dto.repeat,
-            start_date=input_dto.start_date,
-            end_date=input_dto.end_date,
-            categories=input_dto.categories,
-            comment=input_dto.comment
-        )
+        budget = create_new_budget(user_id=request.state.user['id'],
+                                   db=db,
+                                   budget_dto=input_dto)
         return budget
     except Exception as e:
         logger.exception(e)
