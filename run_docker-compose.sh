@@ -4,10 +4,10 @@ if [ $# -eq 0 ]; then
   echo "Starting services without back app..."
   docker-compose up db-orgfin \
                     redis-orgfin \
-                    api-orgfin \
                     celery-orgfin \
                     celery-beat-orgfin \
                     dashboard-redis-celery
+#                    api-orgfin \
 #                    adminer-orgfin \
 
 

@@ -4,10 +4,10 @@
 # print("Debugger is attached!")
 
 
-import sys
-sys.path.append("<PyCharm directory>/debug-egg/pydevd-pycharm.egg")
-import pydevd_pycharm
-pydevd_pycharm.settrace('host.docker.internal', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
+# import sys
+# sys.path.append("<PyCharm directory>/debug-egg/pydevd-pycharm.egg")
+# import pydevd_pycharm
+# pydevd_pycharm.settrace('host.docker.internal', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
 
 
 import uvicorn
