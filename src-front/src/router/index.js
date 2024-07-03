@@ -92,7 +92,7 @@ const router = createRouter({
       },
       component: () => import('../views/ReportsView.vue'),
     },
-        {
+    {
       path: '/budgets',
       name: 'budgets',
       meta: {

@@ -1,7 +1,9 @@
 <script setup>
 import ModalWindow from '@/components/utils/ModalWindow.vue';
 import { defineProps, reactive } from 'vue';
+
 import { useCategoriesStore } from '@/stores/categories';
+import { Services } from '@/services/servicesConfig';
 
 const props = defineProps({
   closeModal: Function,
@@ -10,7 +12,12 @@ const props = defineProps({
 
 const emit = defineEmits(['categoriesUpdated']);
 
-const userCategories = useCategoriesStore().categories;
+let userCategories = useCategoriesStore().categories;
+if (userCategories.length === 0) {
+  Services.categoriesService.getUserCategories();
+  userCategories = useCategoriesStore().categories;
+}
+
 const selectedCategories = reactive([...props.initialCategories])
 
 function applyCategories() {

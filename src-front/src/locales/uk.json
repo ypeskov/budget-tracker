@@ -60,7 +60,8 @@
     "errorDuringActivation": "Помилка під час активації",
     "accountActivated": "Рахунок активовано",
     "noData": "Немає даних",
-    "hideEmptyCategories": "Приховати порожні категорії"
+    "hideEmptyCategories": "Приховати порожні категорії",
+    "selectCategories": "Вибрати категорії"
   },
   "menu": {
     "home": "Початок",
@@ -90,6 +91,7 @@
     "cashFlowReport": "Звіт по грошовому потоку",
     "balanceReport": "Звіт по балансу",
     "baseCurrency": "Базова валюта",
-    "expensesReport": "Звіт по витратам"
+    "expensesReport": "Звіт по витратам",
+    "newBudget": "Новий бюджет"
   }
 }

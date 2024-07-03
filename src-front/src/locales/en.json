@@ -60,7 +60,8 @@
     "errorDuringActivation": "Error during activation",
     "accountActivated": "Account activated",
     "noData": "No data",
-    "hideEmptyCategories": "Hide empty categories"
+    "hideEmptyCategories": "Hide empty categories",
+    "selectCategories": "Select categories"
   },
   "menu": {
     "home": "Home",
@@ -90,6 +91,7 @@
     "cashFlowReport": "Cash flow report",
     "balanceReport": "Balance report",
     "baseCurrency": "Base currency",
-    "expensesReport": "Expenses report"
+    "expensesReport": "Expenses report",
+    "newBudget": "New budget"
   }
 }
