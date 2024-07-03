@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
+import { onBeforeMount, reactive, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import { Services } from '../../services/servicesConfig';

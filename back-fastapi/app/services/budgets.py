@@ -43,7 +43,33 @@ def create_new_budget(user_id: int,
         raise e
 
     db.refresh(budget)
+    fill_budget_with_existing_transactions(db, budget)
     return budget
+
+
+def fill_budget_with_existing_transactions(db: Session, budget: Budget):
+    """ Fill budget with existing transactions """
+    logger.info(f"Filling budget with existing transactions for budget: {budget.id}")
+
+    transactions = db.query(Transaction).filter(
+        Transaction.user_id == budget.user_id,
+        Transaction.is_deleted.is_(False),
+        Transaction.is_transfer.is_(False),
+        Transaction.is_income.is_(False),
+        Transaction.date_time.between(budget.start_date, budget.end_date)
+    ).all()
+
+    for transaction in transactions:
+        if budget.included_categories:
+            included_categories = [int(category_id) for category_id in budget.included_categories.split(",")]
+            if transaction.category_id not in included_categories:
+                # Skip transactions that do not belong to the budget
+                continue
+
+        budget.collected_amount += transaction.amount
+
+    db.commit()
+    logger.info(f"Filled budget with existing transactions for budget: {budget.id}")
 
 
 def update_budget_with_amount(db: Session, transaction: Transaction):
