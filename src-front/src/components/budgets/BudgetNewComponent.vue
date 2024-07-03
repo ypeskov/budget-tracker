@@ -69,11 +69,6 @@ function extractCategoriesIds(categories) {
         </div>
 
         <div class="mb-3">
-          <label for="collected_amount" class="form-label">Collected Amount</label>
-          <input type="number" class="form-control" id="collected_amount" name="collected_amount" step="0.01">
-        </div>
-
-        <div class="mb-3">
           <label for="period" class="form-label">Period</label>
           <select class="form-select" id="period" name="period">
             <option value="daily">Daily</option>
@@ -91,12 +86,12 @@ function extractCategoriesIds(categories) {
 
         <div class="mb-3">
           <label for="start_date" class="form-label">Start Date</label>
-          <input type="datetime-local" class="form-control" id="start_date" name="start_date">
+          <input type="date" class="form-control" id="start_date" name="start_date">
         </div>
 
         <div class="mb-3">
           <label for="end_date" class="form-label">End Date</label>
-          <input type="datetime-local" class="form-control" id="end_date" name="end_date">
+          <input type="date" class="form-control" id="end_date" name="end_date">
         </div>
 
         <div class="mb-3">

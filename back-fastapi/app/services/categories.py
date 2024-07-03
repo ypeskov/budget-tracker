@@ -23,7 +23,8 @@ def get_user_categories(user_id: int, db: Session, include_deleted: bool = False
         else:
             category_display_name = category.name
 
-        category.name = category_display_name
+        prefix = "+" if category.is_income else "-"
+        category.name = f"({prefix}) {category_display_name}"
 
         result_list.append(category)
 
