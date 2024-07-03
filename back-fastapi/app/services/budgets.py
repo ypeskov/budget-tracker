@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from icecream import ic
 
 from app.logger_config import logger
-from app.models.Budget import Budget, PeriodEnum
+from app.models.Budget import Budget
 from app.models.UserCategory import UserCategory
+from app.models.Transaction import Transaction
 from app.schemas.budgets_schema import NewBudgetInputSchema
 
 ic.configureOutput(includeContext=True)
@@ -43,3 +44,21 @@ def create_new_budget(user_id: int,
 
     db.refresh(budget)
     return budget
+
+
+def update_budget_with_amount(db: Session, transaction: Transaction):
+    """ Update collected amount for all applicable budgets """
+    logger.info(f"Updating collected amount for all applicable budgets for transaction: {transaction}")
+
+    user_budgets = db.query(Budget).filter(Budget.user_id == transaction.user_id).all()
+    for budget in user_budgets:
+        if budget.included_categories:
+            included_categories = [int(category_id) for category_id in budget.included_categories.split(",")]
+            if transaction.category_id not in included_categories:
+                # Skip budgets that do not include the transaction category
+                continue
+
+        if budget.start_date <= transaction.date_time <= budget.end_date:
+            budget.collected_amount += transaction.amount
+            db.commit()
+            logger.info(f"Updated collected amount for budget: {budget}")

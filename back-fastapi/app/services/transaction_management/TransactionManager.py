@@ -13,6 +13,7 @@ from app.services.errors import AccessDenied, InvalidCategory
 from app.services.transaction_management.NonTransferTypeTransaction import NonTransferTypeTransaction
 from app.services.transaction_management.TransferTypeTransaction import TransferTypeTransaction
 from app.services.transaction_management.errors import InvalidTransaction
+from app.services.budgets import update_budget_with_amount
 
 ic.configureOutput(includeContext=True)
 
@@ -102,7 +103,10 @@ class TransactionManager:
         else:
             self._process_non_transfer_type()
             self.db.add(self._transaction)
+
         self.db.commit()
+        if not self._transaction.is_transfer and not self._transaction.is_income:
+            update_budget_with_amount(self.db, self._transaction)
 
         update_transactions_new_balances(self._transaction.account_id, self.db)
         if self._transaction.is_transfer:

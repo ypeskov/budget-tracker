@@ -39,3 +39,9 @@ class Budget(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
                                                  onupdate=func.now(), nullable=False)
+
+    def __repr__(self):
+        return (f'Budget(id={self.id}, user_id={self.user_id}, name={self.name}, target_amount={self.target_amount}, '
+                f'collected_amount={self.collected_amount}, period={self.period}, repeat={self.repeat}, '
+                f'start_date={self.start_date}, end_date={self.end_date}, included_categories={self.included_categories}, '
+                f'comment={self.comment}, is_deleted={self.is_deleted}, is_archived={self.is_archived})')
