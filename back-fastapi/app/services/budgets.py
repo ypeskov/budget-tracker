@@ -88,3 +88,16 @@ def update_budget_with_amount(db: Session, transaction: Transaction):
             budget.collected_amount += transaction.amount
             db.commit()
             logger.info(f"Updated collected amount for budget: {budget}")
+
+
+def get_user_budgets(user_id: int, db: Session):
+    """ Get all budgets for user """
+    logger.info(f"Getting all budgets for user_id: {user_id}")
+
+    budgets = db.query(Budget).filter(
+        Budget.user_id == user_id,
+        Budget.is_deleted.is_(False),
+        Budget.is_archived.is_(False)
+    ).all()
+
+    return budgets
