@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.models.User import User
+from app.models.Currency import Currency
 
 
 class PeriodEnum(Enum):
@@ -23,6 +24,7 @@ class Budget(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
     name: Mapped[str] = mapped_column(String(100), index=True)
+    currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'), index=True)
     target_amount: Mapped[Decimal] = mapped_column(default=0)
     collected_amount: Mapped[Decimal] = mapped_column(default=0)
     period: Mapped[PeriodEnum] = mapped_column(SqlAlchemyEnum(PeriodEnum), nullable=False)
