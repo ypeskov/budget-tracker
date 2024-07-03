@@ -105,6 +105,8 @@ class TransactionManager:
             self.db.add(self._transaction)
 
         self.db.commit()
+
+        #  update budgets if transaction is not transfer
         if not self._transaction.is_transfer and not self._transaction.is_income:
             update_budget_with_amount(self.db, self._transaction)
 
