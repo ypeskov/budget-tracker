@@ -69,7 +69,8 @@
     "logout": "Вийти",
     "login": "Вхід",
     "register": "Реєстрація",
-    "reports": "Звіти"
+    "reports": "Звіти",
+    "budgets": "Бюджети"
   },
   "buttons": {
     "login": "Вхід",

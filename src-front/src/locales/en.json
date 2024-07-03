@@ -69,7 +69,8 @@
     "logout": "Logout",
     "login": "Login",
     "register": "Register",
-    "reports": "Reports"
+    "reports": "Reports",
+    "budgets": "Budgets"
   },
   "buttons": {
     "login": "Login",

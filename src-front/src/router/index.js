@@ -92,6 +92,15 @@ const router = createRouter({
       },
       component: () => import('../views/ReportsView.vue'),
     },
+        {
+      path: '/budgets',
+      name: 'budgets',
+      meta: {
+        requiresAuth: true,
+        requiresUnAuth: false,
+      },
+      component: () => import('../views/BudgetsView.vue'),
+    },
     {
       path: '/reports/cashflow',
       name: 'reports-cashflow',
