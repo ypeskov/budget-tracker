@@ -35,6 +35,7 @@ class Budget(Base):
     comment: Mapped[str] = mapped_column(nullable=True)
 
     user: Mapped[User] = relationship(backref="budgets", passive_deletes=True)
+    currency: Mapped[Currency] = relationship(backref="budgets", passive_deletes=True)
 
     is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
     is_archived: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')

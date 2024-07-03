@@ -16,6 +16,15 @@ if (userCategories.length === 0) {
   userCategories = useCategoriesStore().categories;
 }
 
+const budgetName = ref('');
+const currencyId = ref(0);
+const targetAmount = ref(0);
+const period = ref('monthly');
+const repeat = ref(false);
+const startDate = ref('');
+const endDate = ref('');
+const comment = ref('');
+
 let categories = reactive([]);
 const showCategoriesModal = ref(false);
 
@@ -41,6 +50,22 @@ function extractCategoriesIds(categories) {
   return categories.map((category) => category.id);
 }
 
+function submitForm() {
+  const selectedCategories = `[${extractCategoriesIds(categories).join(',')}]`;
+
+  Services.budgetsService.createBudget({
+    name: budgetName.value,
+    currencyId: currencyId.value,
+    targetAmount: targetAmount.value,
+    period: period.value,
+    repeat: repeat.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    comment: comment.value,
+    categories: extractCategoriesIds(categories),
+  });
+}
+
 </script>
 
 <template>
@@ -52,20 +77,20 @@ function extractCategoriesIds(categories) {
     </template>
 
     <template #main>
-      <form>
+      <form @submit.prevent="submitForm">
         <div class="mb-3">
           <label for="name" class="form-label">Name</label>
-          <input type="text" class="form-control" id="name" name="name" maxlength="100">
+          <input type="text" class="form-control" id="name" v-model="budgetName" maxlength="100">
         </div>
 
         <div class="mb-3">
           <label for="currency_id" class="form-label">Currency ID</label>
-          <input type="number" class="form-control" id="currency_id" name="currency_id">
+          <input type="number" class="form-control" id="currency_id" v-model="currencyId">
         </div>
 
         <div class="mb-3">
           <label for="target_amount" class="form-label">Target Amount</label>
-          <input type="number" class="form-control" id="target_amount" name="target_amount" step="0.01">
+          <input type="number" class="form-control" id="target_amount" v-model="targetAmount" step="0.01">
         </div>
 
         <div class="mb-3">
@@ -80,18 +105,18 @@ function extractCategoriesIds(categories) {
         </div>
 
         <div class="form-check form-switch mb-3">
-          <input type="checkbox" class="form-check-input" id="repeat" name="repeat">
+          <input type="checkbox" class="form-check-input" id="repeat" v-model="repeat">
           <label class="form-check-label" for="repeat">Repeat</label>
         </div>
 
         <div class="mb-3">
           <label for="start_date" class="form-label">Start Date</label>
-          <input type="date" class="form-control" id="start_date" name="start_date">
+          <input type="date" class="form-control" id="start_date" v-model="startDate">
         </div>
 
         <div class="mb-3">
           <label for="end_date" class="form-label">End Date</label>
-          <input type="date" class="form-control" id="end_date" name="end_date">
+          <input type="date" class="form-control" id="end_date" v-model="endDate">
         </div>
 
         <div class="mb-3">
@@ -115,7 +140,7 @@ function extractCategoriesIds(categories) {
 
         <div class="mb-3">
           <label for="comment" class="form-label">Comment</label>
-          <textarea class="form-control" id="comment" name="comment"></textarea>
+          <textarea class="form-control" id="comment" v-model="comment" rows="3"></textarea>
         </div>
 
         <button type="submit" class="btn btn-primary">Submit</button>

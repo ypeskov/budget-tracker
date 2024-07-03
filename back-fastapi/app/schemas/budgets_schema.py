@@ -9,6 +9,7 @@ from app.models.Budget import PeriodEnum
 
 class NewBudgetInputSchema(BaseModel):
     name: str
+    currency_id: int
     target_amount: Decimal
     period: PeriodEnum
     repeat: bool

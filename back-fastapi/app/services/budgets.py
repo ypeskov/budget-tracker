@@ -1,13 +1,13 @@
 from datetime import timedelta
-from decimal import Decimal
 
-from sqlalchemy.orm import Session
 from icecream import ic
+from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
 from app.models.Budget import Budget
-from app.models.UserCategory import UserCategory
+from app.models.Currency import Currency
 from app.models.Transaction import Transaction
+from app.models.UserCategory import UserCategory
 from app.schemas.budgets_schema import NewBudgetInputSchema
 
 ic.configureOutput(includeContext=True)
@@ -28,6 +28,7 @@ def create_new_budget(user_id: int,
         budget = Budget(
             user_id=user_id,
             name=budget_dto.name,
+            currency_id=budget_dto.currency_id,
             target_amount=budget_dto.target_amount,
             period=budget_dto.period,
             repeat=budget_dto.repeat,
@@ -44,6 +45,7 @@ def create_new_budget(user_id: int,
 
     db.refresh(budget)
     fill_budget_with_existing_transactions(db, budget)
+
     return budget
 
 
@@ -94,10 +96,15 @@ def get_user_budgets(user_id: int, db: Session):
     """ Get all budgets for user """
     logger.info(f"Getting all budgets for user_id: {user_id}")
 
-    budgets = db.query(Budget).filter(
-        Budget.user_id == user_id,
-        Budget.is_deleted.is_(False),
-        Budget.is_archived.is_(False)
-    ).all()
+    budgets = (
+        db.query(Budget)
+        .options(joinedload(Budget.currency))
+        .filter(
+            Budget.user_id == user_id,
+            Budget.is_deleted.is_(False),
+            Budget.is_archived.is_(False)
+        )
+        .all()
+    )
 
     return budgets
