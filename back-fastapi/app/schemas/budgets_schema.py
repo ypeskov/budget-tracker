@@ -24,6 +24,10 @@ class NewBudgetInputSchema(BaseModel):
                               alias_generator=to_camel)
 
 
+class EditBudgetInputSchema(NewBudgetInputSchema):
+    id: int
+
+
 class CurrencySchema(BaseModel):
     id: int
     code: str

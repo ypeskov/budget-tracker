@@ -8,7 +8,7 @@ from app.logger_config import logger
 from app.models.Budget import Budget
 from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
-from app.schemas.budgets_schema import NewBudgetInputSchema
+from app.schemas.budgets_schema import NewBudgetInputSchema, EditBudgetInputSchema
 from app.services.CurrencyProcessor import calc_amount
 
 ic.configureOutput(includeContext=True)
@@ -16,7 +16,7 @@ ic.configureOutput(includeContext=True)
 
 def create_new_budget(user_id: int,
                       db: Session,
-                      budget_dto: NewBudgetInputSchema) -> Budget:
+                      budget_dto: NewBudgetInputSchema | EditBudgetInputSchema) -> Budget:
     """ Create new budget """
     logger.info(f"Creating new budget for user_id: {user_id}, budget_dto: {budget_dto}")
 
@@ -26,22 +26,32 @@ def create_new_budget(user_id: int,
     included_categories_str = ",".join(map(str, included_categories))
 
     try:
-        budget = Budget(
-            user_id=user_id,
-            name=budget_dto.name,
-            currency_id=budget_dto.currency_id,
-            target_amount=budget_dto.target_amount,
-            period=budget_dto.period,
-            repeat=budget_dto.repeat,
-            start_date=budget_dto.start_date,
-            end_date=budget_dto.end_date + timedelta(days=1),  # add 1 day to include the full end date
-            included_categories=included_categories_str,
-            comment=budget_dto.comment
-        )
+        # Check if it's an update operation
+        if hasattr(budget_dto, "id") and budget_dto.id:
+            budget = db.query(Budget).filter(Budget.id == budget_dto.id).one_or_none()
+            if budget is None:
+                raise ValueError(f"Budget with id {budget_dto.id} not found.")
+            logger.info(f"Updating budget with id: {budget_dto.id}")
+        else:
+            budget = Budget(user_id=user_id)
+            logger.info("Creating a new budget")
+
+        # Update budget fields
+        budget.name = budget_dto.name
+        budget.currency_id = budget_dto.currency_id
+        budget.target_amount = budget_dto.target_amount
+        budget.period = budget_dto.period
+        budget.repeat = budget_dto.repeat
+        budget.start_date = budget_dto.start_date
+        budget.end_date = budget_dto.end_date + timedelta(days=1)  # add 1 day to include the full end date
+        budget.included_categories = included_categories_str
+        budget.comment = budget_dto.comment
+
         db.add(budget)
         db.commit()
     except Exception as e:
         logger.exception(e)
+        db.rollback()  # Rollback the transaction in case of error
         raise e
 
     db.refresh(budget)
