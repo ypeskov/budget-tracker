@@ -26,8 +26,8 @@ let currency = reactive(props.editBudget ? props.editBudget.currency : {});
 const targetAmount = ref(props.editBudget ? props.editBudget.targetAmount : 0);
 const period = ref(props.editBudget ? props.editBudget.period : '');
 const repeat = ref(props.editBudget ? props.editBudget.repeat : false);
-const startDate = ref(props.editBudget ? props.editBudget.startDate : '');
-const endDate = ref(props.editBudget ? props.editBudget.endDate : '');
+const startDate = ref(props.editBudget ? props.editBudget.startDate.split('T')[0] : '');
+const endDate = ref(props.editBudget ? props.editBudget.endDate.split('T')[0] : '');
 const comment = ref(props.editBudget ? props.editBudget.comment : '');
 const currencies = reactive([]);
 
@@ -36,7 +36,17 @@ const showCategoriesModal = ref(false);
 
 onBeforeMount(async () => {
   currencies.push(...(await Services.currenciesService.getAllCurrencies()));
+  getCategoriesFromUserCategories(props.editBudget ? props.editBudget.includedCategories : []);
 });
+
+function getCategoriesFromUserCategories(categoriesIds) {
+  const budgetCategories = categoriesIds.split(',').map((id) => parseInt(id, 10));
+  const cats = userCategories.filter((category) => {
+    return budgetCategories.includes(category.id);
+  });
+  categories.length = 0;
+  categories.push(...cats);
+}
 
 watch(currencies, (newCurrencies) => {
   if (newCurrencies.length > 0 && props.editBudget) {
