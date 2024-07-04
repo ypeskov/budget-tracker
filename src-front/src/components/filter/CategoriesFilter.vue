@@ -1,6 +1,6 @@
 <script setup>
 import ModalWindow from '@/components/utils/ModalWindow.vue';
-import { defineProps, reactive } from 'vue';
+import { defineProps, reactive, ref } from 'vue';
 
 import { useCategoriesStore } from '@/stores/categories';
 import { Services } from '@/services/servicesConfig';
@@ -18,19 +18,19 @@ if (userCategories.length === 0) {
   userCategories = useCategoriesStore().categories;
 }
 
-let selectedCategories = reactive([...props.initialCategories])
+const selectedCategories = ref([...props.initialCategories])
 
 function applyCategories() {
-  emit('categoriesUpdated', selectedCategories);
+  emit('categoriesUpdated', selectedCategories.value);
 }
 
 function updateSelectedCategories(event) {
   const categoryId = parseInt(event.target.value);
   if (event.target.checked) {
-    selectedCategories.push(categoryId);
+    selectedCategories.value.push(categoryId);
   } else {
-    const index = selectedCategories.indexOf(categoryId);
-    selectedCategories.splice(index, 1);
+    const index = selectedCategories.value.indexOf(categoryId);
+    selectedCategories.value.splice(index, 1);
   }
 }
 
