@@ -10,6 +10,8 @@ const props = defineProps({
   closeModal: Function,
 });
 
+const emit = defineEmits(['budgetCreated']);
+
 let userCategories = useCategoriesStore().categories;
 if (userCategories.length === 0) {
   Services.categoriesService.getUserCategories();
@@ -55,9 +57,8 @@ function extractCategoriesIds(categories) {
   return categories.map((category) => category.id);
 }
 
-function submitForm() {
-  console.log(currency.id)
-  Services.budgetsService.createBudget({
+async function submitForm() {
+  const createdBudget = await Services.budgetsService.createBudget({
     name: budgetName.value,
     currencyId: currency.id,
     targetAmount: targetAmount.value,
@@ -68,6 +69,10 @@ function submitForm() {
     comment: comment.value,
     categories: extractCategoriesIds(categories),
   });
+
+  if (createdBudget) {
+    emit('budgetCreated', createdBudget);
+  }
 
   props.closeModal();
 }
