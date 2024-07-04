@@ -1,14 +1,15 @@
 from datetime import timedelta
+from decimal import Decimal
 
 from icecream import ic
 from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
 from app.models.Budget import Budget
-from app.models.Currency import Currency
 from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
 from app.schemas.budgets_schema import NewBudgetInputSchema
+from app.services.CurrencyProcessor import calc_amount
 
 ic.configureOutput(includeContext=True)
 
@@ -68,7 +69,12 @@ def fill_budget_with_existing_transactions(db: Session, budget: Budget):
                 # Skip transactions that do not belong to the budget
                 continue
 
-        budget.collected_amount += transaction.amount
+        adjusted_amount: Decimal = calc_amount(transaction.amount,
+                                               transaction.account.currency.code,
+                                               transaction.date_time.date(),
+                                               budget.currency.code,
+                                               db)
+        budget.collected_amount += adjusted_amount
 
     db.commit()
     logger.info(f"Filled budget with existing transactions for budget: {budget.id}")
@@ -87,7 +93,12 @@ def update_budget_with_amount(db: Session, transaction: Transaction):
                 continue
 
         if budget.start_date <= transaction.date_time <= budget.end_date:
-            budget.collected_amount += transaction.amount
+            adjusted_amount: Decimal = calc_amount(transaction.amount,
+                                                   transaction.account.currency.code,
+                                                   transaction.date_time.date(),
+                                                   budget.currency.code,
+                                                   db)
+            budget.collected_amount += adjusted_amount
             db.commit()
             logger.info(f"Updated collected amount for budget: {budget}")
 
