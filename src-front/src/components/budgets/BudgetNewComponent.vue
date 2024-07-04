@@ -11,18 +11,20 @@ const props = defineProps({
   editBudget: Object,
 });
 
+const isEdit = !!props.editBudget?.id;
+
 const emit = defineEmits(['budgetCreated']);
 
 let userCategories = reactive([]);
 
-const budgetName = ref(props.editBudget ? props.editBudget.name : '');
-let currency = reactive(props.editBudget ? props.editBudget.currency : {});
-const targetAmount = ref(props.editBudget ? props.editBudget.targetAmount : 0);
-const period = ref(props.editBudget ? props.editBudget.period : '');
-const repeat = ref(props.editBudget ? props.editBudget.repeat : false);
-const startDate = ref(props.editBudget ? props.editBudget.startDate.split('T')[0] : '');
-const endDate = ref(props.editBudget ? props.editBudget.endDate.split('T')[0] : '');
-const comment = ref(props.editBudget ? props.editBudget.comment : '');
+const budgetName = ref(props.editBudget?.name ?? '');
+let currency = reactive(props.editBudget?.currency ?? {});
+const targetAmount = ref(props.editBudget?.targetAmount ?? 0);
+const period = ref(props.editBudget?.period ?? '');
+const repeat = ref(props.editBudget?.repeat ?? false);
+const startDate = ref(props.editBudget?.startDate?.split('T')[0] ?? '');
+const endDate = ref(props.editBudget?.endDate?.split('T')[0] ?? '');
+const comment = ref(props.editBudget?.comment ?? '');
 const currencies = reactive([]);
 
 let categories = reactive([]);
@@ -35,7 +37,7 @@ onBeforeMount(async () => {
     userCategories = useCategoriesStore().categories;
   }
   currencies.push(...(await Services.currenciesService.getAllCurrencies()));
-  getCategoriesFromUserCategories(props.editBudget ? props.editBudget.includedCategories : []);
+  getCategoriesFromUserCategories(props.editBudget?.includedCategories ?? "");
 });
 
 function getCategoriesFromUserCategories(categoriesIds) {
@@ -48,7 +50,7 @@ function getCategoriesFromUserCategories(categoriesIds) {
 }
 
 watch(currencies, (newCurrencies) => {
-  if (newCurrencies.length > 0 && props.editBudget) {
+  if (newCurrencies.length > 0 && props.editBudget.currency) {
     const matchedCurrency = newCurrencies.find(c => c.id === props.editBudget.currency.id);
     if (matchedCurrency) {
       currency = matchedCurrency;

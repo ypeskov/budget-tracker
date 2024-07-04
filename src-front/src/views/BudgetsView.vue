@@ -24,6 +24,11 @@ const openBudgetModal = () => {
   showBudgetModal.value = true;
 };
 
+const startCreateBudget = () => {
+  currentBudget = {};
+  openBudgetModal();
+};
+
 const closeBudgetModal = () => {
   showBudgetModal.value = false;
 };
@@ -45,7 +50,7 @@ const editBudget = (budget) => {
       <div class="row">
         <div class="col-2">
           <button class="btn btn-primary w-100"
-                  @click="openBudgetModal">{{ $t('buttons.newBudget') }}
+                  @click="startCreateBudget">{{ $t('buttons.newBudget') }}
           </button>
         </div>
       </div>
