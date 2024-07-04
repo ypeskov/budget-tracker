@@ -1,36 +1,61 @@
 <script setup>
-import { defineProps, onBeforeMount, reactive, ref } from 'vue';
+import { defineProps, onBeforeMount, reactive, ref, watch } from 'vue';
 
 import ModalWindow from '@/components/utils/ModalWindow.vue';
 import CategoriesFilter from '@/components/filter/CategoriesFilter.vue';
 import { useCategoriesStore } from '@/stores/categories';
 import { Services } from '@/services/servicesConfig';
 
-defineProps({
+const props = defineProps({
   closeModal: Function,
+  editBudget: Object,
 });
 
-let userCategories = useCategoriesStore().categories;
-if (userCategories.length === 0) {
-  Services.categoriesService.getUserCategories();
-  userCategories = useCategoriesStore().categories;
-}
+const isEdit = !!props.editBudget?.id;
 
-const budgetName = ref('');
-let currency = reactive({});
-const targetAmount = ref(0);
-const period = ref('monthly');
-const repeat = ref(false);
-const startDate = ref('');
-const endDate = ref('');
-const comment = ref('');
+const emit = defineEmits(['budgetCreated']);
+
+let userCategories = reactive([]);
+
+const budgetName = ref(props.editBudget?.name ?? '');
+let currency = reactive(props.editBudget?.currency ?? {});
+const targetAmount = ref(props.editBudget?.targetAmount ?? 0);
+const period = ref(props.editBudget?.period ?? '');
+const repeat = ref(props.editBudget?.repeat ?? false);
+const startDate = ref(props.editBudget?.startDate?.split('T')[0] ?? '');
+const endDate = ref(props.editBudget?.endDate?.split('T')[0] ?? '');
+const comment = ref(props.editBudget?.comment ?? '');
 const currencies = reactive([]);
 
 let categories = reactive([]);
 const showCategoriesModal = ref(false);
 
 onBeforeMount(async () => {
+  userCategories = useCategoriesStore().categories;
+  if (userCategories.length === 0) {
+    await Services.categoriesService.getUserCategories();
+    userCategories = useCategoriesStore().categories;
+  }
   currencies.push(...(await Services.currenciesService.getAllCurrencies()));
+  getCategoriesFromUserCategories(props.editBudget?.includedCategories ?? "");
+});
+
+function getCategoriesFromUserCategories(categoriesIds) {
+  const budgetCategories = categoriesIds.split(',').map((id) => parseInt(id, 10));
+  const cats = userCategories.filter((category) => {
+    return budgetCategories.includes(category.id);
+  });
+  categories.length = 0;
+  categories.push(...cats);
+}
+
+watch(currencies, (newCurrencies) => {
+  if (newCurrencies.length > 0 && props.editBudget.currency) {
+    const matchedCurrency = newCurrencies.find(c => c.id === props.editBudget.currency.id);
+    if (matchedCurrency) {
+      currency = matchedCurrency;
+    }
+  }
 });
 
 function openCategoriesModal() {
@@ -55,9 +80,8 @@ function extractCategoriesIds(categories) {
   return categories.map((category) => category.id);
 }
 
-function submitForm() {
-  console.log(currency.id)
-  Services.budgetsService.createBudget({
+async function submitForm() {
+  const budgetObj = {
     name: budgetName.value,
     currencyId: currency.id,
     targetAmount: targetAmount.value,
@@ -67,7 +91,21 @@ function submitForm() {
     endDate: endDate.value,
     comment: comment.value,
     categories: extractCategoriesIds(categories),
-  });
+  };
+
+  let createdBudget;
+  if (isEdit) {
+    budgetObj.id = props.editBudget.id;
+    createdBudget = await Services.budgetsService.updateBudget(budgetObj);
+  } else {
+    createdBudget = await Services.budgetsService.createBudget(budgetObj);
+  }
+
+  if (createdBudget) {
+    emit('budgetCreated', createdBudget);
+  }
+
+  props.closeModal();
 }
 
 </script>
@@ -137,7 +175,7 @@ function submitForm() {
         <div class="mb-3">
           <a href="#"
              class="btn btn-primary"
-             @click.stop="openCategoriesModal">{{ $t('message.selectCategories')}}</a>
+             @click.stop="openCategoriesModal">{{ $t('message.selectCategories') }}</a>
           <teleport to="body">
             <CategoriesFilter v-if="showCategoriesModal"
                               :close-modal="closeCategoriesModal"

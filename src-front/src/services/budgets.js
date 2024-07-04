@@ -23,4 +23,13 @@ export class BudgetsService {
       body: JSON.stringify(budget),
     }, { userService: this.userService });
   }
+
+  async updateBudget(budget) {
+    let budgetUrl = `${budgetsPrefix}/${budget.id}/`;
+
+    return await request(budgetUrl, {
+      method: 'PUT',
+      body: JSON.stringify(budget),
+    }, { userService: this.userService });
+  }
 }
