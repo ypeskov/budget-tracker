@@ -23,7 +23,7 @@ class Budget(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
-    name: Mapped[str] = mapped_column(Text, index=True)
+    name: Mapped[str] = mapped_column(String(200), index=True)
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'), index=True)
     target_amount: Mapped[Decimal] = mapped_column(default=0)
     collected_amount: Mapped[Decimal] = mapped_column(default=0)
@@ -31,7 +31,7 @@ class Budget(Base):
     repeat: Mapped[bool] = mapped_column(default=False)
     start_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    included_categories: Mapped[str] = mapped_column(String(100), nullable=True)
+    included_categories: Mapped[str] = mapped_column(Text, nullable=True)
     comment: Mapped[str] = mapped_column(nullable=True)
 
     user: Mapped[User] = relationship(backref="budgets", passive_deletes=True)

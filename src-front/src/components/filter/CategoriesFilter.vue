@@ -18,7 +18,7 @@ if (userCategories.length === 0) {
   userCategories = useCategoriesStore().categories;
 }
 
-const selectedCategories = reactive([...props.initialCategories])
+let selectedCategories = reactive([...props.initialCategories])
 
 function applyCategories() {
   emit('categoriesUpdated', selectedCategories);
