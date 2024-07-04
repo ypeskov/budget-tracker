@@ -13,7 +13,7 @@ const props = defineProps({
 
 const isEdit = !!props.editBudget?.id;
 
-const emit = defineEmits(['budgetCreated']);
+const emit = defineEmits(['budgetCreated', 'budgetUpdated', 'budgetDeleted']);
 
 let userCategories = reactive([]);
 
@@ -108,6 +108,13 @@ async function submitForm() {
   props.closeModal();
 }
 
+async function deleteBudget() {
+  if (isEdit) {
+    await Services.budgetsService.deleteBudget(props.editBudget.id);
+    emit('budgetDeleted', props.editBudget.id);
+    props.closeModal();
+  }
+}
 </script>
 
 <template>
@@ -189,7 +196,11 @@ async function submitForm() {
           <textarea class="form-control" id="comment" v-model="comment" rows="3"></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="manage-buttons">
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="button" class="btn btn-danger" @click="deleteBudget">{{ $t('buttons.delete') }}</button>
+        </div>
+
       </form>
     </template>
   </ModalWindow>
@@ -200,6 +211,11 @@ async function submitForm() {
 
 .form-label {
   font-weight: bold;
+}
+
+.manage-buttons {
+  display: flex;
+  justify-content: space-between;
 }
 
 </style>

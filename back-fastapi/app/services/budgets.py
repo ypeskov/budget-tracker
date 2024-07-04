@@ -10,6 +10,7 @@ from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
 from app.schemas.budgets_schema import NewBudgetInputSchema, EditBudgetInputSchema
 from app.services.CurrencyProcessor import calc_amount
+from app.services.errors import NotFoundError
 
 ic.configureOutput(includeContext=True)
 
@@ -138,3 +139,19 @@ def get_user_budgets(user_id: int, db: Session):
     )
 
     return budgets
+
+
+def delete_budget(user_id: int, db: Session, budget_id: int):
+    """ Delete budget """
+    logger.info(f"Deleting budget with id: {budget_id}")
+
+    budget = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == user_id).one_or_none()
+    if budget is None:
+        raise NotFoundError(f"Budget with id {budget_id} not found.")
+
+    budget.is_deleted = True
+    db.commit()
+    db.refresh(budget)
+    logger.info(f"Deleted budget with id: {budget_id}")
+
+    return budget

@@ -62,6 +62,7 @@ const editBudget = (budget) => {
       <teleport to="body">
         <BudgetNewComponent v-if="showBudgetModal"
                             @budget-created="budgetCreated"
+                            @budget-deleted="fetchBudgets"
                             :edit-budget="currentBudget"
                             :close-modal="closeBudgetModal" />
       </teleport>

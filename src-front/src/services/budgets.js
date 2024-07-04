@@ -32,4 +32,12 @@ export class BudgetsService {
       body: JSON.stringify(budget),
     }, { userService: this.userService });
   }
+
+  async deleteBudget(budgetId) {
+    let budgetUrl = `${budgetsPrefix}/${budgetId}/`;
+
+    return await request(budgetUrl, {
+      method: 'DELETE',
+    }, { userService: this.userService });
+  }
 }

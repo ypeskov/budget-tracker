@@ -19,6 +19,14 @@ const budgetSelected = (budget) => {
 
 <template>
   <div>
+    <div class="budget-item-container headers">
+      <span class="col-4">{{ $t('message.name') }}</span>
+      <span class="col-1">{{ $t('message.collectedExpenses') }}</span>
+      <span class="col-1">{{ $t('message.targetBudget') }}</span>
+      <span class="col-1">{{ $t('message.period') }}</span>
+      <span class="col-1">{{ $t('message.startDate') }}</span>
+      <span class="col-1">{{ $t('message.endDate') }}</span>
+    </div>
     <div v-for="budget in props.budgets" :key="budget.id">
       <div class="budget-item-container" @click="budgetSelected(budget)">
         <span class="col-4">{{ budget.name }} ({{ budget.currency.code }})</span>
@@ -47,5 +55,12 @@ const budgetSelected = (budget) => {
 .budget-item-container:hover {
   background-color: $item-hover-background-color;
   cursor: pointer;
+}
+
+.headers {
+  font-weight: bold;
+  color: #0000ff;
+  background-color: #f0f0f0;
+  text-align: center;
 }
 </style>

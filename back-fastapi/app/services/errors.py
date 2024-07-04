@@ -24,3 +24,7 @@ class InvalidCategory(Exception):
 
 class UserNotActivated(Exception):
     pass
+
+
+class NotFoundError(Exception):
+    pass

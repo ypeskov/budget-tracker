@@ -71,7 +71,9 @@
     "login": "Login",
     "register": "Register",
     "reports": "Reports",
-    "budgets": "Budgets"
+    "budgets": "Budgets",
+    "collectedExpenses": "Collected expenses",
+    "targetBudget": "Target budget"
   },
   "buttons": {
     "login": "Login",
