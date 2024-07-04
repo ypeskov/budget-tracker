@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, onBeforeMount, reactive, ref } from 'vue';
+import { defineProps, onBeforeMount, reactive, ref, watch } from 'vue';
 
 import ModalWindow from '@/components/utils/ModalWindow.vue';
 import CategoriesFilter from '@/components/filter/CategoriesFilter.vue';
@@ -8,6 +8,7 @@ import { Services } from '@/services/servicesConfig';
 
 const props = defineProps({
   closeModal: Function,
+  editBudget: Object,
 });
 
 const emit = defineEmits(['budgetCreated']);
@@ -18,14 +19,16 @@ if (userCategories.length === 0) {
   userCategories = useCategoriesStore().categories;
 }
 
-const budgetName = ref('');
-let currency = reactive({});
-const targetAmount = ref(0);
-const period = ref('monthly');
-const repeat = ref(false);
-const startDate = ref('');
-const endDate = ref('');
-const comment = ref('');
+// console.log(props.editBudget);
+
+const budgetName = ref(props.editBudget ? props.editBudget.name : '');
+let currency = reactive(props.editBudget ? props.editBudget.currency : {});
+const targetAmount = ref(props.editBudget ? props.editBudget.targetAmount : 0);
+const period = ref(props.editBudget ? props.editBudget.period : '');
+const repeat = ref(props.editBudget ? props.editBudget.repeat : false);
+const startDate = ref(props.editBudget ? props.editBudget.startDate : '');
+const endDate = ref(props.editBudget ? props.editBudget.endDate : '');
+const comment = ref(props.editBudget ? props.editBudget.comment : '');
 const currencies = reactive([]);
 
 let categories = reactive([]);
@@ -33,6 +36,15 @@ const showCategoriesModal = ref(false);
 
 onBeforeMount(async () => {
   currencies.push(...(await Services.currenciesService.getAllCurrencies()));
+});
+
+watch(currencies, (newCurrencies) => {
+  if (newCurrencies.length > 0 && props.editBudget) {
+    const matchedCurrency = newCurrencies.find(c => c.id === props.editBudget.currency.id);
+    if (matchedCurrency) {
+      currency = matchedCurrency;
+    }
+  }
 });
 
 function openCategoriesModal() {

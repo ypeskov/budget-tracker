@@ -6,22 +6,27 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['budgetSelected']);
+
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString();
 };
 
+const budgetSelected = (budget) => {
+  emit('budgetSelected', budget);
+};
 </script>
 
 <template>
   <div>
     <div v-for="budget in props.budgets" :key="budget.id">
-      <div class="budget-item-container">
+      <div class="budget-item-container" @click="budgetSelected(budget)">
         <span class="col-4">{{ budget.name }} ({{ budget.currency.code }})</span>
-        <span class="col-1">{{ $n(budget.collected_amount, 'decimal') }}</span>
-        <span class="col-1">{{ $n(budget.target_amount, 'decimal') }}</span>
+        <span class="col-1">{{ $n(budget.collectedAmount, 'decimal') }}</span>
+        <span class="col-1">{{ $n(budget.targetAmount, 'decimal') }}</span>
         <span class="col-1">{{ budget.period }}</span>
-        <span class="col-1">{{ formatDate(budget.start_date) }}</span>
-        <span class="col-1">{{ formatDate(budget.end_date) }}</span>
+        <span class="col-1">{{ formatDate(budget.startDate) }}</span>
+        <span class="col-1">{{ formatDate(budget.endDate) }}</span>
       </div>
     </div>
   </div>

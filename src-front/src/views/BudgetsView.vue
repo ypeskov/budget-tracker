@@ -6,6 +6,7 @@ import BudgetsList from '@/components/budgets/BudgetsList.vue';
 import BudgetNewComponent from '@/components/budgets/BudgetNewComponent.vue';
 
 let budgets = reactive([]);
+let currentBudget = reactive({});
 
 onBeforeMount(async () => {
   await fetchBudgets();
@@ -26,6 +27,16 @@ const openBudgetModal = () => {
 const closeBudgetModal = () => {
   showBudgetModal.value = false;
 };
+
+const budgetCreated = (budget) => {
+  currentBudget = budget;
+  fetchBudgets();
+};
+
+const editBudget = (budget) => {
+  currentBudget = budget;
+  openBudgetModal();
+};
 </script>
 
 <template>
@@ -40,12 +51,13 @@ const closeBudgetModal = () => {
       </div>
 
       <div class="row">
-        <BudgetsList :budgets="budgets" />
+        <BudgetsList :budgets="budgets" @budget-selected="editBudget" />
       </div>
 
       <teleport to="body">
         <BudgetNewComponent v-if="showBudgetModal"
-                            @budget-created="fetchBudgets"
+                            @budget-created="budgetCreated"
+                            :edit-budget="currentBudget"
                             :close-modal="closeBudgetModal" />
       </teleport>
     </div>
