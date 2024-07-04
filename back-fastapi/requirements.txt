@@ -65,7 +65,7 @@ pyarrow==15.0.0
 pydantic==2.7.4
 pydantic-settings==2.3.3
 pydantic_core==2.18.4
-pydevd-pycharm==242.16677.12
+#pydevd-pycharm==241.17890.14
 Pygments==2.18.0
 PyJWT==2.8.0
 pylance==0.12.2

@@ -60,7 +60,8 @@
     "errorDuringActivation": "Error during activation",
     "accountActivated": "Account activated",
     "noData": "No data",
-    "hideEmptyCategories": "Hide empty categories"
+    "hideEmptyCategories": "Hide empty categories",
+    "selectCategories": "Select categories"
   },
   "menu": {
     "home": "Home",
@@ -69,7 +70,8 @@
     "logout": "Logout",
     "login": "Login",
     "register": "Register",
-    "reports": "Reports"
+    "reports": "Reports",
+    "budgets": "Budgets"
   },
   "buttons": {
     "login": "Login",
@@ -89,6 +91,7 @@
     "cashFlowReport": "Cash flow report",
     "balanceReport": "Balance report",
     "baseCurrency": "Base currency",
-    "expensesReport": "Expenses report"
+    "expensesReport": "Expenses report",
+    "newBudget": "New budget"
   }
 }

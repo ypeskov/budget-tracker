@@ -15,9 +15,29 @@ def get_user_categories(user_id: int, db: Session, include_deleted: bool = False
     if not include_deleted:
         query = query.filter(UserCategory.is_deleted == False)
 
-    categories = query.all()
+    categories = query.order_by(UserCategory.is_income, UserCategory.name).all()
 
-    return categories
+    def add_children(category: UserCategory, result_list: list, parent_name: str = None):
+        if parent_name:
+            category_display_name = f"{parent_name} >> {category.name}"
+        else:
+            category_display_name = category.name
+
+        prefix = "+" if category.is_income else "-"
+        category.name = f"({prefix}) {category_display_name}"
+
+        result_list.append(category)
+
+        children = [cat for cat in categories if cat.parent_id == category.id]
+        for child in sorted(children, key=lambda x: x.name):
+            add_children(child, result_list, category_display_name)
+
+    result = []
+    for category in categories:
+        if category.parent_id is None:
+            add_children(category, result)
+
+    return result
 
 
 def grouped_user_categories(user_id: int, db: Session, include_deleted: bool = False) -> GroupedCategorySchema:
