@@ -13,13 +13,7 @@ const props = defineProps({
 
 const emit = defineEmits(['budgetCreated']);
 
-let userCategories = useCategoriesStore().categories;
-if (userCategories.length === 0) {
-  Services.categoriesService.getUserCategories();
-  userCategories = useCategoriesStore().categories;
-}
-
-// console.log(props.editBudget);
+let userCategories = reactive([]);
 
 const budgetName = ref(props.editBudget ? props.editBudget.name : '');
 let currency = reactive(props.editBudget ? props.editBudget.currency : {});
@@ -35,6 +29,11 @@ let categories = reactive([]);
 const showCategoriesModal = ref(false);
 
 onBeforeMount(async () => {
+  userCategories = useCategoriesStore().categories;
+  if (userCategories.length === 0) {
+    await Services.categoriesService.getUserCategories();
+    userCategories = useCategoriesStore().categories;
+  }
   currencies.push(...(await Services.currenciesService.getAllCurrencies()));
   getCategoriesFromUserCategories(props.editBudget ? props.editBudget.includedCategories : []);
 });
@@ -166,7 +165,7 @@ async function submitForm() {
         <div class="mb-3">
           <a href="#"
              class="btn btn-primary"
-             @click.stop="openCategoriesModal">{{ $t('message.selectCategories')}}</a>
+             @click.stop="openCategoriesModal">{{ $t('message.selectCategories') }}</a>
           <teleport to="body">
             <CategoriesFilter v-if="showCategoriesModal"
                               :close-modal="closeCategoriesModal"
