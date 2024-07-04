@@ -6,7 +6,7 @@ import CategoriesFilter from '@/components/filter/CategoriesFilter.vue';
 import { useCategoriesStore } from '@/stores/categories';
 import { Services } from '@/services/servicesConfig';
 
-defineProps({
+const props = defineProps({
   closeModal: Function,
 });
 
@@ -68,6 +68,8 @@ function submitForm() {
     comment: comment.value,
     categories: extractCategoriesIds(categories),
   });
+
+  props.closeModal();
 }
 
 </script>
