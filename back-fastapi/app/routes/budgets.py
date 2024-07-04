@@ -6,7 +6,7 @@ from app.database import get_db
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
 from app.schemas.budgets_schema import NewBudgetInputSchema, BudgetSchema, EditBudgetInputSchema
-from app.services.budgets import create_new_budget, get_user_budgets
+from app.services.budgets import create_new_budget, get_user_budgets, update_budget
 
 ic.configureOutput(includeContext=True)
 
@@ -31,12 +31,12 @@ def new_budget(request: Request, input_dto: NewBudgetInputSchema, db: Session = 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error generting report')
 
 
-@router.put('/')
-def update_budget(request: Request, input_dto: EditBudgetInputSchema, db: Session = Depends(get_db)):
+@router.put('/{id}/', response_model=BudgetSchema)
+def update(request: Request, input_dto: EditBudgetInputSchema, db: Session = Depends(get_db)):
     """ update budget """
     logger.info(f"Editing budget id: {input_dto.id} for user_id: {request.state.user['id']}")
     try:
-        budget = create_new_budget(user_id=request.state.user['id'],
+        budget = update_budget(user_id=request.state.user['id'],
                                    db=db,
                                    budget_dto=input_dto)
         return budget

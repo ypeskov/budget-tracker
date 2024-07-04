@@ -81,7 +81,7 @@ function extractCategoriesIds(categories) {
 }
 
 async function submitForm() {
-  const createdBudget = await Services.budgetsService.createBudget({
+  const budgetObj = {
     name: budgetName.value,
     currencyId: currency.id,
     targetAmount: targetAmount.value,
@@ -91,7 +91,15 @@ async function submitForm() {
     endDate: endDate.value,
     comment: comment.value,
     categories: extractCategoriesIds(categories),
-  });
+  };
+
+  let createdBudget;
+  if (isEdit) {
+    budgetObj.id = props.editBudget.id;
+    createdBudget = await Services.budgetsService.updateBudget(budgetObj);
+  } else {
+    createdBudget = await Services.budgetsService.createBudget(budgetObj);
+  }
 
   if (createdBudget) {
     emit('budgetCreated', createdBudget);

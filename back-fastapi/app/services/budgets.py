@@ -29,6 +29,7 @@ def create_new_budget(user_id: int,
         # Check if it's an update operation
         if hasattr(budget_dto, "id") and budget_dto.id:
             budget = db.query(Budget).filter(Budget.id == budget_dto.id).one_or_none()
+            budget.collected_amount = Decimal(0)
             if budget is None:
                 raise ValueError(f"Budget with id {budget_dto.id} not found.")
             logger.info(f"Updating budget with id: {budget_dto.id}")
@@ -58,6 +59,14 @@ def create_new_budget(user_id: int,
     fill_budget_with_existing_transactions(db, budget)
 
     return budget
+
+
+def update_budget(user_id: int,
+                      db: Session,
+                      budget_dto: NewBudgetInputSchema | EditBudgetInputSchema) -> Budget:
+    """ Update budget """
+    logger.info(f"Updating budget for user_id: {user_id}, budget_dto: {budget_dto.id}")
+    return create_new_budget(user_id, db, budget_dto)
 
 
 def fill_budget_with_existing_transactions(db: Session, budget: Budget):
