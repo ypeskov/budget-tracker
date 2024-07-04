@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 
-from sqlalchemy import String, DateTime, func, ForeignKey, Enum as SqlAlchemyEnum
+from sqlalchemy import String, Text, DateTime, func, ForeignKey, Enum as SqlAlchemyEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -23,7 +23,7 @@ class Budget(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
-    name: Mapped[str] = mapped_column(String(100), index=True)
+    name: Mapped[str] = mapped_column(Text, index=True)
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'), index=True)
     target_amount: Mapped[Decimal] = mapped_column(default=0)
     collected_amount: Mapped[Decimal] = mapped_column(default=0)
