@@ -61,7 +61,9 @@
     "accountActivated": "Рахунок активовано",
     "noData": "Немає даних",
     "hideEmptyCategories": "Приховати порожні категорії",
-    "selectCategories": "Вибрати категорії"
+    "selectCategories": "Вибрати категорії",
+    "collectedExpenses": "Накопичені витрати",
+    "targetBudget": "Цільовий бюджет"
   },
   "menu": {
     "home": "Початок",
