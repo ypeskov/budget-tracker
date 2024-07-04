@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, ref } from 'vue';
+import { defineProps, onBeforeMount, reactive, ref } from 'vue';
 
 import ModalWindow from '@/components/utils/ModalWindow.vue';
 import CategoriesFilter from '@/components/filter/CategoriesFilter.vue';
@@ -17,16 +17,21 @@ if (userCategories.length === 0) {
 }
 
 const budgetName = ref('');
-const currencyId = ref(0);
+let currency = reactive({});
 const targetAmount = ref(0);
 const period = ref('monthly');
 const repeat = ref(false);
 const startDate = ref('');
 const endDate = ref('');
 const comment = ref('');
+const currencies = reactive([]);
 
 let categories = reactive([]);
 const showCategoriesModal = ref(false);
+
+onBeforeMount(async () => {
+  currencies.push(...(await Services.currenciesService.getAllCurrencies()));
+});
 
 function openCategoriesModal() {
   showCategoriesModal.value = true;
@@ -51,11 +56,10 @@ function extractCategoriesIds(categories) {
 }
 
 function submitForm() {
-  const selectedCategories = `[${extractCategoriesIds(categories).join(',')}]`;
-
+  console.log(currency.id)
   Services.budgetsService.createBudget({
     name: budgetName.value,
-    currencyId: currencyId.value,
+    currencyId: currency.id,
     targetAmount: targetAmount.value,
     period: period.value,
     repeat: repeat.value,
@@ -80,22 +84,26 @@ function submitForm() {
       <form @submit.prevent="submitForm">
         <div class="mb-3">
           <label for="name" class="form-label">Name</label>
-          <input type="text" class="form-control" id="name" v-model="budgetName" maxlength="100">
+          <input type="text" class="form-control" id="name" v-model="budgetName" maxlength="100" required>
         </div>
 
         <div class="mb-3">
-          <label for="currency_id" class="form-label">Currency ID</label>
-          <input type="number" class="form-control" id="currency_id" v-model="currencyId">
+          <label for="currencyId" class="form-label">Select Currency</label>
+          <select id="currency_id" class="form-control" v-model="currency" required>
+            <option v-for="currency in currencies" :key="currency.id" :value="currency">
+              {{ currency.name }}
+            </option>
+          </select>
         </div>
 
         <div class="mb-3">
           <label for="target_amount" class="form-label">Target Amount</label>
-          <input type="number" class="form-control" id="target_amount" v-model="targetAmount" step="0.01">
+          <input type="number" class="form-control" id="target_amount" v-model="targetAmount" step="0.01" required>
         </div>
 
         <div class="mb-3">
           <label for="period" class="form-label">Period</label>
-          <select class="form-select" id="period" name="period">
+          <select class="form-select" id="period" v-model="period" required>
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
             <option value="monthly">Monthly</option>
@@ -111,12 +119,12 @@ function submitForm() {
 
         <div class="mb-3">
           <label for="start_date" class="form-label">Start Date</label>
-          <input type="date" class="form-control" id="start_date" v-model="startDate">
+          <input type="date" class="form-control" id="start_date" v-model="startDate" required>
         </div>
 
         <div class="mb-3">
           <label for="end_date" class="form-label">End Date</label>
-          <input type="date" class="form-control" id="end_date" v-model="endDate">
+          <input type="date" class="form-control" id="end_date" v-model="endDate" required>
         </div>
 
         <div class="mb-3">
