@@ -232,8 +232,6 @@ async function confirmDeleteBudget() {
 </template>
 
 <style scoped>
-@import '@/assets/common.scss';
-
 .form-label {
   font-weight: bold;
 }
