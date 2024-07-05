@@ -44,8 +44,8 @@ const collectedAmountClass = (budget) => {
       <div class="budget-item-container" @click="budgetSelected(budget)">
         <span class="data-cell col-4">{{ budget.name }} ({{ budget.currency.code }})</span>
         <span class="data-cell col-1 amount-cell"
-              :class="collectedAmountClass(budget)">{{ $n(budget.collectedAmount, 'decimal') }}</span>
-        <span class="data-cell col-1 amount-cell">{{ $n(budget.targetAmount, 'decimal') }}</span>
+              :class="collectedAmountClass(budget)">{{ parseInt(budget.collectedAmount, 10) }}</span>
+        <span class="data-cell col-1 amount-cell">{{ parseInt(budget.targetAmount, 10) }}</span>
         <span class="data-cell col-1 period-cell">{{ budget.period }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.startDate) }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.endDate) }}</span>
@@ -116,6 +116,11 @@ span.archived {
   .headers span, .date-cell, .period-cell {
     writing-mode: vertical-lr;
     white-space: nowrap;
+  }
+
+  .period-cell {
+    flex-direction: column;
+    align-items: center;
   }
 
   .budget-item-container span {
