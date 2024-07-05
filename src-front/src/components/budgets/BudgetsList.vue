@@ -113,7 +113,7 @@ span.archived {
 }
 
 @media (max-width: 768px) {
-  .headers span, .date-cell {
+  .headers span, .date-cell, .period-cell {
     writing-mode: vertical-lr;
     white-space: nowrap;
   }
