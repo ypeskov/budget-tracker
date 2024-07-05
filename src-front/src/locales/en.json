@@ -65,7 +65,8 @@
     "deleteBudget": "Delete budget",
     "areYouSureWantDeleteBudget": "Are you sure you want to delete this budget",
     "areYouSureWantArchiveBudget": "Are you sure you want to archive this budget",
-    "archiveBudget": "Archive budget"
+    "archiveBudget": "Archive budget",
+    "active": "Active"
   },
   "menu": {
     "home": "Home",

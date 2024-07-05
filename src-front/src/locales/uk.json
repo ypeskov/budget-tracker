@@ -67,7 +67,8 @@
     "deleteBudget": "Видалити бюджет",
     "areYouSureWantDeleteBudget": "Ви впевнені, що хочете видалити бюджет",
     "areYouSureWantArchiveBudget": "Ви впевнені, що хочете архівувати цей бюджет",
-    "archiveBudget": "Архівувати бюджет"
+    "archiveBudget": "Архівувати бюджет",
+    "active": "Активний"
   },
   "menu": {
     "home": "Початок",
