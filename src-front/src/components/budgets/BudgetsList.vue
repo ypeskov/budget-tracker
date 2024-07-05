@@ -46,10 +46,10 @@ const collectedAmountClass = (budget) => {
         <span class="data-cell col-1 amount-cell"
               :class="collectedAmountClass(budget)">{{ $n(budget.collectedAmount, 'decimal') }}</span>
         <span class="data-cell col-1 amount-cell">{{ $n(budget.targetAmount, 'decimal') }}</span>
-        <span class="data-cell col-1">{{ budget.period }}</span>
+        <span class="data-cell col-1 period-cell">{{ budget.period }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.startDate) }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.endDate) }}</span>
-        <span class="data-cell col-1">
+        <span class="data-cell col-1 status-cell">
           <span class="active" v-if="!budget.isArchived">&#x2713;</span>
           <span class="archived" v-else>&#x2718;</span>
         </span>
@@ -108,6 +108,9 @@ span.archived {
   color: red !important;
 }
 
+.period-cell, .status-cell {
+  text-align: center;
+}
 
 @media (max-width: 768px) {
   .headers span, .date-cell {
