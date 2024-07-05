@@ -35,7 +35,6 @@ const collectedAmountClass = (budget) => {
       <span class="col-4">{{ $t('message.name') }}</span>
       <span class="col-1">{{ $t('message.collectedExpenses') }}</span>
       <span class="col-1">{{ $t('message.targetBudget') }}</span>
-      <span class="col-1">{{ $t('message.period') }}</span>
       <span class="col-1">{{ $t('message.startDate') }}</span>
       <span class="col-1">{{ $t('message.endDate') }}</span>
       <span class="col-1">{{ $t('message.active') }}</span>
@@ -46,7 +45,6 @@ const collectedAmountClass = (budget) => {
         <span class="data-cell col-1 amount-cell"
               :class="collectedAmountClass(budget)">{{ parseInt(budget.collectedAmount, 10) }}</span>
         <span class="data-cell col-1 amount-cell">{{ parseInt(budget.targetAmount, 10) }}</span>
-        <span class="data-cell col-1 period-cell">{{ budget.period }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.startDate) }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.endDate) }}</span>
         <span class="data-cell col-1 status-cell">
