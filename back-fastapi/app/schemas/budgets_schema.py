@@ -49,6 +49,7 @@ class BudgetSchema(BaseModel):
     start_date: datetime
     end_date: datetime
     included_categories: str
+    is_archived: bool
     comment: str | None = None
     currency: CurrencySchema
 

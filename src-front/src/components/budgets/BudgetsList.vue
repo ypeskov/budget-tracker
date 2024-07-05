@@ -26,6 +26,7 @@ const budgetSelected = (budget) => {
       <span class="col-1">{{ $t('message.period') }}</span>
       <span class="col-1">{{ $t('message.startDate') }}</span>
       <span class="col-1">{{ $t('message.endDate') }}</span>
+      <span class="col-1">{{ $t('message.active') }}</span>
     </div>
     <div v-for="budget in props.budgets" :key="budget.id">
       <div class="budget-item-container" @click="budgetSelected(budget)">
@@ -35,6 +36,10 @@ const budgetSelected = (budget) => {
         <span class="data-cell col-1">{{ budget.period }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.startDate) }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.endDate) }}</span>
+        <span class="data-cell col-1">
+          <span class="active" v-if="!budget.isArchived">&#x2713;</span>
+          <span class="archived" v-else>&#x2718;</span>
+        </span>
       </div>
     </div>
   </div>
@@ -64,6 +69,16 @@ const budgetSelected = (budget) => {
   text-align: center;
 }
 
+span.active {
+  color: green !important;
+  font-weight: bold;
+}
+
+span.archived {
+  color: red !important;
+}
+
+
 @media (max-width: 768px) {
   .headers span, .date-cell {
     writing-mode: vertical-lr;
@@ -78,6 +93,7 @@ const budgetSelected = (budget) => {
     margin-bottom: 0.5rem;
   }
 }
+
 
 @media (max-width: 480px) {
   .data-cell {
