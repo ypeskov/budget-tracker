@@ -1,9 +1,13 @@
 <script setup>
 import { onBeforeMount, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { Services } from '@/services/servicesConfig';
+import { processError } from '@/errors/errorHandlers';
 import BudgetsList from '@/components/budgets/BudgetsList.vue';
 import BudgetNewComponent from '@/components/budgets/BudgetNewComponent.vue';
+
+const router = useRouter();
 
 let budgets = reactive([]);
 let currentBudget = reactive({});
@@ -13,9 +17,13 @@ onBeforeMount(async () => {
 });
 
 const fetchBudgets = async () => {
-  const response = await Services.budgetsService.getUserBudgets();
-  budgets.length = 0;
-  budgets.push(...response);
+  try {
+    const response = await Services.budgetsService.getUserBudgets();
+    budgets.length = 0;
+    budgets.push(...response);
+  } catch (e) {
+    await processError(e, router);
+  }
 };
 
 const showBudgetModal = ref(false);
