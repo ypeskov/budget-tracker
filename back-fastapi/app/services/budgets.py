@@ -158,3 +158,20 @@ def delete_budget(user_id: int, db: Session, budget_id: int):
     logger.info(f"Deleted budget with id: {budget_id}")
 
     return budget
+
+
+def archive_budget(user_id: int, db: Session, budget_id: int):
+    """ Archive budget """
+    logger.info(f"Archiving budget with id: {budget_id}")
+
+    budget = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == user_id).one_or_none()
+    if budget is None:
+        logger.error(f"Budget with id {budget_id} not found for user_id: {user_id}")
+        raise NotFoundError(f"Budget with id {budget_id} not found.")
+
+    budget.is_archived = True
+    db.commit()
+    db.refresh(budget)
+    logger.info(f"Archived budget with id: {budget_id}")
+
+    return budget

@@ -65,7 +65,9 @@
     "collectedExpenses": "Накопичені витрати",
     "targetBudget": "Цільовий бюджет",
     "deleteBudget": "Видалити бюджет",
-    "areYouSureWantDeleteBudget": "Ви впевнені, що хочете видалити бюджет?"
+    "areYouSureWantDeleteBudget": "Ви впевнені, що хочете видалити бюджет",
+    "areYouSureWantArchiveBudget": "Ви впевнені, що хочете архівувати цей бюджет",
+    "archiveBudget": "Архівувати бюджет"
   },
   "menu": {
     "home": "Початок",
@@ -96,6 +98,7 @@
     "balanceReport": "Звіт по балансу",
     "baseCurrency": "Базова валюта",
     "expensesReport": "Звіт по витратам",
-    "newBudget": "Новий бюджет"
+    "newBudget": "Новий бюджет",
+    "archive": "Архівувати"
   }
 }

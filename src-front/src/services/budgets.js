@@ -40,4 +40,12 @@ export class BudgetsService {
       method: 'DELETE',
     }, { userService: this.userService });
   }
+
+  async archiveBudget(budgetId) {
+    let budgetUrl = `${budgetsPrefix}/${budgetId}/archive/`;
+
+    return await request(budgetUrl, {
+      method: 'PUT',
+    }, { userService: this.userService });
+  }
 }

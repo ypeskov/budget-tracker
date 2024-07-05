@@ -6,7 +6,7 @@ from app.database import get_db
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
 from app.schemas.budgets_schema import NewBudgetInputSchema, BudgetSchema, EditBudgetInputSchema
-from app.services.budgets import create_new_budget, get_user_budgets, update_budget, delete_budget
+from app.services.budgets import create_new_budget, get_user_budgets, update_budget, delete_budget, archive_budget
 from app.services.errors import NotFoundError
 
 ic.configureOutput(includeContext=True)
@@ -72,3 +72,18 @@ def delete(request: Request, id: int, db: Session = Depends(get_db)):
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error deleting budget')
+
+
+@router.put('/{budget_id}/archive/')
+def archive(request: Request, budget_id: int, db: Session = Depends(get_db)):
+    """ Archive budget """
+    logger.info(f"Archiving budget id: {budget_id} for user_id: {request.state.user['id']}")
+    try:
+        archive_budget(user_id=request.state.user['id'], db=db, budget_id=budget_id)
+        return {"message": f"Budget with id {budget_id} archived"}
+    except NotFoundError as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Budget not found')
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error archiving budget')
