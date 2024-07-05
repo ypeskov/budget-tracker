@@ -3,14 +3,17 @@ import { defineProps, onBeforeMount, reactive, ref, watch } from 'vue';
 
 import ModalWindow from '@/components/utils/ModalWindow.vue';
 import CategoriesFilter from '@/components/filter/CategoriesFilter.vue';
+import { processError } from '@/errors/errorHandlers';
 import { useCategoriesStore } from '@/stores/categories';
 import { Services } from '@/services/servicesConfig';
+import { useRouter } from 'vue-router';
 
 const props = defineProps({
   closeModal: Function,
   editBudget: Object,
 });
 
+const router = useRouter();
 const isEdit = !!props.editBudget?.id;
 
 const emit = defineEmits(['budgetCreated', 'budgetUpdated', 'budgetDeleted']);
@@ -34,7 +37,11 @@ const showDeleteModal = ref(false);
 onBeforeMount(async () => {
   userCategories = useCategoriesStore().categories;
   if (userCategories.length === 0) {
-    await Services.categoriesService.getUserCategories();
+    try {
+      await Services.categoriesService.getUserCategories();
+    } catch (e) {
+      await processError(e, router);
+    }
     userCategories = useCategoriesStore().categories;
   }
   currencies.push(...(await Services.currenciesService.getAllCurrencies()));
