@@ -63,8 +63,8 @@ def create_new_budget(user_id: int,
 
 
 def update_budget(user_id: int,
-                      db: Session,
-                      budget_dto: NewBudgetInputSchema | EditBudgetInputSchema) -> Budget:
+                  db: Session,
+                  budget_dto: NewBudgetInputSchema | EditBudgetInputSchema) -> Budget:
     """ Update budget """
     logger.info(f"Updating budget for user_id: {user_id}, budget_dto: {budget_dto.id}")
     return create_new_budget(user_id, db, budget_dto)
@@ -104,7 +104,9 @@ def update_budget_with_amount(db: Session, transaction: Transaction):
     """ Update collected amount for all applicable budgets """
     logger.info(f"Updating collected amount for all applicable budgets for transaction: {transaction}")
 
-    user_budgets = db.query(Budget).filter(Budget.user_id == transaction.user_id).all()
+    user_budgets = (db.query(Budget)
+                    .filter(Budget.user_id == transaction.user_id, Budget.is_archived == False)
+                    .all())
     for budget in user_budgets:
         if budget.included_categories:
             included_categories = [int(category_id) for category_id in budget.included_categories.split(",")]
