@@ -63,7 +63,9 @@
     "hideEmptyCategories": "Hide empty categories",
     "selectCategories": "Select categories",
     "deleteBudget": "Delete budget",
-    "areYouSureWantDeleteBudget": "Are you sure you want to delete this budget?"
+    "areYouSureWantDeleteBudget": "Are you sure you want to delete this budget",
+    "areYouSureWantArchiveBudget": "Are you sure you want to archive this budget",
+    "archiveBudget": "Archive budget"
   },
   "menu": {
     "home": "Home",
@@ -96,6 +98,7 @@
     "balanceReport": "Balance report",
     "baseCurrency": "Base currency",
     "expensesReport": "Expenses report",
-    "newBudget": "New budget"
+    "newBudget": "New budget",
+    "archive": "Archive"
   }
 }

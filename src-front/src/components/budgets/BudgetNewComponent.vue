@@ -16,7 +16,7 @@ const props = defineProps({
 const router = useRouter();
 const isEdit = !!props.editBudget?.id;
 
-const emit = defineEmits(['budgetCreated', 'budgetUpdated', 'budgetDeleted']);
+const emit = defineEmits(['budgetCreated', 'budgetUpdated', 'budgetDeleted', 'budgetArchived']);
 
 let userCategories = reactive([]);
 
@@ -33,6 +33,7 @@ const currencies = reactive([]);
 let categories = reactive([]);
 const showCategoriesModal = ref(false);
 const showDeleteModal = ref(false);
+const showArchiveModal = ref(false);
 
 onBeforeMount(async () => {
   userCategories = useCategoriesStore().categories;
@@ -45,7 +46,7 @@ onBeforeMount(async () => {
     userCategories = useCategoriesStore().categories;
   }
   currencies.push(...(await Services.currenciesService.getAllCurrencies()));
-  getCategoriesFromUserCategories(props.editBudget?.includedCategories ?? "");
+  getCategoriesFromUserCategories(props.editBudget?.includedCategories ?? '');
 });
 
 function getCategoriesFromUserCategories(categoriesIds) {
@@ -120,12 +121,26 @@ async function deleteBudget() {
   if (isEdit) {
     await Services.budgetsService.deleteBudget(props.editBudget.id);
     emit('budgetDeleted', props.editBudget.id);
+    showDeleteModal.value = false;
     props.closeModal();
   }
 }
 
 async function confirmDeleteBudget() {
   showDeleteModal.value = true;
+}
+
+async function archiveBudget() {
+  if (isEdit) {
+    await Services.budgetsService.archiveBudget(props.editBudget.id);
+    emit('budgetArchived', props.editBudget.id);
+    showArchiveModal.value = false;
+    props.closeModal();
+  }
+}
+
+async function confirmArchiveBudget() {
+  showArchiveModal.value = true;
 }
 </script>
 
@@ -210,6 +225,9 @@ async function confirmDeleteBudget() {
 
         <div class="manage-buttons">
           <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="button"
+                  class="btn btn-warning"
+                  @click.prevent="confirmArchiveBudget">{{ $t('buttons.archive') }}</button>
           <button type="button" class="btn btn-danger" @click="confirmDeleteBudget">{{ $t('buttons.delete') }}</button>
         </div>
 
@@ -224,6 +242,19 @@ async function confirmDeleteBudget() {
           <p>{{ $t('message.areYouSureWantDeleteBudget') }}?</p>
           <div class="row gap-2 justify-content-center">
             <button class="btn btn-danger col-auto" @click="deleteBudget">{{ $t('buttons.delete') }}</button>
+          </div>
+        </template>
+      </ModalWindow>
+
+      <ModalWindow :close-modal="() => showArchiveModal = false" v-if="showArchiveModal">
+        <template #header>
+          <h2>{{ $t('message.archiveBudget') }}</h2>
+        </template>
+
+        <template #main>
+          <p>{{ $t('message.areYouSureWantArchiveBudget') }}?</p>
+          <div class="row gap-2 justify-content-center">
+            <button class="btn btn-danger col-auto" @click="archiveBudget">{{ $t('buttons.archive') }}</button>
           </div>
         </template>
       </ModalWindow>
