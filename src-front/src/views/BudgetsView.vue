@@ -78,6 +78,6 @@ const editBudget = (budget) => {
   </main>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 
 </style>
