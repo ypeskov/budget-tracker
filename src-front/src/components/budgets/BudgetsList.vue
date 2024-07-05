@@ -108,7 +108,7 @@ span.archived {
   color: red !important;
 }
 
-.period-cell, .status-cell {
+.period-cell, .status-cell, .date-cell {
   text-align: center;
 }
 
