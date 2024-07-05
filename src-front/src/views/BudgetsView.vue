@@ -56,7 +56,7 @@ const editBudget = (budget) => {
   <main>
     <div class="container">
       <div class="row">
-        <div class="col-2">
+        <div class="col-3">
           <button class="btn btn-primary w-100"
                   @click="startCreateBudget">{{ $t('buttons.newBudget') }}
           </button>
