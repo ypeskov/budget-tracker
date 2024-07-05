@@ -29,6 +29,7 @@ const currencies = reactive([]);
 
 let categories = reactive([]);
 const showCategoriesModal = ref(false);
+const showDeleteModal = ref(false);
 
 onBeforeMount(async () => {
   userCategories = useCategoriesStore().categories;
@@ -115,6 +116,10 @@ async function deleteBudget() {
     props.closeModal();
   }
 }
+
+async function confirmDeleteBudget() {
+  showDeleteModal.value = true;
+}
 </script>
 
 <template>
@@ -198,10 +203,23 @@ async function deleteBudget() {
 
         <div class="manage-buttons">
           <button type="submit" class="btn btn-primary">Submit</button>
-          <button type="button" class="btn btn-danger" @click="deleteBudget">{{ $t('buttons.delete') }}</button>
+          <button type="button" class="btn btn-danger" @click="confirmDeleteBudget">{{ $t('buttons.delete') }}</button>
         </div>
 
       </form>
+
+      <ModalWindow :close-modal="() => showDeleteModal = false" v-if="showDeleteModal">
+        <template #header>
+          <h2>{{ $t('message.deleteBudget') }}?</h2>
+        </template>
+
+        <template #main>
+          <p>{{ $t('message.areYouSureWantDeleteBudget') }}?</p>
+          <div class="row gap-2 justify-content-center">
+            <button class="btn btn-danger col-auto" @click="deleteBudget">{{ $t('buttons.delete') }}</button>
+          </div>
+        </template>
+      </ModalWindow>
     </template>
   </ModalWindow>
 </template>

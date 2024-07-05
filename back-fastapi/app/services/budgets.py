@@ -138,6 +138,9 @@ def get_user_budgets(user_id: int, db: Session):
         .all()
     )
 
+    for budget in budgets:
+        budget.end_date -= timedelta(days=1)  # subtract 1 day to exclude the full end date
+
     return budgets
 
 

@@ -63,7 +63,9 @@
     "hideEmptyCategories": "Приховати порожні категорії",
     "selectCategories": "Вибрати категорії",
     "collectedExpenses": "Накопичені витрати",
-    "targetBudget": "Цільовий бюджет"
+    "targetBudget": "Цільовий бюджет",
+    "deleteBudget": "Видалити бюджет",
+    "areYouSureWantDeleteBudget": "Ви впевнені, що хочете видалити бюджет?"
   },
   "menu": {
     "home": "Початок",
