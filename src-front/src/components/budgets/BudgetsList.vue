@@ -15,6 +15,18 @@ const formatDate = (date) => {
 const budgetSelected = (budget) => {
   emit('budgetSelected', budget);
 };
+
+const collectedAmountClass = (budget) => {
+  const collectedAmountPercentage = (budget.collectedAmount / budget.targetAmount) * 100;
+  let commonClass = 'amount-cell';
+  if (collectedAmountPercentage < 70) {
+    return commonClass + ' low-risk';
+  } else if (collectedAmountPercentage < 100) {
+    return commonClass + ' medium-risk';
+  } else {
+    return commonClass + ' high-risk';
+  }
+};
 </script>
 
 <template>
@@ -31,7 +43,8 @@ const budgetSelected = (budget) => {
     <div v-for="budget in props.budgets" :key="budget.id">
       <div class="budget-item-container" @click="budgetSelected(budget)">
         <span class="data-cell col-4">{{ budget.name }} ({{ budget.currency.code }})</span>
-        <span class="data-cell col-1">{{ $n(budget.collectedAmount, 'decimal') }}</span>
+        <span class="data-cell col-1"
+              :class="collectedAmountClass(budget)">{{ $n(budget.collectedAmount, 'decimal') }}</span>
         <span class="data-cell col-1">{{ $n(budget.targetAmount, 'decimal') }}</span>
         <span class="data-cell col-1">{{ budget.period }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.startDate) }}</span>
@@ -67,6 +80,23 @@ const budgetSelected = (budget) => {
   color: #0000ff;
   background-color: #f0f0f0;
   text-align: center;
+}
+
+.amount-cell {
+  text-align: right;
+  font-weight: bold;
+}
+
+.low-risk {
+  color: rgba(72, 234, 12, 0.83);
+}
+
+.medium-risk {
+  color: orange;
+}
+
+.high-risk {
+  color: #781919;
 }
 
 span.active {
