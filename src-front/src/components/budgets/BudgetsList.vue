@@ -18,7 +18,7 @@ const budgetSelected = (budget) => {
 
 const collectedAmountClass = (budget) => {
   const collectedAmountPercentage = (budget.collectedAmount / budget.targetAmount) * 100;
-  let commonClass = 'amount-cell';
+  let commonClass = '';
   if (collectedAmountPercentage < 70) {
     return commonClass + ' low-risk';
   } else if (collectedAmountPercentage < 100) {
@@ -43,9 +43,9 @@ const collectedAmountClass = (budget) => {
     <div v-for="budget in props.budgets" :key="budget.id">
       <div class="budget-item-container" @click="budgetSelected(budget)">
         <span class="data-cell col-4">{{ budget.name }} ({{ budget.currency.code }})</span>
-        <span class="data-cell col-1"
+        <span class="data-cell col-1 amount-cell"
               :class="collectedAmountClass(budget)">{{ $n(budget.collectedAmount, 'decimal') }}</span>
-        <span class="data-cell col-1">{{ $n(budget.targetAmount, 'decimal') }}</span>
+        <span class="data-cell col-1 amount-cell">{{ $n(budget.targetAmount, 'decimal') }}</span>
         <span class="data-cell col-1">{{ budget.period }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.startDate) }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.endDate) }}</span>
