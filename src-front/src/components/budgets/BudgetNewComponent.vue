@@ -6,7 +6,7 @@ import CategoriesFilter from '@/components/filter/CategoriesFilter.vue';
 import { processError } from '@/errors/errorHandlers';
 import { useCategoriesStore } from '@/stores/categories';
 import { Services } from '@/services/servicesConfig';
-import { useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
 const props = defineProps({
   closeModal: Function,
@@ -148,7 +148,21 @@ async function confirmArchiveBudget() {
   <ModalWindow :close-modal="closeModal">
     <template #header>
       <div class="row">
-        <h2>Create New Budget</h2>
+        <div class="header-container">
+          <h2>{{ $t('message.budgetDetails') }}</h2>
+          <span>
+            <RouterLink :to="{
+              name: 'transactions',
+              query: {
+                categories: categories.map((category) => category.id).join(','),
+                startDate: startDate,
+                endDate: endDate,
+              }
+            }">
+              <button class="btn btn-secondary">{{ $t('menu.transactions') }}</button>
+            </RouterLink>
+          </span>
+        </div>
       </div>
     </template>
 
@@ -227,7 +241,8 @@ async function confirmArchiveBudget() {
           <button type="submit" class="btn btn-primary">Submit</button>
           <button type="button"
                   class="btn btn-warning"
-                  @click.prevent="confirmArchiveBudget">{{ $t('buttons.archive') }}</button>
+                  @click.prevent="confirmArchiveBudget">{{ $t('buttons.archive') }}
+          </button>
           <button type="button" class="btn btn-danger" @click="confirmDeleteBudget">{{ $t('buttons.delete') }}</button>
         </div>
 
@@ -263,6 +278,11 @@ async function confirmArchiveBudget() {
 </template>
 
 <style scoped>
+.header-container {
+  display: flex;
+  justify-content: space-between;
+}
+
 .form-label {
   font-weight: bold;
 }
