@@ -13,6 +13,7 @@ from app.services.exchange_rates import update_exchange_rates as update_exchange
 from app.tasks.errors import BackupPostgresDbError
 from app.utils.db.backup import backup_postgres_db
 from app.utils.email import send_html_email
+from app.services.budgets import put_outdated_budgets_to_archive
 
 settings = Settings()
 
@@ -111,3 +112,14 @@ def send_activation_email(task, user_id: int):
     except Exception as e:
         logger.exception(e)
         task.retry(exc=e)
+
+
+@celery_app.task(bind=True, max_retries=10, default_retry_delay=600)
+def run_daily_budgets_processing(task):
+    logger.info('Daily budgets processing is requested')
+
+    db = next(get_db())
+    put_outdated_budgets_to_archive(db)
+
+    return True
+

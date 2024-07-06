@@ -40,4 +40,8 @@ celery_app.conf.beat_schedule = {
         "schedule": crontab(hour=db_backup_hour,
                             minute=db_backup_minute),
     },
+    "put-outdated-budgets-to-archive": {
+        "task": "app.tasks.tasks.put_outdated_budgets_to_archive",
+        "schedule": crontab(hour=0, minute=1),
+    },
 }
