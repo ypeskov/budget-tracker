@@ -6,8 +6,10 @@ from app.database import get_db
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
 from app.schemas.budgets_schema import NewBudgetInputSchema, BudgetSchema, EditBudgetInputSchema
-from app.services.budgets import create_new_budget, get_user_budgets, update_budget, delete_budget, archive_budget
+from app.services.budgets import (create_new_budget, get_user_budgets, update_budget, delete_budget,
+                                  archive_budget, put_outdated_budgets_to_archive)
 from app.services.errors import NotFoundError
+from app.tasks.tasks import run_daily_budgets_processing
 
 ic.configureOutput(includeContext=True)
 
@@ -87,3 +89,13 @@ def archive(request: Request, budget_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error archiving budget')
+
+
+@router.get('/daily-processing/')
+def daily_processing(db: Session = Depends(get_db)):
+    """ Daily processing """
+    #  disable this endpoint in production
+    return {"message": "Daily processing is disabled in production"}
+    logger.info(f"Daily processing")
+    run_daily_budgets_processing.delay()
+    return {"message": "Daily processing initiated"}

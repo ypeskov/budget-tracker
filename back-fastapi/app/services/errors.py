@@ -28,3 +28,7 @@ class UserNotActivated(Exception):
 
 class NotFoundError(Exception):
     pass
+
+
+class InvalidPeriod(Exception):
+    pass

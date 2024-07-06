@@ -1,16 +1,17 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from decimal import Decimal
 
 from icecream import ic
 from sqlalchemy.orm import Session, joinedload
+import pendulum
 
 from app.logger_config import logger
-from app.models.Budget import Budget
+from app.models.Budget import Budget, PeriodEnum
 from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
 from app.schemas.budgets_schema import NewBudgetInputSchema, EditBudgetInputSchema
 from app.services.CurrencyProcessor import calc_amount
-from app.services.errors import NotFoundError
+from app.services.errors import NotFoundError, InvalidPeriod
 
 ic.configureOutput(includeContext=True)
 
@@ -178,3 +179,70 @@ def archive_budget(user_id: int, db: Session, budget_id: int):
     logger.info(f"Archived budget with id: {budget_id}")
 
     return budget
+
+
+def put_outdated_budgets_to_archive(db: Session):
+    """ Put budget to archive """
+    logger.info("Putting outdated budgets to archive")
+
+    now = datetime.now()
+    outdated_budgets: list[Budget] = (
+        db.query(Budget).filter(Budget.end_date < now, Budget.is_archived.is_(False)).all())
+
+    archiving_budgets = []
+    for budget in outdated_budgets:
+        if budget.repeat:
+            create_copy_of_outdated_budget(db, budget)
+        budget.is_archived = True
+        db.commit()
+        archiving_budgets.append(budget.id)
+
+    logger.info(f"Archived budgets: {archiving_budgets}")
+
+    return archiving_budgets
+
+
+def create_copy_of_outdated_budget(db: Session, budget: Budget):
+    """ Create copy of outdated budget """
+    logger.info(f"Creating copy of outdated budget: {budget.id}")
+
+    end_date = pendulum.instance(budget.end_date)
+
+    if budget.period == PeriodEnum.DAILY:
+        new_start_date = end_date
+        new_end_date = end_date.add(days=1)
+    elif budget.period == PeriodEnum.WEEKLY:
+        new_start_date = end_date
+        new_end_date = end_date.add(weeks=1)
+    elif budget.period == PeriodEnum.MONTHLY:
+        new_start_date = end_date
+        new_end_date = end_date.add(months=1)
+    elif budget.period == PeriodEnum.YEARLY:
+        new_start_date = end_date
+        new_end_date = end_date.add(years=1)
+    else:
+        raise InvalidPeriod(f"Invalid period: {budget.period}")
+
+    new_budget = Budget(
+        user_id=budget.user_id,
+        name=f"{budget.name} (copy)",
+        currency_id=budget.currency_id,
+        target_amount=budget.target_amount,
+        period=budget.period,
+        repeat=budget.repeat,
+        start_date=new_start_date,
+        end_date=new_end_date,
+        included_categories=budget.included_categories,
+        comment=budget.comment,
+        is_deleted=False,
+        is_archived=False,
+        collected_amount=Decimal(0),
+    )
+
+    db.add(new_budget)
+    db.commit()
+    db.refresh(new_budget)
+
+    logger.info(f"Created copy of outdated budget: {budget.id} as new budget: {new_budget.id}")
+
+    return new_budget

@@ -8,9 +8,7 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.database import Base
 from app.models.User import User
 from app.models.UserCategory import UserCategory
-
-if TYPE_CHECKING:  # pragma: no cover
-    from app.models.Account import Account
+from app.models.Account import Account
 
 LABEL_MAX_LENGTH = 50
 
@@ -35,7 +33,7 @@ class Transaction(Base):
     date_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True, nullable=True)
 
     user: Mapped[User] = relationship(backref='transactions')
-    account: Mapped['Account'] = relationship('Account', foreign_keys="Transaction.account_id")
+    account: Mapped[Account] = relationship('Account', foreign_keys="Transaction.account_id")
     category: Mapped[UserCategory] = relationship()
     linked_transaction: Mapped['Transaction'] = relationship('Transaction',
                                                              foreign_keys='Transaction.linked_transaction_id',
