@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 
 from app.config import Settings
+from app.logger_config import logger
 
 settings = Settings()
 
@@ -24,11 +25,15 @@ conf = ConnectionConfig(
 async def send_html_email(subject: str,
                           recipients: list[str],
                           template_name: str,
-                          template_body: dict):
+                          template_body: dict,
+                          filename: str = None):
+
     message = MessageSchema(subject=subject,
                             recipients=recipients,
                             template_body=template_body,
-                            subtype=MessageType.html)
+                            subtype=MessageType.html,
+                            attachments=[filename] if filename else None)
+    logger.info(f'Sending backup file {filename} to {recipients}...')
 
     fm = FastMail(conf)
     await fm.send_message(message, template_name=template_name)

@@ -75,14 +75,20 @@ def make_db_backup(task):
 
 
 @celery_app.task(bind=True, max_retries=10, default_retry_delay=600)
-def send_email(task, subject: str, recipients: list[str], template_name: str, template_body: dict):
+def send_email(task,
+               subject: str,
+               recipients: list[str],
+               template_name: str,
+               template_body: dict,
+               filename: str = None):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
         loop.run_until_complete(send_html_email(subject=subject,
                                                 recipients=recipients,
                                                 template_name=template_name,
-                                                template_body=template_body))
+                                                template_body=template_body,
+                                                filename=filename))
 
         return True
     except Exception as e:
