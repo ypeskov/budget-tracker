@@ -16,13 +16,14 @@ def backup_postgres_db(env_name: str,
                        dbname: str,
                        user: str,
                        password: str,
-                       backup_dir: Path) -> bool:
+                       backup_dir: Path) -> str:
     """ Create a backup of a PostgreSQL database """
     if not os.path.exists(backup_dir):
         os.makedirs(backup_dir)
 
     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    backup_file = f"{backup_dir}/{env_name}-{dbname}_{timestamp}.sql"
+    filename = f"{env_name}-{dbname}_{timestamp}.sql"
+    backup_file = f"{backup_dir}/{filename}"
 
     command = [
         "pg_dump",
@@ -46,7 +47,7 @@ def backup_postgres_db(env_name: str,
                        text=True)
         logger.info(f"Backup of DB [{dbname}] is successfully created: {backup_file}")
 
-        return True
+        return backup_file
     except subprocess.CalledProcessError as e:
         logger.error(f"Error creating backup of DB [{dbname}]: {e.stderr}")
         raise e

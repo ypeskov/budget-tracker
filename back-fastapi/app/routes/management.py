@@ -31,13 +31,13 @@ async def backup_db():
     environment = settings.ENVIRONMENT
 
     try:
-        backup_postgres_db(env_name=environment,
-                           host=settings.DB_HOST,
-                           port=settings.DB_PORT,
-                           dbname=settings.DB_NAME,
-                           user=settings.DB_USER,
-                           password=settings.DB_PASSWORD,
-                           backup_dir=backup_dir)
+        filename = backup_postgres_db(env_name=environment,
+                                      host=settings.DB_HOST,
+                                      port=settings.DB_PORT,
+                                      dbname=settings.DB_NAME,
+                                      user=settings.DB_USER,
+                                      password=settings.DB_PASSWORD,
+                                      backup_dir=backup_dir)
 
         send_email.delay(subject='Database backup created',
                          recipients=settings.ADMINS_NOTIFICATION_EMAILS,
@@ -45,7 +45,8 @@ async def backup_db():
                          template_body={
                              'env_name': settings.ENVIRONMENT,
                              'db_name': settings.DB_NAME,
-                         })
+                         },
+                         filename=filename)
 
         return {'message': 'Backup of the database is successfully created'}
     except Exception as e:
