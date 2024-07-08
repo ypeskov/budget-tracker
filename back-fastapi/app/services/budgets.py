@@ -101,7 +101,7 @@ def fill_budget_with_existing_transactions(db: Session, budget: Budget):
     logger.info(f"Filled budget with existing transactions for budget: {budget.id}")
 
 
-def update_budget_with_amount(db: Session, transaction: Transaction):
+def update_budget_with_amount(db: Session, transaction: Transaction, adjusted_amount: Decimal):
     """ Update collected amount for all applicable budgets """
     logger.info(f"Updating collected amount for all applicable budgets for transaction: {transaction}")
 
@@ -116,7 +116,7 @@ def update_budget_with_amount(db: Session, transaction: Transaction):
                 continue
 
         if budget.start_date <= transaction.date_time <= budget.end_date:
-            adjusted_amount: Decimal = calc_amount(transaction.amount,
+            adjusted_amount: Decimal = calc_amount(adjusted_amount,
                                                    transaction.account.currency.code,
                                                    transaction.date_time.date(),
                                                    budget.currency.code,
