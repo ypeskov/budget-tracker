@@ -108,7 +108,10 @@ class TransactionManager:
 
         #  update budgets if transaction is not transfer
         if not self._transaction.is_transfer and not self._transaction.is_income:
-            adjusted_amount = self._transaction.amount - self.prev_transaction_state.amount
+            if self.is_update:
+                adjusted_amount = self._transaction.amount - self.prev_transaction_state.amount
+            else:
+                adjusted_amount = self._transaction.amount
             try:
                 update_budget_with_amount(self.db, self._transaction, adjusted_amount)
             except Exception as e:
