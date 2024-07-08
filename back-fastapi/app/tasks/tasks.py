@@ -9,11 +9,11 @@ from app.database import get_db
 from app.logger_config import logger
 from app.models.ActivationToken import ActivationToken
 from app.models.User import User
+from app.services.budgets import put_outdated_budgets_to_archive
 from app.services.exchange_rates import update_exchange_rates as update_exchange_rates
 from app.tasks.errors import BackupPostgresDbError
 from app.utils.db.backup import backup_postgres_db
 from app.utils.email import send_html_email
-from app.services.budgets import put_outdated_budgets_to_archive
 
 settings = Settings()
 
@@ -49,13 +49,13 @@ def make_db_backup(task):
     environment = settings.ENVIRONMENT
 
     try:
-        backup_postgres_db(env_name=environment,
-                           host=settings.DB_HOST,
-                           port=settings.DB_PORT,
-                           dbname=settings.DB_NAME,
-                           user=settings.DB_USER,
-                           password=settings.DB_PASSWORD,
-                           backup_dir=backup_dir)
+        filename = backup_postgres_db(env_name=environment,
+                                       host=settings.DB_HOST,
+                                       port=settings.DB_PORT,
+                                       dbname=settings.DB_NAME,
+                                       user=settings.DB_USER,
+                                       password=settings.DB_PASSWORD,
+                                       backup_dir=backup_dir)
 
         send_email.delay(subject='Database backup created',
                          recipients=settings.ADMINS_NOTIFICATION_EMAILS,
@@ -63,7 +63,9 @@ def make_db_backup(task):
                          template_body={
                              'env_name': settings.ENVIRONMENT,
                              'db_name': settings.DB_NAME,
-                         })
+                         },
+                         filename=filename
+                         )
 
         return {'message': 'Backup of the database is successfully created'}
     except BackupPostgresDbError as e:
@@ -128,4 +130,3 @@ def run_daily_budgets_processing(task):
     put_outdated_budgets_to_archive(db)
 
     return True
-
