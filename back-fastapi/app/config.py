@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     DAILY_DB_BACKUP_HOUR: str = '14'
     DAILY_DB_BACKUP_MINUTE: str = '00'
 
+    DAILY_BUDGETS_PROCESSING_HOUR: str = '00'
+    DAILY_BUDGETS_PROCESSING_MINUTE: str = '01'
+
     DB_BACKUP_DIR: str = 'backup'
 
     ADMINS_NOTIFICATION_EMAILS: list[str] = Field(..., alias='ADMINS_NOTIFICATION_EMAILS')

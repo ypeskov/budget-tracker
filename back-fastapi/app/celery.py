@@ -29,6 +29,9 @@ update_exchange_rates_minute = settings.DAILY_UPDATE_EXCHANGE_RATES_MINUTE
 db_backup_hour = settings.DAILY_DB_BACKUP_HOUR
 db_backup_minute = settings.DAILY_DB_BACKUP_MINUTE
 
+budgets_processing_hour = settings.DAILY_BUDGETS_PROCESSING_HOUR
+budgets_processing_minute = settings.DAILY_BUDGETS_PROCESSING_MINUTE
+
 celery_app.conf.beat_schedule = {
     "update-exchange-rates-daily": {
         "task": "app.tasks.tasks.daily_update_exchange_rates",
@@ -41,7 +44,7 @@ celery_app.conf.beat_schedule = {
                             minute=db_backup_minute),
     },
     "put-outdated-budgets-to-archive": {
-        "task": "app.tasks.tasks.put_outdated_budgets_to_archive",
-        "schedule": crontab(hour=0, minute=1),
+        "task": "app.tasks.tasks.run_daily_budgets_processing",
+        "schedule": crontab(hour=budgets_processing_hour, minute=budgets_processing_minute),
     },
 }
