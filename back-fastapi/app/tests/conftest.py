@@ -34,6 +34,8 @@ from app.services.auth import create_users as create_users_service, get_jwt_toke
 from app.tests.data.auth_data import main_test_user
 from app.tests.data.accounts_data import test_accounts_data
 
+ic.configureOutput(includeContext=True)
+
 settings = Settings()
 
 test_log_file = f"logs/{settings.TEST_LOG_FILE}"

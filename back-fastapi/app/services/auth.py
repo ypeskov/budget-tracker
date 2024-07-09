@@ -1,10 +1,11 @@
 import secrets
 from datetime import timedelta, datetime, UTC
+import bcrypt
 
 import jwt
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
+
 
 from icecream import ic
 
@@ -19,9 +20,6 @@ from app.tasks.tasks import send_activation_email
 from app.services.errors import UserNotActivated
 
 ic.configureOutput(includeContext=True)
-
-# Password hashing configuration
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Secret key for JWT generation
 SECRET_KEY = "your-secret-key"
@@ -68,12 +66,12 @@ def create_users(user_request: UserRegistration, db: Session):
 
     currency = db.query(Currency).filter_by(code=DEFAULT_CURRENCY_CODE).one()
 
-    hashed_password = pwd_context.hash(user_request.password)
+    hashed_password = bcrypt.hashpw(user_request.password.encode('utf-8'), bcrypt.gensalt())
     new_user = User(
         email=user_request.email,
         first_name=user_request.first_name,
         last_name=user_request.last_name,
-        password_hash=hashed_password,
+        password_hash=hashed_password.decode('utf-8'),
         base_currency=currency,
         is_active=False)
     if user_request.id is not None:
@@ -123,7 +121,7 @@ def get_jwt_token(user_login: UserLoginSchema, db: Session):
     if not user.is_active:
         raise UserNotActivated
 
-    if not pwd_context.verify(user_login.password, user.password_hash):
+    if not bcrypt.checkpw(user_login.password.encode('utf-8'), user.password_hash.encode('utf-8')):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
