@@ -17,7 +17,7 @@ from app.models.ActivationToken import ActivationToken
 from app.schemas.user_schema import UserRegistration, UserLoginSchema
 from app.services.user_settings import generate_initial_settings
 from app.tasks.tasks import send_activation_email
-from app.services.errors import UserNotActivated
+from app.services.errors import UserNotActivated, NotFoundError
 
 ic.configureOutput(includeContext=True)
 
@@ -60,6 +60,7 @@ def copy_all_categories(user_id: int, db: Session):
 def create_users(user_request: UserRegistration, db: Session):
     existing_user = db.query(User).filter(
         User.email == user_request.email).first()  # type: ignore
+
     if existing_user:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                             detail="User with this email already exists")
@@ -115,8 +116,9 @@ def get_jwt_token(user_login: UserLoginSchema, db: Session):
     Authenticate user and generate JWT.
     """
     user: User = db.query(User).filter(User.email == user_login.email).first()  # type: ignore
+
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email")
+        raise NotFoundError("User not found")
 
     if not user.is_active:
         raise UserNotActivated

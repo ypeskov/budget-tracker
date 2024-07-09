@@ -2,15 +2,15 @@ test_users = [
     {
         'id': 1,
         "email": "user1@example.com",
-        "first_name": "Yura",
-        "last_name": "Peskov",
+        "firstName": "Yura",
+        "lastName": "Peskov",
         "password": "qqq_111_",
     },
     {
         'id': 2,
         "email": "user2@example.com",
-        "first_name": "Yura",
-        "last_name": "Peskov",
+        "firstName": "Yura",
+        "lastName": "Peskov",
         "password": "qqq_111_",
     },
 ]

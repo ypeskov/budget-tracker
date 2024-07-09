@@ -11,7 +11,7 @@ from app.schemas.token_schema import Token
 from app.dependencies.check_token import check_token
 from app.services.auth import create_users, get_jwt_token, activate_user
 from app.services.user_settings import get_user_settings
-from app.services.errors import UserNotActivated
+from app.services.errors import UserNotActivated, NotFoundError
 
 ic.configureOutput(includeContext=True)
 
@@ -36,6 +36,9 @@ def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)):
     except UserNotActivated as e:
         logger.error(f"Error while logging in user: '{user_login.email}': {e}")
         raise HTTPException(status_code=401, detail="User not activated")
+    except NotFoundError as e:
+        logger.error(f"Error while logging in user: '{user_login.email}': {e}")
+        raise HTTPException(status_code=401, detail="Invalid credentials or user not found")
     except HTTPException as e:
         logger.error(f"Error while logging in user: '{user_login.email}': {e.detail}")
         raise HTTPException(status_code=401, detail="Invalid credentials. See logs for details")

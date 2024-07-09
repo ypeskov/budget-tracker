@@ -10,7 +10,9 @@ password_field: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_
 class UserBase(BaseModel):
     email: EmailStr
 
-    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel)
+    model_config = ConfigDict(from_attributes=True,
+                              populate_by_name=True,
+                              alias_generator=to_camel)
 
 
 class UserRegistration(UserBase):
@@ -18,6 +20,10 @@ class UserRegistration(UserBase):
     first_name: str = ''
     last_name: str = ''
     password: str = password_field
+
+    model_config = ConfigDict(from_attributes=True,
+                              populate_by_name=True,
+                              alias_generator=to_camel)
 
 
 class UserLoginSchema(UserBase):
@@ -28,3 +34,7 @@ class UserResponse(UserBase):
     id: int | None = None
     first_name: str | None = None
     last_name: str | None = None
+
+    model_config = ConfigDict(from_attributes=True,
+                              populate_by_name=True,
+                              alias_generator=to_camel)

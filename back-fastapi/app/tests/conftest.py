@@ -56,9 +56,9 @@ main_test_user_id = 1000
 main_user_account1_id = 1
 main_user_account2_id = 2
 
-truly_invalid_account_id = 999999999
-truly_invalid_account_type_id = 9999999
-truly_invalid_currency_id = 9999999
+truly_invalid_account_id = 999_999_999
+truly_invalid_account_type_id = 9_999_999
+truly_invalid_currency_id = 9_999_999
 
 client = TestClient(app)
 
@@ -72,6 +72,7 @@ def setup_db():
     db.query(DefaultCategory).delete()
     db.query(Account).delete()
     db.query(Transaction).delete()
+    db.query(UserSettings).delete()
     db.commit()
     print("\n------- DB is cleared -------")
 
@@ -79,11 +80,23 @@ def setup_db():
 
     yield
 
+    db.query(User).delete()
+    db.query(Currency).delete()
+    db.query(AccountType).delete()
+    db.query(UserCategory).delete()
+    db.query(DefaultCategory).delete()
+    db.query(Account).delete()
+    db.query(Transaction).delete()
+    db.query(UserSettings).delete()
+    db.commit()
+
 
 @pytest.fixture(scope="function")
 def token():
     """ Create a user for test purposes and return his access token """
     user: User = create_users_service(UserRegistration.model_validate(main_test_user), db)
+    user.is_active = True
+    db.commit()
     token = get_jwt_token_service(UserLoginSchema.model_validate(main_test_user), db)
 
     yield token['access_token']
@@ -191,14 +204,21 @@ def create_transaction(token) -> Callable[[dict], Transaction]:
 
 @pytest.fixture(scope="function")
 def create_user():
-    def _create_user(email, password='qqq_111_'):
+    def _create_user(email, password='qqq_111_', first_name=None, last_name=None):
         user = {
             'email': email,
             'password': password,
         }
-        user_response = client.post(f'{auth_path_prefix}/register/', json=user)
-        assert user_response.status_code == 200
-        user_props = user_response.json()
-        return User(**user_props)
+        if first_name:
+            user['first_name'] = first_name
+        if last_name:
+            user['last_name'] = last_name
+
+        user_schema = UserRegistration.model_validate(user)
+        u = create_users_service(user_schema, db)
+        u.is_active = True
+        db.commit()
+
+        return u
 
     return _create_user
