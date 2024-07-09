@@ -8,6 +8,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
+from app.models.Account import Account
 from app.models.Transaction import Transaction
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.services.errors import AccessDenied
@@ -35,9 +36,10 @@ def get_transactions(user_id: int, db: Session, params: dict = None, include_del
         params = dict()
 
     stmt = (db.query(Transaction)
+            .join(Transaction.account)
             .options(joinedload(Transaction.account),
                      joinedload(Transaction.category))
-            .filter_by(user_id=user_id)
+            .filter(Transaction.user_id == user_id)
             .order_by(Transaction.date_time.desc()))
 
     if not include_deleted:
@@ -63,7 +65,7 @@ def get_transactions(user_id: int, db: Session, params: dict = None, include_del
             stmt = stmt.filter(or_(*type_filters))
 
     if 'currencies' in params:
-        stmt = stmt.filter(Transaction.account.currency_id.in_(params['currencies']))
+        stmt = stmt.filter(Account.currency_id.in_(params['currencies']))
 
     if 'accounts' in params:
         stmt = stmt.filter(Transaction.account_id.in_(params['accounts']))

@@ -2,6 +2,7 @@ import copy
 from datetime import datetime, timezone
 
 from icecream import ic
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
@@ -9,7 +10,7 @@ from app.models.Account import Account
 from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
-from app.services.errors import AccessDenied, InvalidCategory
+from app.services.errors import AccessDenied, InvalidCategory, InvalidAccount
 from app.services.transaction_management.NonTransferTypeTransaction import NonTransferTypeTransaction
 from app.services.transaction_management.TransferTypeTransaction import TransferTypeTransaction
 from app.services.transaction_management.errors import InvalidTransaction
@@ -42,7 +43,12 @@ class TransactionManager:
         return self
 
     def _set_account(self, account_id: int) -> 'TransactionManager':
-        account = self.db.query(Account).filter_by(id=account_id).one()
+        try:
+            account = self.db.query(Account).filter_by(id=account_id).one()
+        except NoResultFound as e:
+            logger.error(f'Account {account_id} not found')
+            raise InvalidAccount()
+
         if account.user_id != self.user_id:
             logger.error(f'User {self.user_id} tried to create transaction with not own account {account_id}')
             raise AccessDenied()
