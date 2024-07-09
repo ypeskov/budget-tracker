@@ -1,7 +1,6 @@
 import pytest
 
-from sqlalchemy import select
-from fastapi import HTTPException, status
+from fastapi import status
 from fastapi.testclient import TestClient
 from icecream import ic
 

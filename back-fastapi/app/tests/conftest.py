@@ -193,14 +193,21 @@ def create_transaction(token) -> Callable[[dict], Transaction]:
 
 @pytest.fixture(scope="function")
 def create_user():
-    def _create_user(email, password='qqq_111_'):
+    def _create_user(email, password='qqq_111_', first_name=None, last_name=None):
         user = {
             'email': email,
             'password': password,
         }
-        user_response = client.post(f'{auth_path_prefix}/register/', json=user)
-        assert user_response.status_code == 200
-        user_props = user_response.json()
-        return User(**user_props)
+        if first_name:
+            user['first_name'] = first_name
+        if last_name:
+            user['last_name'] = last_name
+
+        user_schema = UserRegistration.model_validate(user)
+        u = create_users_service(user_schema, db)
+        u.is_active = True
+        db.commit()
+
+        return u
 
     return _create_user
