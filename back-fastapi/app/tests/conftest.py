@@ -56,9 +56,9 @@ main_test_user_id = 1000
 main_user_account1_id = 1
 main_user_account2_id = 2
 
-truly_invalid_account_id = 999999999
-truly_invalid_account_type_id = 9999999
-truly_invalid_currency_id = 9999999
+truly_invalid_account_id = 999_999_999
+truly_invalid_account_type_id = 9_999_999
+truly_invalid_currency_id = 9_999_999
 
 client = TestClient(app)
 
@@ -84,6 +84,8 @@ def setup_db():
 def token():
     """ Create a user for test purposes and return his access token """
     user: User = create_users_service(UserRegistration.model_validate(main_test_user), db)
+    user.is_active = True
+    db.commit()
     token = get_jwt_token_service(UserLoginSchema.model_validate(main_test_user), db)
 
     yield token['access_token']

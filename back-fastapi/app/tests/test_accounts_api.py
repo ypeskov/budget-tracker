@@ -100,7 +100,7 @@ def test_add_get_account(test_account, token):
 
 
 def test_get_accounts_list(token, create_accounts):
-    response = client.get(f'{accounts_path_prefix}/', headers={'auth-token': token})
+    response = client.get(f'{accounts_path_prefix}/?includeHidden=false', headers={'auth-token': token})
     assert response.status_code == status.HTTP_200_OK
     accounts_list = response.json()
 
