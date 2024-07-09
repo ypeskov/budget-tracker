@@ -2,6 +2,7 @@ import pytest
 from fastapi import status, HTTPException
 from fastapi.testclient import TestClient
 
+from app.models.User import User
 from app.tests.conftest import auth_path_prefix, db
 from app.main import app
 from app.tests.data.auth_data import test_users
@@ -24,6 +25,8 @@ def test_create_user(test_user):
     assert data['email'] == test_user['email']
     assert data['firstName'] == test_user['firstName']
     assert data['lastName'] == test_user['lastName']
+
+    db.query(User).delete()
 
 
 @pytest.mark.parametrize("test_user", test_users)

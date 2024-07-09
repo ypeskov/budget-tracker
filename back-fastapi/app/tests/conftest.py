@@ -72,12 +72,23 @@ def setup_db():
     db.query(DefaultCategory).delete()
     db.query(Account).delete()
     db.query(Transaction).delete()
+    db.query(UserSettings).delete()
     db.commit()
     print("\n------- DB is cleared -------")
 
     load_all_data(db)
 
     yield
+
+    db.query(User).delete()
+    db.query(Currency).delete()
+    db.query(AccountType).delete()
+    db.query(UserCategory).delete()
+    db.query(DefaultCategory).delete()
+    db.query(Account).delete()
+    db.query(Transaction).delete()
+    db.query(UserSettings).delete()
+    db.commit()
 
 
 @pytest.fixture(scope="function")
