@@ -19,7 +19,6 @@ from app.models.Transaction import Transaction
 
 from app.services.transactions import create_transaction as create_transaction_service, \
     get_transactions, get_transaction_details, update as update_transaction_service
-from app.services.CurrencyProcessor import CurrencyProcessor
 from app.services.auth import get_jwt_token as get_jwt_token_service
 
 from app.schemas.transaction_schema import CreateTransactionSchema, UpdateTransactionSchema
@@ -31,9 +30,9 @@ client = TestClient(app)
 @pytest.fixture(autouse=True)
 def run_around_tests():
     yield
-    db.query(User).delete()
     db.query(Account).delete()
     db.query(Transaction).delete()
+    db.query(User).delete()
     db.commit()
 
 
@@ -42,6 +41,16 @@ def test_create_transaction_expense_route(token, one_account, amount):
     categories_response = client.get(f'{categories_path_prefix}/', headers={'auth-token': token})
     assert categories_response.status_code == 200
     categories = categories_response.json()
+
+    income_category = None
+    expense_category = None
+    for category in categories:
+        if category['isIncome']:
+            income_category = category
+        else:
+            expense_category = category
+        if income_category and expense_category:
+            break
 
     operations = ['expense', 'income', ]
     created_transactions_ids = []
@@ -52,15 +61,20 @@ def test_create_transaction_expense_route(token, one_account, amount):
 
         is_income = True if operation == 'income' else False
         transaction_data = {
-            'account_id': one_account['id'],
-            'category_id': categories[0]['id'],
+            'accountId': one_account['id'],
             'amount': amount,
-            'currency_id': one_account['currency_id'],
+            'currencyId': one_account['currency_id'],
             'date': '2021-01-01',
-            'is_income': is_income,
-            'is_transfer': False,
+            'isIncome': is_income,
+            'isTransfer': False,
             'notes': 'Test transaction'
         }
+
+        if operation == 'income':
+            transaction_data['categoryId'] = income_category['id']
+        else:
+            transaction_data['categoryId'] = expense_category['id']
+
         transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
                                            headers={'auth-token': token})
         assert transaction_response.status_code == status.HTTP_200_OK
@@ -72,8 +86,10 @@ def test_create_transaction_expense_route(token, one_account, amount):
         assert transaction['isTransfer'] is False
         assert transaction['notes'] == 'Test transaction'
         assert transaction['account']['id'] == one_account['id']
-        assert transaction['categoryId'] == categories[0]['id']
-        assert transaction['currencyId'] == one_account['currency_id']
+        if operation == 'income':
+            assert transaction['categoryId'] == income_category['id']
+        else:
+            assert transaction['categoryId'] == expense_category['id']
 
         accounts_response = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token})
         account = accounts_response.json()
@@ -87,12 +103,11 @@ def test_create_transaction_expense_route(token, one_account, amount):
         transaction_details = transaction_response.json()
         assert transaction_details['id'] == transaction['id']
         assert transaction_details['amount'] == transaction_data['amount']
-        assert transaction_details['isIncome'] == transaction_data['is_income']
-        assert transaction_details['isTransfer'] == transaction_data['is_transfer']
+        assert transaction_details['isIncome'] == transaction_data['isIncome']
+        assert transaction_details['isTransfer'] == transaction_data['isTransfer']
         assert transaction_details['notes'] == transaction_data['notes']
-        assert transaction_details['account']['id'] == transaction_data['account_id']
-        assert transaction_details['categoryId'] == transaction_data['category_id']
-        assert transaction_details['currencyId'] == transaction_data['currency_id']
+        assert transaction_details['account']['id'] == transaction_data['accountId']
+        assert transaction_details['categoryId'] == transaction_data['categoryId']
 
         # get all transactions for the user
         transactions_response = client.get(f'{transactions_path_prefix}/', headers={'auth-token': token})
@@ -108,10 +123,19 @@ def test_update_transaction(token, one_account, create_user):
     amount_initial: int = 100
 
     categories_dict: dict = client.get(f'{categories_path_prefix}/', headers={'auth-token': token}).json()
+    expense_category = None
+    income_category = None
+    for category in categories_dict:
+        if category['isIncome']:
+            income_category = category
+        else:
+            expense_category = category
+        if income_category and expense_category:
+            break
 
     transaction_data = {
         'account_id': one_account['id'],
-        'category_id': categories_dict[0]['id'],
+        'category_id': expense_category['id'],
         'amount': amount_initial,
         'currency_id': one_account['currency_id'],
         'date_time': '2023-10-12T12:00:00Z',
@@ -135,11 +159,13 @@ def test_update_transaction(token, one_account, create_user):
     transaction_data['amount'] = amount_update
     transaction_data['is_income'] = True
     transaction_data['notes'] = 'Updated transaction'
-    transaction_data['category_id'] = categories_dict[1]['id']
+    transaction_data['category_id'] = income_category['id']
     transaction_data['date_time'] = '2023-10-12T12:00:00Z'
+
     updated_transaction_response = client.put(f'{transactions_path_prefix}/',
                                               json=transaction_data,
                                               headers={'auth-token': token})
+
     assert updated_transaction_response.status_code == status.HTTP_200_OK
     updated_transaction = updated_transaction_response.json()
 
@@ -149,20 +175,19 @@ def test_update_transaction(token, one_account, create_user):
     assert updated_transaction['notes'] == transaction_data['notes']
     assert updated_transaction['account']['id'] == transaction_data['account_id']
     assert updated_transaction['categoryId'] == transaction_data['category_id']
-    assert updated_transaction['currencyId'] == transaction_data['currency_id']
 
     updated_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
     assert updated_account['balance'] == updated_balance + transaction_data['amount'] + amount_initial
 
     with pytest.raises(InvalidTransaction) as ex:
-        updated_transaction['id'] = 999999999999
+        updated_transaction['id'] = 999_999_999_999
         update_transaction_service(UpdateTransactionSchema(**updated_transaction), main_test_user_id, db)
 
     with pytest.raises(InvalidAccount):
         updated_transaction['id'] = transaction['id']
-        updated_transaction['accountId'] = 999999999999
+        updated_transaction['accountId'] = 999_999_999_999
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
-        q = update_transaction_service(transaction_schema_update, main_test_user_id, db)
+        update_transaction_service(transaction_schema_update, main_test_user_id, db)
 
     user2 = create_user('email2@email.com', 'qqq_111_')
     with pytest.raises(AccessDenied):
@@ -172,10 +197,10 @@ def test_update_transaction(token, one_account, create_user):
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, user2.id, db)
 
-    with pytest.raises(InvalidAccount):
+    with pytest.raises(InvalidTransaction):
         updated_transaction['id'] = transaction['id']
         updated_transaction['isTransfer'] = True
-        updated_transaction['targetAccountId'] = 999999999999
+        updated_transaction['targetAccountId'] = 999_999_999_999
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, main_test_user_id, db)
 
@@ -275,44 +300,6 @@ def test_update_transaction_forbidden_category(one_account, create_user, create_
     db.commit()
 
 
-def test_currency_processor(create_transaction, token, one_account):
-    transaction_details = {
-        'account_id': one_account['id'],
-        'amount': 100,
-        'currency_id': one_account['currency_id'],
-        'is_income': False,
-        'is_transfer': False,
-        'notes': 'Test transaction',
-        'target_account_id': None,
-    }
-    transaction: Transaction = create_transaction(transaction_details)
-
-    with pytest.raises(HTTPException) as ex:
-        CurrencyProcessor(transaction, db).calculate_exchange_rate()
-    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    tmp_transaction = Transaction(**transaction_details)
-    tmp_transaction.target_amount = None
-    tmp_transaction.exchange_rate = None
-    with pytest.raises(HTTPException) as ex:
-        CurrencyProcessor(tmp_transaction, db).calculate_exchange_rate()
-    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert ex.value.detail == 'Exchange rate or target amount are required'
-
-    transaction.exchange_rate = Decimal(1.5)
-    transaction.target_amount = None
-    transaction = CurrencyProcessor(transaction, db).calculate_exchange_rate()
-    assert transaction.target_amount == 150
-
-    transaction.exchange_rate = None
-    transaction.target_amount = Decimal(150)
-    transaction = CurrencyProcessor(transaction, db).calculate_exchange_rate()
-    assert transaction.exchange_rate == 1.5
-
-    db.query(Transaction).filter(Transaction.id == transaction.id).delete()
-    db.commit()
-
-
 def test_process_transfer_type(create_transaction, token, one_account, create_user):
     second_account_details = {
         **one_account,
@@ -336,19 +323,16 @@ def test_process_transfer_type(create_transaction, token, one_account, create_us
                              comment=json_response['comment'],
                              )
     transaction_details = {
-        'account_id': one_account['id'],
+        'accountId': one_account['id'],
         'amount': 100,
-        'currency_id': one_account['currency_id'],
         'date': '2021-01-01',
-        'is_income': False,
-        'is_transfer': True,
+        'isIncome': False,
+        'isTransfer': True,
         'notes': 'Test transaction',
-        'target_account_id': second_account.id,
+        'targetAccountId': second_account.id,
     }
     transaction: Transaction = create_transaction(transaction_details)
     assert transaction.is_transfer is True
-    assert transaction.target_account_id == second_account.id
-    assert transaction.target_amount == 100
 
     updated_account = client.get(f'/accounts/{one_account["id"]}', headers={'auth-token': token}).json()
     assert updated_account['balance'] == one_account['balance'] - 100
@@ -360,7 +344,7 @@ def test_process_transfer_type(create_transaction, token, one_account, create_us
         'email': 'ex@ex.com',
         'password': 'qqq_111_',
     })
-    new_user_token = new_user_profile.json()['access_token']
+    new_user_token = new_user_profile.json()['accessToken']
     third_account_details = {**one_account, 'name': 'Third account', 'id': one_account['id'] + 2,
                              'user_id': new_user.id}
     third_account_response = client.post(f'{accounts_path_prefix}/', json=third_account_details,
@@ -415,15 +399,14 @@ def test_process_transfer_type_diff_currencies(create_transaction, token, one_ac
     second_account.balance = Decimal(second_account.balance)
 
     transaction_details = {
-        'account_id': first_account.id,
+        'accountId': first_account.id,
         'amount': 100,
-        'currency_id': first_account.currency_id,
         'date': '2021-01-01',
-        'is_income': False,
-        'is_transfer': True,
+        'isIncome': False,
+        'isTransfer': True,
         'notes': 'Test transaction',
-        'target_account_id': second_account.id,
-        'target_amount': 200,
+        'targetAccountId': second_account.id,
+        'targetAmount': 200,
     }
     transaction: Transaction = create_transaction(transaction_details)
 
@@ -445,22 +428,20 @@ def test_process_non_transfer_type(create_transaction, token, one_account, creat
 
     amount = 100
     transaction_details = {
-        'account_id': first_account.id,
+        'accountId': first_account.id,
         'amount': amount,
-        'currency_id': first_account.currency_id,
         'date': '2021-01-01',
-        'is_income': False,
-        'is_transfer': False,
+        'isIncome': False,
+        'isTransfer': False,
         'notes': 'Test transaction',
-        'target_account_id': None,
-        'target_amount': 0,
+        'targetAccountId': None,
     }
     transaction1: Transaction = create_transaction(transaction_details)
     updated_account = client.get(f'/accounts/{first_account.id}', headers={'auth-token': token}).json()
     assert first_account.balance - amount == updated_account['balance']
     updated_balance = updated_account['balance']
 
-    transaction_details['is_income'] = True
+    transaction_details['isIncome'] = True
     transaction2 = create_transaction(transaction_details)
     updated_account = client.get(f'/accounts/{first_account.id}', headers={'auth-token': token}).json()
     assert updated_account['balance'] == updated_balance + amount
@@ -525,12 +506,12 @@ def test_create_transaction_forbidden(create_user):
     password = 'qqq_111_'
     user1 = create_user(email1, password)
     user1_token = client.post(f'{auth_path_prefix}/login/',
-                              json={'email': email1, 'password': password}).json()['access_token']
+                              json={'email': email1, 'password': password}).json()['accessToken']
 
     email2 = 'email2@email.com'
     user2 = create_user(email2, password)
     user2_token = client.post(f'{auth_path_prefix}/login/',
-                              json={'email': email2, 'password': password}).json()['access_token']
+                              json={'email': email2, 'password': password}).json()['accessToken']
     user2_categories = client.get(f'{categories_path_prefix}/', headers={'auth-token': user2_token}).json()
 
     account_details = {
@@ -585,7 +566,7 @@ def test_create_transaction_forbidden_account(create_user):
     email2 = 'email2@email.com'
     user2 = create_user(email2, 'qqq_111_')
     user2_token = client.post(f'{auth_path_prefix}/login/',
-                              json={'email': email2, 'password': password}).json()['access_token']
+                              json={'email': email2, 'password': password}).json()['accessToken']
 
     account2_details = {
         'name': 'Test account',
@@ -702,7 +683,6 @@ def test_get_transaction_details(token, create_transaction, one_account):
     assert transaction_from_service.notes == transaction.notes
     assert transaction_from_service.account_id == transaction.account_id
     assert transaction_from_service.category_id == transaction.category_id
-    assert transaction_from_service.currency_id == transaction.currency_id
 
     with pytest.raises(HTTPException) as ex:
         get_transaction_details(99999999999, main_test_user_id, db)

@@ -79,16 +79,16 @@ def setup_db():
     load_all_data(db)
 
     yield
-
-    db.query(User).delete()
-    db.query(Currency).delete()
-    db.query(AccountType).delete()
-    db.query(UserCategory).delete()
-    db.query(DefaultCategory).delete()
-    db.query(Account).delete()
-    db.query(Transaction).delete()
-    db.query(UserSettings).delete()
-    db.commit()
+    #
+    # db.query(User).delete()
+    # db.query(Currency).delete()
+    # db.query(AccountType).delete()
+    # db.query(UserCategory).delete()
+    # db.query(DefaultCategory).delete()
+    # db.query(Account).delete()
+    # db.query(Transaction).delete()
+    # db.query(UserSettings).delete()
+    # db.commit()
 
 
 @pytest.fixture(scope="function")
@@ -101,8 +101,8 @@ def token():
 
     yield token['access_token']
 
-    db.query(UserSettings).filter(UserSettings.user_id == user.id).delete()
-    db.delete(user)
+    db.query(UserSettings).delete()
+    db.query(User).delete()
     db.commit()
 
 
@@ -130,7 +130,8 @@ def one_account(token):
 
     yield account_dict
 
-    db.query(Account).filter_by(id=account.id).delete()
+    db.query(Transaction).delete()
+    db.query(Account).delete()
     db.commit()
 
 
@@ -166,31 +167,43 @@ def create_transaction(token) -> Callable[[dict], Transaction]:
     categories_response = client.get(f'{categories_path_prefix}/', headers={'auth-token': token})
     categories = categories_response.json()
 
+    expense_category = None
+    income_category = None
+    for category in categories:
+        if not category['isIncome']:
+            expense_category = category
+        else:
+            income_category = category
+        if expense_category is not None and income_category is not None:
+            break
+
     def _create_transaction(transaction_details: dict):
         transaction_data = {
-            'account_id': transaction_details['account_id'],
-            'category_id': categories[0]['id'],
+            'accountId': transaction_details['accountId'],
             'amount': 100,
-            'target_amount': 100,
-            'currency_id': transaction_details['currency_id'],
-            'target_account_id': transaction_details['target_account_id'],
-            'is_income': False,
-            'is_transfer': False,
+            'targetAmount': 100,
+            'targetAccountId': transaction_details['targetAccountId'],
+            'isIncome': False,
+            'isTransfer': False,
             'notes': 'Test transaction'
         }
         transaction_data = {**transaction_data, **transaction_details}
 
+        if transaction_data['isIncome']:
+            transaction_data['categoryId'] = income_category['id']
+        else:
+            transaction_data['categoryId'] = expense_category['id']
+
         transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
                                            headers={'auth-token': token})
+
         assert transaction_response.status_code == 200
         transaction_props = transaction_response.json()
         transaction = Transaction(id=transaction_props['id'],
                                   user_id=transaction_props['userId'],
                                   account_id=transaction_props['accountId'],
                                   category_id=transaction_props['categoryId'],
-                                  target_account_id=transaction_props['targetAccountId'],
                                   amount=Decimal(transaction_props['amount']),
-                                  currency_id=transaction_props['currencyId'],
                                   date_time=transaction_props['dateTime'],
                                   is_income=transaction_props['isIncome'],
                                   is_transfer=transaction_props['isTransfer'],

@@ -3,11 +3,13 @@ import copy
 from icecream import ic
 from sqlalchemy.orm import Session
 
+from app.logger_config import logger
 from app.models.Account import Account
 from app.models.Currency import Currency
 from app.models.Transaction import Transaction
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from .NonTransferTypeTransaction import NonTransferTypeTransaction
+from .errors import InvalidTransaction
 
 ic.configureOutput(includeContext=True)
 
@@ -31,7 +33,12 @@ class TransferTypeTransaction:
         self._db.flush()
 
         if self._is_update:
-            target_transaction = self._db.query(Transaction).filter_by(id=self._transaction.linked_transaction_id).one()
+            target_transaction = (self._db.query(Transaction)
+                                  .filter_by(id=self._transaction.linked_transaction_id)
+                                  .one_or_none())
+            if target_transaction is None:
+                logger.error(f'Transfer target transaction not found for transaction {self._transaction.id}')
+                raise InvalidTransaction("Transfer target transaction not found")
             self._prev_transaction_state = copy.deepcopy(target_transaction)
         target_transaction.account_id = transaction_details.target_account_id  # type: ignore
         target_transaction.account = self._db.query(Account).filter_by(id=transaction_details.target_account_id).one()
