@@ -92,10 +92,12 @@ def archive(request: Request, budget_id: int, db: Session = Depends(get_db)):
 
 
 @router.get('/daily-processing/')
-def daily_processing(db: Session = Depends(get_db)):
+def daily_processing(request: Request):
     """ Daily processing """
-    #  disable this endpoint in production
-    return {"message": "Daily processing is disabled in production"}
+    user_id = request.state.user['id']
+    if user_id != 1:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Forbidden')
+    
     logger.info(f"Daily processing")
     run_daily_budgets_processing.delay()
     return {"message": "Daily processing initiated"}
