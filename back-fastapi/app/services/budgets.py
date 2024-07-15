@@ -186,9 +186,10 @@ def put_outdated_budgets_to_archive(db: Session):
     logger.info("Putting outdated budgets to archive")
 
     now = datetime.now()
+    logger.info(f"Now: {now}")
     outdated_budgets: list[Budget] = (
         db.query(Budget).filter(Budget.end_date < now, Budget.is_archived.is_(False)).all())
-
+    logger.info(f"Outdated budgets: {outdated_budgets}")
     archiving_budgets = []
     for budget in outdated_budgets:
         if budget.repeat:
