@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from decimal import Decimal
 
 from icecream import ic
@@ -185,7 +185,7 @@ def put_outdated_budgets_to_archive(db: Session):
     """ Put budget to archive """
     logger.info("Putting outdated budgets to archive")
 
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     logger.info(f"Now: {now}")
     outdated_budgets: list[Budget] = (
         db.query(Budget).filter(Budget.end_date < now, Budget.is_archived.is_(False)).all())
