@@ -1,9 +1,9 @@
 from datetime import timedelta, datetime, timezone
 from decimal import Decimal
 
+import pendulum
 from icecream import ic
 from sqlalchemy.orm import Session, joinedload
-import pendulum
 
 from app.logger_config import logger
 from app.models.Budget import Budget, PeriodEnum
@@ -105,9 +105,9 @@ def update_budget_with_amount(db: Session, transaction: Transaction, adjusted_am
     """ Update collected amount for all applicable budgets """
     logger.info(f"Updating collected amount for all applicable budgets for transaction: {transaction}")
 
-    user_budgets = (db.query(Budget)
-                    .filter(Budget.user_id == transaction.user_id, Budget.is_archived == False)
-                    .all())
+    user_budgets: list[Budget] = (db.query(Budget)
+                                  .filter(Budget.user_id == transaction.user_id, Budget.is_archived == False)
+                                  .all())
     for budget in user_budgets:
         if budget.included_categories:
             included_categories = [int(category_id) for category_id in budget.included_categories.split(",")]
@@ -116,11 +116,11 @@ def update_budget_with_amount(db: Session, transaction: Transaction, adjusted_am
                 continue
 
         if budget.start_date <= transaction.date_time <= budget.end_date:
-            adjusted_amount: Decimal = calc_amount(adjusted_amount,
-                                                   transaction.account.currency.code,
-                                                   transaction.date_time.date(),
-                                                   budget.currency.code,
-                                                   db)
+            adjusted_amount = calc_amount(adjusted_amount,
+                                          transaction.account.currency.code,
+                                          transaction.date_time.date(),
+                                          budget.currency.code,
+                                          db)
             budget.collected_amount += adjusted_amount
             db.commit()
             logger.info(f"Updated collected amount for budget: {budget}")
