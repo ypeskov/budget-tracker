@@ -17,10 +17,10 @@ ic.configureOutput(includeContext=True)
 class ExpensesReportGenerator:
     def __init__(self,
                  user_id,
-                 db: Session = None,
-                 start_date: datetime = None,
-                 end_date: datetime = None,
-                 categories_ids: list = None,
+                 db: Session,
+                 start_date: datetime,
+                 end_date: datetime,
+                 categories_ids: list[int],
                  hide_empty_categories: bool = False):
         self._db = db
         self.user_id = user_id
@@ -29,7 +29,7 @@ class ExpensesReportGenerator:
         self.categories_ids = categories_ids
         self.hide_empty_categories = hide_empty_categories
 
-        self._user_categories_with_expenses = []
+        self._user_categories_with_expenses: list = []
 
     def prepare_data(self):
         user_categories = self._get_flat_user_categories()
@@ -60,7 +60,7 @@ class ExpensesReportGenerator:
 
         result = self._db.execute(query).all()
 
-        user: User = self._db.query(User).get(self.user_id)
+        user: User = self._db.query(User).get(self.user_id)  # type: ignore
         base_currency: Currency = user.base_currency
 
         for row in result:
@@ -124,20 +124,20 @@ class ExpensesReportGenerator:
 
         flat_categories = {}
 
-        for category in structured_categories.values():
-            flat_categories[int(category['id'])] = {
-                'id': int(category['id']),
-                'name': category['name'],
+        for category in structured_categories.values():  # type: ignore
+            flat_categories[int(category['id'])] = {  # type: ignore
+                'id': int(category['id']),  # type: ignore
+                'name': category['name'],  # type: ignore
                 'parent_id': None,
                 'parent_name': None,
                 'total_expenses': 0,
                 'isParent': True,
             }
 
-            for child in category['children']:
+            for child in category['children']:  # type: ignore
                 flat_categories[int(child['id'])] = {
                     'id': int(child['id']),
-                    'name': f"{category['name']} >> {child['name']}",
+                    'name': f"{category['name']} >> {child['name']}",  # type: ignore
                     'parent_id': child['parent_id'],
                     'parent_name': child['parent_name'],
                     'total_expenses': 0,

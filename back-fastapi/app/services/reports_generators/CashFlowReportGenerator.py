@@ -17,17 +17,17 @@ ic.configureOutput(includeContext=True)
 
 
 class CashFlowReportGenerator:
-    def __init__(self, user_id, db: Session = None):
+    def __init__(self, user_id, db: Session):
         self._db = db
         self.user_id = user_id
-        self.account_ids = None
+        self.account_ids: list[int] = []
         self.period = None
         self.start_date = None
         self.end_date = None
         self.period_str: str = ''
         self.label: str = ''
 
-        self._accounts_info = None
+        self._accounts_info: dict = {}
 
     def set_parameters(self, period='monthly', start_date=None, end_date=None):
         self.period = period
@@ -45,7 +45,7 @@ class CashFlowReportGenerator:
             Account.name,
             Currency.code.label("currency")
         ).filter(
-            Account.show_in_reports == True,
+            Account.show_in_reports == True,  # noqa
             Account.user_id == self.user_id
         ).join(
             Currency, Account.currency_id == Currency.id
@@ -61,14 +61,14 @@ class CashFlowReportGenerator:
         today = datetime.now().date()
         user = self._db.query(User).filter(User.id == self.user_id).one()
 
-        income_sum = {}
-        expenses_sum = {}
-        net_flow = {}
+        income_sum: dict = {}
+        expenses_sum: dict = {}
+        net_flow: dict = {}
 
         for result in prepared_results:
             account_id, period, total_income, total_expenses = result
             income_in_period = Decimal(calc_amount(
-                total_income or 0,
+                total_income or Decimal(0),
                 self._accounts_info[account_id]["currency"],
                 today,
                 user.base_currency.code,
@@ -80,7 +80,7 @@ class CashFlowReportGenerator:
                 income_sum[period] += income_in_period
 
             expenses_in_period = Decimal(calc_amount(
-                total_expenses or 0,
+                total_expenses or Decimal(0),
                 self._accounts_info[account_id]["currency"],
                 today,
                 user.base_currency.code,
@@ -125,12 +125,12 @@ class CashFlowReportGenerator:
                 func.to_char(Transaction.date_time, self.period_str).label(self.label),
                 func.coalesce(
                     func.sum(
-                        case((Transaction.is_income == True, Transaction.amount), else_=0)
+                        case((Transaction.is_income == True, Transaction.amount), else_=0)  # noqa
                     ).filter(Transaction.is_deleted == False, Transaction.is_transfer == False), 0
                 ).label('total_income'),
                 func.coalesce(
                     func.sum(
-                        case((Transaction.is_income == False, Transaction.amount), else_=0)
+                        case((Transaction.is_income == False, Transaction.amount), else_=0)  # noqa
                     ).filter(Transaction.is_deleted == False, Transaction.is_transfer == False), 0
                 ).label('total_expenses')
             )

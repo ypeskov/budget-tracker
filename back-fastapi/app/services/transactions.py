@@ -31,7 +31,7 @@ def create_transaction(transaction_details: CreateTransactionSchema, user_id: in
     return transaction
 
 
-def get_transactions(user_id: int, db: Session, params: dict = None, include_deleted=False) -> list[Transaction]:
+def get_transactions(user_id: int, db: Session, params: dict | None = None, include_deleted=False) -> list[Transaction]:
     if params is None:
         params = dict()
 

@@ -1,5 +1,4 @@
 from pydantic_settings import SettingsConfigDict, BaseSettings
-from pydantic import Field
 
 
 class Settings(BaseSettings):
@@ -32,7 +31,7 @@ class Settings(BaseSettings):
 
     DB_BACKUP_DIR: str = 'backup'
 
-    ADMINS_NOTIFICATION_EMAILS: list[str] = Field(..., alias='ADMINS_NOTIFICATION_EMAILS')
+    ADMINS_NOTIFICATION_EMAILS: list[str] = []
 
     MAIL_USERNAME: str = "example@example.com"
     MAIL_PASSWORD: str = "*************"

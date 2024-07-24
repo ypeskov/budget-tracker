@@ -23,6 +23,6 @@ class UserSettings(Base):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f'UserSettings(id={self.id}, settings={self.settings}, user={self.user}, ' \
                f'created_at={self.created_at}, updated_at={self.updated_at})'

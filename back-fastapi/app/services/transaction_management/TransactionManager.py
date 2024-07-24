@@ -28,7 +28,7 @@ class TransactionManager:
         self.user_id = user_id
         self.db = db
         self.transaction_details = transaction_details
-        self._transaction = Transaction()  # main entity for current transaction
+        self._transaction: Transaction = Transaction()  # main entity for current transaction
         self.prev_transaction_state = Transaction()  # remember state of transaction before update
         self.is_update = True if transaction_details.id is not None else False
 
@@ -57,7 +57,7 @@ class TransactionManager:
 
         return self
 
-    def _set_category(self, category_id: int) -> 'TransactionManager':
+    def _set_category(self, category_id) -> 'TransactionManager':
         category = self.db.query(UserCategory).filter_by(id=category_id).one_or_none()
         if category is None:
             logger.error(f'Category {category_id} not found')
@@ -72,7 +72,7 @@ class TransactionManager:
 
     def _prepare_transaction(self) -> 'TransactionManager':
         if self.transaction_details.id is not None:
-            self._transaction = (self.db.query(Transaction)
+            self._transaction = (self.db.query(Transaction)  # type: ignore
                                  .options(joinedload(Transaction.account),
                                           joinedload(Transaction.category))
                                  .filter_by(id=self.transaction_details.id).one_or_none())
@@ -94,7 +94,7 @@ class TransactionManager:
 
         self._transaction.amount = self.transaction_details.amount
         self._transaction.label = self.transaction_details.label
-        self._transaction.notes = self.transaction_details.notes
+        self._transaction.notes = str(self.transaction_details.notes)
         self._transaction.is_income = self.transaction_details.is_income
         self._transaction.is_transfer = self.transaction_details.is_transfer
 

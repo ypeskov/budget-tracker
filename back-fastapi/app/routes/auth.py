@@ -62,7 +62,7 @@ def get_profile(user=Depends(check_token), db: Session = Depends(get_db)) -> dic
 
 
 @router.get('/activate/{token}')
-def activate(token: str, db: Session = Depends(get_db)) -> bool:
+def activate(token: str, db: Session = Depends(get_db)):
     try:
         activate_user(token, db)
 

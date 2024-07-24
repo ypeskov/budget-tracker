@@ -30,7 +30,9 @@ def create_new_budget(user_id: int,
     try:
         # Check if it's an update operation
         if hasattr(budget_dto, "id") and budget_dto.id:
-            budget = db.query(Budget).filter(Budget.id == budget_dto.id).one_or_none()
+            budget: Budget | None = db.query(Budget).filter(Budget.id == budget_dto.id).one_or_none()
+            if budget is None:
+                raise NotFoundError(f"Budget with id {budget_dto.id} not found.")
             budget.collected_amount = Decimal(0)
             if budget is None:
                 raise ValueError(f"Budget with id {budget_dto.id} not found.")
@@ -48,7 +50,7 @@ def create_new_budget(user_id: int,
         budget.start_date = budget_dto.start_date
         budget.end_date = budget_dto.end_date + timedelta(days=1)  # add 1 day to include the full end date
         budget.included_categories = included_categories_str
-        budget.comment = budget_dto.comment
+        budget.comment = str(budget_dto.comment)
 
         db.add(budget)
         db.commit()
@@ -67,7 +69,7 @@ def update_budget(user_id: int,
                   db: Session,
                   budget_dto: NewBudgetInputSchema | EditBudgetInputSchema) -> Budget:
     """ Update budget """
-    logger.info(f"Updating budget for user_id: {user_id}, budget_dto: {budget_dto.id}")
+    logger.info(f"Updating budget for user_id: {user_id}, budget_dto: {budget_dto.id}")  # type: ignore
     return create_new_budget(user_id, db, budget_dto)
 
 
@@ -75,7 +77,7 @@ def fill_budget_with_existing_transactions(db: Session, budget: Budget):
     """ Fill budget with existing transactions """
     logger.info(f"Filling budget with existing transactions for budget: {budget.id}")
 
-    transactions = db.query(Transaction).filter(
+    transactions: list[Transaction] = db.query(Transaction).filter(  # type: ignore
         Transaction.user_id == budget.user_id,
         Transaction.is_deleted.is_(False),
         Transaction.is_transfer.is_(False),
@@ -90,11 +92,13 @@ def fill_budget_with_existing_transactions(db: Session, budget: Budget):
                 # Skip transactions that do not belong to the budget
                 continue
 
+        assert transaction.date_time is not None, f"Transaction {transaction.id} has no date_time"
+
         adjusted_amount: Decimal = calc_amount(transaction.amount,
-                                               transaction.account.currency.code,
-                                               transaction.date_time.date(),
-                                               budget.currency.code,
-                                               db)
+                                           transaction.account.currency.code,
+                                           transaction.date_time.date(),
+                                           budget.currency.code,
+                                           db)
         budget.collected_amount += adjusted_amount
 
     db.commit()
@@ -115,10 +119,10 @@ def update_budget_with_amount(db: Session, transaction: Transaction, adjusted_am
                 # Skip budgets that do not include the transaction category
                 continue
 
-        if budget.start_date <= transaction.date_time <= budget.end_date:
+        if budget.start_date <= transaction.date_time <= budget.end_date:  # type: ignore
             adjusted_amount = calc_amount(adjusted_amount,
                                           transaction.account.currency.code,
-                                          transaction.date_time.date(),
+                                          transaction.date_time.date(),  # type: ignore
                                           budget.currency.code,
                                           db)
             budget.collected_amount += adjusted_amount
