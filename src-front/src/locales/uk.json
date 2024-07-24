@@ -69,7 +69,8 @@
     "areYouSureWantArchiveBudget": "Ви впевнені, що хочете архівувати цей бюджет",
     "archiveBudget": "Архівувати бюджет",
     "active": "Активний",
-    "budgetDetails": "Деталі бюджету"
+    "budgetDetails": "Деталі бюджету",
+    "budgetLeft": "Залишилось бюджету"
   },
   "menu": {
     "home": "Початок",

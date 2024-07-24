@@ -35,16 +35,23 @@ const collectedAmountClass = (budget) => {
       <span class="col-4">{{ $t('message.name') }}</span>
       <span class="col-1">{{ $t('message.collectedExpenses') }}</span>
       <span class="col-1">{{ $t('message.targetBudget') }}</span>
+      <span class="col-1">{{ $t('message.budgetLeft') }}</span>
       <span class="col-1">{{ $t('message.startDate') }}</span>
       <span class="col-1">{{ $t('message.endDate') }}</span>
       <span class="col-1">{{ $t('message.active') }}</span>
     </div>
     <div v-for="budget in props.budgets" :key="budget.id">
-      <div class="budget-item-container" @click="budgetSelected(budget)">
+      <div class="budget-item-container"
+           :class="{ 'active-budget': !budget.isArchived }"
+           @click="budgetSelected(budget)">
+
         <span class="data-cell col-4">{{ budget.name }} ({{ budget.currency.code }})</span>
         <span class="data-cell col-1 amount-cell"
               :class="collectedAmountClass(budget)">{{ parseInt(budget.collectedAmount, 10) }}</span>
-        <span class="data-cell col-1 amount-cell">{{ parseInt(budget.targetAmount, 10) }}</span>
+        <span class="data-cell col-1 amount-cell" >{{ parseInt(budget.targetAmount, 10) }}</span>
+        <span class="data-cell col-1 amount-cell" :class="collectedAmountClass(budget)">
+          {{ parseInt(budget.targetAmount, 10) - parseInt(budget.collectedAmount, 10) }}
+        </span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.startDate) }}</span>
         <span class="data-cell col-1 date-cell">{{ formatDate(budget.endDate) }}</span>
         <span class="data-cell col-1 status-cell">
@@ -68,6 +75,14 @@ const collectedAmountClass = (budget) => {
   background-color: $item-background-color;
 }
 
+.active-budget {
+  background-color: $active-item-background-color;
+}
+
+.active-budget:hover {
+  background-color: $active-item-hover-background-color !important;
+}
+
 .budget-item-container:hover {
   background-color: $item-hover-background-color;
   cursor: pointer;
@@ -86,7 +101,7 @@ const collectedAmountClass = (budget) => {
 }
 
 .low-risk {
-  color: rgba(72, 234, 12, 0.83);
+  color: rgb(38, 113, 10);
 }
 
 .medium-risk {

@@ -67,7 +67,8 @@
     "areYouSureWantArchiveBudget": "Are you sure you want to archive this budget",
     "archiveBudget": "Archive budget",
     "active": "Active",
-    "budgetDetails": "Budget details"
+    "budgetDetails": "Budget details",
+    "budgetLeft": "Budget left"
   },
   "menu": {
     "home": "Home",
