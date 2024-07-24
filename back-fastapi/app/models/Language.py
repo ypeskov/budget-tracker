@@ -19,6 +19,6 @@ class Language(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f'Language(id={self.id}, name="{self.name}", code="{self.code}", is_deleted={self.is_deleted}, ' + \
             f'created_at={self.created_at}, updated_at={self.updated_at})'

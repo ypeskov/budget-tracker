@@ -26,7 +26,7 @@ async def send_html_email(subject: str,
                           recipients: list[str],
                           template_name: str,
                           template_body: dict,
-                          filename: str = None):
+                          filename: str | None = None):
 
     message = MessageSchema(subject=subject,
                             recipients=recipients,

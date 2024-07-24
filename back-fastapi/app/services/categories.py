@@ -17,7 +17,7 @@ def get_user_categories(user_id: int, db: Session, include_deleted: bool = False
 
     categories = query.order_by(UserCategory.is_income, UserCategory.name).all()
 
-    def add_children(category: UserCategory, result_list: list, parent_name: str = None):
+    def add_children(category: UserCategory, result_list: list, parent_name: str | None = None):
         if parent_name:
             category_display_name = f"{parent_name} >> {category.name}"
         else:
@@ -32,7 +32,7 @@ def get_user_categories(user_id: int, db: Session, include_deleted: bool = False
         for child in sorted(children, key=lambda x: x.name):
             add_children(child, result_list, category_display_name)
 
-    result = []
+    result: list[UserCategory] = []
     for category in categories:
         if category.parent_id is None:
             add_children(category, result)

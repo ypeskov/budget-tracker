@@ -1,4 +1,5 @@
 from datetime import datetime, date, timedelta
+from decimal import Decimal
 
 from icecream import ic
 from sqlalchemy import func, and_
@@ -14,7 +15,7 @@ ic.configureOutput(includeContext=True)
 
 
 class BalanceReportGenerator:
-    def __init__(self, user_id: int, account_ids: list = list(), db: Session = None, balance_date: date = None):
+    def __init__(self, user_id: int, account_ids: list, db: Session, balance_date: date | None = None):
         self.account_ids = account_ids
         self.user_id = user_id
         self.db = db
@@ -53,7 +54,7 @@ class BalanceReportGenerator:
         )
 
         self.raw_results = (
-            self.db.query(
+            self.db.query(  # type: ignore
                 Transaction.account_id,
                 Transaction.new_balance,
                 Account.name,
@@ -75,7 +76,7 @@ class BalanceReportGenerator:
     def get_balances(self) -> list[dict]:
         balance_data = []
         balance_date = self.balance_date
-        for result in self.raw_results:
+        for result in self.raw_results:  # type: ignore
             balance = result.new_balance if result else 0
             account_name = result.name if result else ''
             currency_code = result.code if result else ''
@@ -88,7 +89,7 @@ class BalanceReportGenerator:
                                                     self.user_base_currency.code,
                                                     self.db)
             else:
-                base_currency_balance = 0
+                base_currency_balance = Decimal(0)
 
             balance_data.append({"account_id": result.account_id,
                                  "account_name": account_name,

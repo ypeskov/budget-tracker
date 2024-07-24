@@ -31,7 +31,7 @@ class ExpensesReportOutputItemSchema(BaseModel):
     name: str
     parent_id: int | None = None
     parent_name: str | None = None
-    total_expenses: Decimal = 0
+    total_expenses: Decimal = Decimal(0)
     currency_code: str | None = None
     is_parent: bool = False
 

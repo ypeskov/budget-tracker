@@ -41,7 +41,7 @@ def get_expenses_by_categories(user_id: int,
                                db: Session,
                                start_date: datetime,
                                end_date: datetime,
-                               categories_ids: list = None,
+                               categories_ids: list[int],
                                hide_empty_categories: bool = False) -> dict:
     """ Get all expenses within a given time period """
 

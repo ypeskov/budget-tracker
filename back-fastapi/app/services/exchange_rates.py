@@ -35,7 +35,7 @@ def update_exchange_rates(db: Session, when: date) -> ExchangeRateHistory:
     try:
         currency_service: CurrencyBeaconService = CurrencyBeaconService()
         prev_exchange_rates: ExchangeRateHistory = db.query(ExchangeRateHistory).filter(
-            ExchangeRateHistory.actual_date == when).one_or_none()  # noqa
+            ExchangeRateHistory.actual_date == when).one()  # noqa
         if prev_exchange_rates:
             db.delete(prev_exchange_rates)
             db.flush()

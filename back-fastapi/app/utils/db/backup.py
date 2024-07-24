@@ -52,5 +52,5 @@ def backup_postgres_db(env_name: str,
         logger.error(f"Error creating backup of DB [{dbname}]: {e.stderr}")
         raise e
     except Exception as e:
-        logger.error(e.strerror)
+        logger.error(e)
         raise e

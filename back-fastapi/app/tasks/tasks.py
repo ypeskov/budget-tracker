@@ -82,7 +82,7 @@ def send_email(task,
                recipients: list[str],
                template_name: str,
                template_body: dict,
-               filename: str = None):
+               filename: str | None = None):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
