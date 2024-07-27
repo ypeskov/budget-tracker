@@ -95,37 +95,60 @@ def fill_budget_with_existing_transactions(db: Session, budget: Budget):
         assert transaction.date_time is not None, f"Transaction {transaction.id} has no date_time"
 
         adjusted_amount: Decimal = calc_amount(transaction.amount,
-                                           transaction.account.currency.code,
-                                           transaction.date_time.date(),
-                                           budget.currency.code,
-                                           db)
+                                               transaction.account.currency.code,
+                                               transaction.date_time.date(),
+                                               budget.currency.code,
+                                               db)
         budget.collected_amount += adjusted_amount
 
     db.commit()
     logger.info(f"Filled budget with existing transactions for budget: {budget.id}")
 
 
-def update_budget_with_amount(db: Session, transaction: Transaction, adjusted_amount: Decimal):
+def update_budget_with_amount(db: Session,
+                              transaction: Transaction,
+                              prev_transaction: Transaction,
+                              adjusted_amount: Decimal):
     """ Update collected amount for all applicable budgets """
     logger.info(f"Updating collected amount for all applicable budgets for transaction: {transaction}")
 
     user_budgets: list[Budget] = (db.query(Budget)
-                                  .filter(Budget.user_id == transaction.user_id, Budget.is_archived == False)
+                                  .filter(Budget.user_id == transaction.user_id)
                                   .all())
+    is_same_category = transaction.category_id == prev_transaction.category_id
+
     for budget in user_budgets:
         if budget.included_categories:
             included_categories = [int(category_id) for category_id in budget.included_categories.split(",")]
-            if transaction.category_id not in included_categories:
+            if is_same_category and transaction.category_id not in included_categories:
                 # Skip budgets that do not include the transaction category
                 continue
+            elif not is_same_category \
+                    and prev_transaction.category_id not in included_categories \
+                    and transaction.category_id not in included_categories:
+                # Skip budgets that do not include the transaction category and the previous category
+                continue
+            elif not is_same_category \
+                    and prev_transaction.category_id in included_categories \
+                    and transaction.category_id not in included_categories:
+                # reduce the amount from the budget if the previous category was included
+                adjusted_amount = -adjusted_amount
+            elif not is_same_category \
+                    and prev_transaction.category_id not in included_categories \
+                    and transaction.category_id in included_categories:
+                # add the amount to the budget if the new category is included
+                pass
+            else:
+                # in theory, this should never happen
+                pass
 
         if budget.start_date <= transaction.date_time <= budget.end_date:  # type: ignore
-            adjusted_amount = calc_amount(adjusted_amount,
+            adjusted_amount_in_base_curr = calc_amount(adjusted_amount,
                                           transaction.account.currency.code,
                                           transaction.date_time.date(),  # type: ignore
                                           budget.currency.code,
                                           db)
-            budget.collected_amount += adjusted_amount
+            budget.collected_amount += adjusted_amount_in_base_curr
             db.commit()
             logger.info(f"Updated collected amount for budget: {budget}")
 
