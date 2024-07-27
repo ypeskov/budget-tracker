@@ -155,7 +155,7 @@ class TransactionManager:
             indirect_transaction_type.correct_prev_balance()
             self.db.add(indirect_transaction)
         else:
-            update_budget_with_amount(self.db, self._transaction, -self._transaction.amount)
+            update_budget_with_amount(self.db, self._transaction, self.prev_transaction_state, -self._transaction.amount)
 
         self._transaction.is_deleted = True
         self.db.add(self._transaction)
