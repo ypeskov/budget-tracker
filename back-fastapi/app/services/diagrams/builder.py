@@ -75,8 +75,6 @@ def build_diagram(aggregated_categories, currency_code):
     labels = [cat['label'] for cat in aggregated_categories]
     total_sum = sum(cat['amount'] for cat in aggregated_categories)
     sizes = [cat['amount'] / total_sum for cat in aggregated_categories]
-    number_of_categories = len(aggregated_categories)
-    explode = [0.1] + [0] * (number_of_categories - 1)
 
     def autopct(pct):
         absolute = int(pct / 100. * float(total_sum))
@@ -85,7 +83,6 @@ def build_diagram(aggregated_categories, currency_code):
     fig = Figure()
     ax = fig.subplots()
     ax.pie(sizes,
-           explode=explode,
            labels=labels,
            autopct=autopct,
            shadow=False,
