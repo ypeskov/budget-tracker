@@ -1,6 +1,7 @@
 import { request } from './requests';
 
 const reportPrefix = '/reports';
+const BACKEND_HOST = import.meta.env.VITE_BACKEND_HOST;
 
 export class ReportsService {
   userService;
@@ -20,7 +21,7 @@ export class ReportsService {
   }
 
   async getDiagram(reportType, startDate, endDate) {
-    const reportUrl = `http://localhost:8000${reportPrefix}/diagram/${reportType}/${startDate}/${endDate}`;
+    const reportUrl = `${BACKEND_HOST}${reportPrefix}/diagram/${reportType}/${startDate}/${endDate}`;
     const token = localStorage.getItem('accessToken');
 
     const response = await fetch(reportUrl, {
