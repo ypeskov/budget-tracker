@@ -70,7 +70,8 @@
     "archiveBudget": "Архівувати бюджет",
     "active": "Активний",
     "budgetDetails": "Деталі бюджету",
-    "budgetLeft": "Залишилось бюджету"
+    "budgetLeft": "Залишилось бюджету",
+    "loadingDiagram": "Завантаження діаграми"
   },
   "menu": {
     "home": "Початок",
