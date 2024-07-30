@@ -68,7 +68,8 @@
     "archiveBudget": "Archive budget",
     "active": "Active",
     "budgetDetails": "Budget details",
-    "budgetLeft": "Budget left"
+    "budgetLeft": "Budget left",
+    "loadingDiagram": "Loading diagram"
   },
   "menu": {
     "home": "Home",

@@ -19,6 +19,8 @@ let groupSum = 0;
 let currentParentId = null;
 let start = true;
 
+const pieDiagramUrl = ref(''); // 'http://localhost:8000/reports/diagram/pie/2024-07-01/2024-07-31'
+
 function isNewGroup(category) {
   if (category.parentId === null) {
     currentParentId = category.id;
@@ -76,14 +78,28 @@ async function getReportData() {
 onBeforeMount(async () => {
   try {
     await getReportData();
+    await fetchPieDiagram();
   } catch (e) {
     await processError(e, router);
   }
 });
 
+async function fetchPieDiagram() {
+  const start = startDate.value;
+  const end = endDate.value;
+
+  try {
+    const diagramUrl = await Services.reportsService.getDiagram('pie', start, end);
+    pieDiagramUrl.value = `${diagramUrl}`;
+  } catch (e) {
+    await processError(e, router);
+  }
+}
+
 async function changeDate() {
   if (startDate.value !== '' && endDate.value !== '') {
     await getReportData();
+    await fetchPieDiagram();
   }
 }
 
@@ -132,6 +148,15 @@ async function changeHideEmptyCategories() {
             </div>
 
             <div class="larger-first"></div>
+          </div>
+
+          <div class="diagram-container">
+            <div v-if="pieDiagramUrl">
+              <img :src="pieDiagramUrl" alt="Pie diagram" />
+            </div>
+            <div v-else>
+              <span>{{ $t('message.loadingDiagram') }}</span>
+            </div>
           </div>
 
           <div class="report-section">

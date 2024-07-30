@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from icecream import ic
 from sqlalchemy.orm import Session
@@ -8,8 +10,10 @@ from app.logger_config import logger
 from app.schemas.reports_schema import (CashFlowReportInputSchema, CashFlowReportOutputSchema,
                                         BalanceReportInputSchema, BalanceReportOutputSchema,
                                         ExpensesReportInputSchema, ExpensesReportOutputItemSchema)
+
 from app.services.errors import AccessDenied
-from app.services.reports import get_cash_flows, get_balance_report, get_expenses_by_categories
+from app.services.reports import get_cash_flows, get_balance_report, get_expenses_by_categories, get_diagram
+from app.services.diagrams.builder import prepare_data
 
 ic.configureOutput(includeContext=True)
 
@@ -96,10 +100,37 @@ def expenses_by_categories(request: Request,
                                                   db,
                                                   input_data.start_date,
                                                   input_data.end_date,
-                                                  input_data.categories,
                                                   input_data.hide_empty_categories)
 
         return result
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error generting report')
+
+
+@router.get('/diagram/{diagram_type}/{start_date}/{end_date}')
+def diagram(request: Request, diagram_type: str, start_date: str, end_date: str, db: Session = Depends(get_db)):
+    user_id = request.state.user['id']
+    logger.info(f"Getting diagram for user_id: {user_id}, diagram_type: {diagram_type},"
+                f" start_date: {start_date}, end_date: {end_date}")
+
+    expenses = get_expenses_by_categories(user_id,
+                                          db,
+                                          datetime.strptime(start_date, '%Y-%m-%d'),
+                                          datetime.strptime(end_date, '%Y-%m-%d'),
+                                          hide_empty_categories=False)
+    return get_diagram(expenses, db, user_id)
+
+
+@router.get('/expenses-data/{start_date}/{end_date}')
+def expenses_data(request: Request, start_date: str, end_date: str, db: Session = Depends(get_db)):
+    user_id = request.state.user['id']
+    logger.info(f"Getting data for diagram for user_id: {user_id}, "
+                f" start_date: {start_date}, end_date: {end_date}")
+
+    expenses = get_expenses_by_categories(user_id,
+                                          db,
+                                          datetime.strptime(start_date, '%Y-%m-%d'),
+                                          datetime.strptime(end_date, '%Y-%m-%d'),
+                                          hide_empty_categories=False)
+    return prepare_data(expenses, None)

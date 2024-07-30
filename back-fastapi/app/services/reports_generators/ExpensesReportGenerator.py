@@ -20,13 +20,11 @@ class ExpensesReportGenerator:
                  db: Session,
                  start_date: datetime,
                  end_date: datetime,
-                 categories_ids: list[int],
                  hide_empty_categories: bool = False):
         self._db = db
         self.user_id = user_id
         self.start_date = start_date
         self.end_date = end_date
-        self.categories_ids = categories_ids
         self.hide_empty_categories = hide_empty_categories
 
         self._user_categories_with_expenses: list = []

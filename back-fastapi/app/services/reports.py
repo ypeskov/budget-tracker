@@ -4,10 +4,13 @@ from sqlalchemy.orm import Session
 from icecream import ic
 
 from app.logger_config import logger
+from app.models.Currency import Currency
+from app.models.User import User
 
 from app.services.reports_generators.CashFlowReportGenerator import CashFlowReportGenerator
 from app.services.reports_generators.BalanceReportGenerator import BalanceReportGenerator
 from app.services.reports_generators.ExpensesReportGenerator import ExpensesReportGenerator
+from app.services.diagrams.builder import build_diagram, prepare_data
 
 ic.configureOutput(includeContext=True)
 
@@ -41,7 +44,6 @@ def get_expenses_by_categories(user_id: int,
                                db: Session,
                                start_date: datetime,
                                end_date: datetime,
-                               categories_ids: list[int],
                                hide_empty_categories: bool = False) -> dict:
     """ Get all expenses within a given time period """
 
@@ -49,8 +51,15 @@ def get_expenses_by_categories(user_id: int,
                                                         db,
                                                         start_date,
                                                         end_date,
-                                                        categories_ids,
                                                         hide_empty_categories)
     expenses = expenses_report_generator.prepare_data().get_expenses()
 
     return expenses
+
+
+def get_diagram(expenses: dict, db: Session, user_id: int) -> dict:
+    user: User = db.query(User).get(user_id)
+    base_currency: Currency = user.base_currency
+
+    aggregated_categories = prepare_data(expenses, None)
+    return build_diagram(aggregated_categories, base_currency.code)
