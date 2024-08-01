@@ -12,7 +12,7 @@ const userStore = useUserStore();
 
 const startDate = ref(DateTime.now().startOf('month').toISODate()); // 'YYYY-MM-DD'
 const endDate = ref(DateTime.now().toISODate()); // 'YYYY-MM-DD'
-const hideEmptyCategories = ref(false);
+const hideEmptyCategories = ref(true);
 let expensesReportData = reactive([]);
 
 let groupSum = 0;
