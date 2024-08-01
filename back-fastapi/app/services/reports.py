@@ -10,7 +10,7 @@ from app.models.User import User
 from app.services.reports_generators.CashFlowReportGenerator import CashFlowReportGenerator
 from app.services.reports_generators.BalanceReportGenerator import BalanceReportGenerator
 from app.services.reports_generators.ExpensesReportGenerator import ExpensesReportGenerator
-from app.services.diagrams.builder import build_diagram, prepare_data
+from app.services.diagrams.builder import build_diagram, prepare_data, combine_small_categories
 
 ic.configureOutput(includeContext=True)
 
@@ -63,3 +63,16 @@ def get_diagram(expenses: dict, db: Session, user_id: int) -> dict:
 
     aggregated_categories = prepare_data(expenses, None)
     return build_diagram(aggregated_categories, base_currency.code)
+
+
+def get_expenses_diagram_data(user_id: int,
+                              db: Session,
+                              start_date: datetime,
+                              end_date: datetime,
+                              hide_empty_categories: bool = False) -> dict:
+    expenses = get_expenses_by_categories(user_id, db, start_date, end_date, hide_empty_categories)
+
+    diagram_data = combine_small_categories(prepare_data(expenses, None))
+    diagram_data.sort(key=lambda x: x['amount'], reverse=True)
+
+    return diagram_data
