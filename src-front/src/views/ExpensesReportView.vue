@@ -171,7 +171,7 @@ async function changeHideEmptyCategories() {
                 <span class="text-muted">{{ $t('message.loadingDiagram') }}</span>
               </div>
             </div>
-            <div class="data-container ms-3">
+            <div class="data-container">
               <ul class="list-group">
                 <li v-for="category in aggregatedCategories"
                     :key="category.id"
