@@ -179,6 +179,10 @@ async function changeHideEmptyCategories() {
                   <span>{{ category.label }}</span>
                   <span>{{ $n(category.amount, 'decimal') }}, {{ userStore.baseCurrency }}</span>
                 </li>
+                <li class="list-group-item expenses-total d-flex justify-content-between align-items-center">
+                  <span>{{ $t('message.totalExpenses')}}</span>
+                  <span>{{ $n(aggregatedSum, 'decimal') }} {{ userStore.baseCurrency }}</span>
+                </li>
               </ul>
             </div>
           </div>
@@ -264,6 +268,12 @@ async function changeHideEmptyCategories() {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
+}
+
+.expenses-total {
+  border: 1px solid;
+  font-weight: bold;
+  background-color: $item-hover-background-color;
 }
 
 .prev-sum {

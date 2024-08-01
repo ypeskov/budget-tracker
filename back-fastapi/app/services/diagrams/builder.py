@@ -46,7 +46,6 @@ def prepare_data(categories, category_id=None):
 def combine_small_categories(aggregated_categories, threshold=0.02):
     """ Combines small categories into one category """
     total_sum = sum(cat['amount'] for cat in aggregated_categories)
-    ic(total_sum)
 
     new_other_category = {
         'category_id': 0,
