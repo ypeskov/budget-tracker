@@ -74,7 +74,10 @@ def combine_small_categories(aggregated_categories, threshold=0.02):
 
 def build_diagram(aggregated_categories, currency_code):
     aggregated_categories = combine_small_categories(aggregated_categories)
-    labels = [cat['label'] for cat in aggregated_categories]
+    aggregated_categories.sort(key=lambda x: x['amount'], reverse=True)
+
+    labels = [f"{cat['label']}"
+              for cat in aggregated_categories]
     total_sum = sum(cat['amount'] for cat in aggregated_categories)
 
     if total_sum > 0:
@@ -83,8 +86,7 @@ def build_diagram(aggregated_categories, currency_code):
         return None
 
     def autopct(pct):
-        absolute = int(pct / 100. * float(total_sum))
-        return f'{pct:.1f}%\n({absolute:d})'
+        return f'{pct:.1f}%'
 
     fig = Figure()
     ax = fig.subplots()
@@ -92,7 +94,7 @@ def build_diagram(aggregated_categories, currency_code):
            labels=labels,
            autopct=autopct,
            shadow=False,
-           pctdistance=0.8,
+           pctdistance=0.75,
            labeldistance=1.1,
            rotatelabels=False,
            startangle=0)

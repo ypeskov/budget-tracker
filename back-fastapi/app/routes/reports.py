@@ -9,11 +9,13 @@ from app.dependencies.check_token import check_token
 from app.logger_config import logger
 from app.schemas.reports_schema import (CashFlowReportInputSchema, CashFlowReportOutputSchema,
                                         BalanceReportInputSchema, BalanceReportOutputSchema,
-                                        ExpensesReportInputSchema, ExpensesReportOutputItemSchema)
-
-from app.services.errors import AccessDenied
-from app.services.reports import get_cash_flows, get_balance_report, get_expenses_by_categories, get_diagram
+                                        ExpensesReportInputSchema, ExpensesReportOutputItemSchema,
+                                        )
 from app.services.diagrams.builder import prepare_data
+from app.services.errors import AccessDenied
+from app.services.reports import (get_cash_flows, get_balance_report, get_expenses_by_categories,
+                                  get_diagram, get_expenses_diagram_data,
+                                  )
 
 ic.configureOutput(includeContext=True)
 
@@ -122,15 +124,15 @@ def diagram(request: Request, diagram_type: str, start_date: str, end_date: str,
     return get_diagram(expenses, db, user_id)
 
 
-@router.get('/expenses-data/{start_date}/{end_date}')
-def expenses_data(request: Request, start_date: str, end_date: str, db: Session = Depends(get_db)):
+@router.post('/expenses-data/')
+def expenses_data(request: Request, input_data: ExpensesReportInputSchema, db: Session = Depends(get_db)):
     user_id = request.state.user['id']
     logger.info(f"Getting data for diagram for user_id: {user_id}, "
-                f" start_date: {start_date}, end_date: {end_date}")
+                f" start_date: {input_data.start_date}, end_date: {input_data.end_date}")
 
-    expenses = get_expenses_by_categories(user_id,
-                                          db,
-                                          datetime.strptime(start_date, '%Y-%m-%d'),
-                                          datetime.strptime(end_date, '%Y-%m-%d'),
-                                          hide_empty_categories=False)
-    return prepare_data(expenses, None)
+    expenses = get_expenses_diagram_data(user_id,
+                                         db,
+                                         input_data.start_date,
+                                         input_data.end_date,
+                                         hide_empty_categories=False)
+    return expenses

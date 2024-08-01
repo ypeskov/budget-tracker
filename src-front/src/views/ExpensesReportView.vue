@@ -20,6 +20,8 @@ let currentParentId = null;
 let start = true;
 
 const pieDiagramUrl = ref(''); // 'http://localhost:8000/reports/diagram/pie/2024-07-01/2024-07-31'
+const aggregatedCategories = ref([]);
+const aggregatedSum = ref(0);
 
 function isNewGroup(category) {
   if (category.parentId === null) {
@@ -75,10 +77,20 @@ async function getReportData() {
   groupSum = 0;
 }
 
+async function getDiagramData() {
+  aggregatedCategories.value.splice(0);
+  aggregatedCategories.value = await Services.reportsService.getReport('expenses-data', {
+    startDate: startDate.value,
+    endDate: endDate.value,
+  });
+  aggregatedSum.value = aggregatedCategories.value.reduce((acc, category) => acc + category.amount, 0);
+}
+
 onBeforeMount(async () => {
   try {
     await getReportData();
     await fetchPieDiagram();
+    await getDiagramData();
   } catch (e) {
     await processError(e, router);
   }
@@ -100,6 +112,7 @@ async function changeDate() {
   if (startDate.value !== '' && endDate.value !== '') {
     await getReportData();
     await fetchPieDiagram();
+    await getDiagramData();
   }
 }
 
@@ -150,12 +163,24 @@ async function changeHideEmptyCategories() {
             <div class="larger-first"></div>
           </div>
 
-          <div class="diagram-container">
-            <div v-if="pieDiagramUrl">
-              <img :src="pieDiagramUrl" alt="No Diagram" />
+          <div class="diagram-container" v-if="aggregatedSum > 0">
+            <div class="diagram-img-container">
+              <div v-if="pieDiagramUrl">
+                <img :src="pieDiagramUrl" alt="No Diagram" class="img-fluid" />
+              </div>
+              <div v-else>
+                <span class="text-muted">{{ $t('message.loadingDiagram') }}</span>
+              </div>
             </div>
-            <div v-else>
-              <span>{{ $t('message.loadingDiagram') }}</span>
+            <div class="data-container ms-3">
+              <ul class="list-group">
+                <li v-for="category in aggregatedCategories"
+                    :key="category.id"
+                    class="list-group-item d-flex justify-content-between align-items-center">
+                  <span>{{ category.label }}</span>
+                  <span>{{ $n(category.amount, 'decimal') }}, {{ userStore.baseCurrency }}</span>
+                </li>
+              </ul>
             </div>
           </div>
 
@@ -209,6 +234,34 @@ async function changeHideEmptyCategories() {
 @import '@/assets/common.scss';
 
 .date-section {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.diagram-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.diagram-img-container {
+  flex: 0 0 60%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.data-container {
+  flex: 0 0 40%;
+}
+
+.data-container ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.data-container li {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
