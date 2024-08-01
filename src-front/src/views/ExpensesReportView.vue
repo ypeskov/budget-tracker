@@ -152,7 +152,7 @@ async function changeHideEmptyCategories() {
 
           <div class="diagram-container">
             <div v-if="pieDiagramUrl">
-              <img :src="pieDiagramUrl" alt="Pie diagram" />
+              <img :src="pieDiagramUrl" alt="No Diagram" />
             </div>
             <div v-else>
               <span>{{ $t('message.loadingDiagram') }}</span>
