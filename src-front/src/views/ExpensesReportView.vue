@@ -17,7 +17,6 @@ let expensesReportData = reactive([]);
 
 let groupSum = 0;
 let currentParentId = null;
-let start = true;
 
 const pieDiagramUrl = ref(''); // 'http://localhost:8000/reports/diagram/pie/2024-07-01/2024-07-31'
 const aggregatedCategories = ref([]);
@@ -37,12 +36,13 @@ function isNewGroup(category) {
   return false;
 }
 
-function makeNotStart() {
-  start = false;
-}
+function isStart(category) {
+  // check if the category is the first in the expensesReportData
+  if (expensesReportData[0].id === category.id) {
+    return true;
+  }
 
-function isStart() {
-  return start;
+  return false;
 }
 
 function addGroupSum(category) {
@@ -73,7 +73,6 @@ async function getReportData() {
 
   expensesReportData.splice(0);
   expensesReportData.push(...tmpData);
-  start = true;
   groupSum = 0;
 }
 
@@ -188,12 +187,12 @@ async function changeHideEmptyCategories() {
             <div v-if="Object.keys(expensesReportData).length > 0">
 
               <div v-for="(category) in expensesReportData" :key="category.id" class="category-item-container">
-                <div v-if="isNewGroup(category) && !isStart()" class="prev-sum">
+                <div v-if="isNewGroup(category) && !isStart(category)" class="prev-sum">
                   {{ $n(getCurrentGroupSum(), 'decimal') }}&nbsp;{{ userStore.baseCurrency }}
                   {{ resetGroupSum() }}
                   {{ addGroupSum(category) }}
                 </div>
-                <div v-else>{{ makeNotStart(category) }}{{ addGroupSum(category) }}</div>
+                <div v-else>{{ addGroupSum(category) }}</div>
 
                 <RouterLink class="row-category-expenses" :to="{
                   name: 'transactions',
