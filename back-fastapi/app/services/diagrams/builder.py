@@ -46,6 +46,7 @@ def prepare_data(categories, category_id=None):
 def combine_small_categories(aggregated_categories, threshold=0.02):
     """ Combines small categories into one category """
     total_sum = sum(cat['amount'] for cat in aggregated_categories)
+    ic(total_sum)
 
     new_other_category = {
         'category_id': 0,
@@ -54,18 +55,19 @@ def combine_small_categories(aggregated_categories, threshold=0.02):
     }
 
     small_categories = []
-    for cat in aggregated_categories:
-        size = cat['amount'] / total_sum
+    if total_sum > 0:
+        for cat in aggregated_categories:
+            size = cat['amount'] / total_sum
 
-        if size < threshold:
-            new_other_category['amount'] += cat['amount']
-            small_categories.append(cat)
+            if size < threshold:
+                new_other_category['amount'] += cat['amount']
+                small_categories.append(cat)
 
-    for cat in small_categories:
-        aggregated_categories.remove(cat)
+        for cat in small_categories:
+            aggregated_categories.remove(cat)
 
-    if new_other_category['amount'] > 0:  # type: ignore
-        aggregated_categories.append(new_other_category)
+        if new_other_category['amount'] > 0:  # type: ignore
+            aggregated_categories.append(new_other_category)
 
     return aggregated_categories
 
@@ -74,7 +76,11 @@ def build_diagram(aggregated_categories, currency_code):
     aggregated_categories = combine_small_categories(aggregated_categories)
     labels = [cat['label'] for cat in aggregated_categories]
     total_sum = sum(cat['amount'] for cat in aggregated_categories)
-    sizes = [cat['amount'] / total_sum for cat in aggregated_categories]
+
+    if total_sum > 0:
+        sizes = [cat['amount'] / total_sum for cat in aggregated_categories]
+    else:
+        return None
 
     def autopct(pct):
         absolute = int(pct / 100. * float(total_sum))
