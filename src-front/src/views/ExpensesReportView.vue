@@ -249,14 +249,14 @@ async function changeHideEmptyCategories() {
 }
 
 .diagram-img-container {
-  flex: 0 0 60%;
+  flex: 0 0 50%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .data-container {
-  flex: 0 0 40%;
+  flex: 0 0 50%;
 }
 
 .data-container ul {
