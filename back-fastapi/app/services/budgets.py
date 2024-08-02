@@ -30,12 +30,14 @@ def create_new_budget(user_id: int,
     try:
         # Check if it's an update operation
         if hasattr(budget_dto, "id") and budget_dto.id:
-            budget: Budget | None = db.query(Budget).filter(Budget.id == budget_dto.id).one_or_none()
+            budget: Budget | None = (db.query(Budget)
+                                     .filter(Budget.id == budget_dto.id,
+                                             Budget.user_id == user_id)
+                                     .one_or_none())
             if budget is None:
                 raise NotFoundError(f"Budget with id {budget_dto.id} not found.")
+
             budget.collected_amount = Decimal(0)
-            if budget is None:
-                raise ValueError(f"Budget with id {budget_dto.id} not found.")
             logger.info(f"Updating budget with id: {budget_dto.id}")
         else:
             budget = Budget(user_id=user_id)
@@ -85,77 +87,40 @@ def fill_budget_with_existing_transactions(db: Session, budget: Budget):
         Transaction.date_time.between(budget.start_date, budget.end_date)
     ).all()
 
+    included_categories = [int(category_id) for category_id in budget.included_categories.split(",")]
+
+    budget.collected_amount = Decimal(0)
     for transaction in transactions:
-        if budget.included_categories:
-            included_categories = [int(category_id) for category_id in budget.included_categories.split(",")]
-            if transaction.category_id not in included_categories:
-                # Skip transactions that do not belong to the budget
-                continue
-
-        assert transaction.date_time is not None, f"Transaction {transaction.id} has no date_time"
-
-        adjusted_amount: Decimal = calc_amount(transaction.amount,
-                                               transaction.account.currency.code,
-                                               transaction.date_time.date(),
-                                               budget.currency.code,
-                                               db)
-        budget.collected_amount += adjusted_amount
+        if transaction.category_id in included_categories:
+            adjusted_amount: Decimal = calc_amount(transaction.amount,
+                                                   transaction.account.currency.code,
+                                                   transaction.date_time.date(),
+                                                   budget.currency.code,
+                                                   db)
+            budget.collected_amount += adjusted_amount
 
     db.commit()
     logger.info(f"Filled budget with existing transactions for budget: {budget.id}")
 
 
-def update_budget_with_amount(db: Session,
-                              transaction: Transaction,
-                              prev_transaction: Transaction,
-                              adjusted_amount: Decimal):
+def update_budget_with_amount(db: Session, user_id: int, ):
     """ Update collected amount for all applicable budgets """
-    logger.info(f"Updating collected amount for all applicable budgets for transaction: {transaction}")
+    logger.info(f"Updating budgets for user with id: {user_id}")
 
-    user_budgets: list[Budget] = (db.query(Budget)
-                                  .filter(Budget.user_id == transaction.user_id)
-                                  .all())
-    is_same_category = transaction.category_id == prev_transaction.category_id
+    user_budgets: list[Budget] = db.query(Budget).filter(Budget.user_id == user_id, ).all()
 
+    # just update all budgets not to complicate the logic
     for budget in user_budgets:
-        if budget.included_categories:
-            included_categories = [int(category_id) for category_id in budget.included_categories.split(",")]
-            if is_same_category and transaction.category_id not in included_categories:
-                # Skip budgets that do not include the transaction category
-                continue
-            elif not is_same_category \
-                    and prev_transaction.category_id not in included_categories \
-                    and transaction.category_id not in included_categories:
-                # Skip budgets that do not include the transaction category and the previous category
-                continue
-            elif not is_same_category \
-                    and prev_transaction.category_id in included_categories \
-                    and transaction.category_id not in included_categories:
-                # reduce the amount from the budget if the previous category was included
-                adjusted_amount = -adjusted_amount
-            elif not is_same_category \
-                    and prev_transaction.category_id not in included_categories \
-                    and transaction.category_id in included_categories:
-                # add the amount to the budget if the new category is included
-                pass
-            else:
-                # in theory, this should never happen
-                pass
+        fill_budget_with_existing_transactions(db, budget)
 
-        if budget.start_date <= transaction.date_time <= budget.end_date:  # type: ignore
-            adjusted_amount_in_base_curr = calc_amount(adjusted_amount,
-                                          transaction.account.currency.code,
-                                          transaction.date_time.date(),  # type: ignore
-                                          budget.currency.code,
-                                          db)
-            budget.collected_amount += adjusted_amount_in_base_curr
-            db.commit()
-            logger.info(f"Updated collected amount for budget: {budget}")
+    logger.info(f"Updated budgets for user with id: {user_id}")
 
 
 def get_user_budgets(user_id: int, db: Session):
     """ Get all budgets for user """
     logger.info(f"Getting all budgets for user_id: {user_id}")
+
+    include_archived = False
 
     budgets = (
         db.query(Budget)
@@ -163,7 +128,7 @@ def get_user_budgets(user_id: int, db: Session):
         .filter(
             Budget.user_id == user_id,
             Budget.is_deleted.is_(False),
-            # Budget.is_archived.is_(False)
+            Budget.is_archived.is_(include_archived)
         )
         .order_by(Budget.is_archived, Budget.end_date.asc())
         .all()

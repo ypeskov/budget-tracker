@@ -114,20 +114,7 @@ class TransactionManager:
 
         #  update budgets if transaction is not transfer
         if not self._transaction.is_transfer and not self._transaction.is_income:
-            if self.is_update:
-                #  if category was not changed then update budget with difference between new and old amount
-                if self._transaction.category_id == self.prev_transaction_state.category_id:
-                    adjusted_amount = self._transaction.amount - self.prev_transaction_state.amount
-                else:  # if category was changed then update budget with new amount
-                    adjusted_amount = self._transaction.amount
-            else:
-                adjusted_amount = self._transaction.amount
-
-            try:
-                update_budget_with_amount(self.db, self._transaction, self.prev_transaction_state, adjusted_amount)
-            except Exception as e:
-                logger.exception(e)
-                #  do nothing if budget update failed
+            update_budget_with_amount(self.db, self.user_id)
 
         update_transactions_new_balances(self._transaction.account_id, self.db)
         if self._transaction.is_transfer:
@@ -155,7 +142,7 @@ class TransactionManager:
             indirect_transaction_type.correct_prev_balance()
             self.db.add(indirect_transaction)
         else:
-            update_budget_with_amount(self.db, self._transaction, self.prev_transaction_state, -self._transaction.amount)
+            update_budget_with_amount(self.db, self.user_id)
 
         self._transaction.is_deleted = True
         self.db.add(self._transaction)
