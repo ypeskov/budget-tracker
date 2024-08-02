@@ -116,24 +116,30 @@ def update_budget_with_amount(db: Session, user_id: int, ):
     logger.info(f"Updated budgets for user with id: {user_id}")
 
 
-def get_user_budgets(user_id: int, db: Session):
+def get_user_budgets(user_id: int, db: Session, include: str = 'all') -> list[Budget]:
     """ Get all budgets for user """
     logger.info(f"Getting all budgets for user_id: {user_id}")
 
-    include_archived = False
-
-    budgets = (
+    budgets_query = (
         db.query(Budget)
         .options(joinedload(Budget.currency))
         .filter(
             Budget.user_id == user_id,
             Budget.is_deleted.is_(False),
-            Budget.is_archived.is_(include_archived)
         )
         .order_by(Budget.is_archived, Budget.end_date.asc())
-        .all()
     )
 
+    if include == 'all':
+        pass
+    elif include == 'active':
+        budgets_query = budgets_query.filter(Budget.is_archived.is_(False))
+    elif include == 'archived':
+        budgets_query = budgets_query.filter(Budget.is_archived.is_(True))
+    else:
+        raise ValueError(f"Invalid value for include: {include}")
+
+    budgets: list[Budget] = budgets_query.all()  # type: ignore
     for budget in budgets:
         budget.end_date -= timedelta(days=1)  # subtract 1 day to exclude the full end date
 

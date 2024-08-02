@@ -103,6 +103,8 @@
     "baseCurrency": "Base currency",
     "expensesReport": "Expenses report",
     "newBudget": "New budget",
-    "archive": "Archive"
+    "archive": "Archive",
+    "showArchivedBudgets": "Show archived budgets",
+    "hideArchivedBudgets": "Hide archived budgets"
   }
 }

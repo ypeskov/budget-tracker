@@ -9,8 +9,8 @@ export class BudgetsService {
     this.userService = userService;
   }
 
-  async getUserBudgets() {
-    let budgetUrl = `${budgetsPrefix}/`;
+  async getUserBudgets(includeType) {
+    let budgetUrl = `${budgetsPrefix}/?include=${includeType}`;
 
     return await request(budgetUrl, {}, { userService: this.userService });
   }

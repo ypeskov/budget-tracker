@@ -9,8 +9,10 @@ import BudgetNewComponent from '@/components/budgets/BudgetNewComponent.vue';
 
 const router = useRouter();
 
-let budgets = reactive([]);
+let activeBudgets = reactive([]);
+let archivedBudgets = reactive([]);
 let currentBudget = reactive({});
+const showArchived = ref(false);
 
 onBeforeMount(async () => {
   await fetchBudgets();
@@ -18,9 +20,9 @@ onBeforeMount(async () => {
 
 const fetchBudgets = async () => {
   try {
-    const response = await Services.budgetsService.getUserBudgets();
-    budgets.length = 0;
-    budgets.push(...response);
+    const response = await Services.budgetsService.getUserBudgets('active');
+    activeBudgets.splice(0);
+    activeBudgets.push(...response);
   } catch (e) {
     await processError(e, router);
   }
@@ -50,6 +52,21 @@ const editBudget = (budget) => {
   currentBudget = budget;
   openBudgetModal();
 };
+
+const showArchivedBudgets = async () => {
+  try {
+    const response = await Services.budgetsService.getUserBudgets('archived');
+    archivedBudgets.splice(0);
+    archivedBudgets.push(...response);
+  } catch (e) {
+    await processError(e, router);
+  }
+  showArchived.value = !showArchived.value;
+};
+
+const hideArchivedBudgets = () => {
+  showArchived.value = false;
+};
 </script>
 
 <template>
@@ -64,7 +81,23 @@ const editBudget = (budget) => {
       </div>
 
       <div class="row">
-        <BudgetsList :budgets="budgets" @budget-selected="editBudget" />
+        <BudgetsList :budgets="activeBudgets" @budget-selected="editBudget" />
+      </div>
+
+      <div class="row">
+        <div class="col-4 mt-4">
+          <button v-if="!showArchived" class="btn btn-primary w-100" @click="showArchivedBudgets">
+            <span>{{ $t('buttons.showArchivedBudgets') }}</span>
+          </button>
+
+          <button v-if="showArchived" class="btn btn-primary w-100" @click="hideArchivedBudgets">
+            <span>{{ $t('buttons.hideArchivedBudgets') }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div v-if="showArchived" class="row">
+        <BudgetsList :budgets="archivedBudgets" @budget-selected="editBudget" />
       </div>
 
       <teleport to="body">

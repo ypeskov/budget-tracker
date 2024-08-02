@@ -49,13 +49,16 @@ def update(request: Request, input_dto: EditBudgetInputSchema, db: Session = Dep
 
 
 @router.get('/', response_model=list[BudgetSchema])
-def get_budgets(request: Request, db: Session = Depends(get_db)):
+def get_budgets(request: Request, include: str = 'all', db: Session = Depends(get_db)):
     """ Get all budgets """
     logger.info(f"Getting all budgets for user_id: {request.state.user['id']}")
 
     try:
-        budgets = get_user_budgets(user_id=request.state.user['id'], db=db)
+        budgets = get_user_budgets(user_id=request.state.user['id'], db=db, include=include)
         return budgets
+    except ValueError as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid include parameter')
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error getting budgets')

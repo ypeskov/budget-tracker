@@ -103,6 +103,8 @@
     "baseCurrency": "Базова валюта",
     "expensesReport": "Звіт по витратам",
     "newBudget": "Новий бюджет",
-    "archive": "Архівувати"
+    "archive": "Архівувати",
+    "showArchivedBudgets": "Показати архівовані бюджети",
+    "hideArchivedBudgets": "Приховати архівовані бюджети"
   }
 }
