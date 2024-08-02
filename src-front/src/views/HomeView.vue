@@ -21,7 +21,7 @@ if (userStore.user.email) {
             {{ $t('message.welcome') }}, {{ userStore.user.first_name }} {{ userStore.user.last_name }}
           </div>
           <div v-else>
-            <RouterLink :to="{name: 'login'}">{{ $t('menu.login') }}</RouterLink>
+            <RouterLink :to="{name: 'login'}" class="btn btn-primary">{{ $t('menu.login') }}</RouterLink>
           </div>
         </div>
       </div>
