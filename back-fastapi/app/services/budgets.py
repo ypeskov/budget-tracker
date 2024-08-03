@@ -141,7 +141,7 @@ def get_user_budgets(user_id: int, db: Session, include: str = 'all') -> list[Bu
 
     budgets: list[Budget] = budgets_query.all()  # type: ignore
     for budget in budgets:
-        budget.end_date -= timedelta(days=1)  # subtract 1 day to exclude the full end date
+        budget.end_date -= timedelta(days=1)  # subtract 1 day to exclude the full end date stored in the database
 
     return budgets
 

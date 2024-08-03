@@ -14,7 +14,7 @@ from app.services.errors import AccessDenied, InvalidCategory, InvalidAccount
 from app.services.transaction_management.NonTransferTypeTransaction import NonTransferTypeTransaction
 from app.services.transaction_management.TransferTypeTransaction import TransferTypeTransaction
 from app.services.transaction_management.errors import InvalidTransaction
-from app.services.budgets import update_budget_with_amount
+from app.tasks.tasks import run_user_budgets_update
 
 ic.configureOutput(includeContext=True)
 
@@ -114,7 +114,7 @@ class TransactionManager:
 
         #  update budgets if transaction is not transfer
         if not self._transaction.is_transfer and not self._transaction.is_income:
-            update_budget_with_amount(self.db, self.user_id)
+            run_user_budgets_update.delay(self.user_id)
 
         update_transactions_new_balances(self._transaction.account_id, self.db)
         if self._transaction.is_transfer:
@@ -142,7 +142,7 @@ class TransactionManager:
             indirect_transaction_type.correct_prev_balance()
             self.db.add(indirect_transaction)
         else:
-            update_budget_with_amount(self.db, self.user_id)
+            run_user_budgets_update.delay(self.user_id)
 
         self._transaction.is_deleted = True
         self.db.add(self._transaction)
