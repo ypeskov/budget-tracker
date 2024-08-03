@@ -45,7 +45,6 @@ class CashFlowReportGenerator:
             Account.name,
             Currency.code.label("currency")
         ).filter(
-            Account.show_in_reports == True,  # noqa
             Account.user_id == self.user_id
         ).join(
             Currency, Account.currency_id == Currency.id
@@ -55,7 +54,6 @@ class CashFlowReportGenerator:
         self._accounts_info = {account.id: {"name": account.name, "currency": account.currency} for account in accounts}
 
     def get_cash_flows(self):
-        cash_flows = []
         prepared_results = self.prepare_data()
 
         today = datetime.now().date()
