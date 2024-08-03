@@ -9,7 +9,7 @@ from app.database import get_db
 from app.logger_config import logger
 from app.models.ActivationToken import ActivationToken
 from app.models.User import User
-from app.services.budgets import put_outdated_budgets_to_archive
+from app.services.budgets import put_outdated_budgets_to_archive, update_budget_with_amount
 from app.services.exchange_rates import update_exchange_rates as update_exchange_rates
 from app.tasks.errors import BackupPostgresDbError
 from app.utils.db.backup import backup_postgres_db
@@ -127,6 +127,24 @@ def run_daily_budgets_processing(task):
     logger.info('Daily budgets processing is requested')
 
     db = next(get_db())
-    put_outdated_budgets_to_archive(db)
+    try:
+        put_outdated_budgets_to_archive(db)
+    except Exception as e:
+        logger.error(e)
+        task.retry(exc=e)
+
+    return True
+
+
+@celery_app.task(bind=True, max_retries=10, default_retry_delay=30)
+def run_user_budgets_update(task, user_id: int):
+    logger.info(f'Updating budgets for user_id: {user_id}')
+
+    db = next(get_db())
+    try:
+        update_budget_with_amount(db, user_id)
+    except Exception as e:
+        logger.error(e)
+        task.retry(exc=e)
 
     return True
