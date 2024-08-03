@@ -24,8 +24,8 @@ CMD ["python", "-Xfrozen_modules=off", "-m", "uvicorn", "app.main:app", "--host"
 
 FROM python:3.12.3-slim-bookworm AS prod
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
