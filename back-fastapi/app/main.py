@@ -10,11 +10,13 @@
 # import pydevd_pycharm
 # pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
 
+import os
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import Settings
 from app.routes.auth import router as auth_router
 from app.routes.accounts import router as accounts_router
 from app.routes.transations import router as transaction_router
@@ -26,11 +28,13 @@ from app.routes.reports import router as reports_router
 from app.routes.management import router as management_router
 from app.routes.budgets import router as budgets_router
 
-from icecream import install
+from icecream import install, ic
 install()
 
+settings = Settings()
+is_production = settings.ENVIRONMENT == 'prod'
 
-app = FastAPI()
+app = FastAPI(docs_url=None if is_production else "/docs", redoc_url=None if is_production else "/redoc")
 
 origins = ['*', ]
 app.add_middleware(
