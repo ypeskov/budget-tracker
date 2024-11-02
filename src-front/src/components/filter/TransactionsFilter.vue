@@ -144,7 +144,7 @@ function closeCategoriesModal() {
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/common.scss';
+@use '@/assets/common.scss' as *;
 
 .filter-container {
   margin-bottom: 1vh;

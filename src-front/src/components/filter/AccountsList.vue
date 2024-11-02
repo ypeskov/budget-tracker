@@ -64,7 +64,7 @@ function toggleAccountInFilter(event) {
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/common.scss';
+@use '@/assets/common.scss' as *;
 
 .account-item {
   display: flex;

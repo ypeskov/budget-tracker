@@ -1,6 +1,6 @@
 <script setup>
 import { DateTime } from 'luxon';
-import { defineProps, ref, watchEffect } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 const props = defineProps({ 'isEdit': Boolean, 'transaction': Object });
 const emit = defineEmits(['dateTimeChanged']);

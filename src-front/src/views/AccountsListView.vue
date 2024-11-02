@@ -138,7 +138,7 @@ function balanceClass(balance) {
 </template>
 
 <style scoped lang="scss">
-@use '../assets/main.scss' as *;
+@use '@/assets/main.scss' as *;
 
 .account-name {
   white-space: nowrap;

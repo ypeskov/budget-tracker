@@ -1,6 +1,6 @@
 <script setup>
 import ModalWindow from '@/components/utils/ModalWindow.vue';
-import { defineProps, reactive, ref } from 'vue';
+import { ref } from 'vue';
 
 import { useCategoriesStore } from '@/stores/categories';
 import { Services } from '@/services/servicesConfig';

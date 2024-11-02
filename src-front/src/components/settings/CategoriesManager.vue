@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, onBeforeMount, reactive, ref } from 'vue';
+import { onBeforeMount, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Services } from '../../services/servicesConfig';

@@ -141,7 +141,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@import '../../assets/main.scss';
+@use '@/assets/main.scss' as *;
 
 .date-header {
   font-weight: bold;

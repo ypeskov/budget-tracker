@@ -64,7 +64,7 @@ const collectedAmountClass = (budget) => {
 </template>
 
 <style scoped lang="scss">
-@import '@/assets/common.scss';
+@use '@/assets/common.scss' as *;
 
 .budget-item-container {
   display: flex;

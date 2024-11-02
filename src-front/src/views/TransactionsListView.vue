@@ -16,7 +16,7 @@ const props = defineProps(['accountId', 'isAccountDetails', 'categories', 'start
 </template>
 
 <style scoped lang="scss">
-@import '../assets/main.scss';
+@use '@/assets/main.scss' as *;
 
 .transaction-element {
   overflow: hidden;
