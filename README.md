@@ -7,14 +7,15 @@ The main idea is to make self-hosted budget tracker that and keep info for yours
 Something like paranoid mode in the budget tracking world.
 
 ## Table of Contents
-  - [Local Development] (#Local-Development)
+  - [Local Development] (#local-development)
   - [Prerequisites](#prerequisites)
   - [Application setup](#application-setup)
 
 
 ## Local Development
+wdsdddd
 
-### Prerequisites
+## Prerequisites
 - PostgreSQL
 Db can be run in Docker container or right on your OS.
 - Redis
