@@ -10,8 +10,6 @@
 # import pydevd_pycharm
 # pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
 
-import os
-
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,9 +30,10 @@ from icecream import install, ic
 install()
 
 settings = Settings()
-is_production = settings.ENVIRONMENT == 'prod'
+is_production = (settings.ENVIRONMENT == 'prod')
 
-app = FastAPI(docs_url=None if is_production else "/docs", redoc_url=None if is_production else "/redoc")
+app = FastAPI(docs_url=None if is_production else "/docs",
+              redoc_url=None if is_production else "/redoc")
 
 origins = ['*', ]
 app.add_middleware(
