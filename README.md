@@ -66,6 +66,20 @@ npm install
 npm run dev
 ```
 
+## Build Docker Images and Push to Docker Hub
+### Build and push the back-end image
+```bash
+./build-and-push.sh push [tag version]
+```
+### Add commit and push master branch
+The script above will push the image to Docker Hub and will add a new version in docekr-compose file.
+
+### Login to server and pull the image
+```bash
+cd budget-tracker/
+./deploy_full.sh
+```
+
 ## License
 This project is licensed under the MIT license.
 
