@@ -28,7 +28,11 @@ OS steps:
 git clone git@github.com:ypeskov/budget-tracker.git budget-tracker
 ``` 
 2. Run PostgreSQL and Redis
-3. cd back-fastapi and create `.env` file in the root of the project and add the following variables:
+3. Go to back-end app directory
+```bash
+cd budget-tracker/back-fastapi
+```
+4. create `.env` file in the root of the back-end app directory
 ```bash
 cp .env.sample .env
 ```
