@@ -1,4 +1,4 @@
-# budget-tracker
+# Yet Another Budget Tracker
 
 ## Description
 This is a budget tracker application that allows users to track their incomes and expenses.
