@@ -13,6 +13,7 @@ Something like paranoid mode in the budget tracking world.
 
 
 # Local Development
+Package manager: poetry
 
 
 ## Prerequisites
@@ -40,12 +41,11 @@ cp .env.sample .env
 ```
 ### setup python virtual environment
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+poetry shell
 ```
 ### Install dependencies
 ```bash
-pip install -r requirements.txt
+poetry install
 ```
 ### Run the application Celery worker
 ```bash
