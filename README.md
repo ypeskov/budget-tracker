@@ -7,9 +7,10 @@ The main idea is to make self-hosted budget tracker that and keep info for yours
 Something like paranoid mode in the budget tracking world.
 
 ## Table of Contents
-- [Local Development] (#local-development)
-- [Usage](#usage)
-- [License](#license)
+  - [Local Development] (#Local-Development)
+  - [Prerequisites](#prerequisites)
+  - [Application setup](#application-setup)
+
 
 ## Local Development
 
