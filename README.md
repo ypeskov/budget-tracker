@@ -47,15 +47,15 @@ pip install -r requirements.txt
 ```
 6. Run the application Celery worker
 ```bash
-./run celery
+./run.sh celery
 ```
 7. Run the application Beat
 ```bash
-./run beat
+./run.sh beat
 ```
 8. Run the application FastAPI
 ```bash
-./run app
+./run.sh app
 ```
 9. Now run frontend part of the application
 ```bash
