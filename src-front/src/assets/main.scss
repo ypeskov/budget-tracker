@@ -1,4 +1,4 @@
-@import './common.scss';
+@use './common.scss' as *;
 
 .list-item:hover {
   background-color: $item-hover-background-color;
