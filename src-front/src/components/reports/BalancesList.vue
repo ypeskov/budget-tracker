@@ -42,7 +42,7 @@ const accountName = (name) => {
 </template>
 
 <style scoped lang="scss">
-@import '../../assets/common.scss';
+@use '@/assets/common.scss' as *;
 
 .account-total-balance {
   display: grid;

@@ -234,7 +234,7 @@ async function changeHideEmptyCategories() {
 </template>
 
 <style scoped lang="scss">
-@import '@/assets/common.scss';
+@use '@/assets/common.scss' as *;
 
 .date-section {
   display: flex;

@@ -47,7 +47,7 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
-@import '@/assets/main.scss';
+@use '@/assets/main.scss' as *;
 .loading {
   text-align: center;
   padding: 20px;
