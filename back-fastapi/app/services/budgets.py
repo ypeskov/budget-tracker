@@ -127,7 +127,7 @@ def get_user_budgets(user_id: int, db: Session, include: str = 'all') -> list[Bu
             Budget.user_id == user_id,
             Budget.is_deleted.is_(False),
         )
-        .order_by(Budget.is_archived, Budget.end_date.asc())
+        .order_by(Budget.is_archived, Budget.end_date.asc(), Budget.name.asc())
     )
 
     if include == 'all':
