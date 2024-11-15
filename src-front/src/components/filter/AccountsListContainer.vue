@@ -1,6 +1,4 @@
 <script setup>
-import { defineEmits } from 'vue';
-
 import AccountsList from '@/components/filter/AccountsList.vue';
 import CustomHr from '@/components/utilities/CustomHr.vue';
 
