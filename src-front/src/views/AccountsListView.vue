@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive, ref } from 'vue';
+import { computed, onBeforeMount, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import { Services } from '../services/servicesConfig';
@@ -72,6 +72,10 @@ function toggleHiddenAccounts(event) {
 function balanceClass(balance) {
   return balance < 0 ? 'text-danger' : 'text-success';
 }
+
+function availableBalanceCC(acc) {
+  return acc.balance + acc.creditLimit;
+}
 </script>
 
 <template>
@@ -123,7 +127,9 @@ function balanceClass(balance) {
               {{ acc.name }}
             </div>
             <div class="col account-balance" :class="balanceClass(acc.balance)">
-              <b>{{ $n(acc.balance, 'decimal') }}</b> {{ acc.currency.code }}
+              <b>{{ $n(acc.balance, 'decimal') }}</b>
+              <span v-if="acc.accountTypeId===4"> ({{ $n(availableBalanceCC(acc), 'decimal') }})</span>
+              {{ acc.currency.code }}
             </div>
             <div class="col-2 account-marks">
               <span v-if="acc.showInReports"

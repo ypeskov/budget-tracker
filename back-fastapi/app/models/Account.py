@@ -26,6 +26,7 @@ class Account(Base):
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
     initial_balance: Mapped[Decimal] = mapped_column(default=0)
     balance: Mapped[Decimal] = mapped_column(default=0)
+    credit_limit: Mapped[Decimal] = mapped_column(nullable=True)
     name: Mapped[str] = mapped_column(String(ACCOUNT_NAME_MAX_LENGTH), index=True)
     opening_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     comment: Mapped[str] = mapped_column(nullable=True)

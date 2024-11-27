@@ -3,6 +3,7 @@ import { computed, onBeforeMount, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 
+import { CREDIT_CARD_ACC_TYPE_ID } from '@/constants.js';
 import { Services } from '../../services/servicesConfig';
 import { processError } from '@/errors/errorHandlers';
 
@@ -14,6 +15,7 @@ const accountType = ref(1);
 const currency = ref(1);
 const name = ref('');
 const balance = ref(0);
+const creditLimit = ref(0);
 const openingDate = ref(DateTime.now().toFormat("yyyy-LL-dd'T'HH:mm"));
 const comment = ref('');
 const isHidden = ref(false);
@@ -24,6 +26,7 @@ if (props.accountDetails) {
   currency.value = props.accountDetails.currencyId;
   name.value = props.accountDetails.name;
   balance.value = props.accountDetails.balance;
+  creditLimit.value = props.accountDetails.creditLimit;
   openingDate.value = new DateTime(props.accountDetails.openingDate).toFormat("yyyy-LL-dd'T'HH:mm");
   comment.value = props.accountDetails.comment;
   isHidden.value = props.accountDetails.isHidden;
@@ -62,6 +65,7 @@ async function updateAccount() {
     currency_id: currency.value,
     name: name.value,
     balance: balance.value,
+    creditLimit: creditLimit.value,
     opening_date: openingDate.value,
     comment: comment.value,
     is_hidden: isHidden.value,
@@ -82,6 +86,7 @@ async function createAccount() {
     currency_id: currency.value,
     name: name.value,
     balance: balance.value,
+    creditLimit: creditLimit.value,
     opening_date: openingDate.value,
     comment: comment.value,
     is_hidden: isHidden.value,
@@ -113,6 +118,11 @@ async function createAccount() {
           </select>
           <i class="arrow"></i>
         </div>
+      </div>
+
+      <div v-if="accountType==CREDIT_CARD_ACC_TYPE_ID" class="form-group">
+        <label for="balance">{{ $t('message.creditLimit') }}</label>
+        <input type="number" id="balance" v-model="creditLimit" step="0.01">
       </div>
 
       <div class="form-group">

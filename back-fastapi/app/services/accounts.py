@@ -1,11 +1,10 @@
 from datetime import UTC
 from datetime import datetime
 
+from icecream import ic
 from sqlalchemy import asc, select, or_
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
-
-from icecream import ic
 
 from app.models.Account import Account
 from app.models.AccountType import AccountType
@@ -13,7 +12,6 @@ from app.models.Currency import Currency
 from app.models.User import User
 from app.schemas.account_schema import CreateAccountSchema, UpdateAccountSchema
 from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied
-
 
 ic.configureOutput(includeContext=True)
 
@@ -48,6 +46,7 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
             if account_dto.initial_balance:
                 account.initial_balance = account_dto.initial_balance
             account.balance = account_dto.balance
+            account.credit_limit = account_dto.credit_limit
             account.opening_date = account_dto.opening_date
             account.is_hidden = account_dto.is_hidden
             account.show_in_reports = account_dto.show_in_reports
@@ -59,6 +58,7 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
                           currency=currency,
                           initial_balance=account_dto.initial_balance,
                           balance=account_dto.balance,
+                          credit_limit=account_dto.credit_limit,
                           opening_date=account_dto.opening_date,
                           is_hidden=account_dto.is_hidden,
                           name=account_dto.name,

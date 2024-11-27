@@ -71,7 +71,8 @@
     "active": "Активний",
     "budgetDetails": "Деталі бюджету",
     "budgetLeft": "Залишилось бюджету",
-    "loadingDiagram": "Завантаження діаграми"
+    "loadingDiagram": "Завантаження діаграми",
+    "creditLimit": "Кредитний ліміт"
   },
   "menu": {
     "home": "Початок",

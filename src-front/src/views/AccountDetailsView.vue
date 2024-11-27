@@ -9,6 +9,7 @@ import { processError } from '@/errors/errorHandlers';
 
 import TransactionsListView from './TransactionsListView.vue';
 import newAccount from '../components/account/newAccount.vue';
+import { CREDIT_CARD_ACC_TYPE_ID } from '@/constants.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -69,6 +70,10 @@ const confirmDelete = async () => {
     showConfirmation.value = false; // Hide popup regardless of outcome
   }
 }
+
+const availableBalanceCC = computed(() => {
+  return accountDetails.balance + accountDetails.creditLimit;
+})
 </script>
 
 <template>
@@ -85,7 +90,9 @@ const confirmDelete = async () => {
 
         <div class="account-balance">
           <span>
-            {{$t('message.balance')}}: <b>{{ formattedBalance }}&nbsp;{{ accountDetails?.currency?.code }}</b>
+            {{$t('message.balance')}}: <b>{{ formattedBalance }}
+            <span v-if="accountDetails.accountType==CREDIT_CARD_ACC_TYPE_ID">({{ availableBalanceCC }})</span>
+            &nbsp;{{ accountDetails?.currency?.code }}</b>
           </span>
           <a class="edit-acc-icon" href="" @click.prevent="handleDeleteClick">
             <img src="/images/icons/delete-icon.svg" alt="Delete account" width="24" height="24"
