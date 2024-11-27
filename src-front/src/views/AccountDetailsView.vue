@@ -91,7 +91,7 @@ const availableBalanceCC = computed(() => {
         <div class="account-balance">
           <span>
             {{$t('message.balance')}}: <b>{{ formattedBalance }}
-            <span v-if="accountDetails.accountType==CREDIT_CARD_ACC_TYPE_ID">({{ availableBalanceCC }})</span>
+            <span v-if="accountDetails.accountTypeId==CREDIT_CARD_ACC_TYPE_ID">({{ availableBalanceCC }})</span>
             &nbsp;{{ accountDetails?.currency?.code }}</b>
           </span>
           <a class="edit-acc-icon" href="" @click.prevent="handleDeleteClick">
