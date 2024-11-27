@@ -69,7 +69,8 @@
     "active": "Active",
     "budgetDetails": "Budget details",
     "budgetLeft": "Budget left",
-    "loadingDiagram": "Loading diagram"
+    "loadingDiagram": "Loading diagram",
+    "creditLimit": "Credit limit"
   },
   "menu": {
     "home": "Home",
