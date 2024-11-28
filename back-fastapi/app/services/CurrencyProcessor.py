@@ -6,7 +6,6 @@ from icecream import ic
 from sqlalchemy.orm import Session
 
 from app.models.ExchangeRateHistory import ExchangeRateHistory
-from app.models.Transaction import Transaction
 
 ic.configureOutput(includeContext=True)
 

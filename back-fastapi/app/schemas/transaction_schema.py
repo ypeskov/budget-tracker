@@ -42,6 +42,10 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     user_id: int
     user: UserResponse
     account: AccountResponseSchema
+    base_currency_amount: Annotated[Decimal, PlainSerializer(
+        lambda x: float(x), return_type=float, when_used='json'
+    )]
+    base_currency_code: str
     new_balance: Annotated[Decimal, PlainSerializer(
         lambda x: float(x), return_type=float, when_used='json'
     )] | None = None

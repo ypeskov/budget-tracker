@@ -14,6 +14,7 @@ from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransa
 from app.services.errors import AccessDenied
 from app.services.transaction_management.TransactionManager import TransactionManager
 from app.services.transaction_management.errors import InvalidTransaction
+from app.services.CurrencyProcessor import calc_amount
 
 ic.configureOutput(includeContext=True)
 
@@ -89,6 +90,13 @@ def get_transactions(user_id: int, db: Session, params: dict | None = None, incl
     offset = (page - 1) * per_page
 
     transactions: list[Transaction] = stmt.offset(offset).limit(per_page).all()  # type: ignore
+    for transaction in transactions:
+        transaction.base_currency_amount = calc_amount(transaction.amount,
+                                                       transaction.account.currency.code,
+                                                       transaction.date_time.date(),
+                                                       transaction.user.base_currency.code,
+                                                       db)
+        transaction.base_currency_code = transaction.user.base_currency.code
 
     return transactions
 
