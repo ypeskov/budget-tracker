@@ -135,12 +135,6 @@ function availableBalanceCC(acc) {
               <div>
                 ({{ $n(acc.balanceInBaseCurrency, 'decimal') }} {{ baseCurrencyCode }})
               </div>
-
-            </div>
-            <div class="col-2 account-marks">
-              <span v-if="acc.showInReports"
-                    :title="$t('message.showInReports')"
-                    class="badge bg-success">&#10003;</span>
             </div>
           </div>
         </RouterLink>
@@ -153,9 +147,14 @@ function availableBalanceCC(acc) {
 @use '@/assets/main.scss' as *;
 
 .account-name {
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: normal;
+  -webkit-line-clamp: 3;
+  max-height: calc(3 * 1.2em);
+  line-height: 1.2;
 }
 
 .account-balance {
