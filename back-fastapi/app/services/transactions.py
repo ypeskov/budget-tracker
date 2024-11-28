@@ -117,6 +117,13 @@ def get_transaction_details(transaction_id: int, user_id: int, db: Session) -> T
         logger.error(f'User {user_id} tried to get not own transaction {transaction_id}')
         raise HTTPException(status.HTTP_403_FORBIDDEN)
 
+    transaction.base_currency_amount = calc_amount(transaction.amount,
+                                                   transaction.account.currency.code,
+                                                   transaction.date_time.date(),
+                                                   transaction.user.base_currency.code,
+                                                   db)
+    transaction.base_currency_code = transaction.user.base_currency.code
+
     return transaction
 
 
