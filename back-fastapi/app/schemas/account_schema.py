@@ -57,6 +57,9 @@ class AccountResponseSchema(CreateAccountSchema):
     currency: CurrencyResponseSchema
     account_type: AccountTypeResponseSchema
     is_deleted: bool
+    balance_in_base_currency: Annotated[Decimal, PlainSerializer(
+        lambda x: float(x or 0), return_type=float, when_used='json'
+    )] = None
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,
                               alias_generator=to_camel)

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeMount, reactive, ref } from 'vue';
+import { onBeforeMount, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import { Services } from '../services/servicesConfig';
@@ -127,9 +127,15 @@ function availableBalanceCC(acc) {
               {{ acc.name }}
             </div>
             <div class="col account-balance" :class="balanceClass(acc.balance)">
-              <b>{{ $n(acc.balance, 'decimal') }}</b>
-              <span v-if="acc.accountTypeId===4"> ({{ $n(availableBalanceCC(acc), 'decimal') }})</span>
-              {{ acc.currency.code }}
+              <div>
+                <b>{{ $n(acc.balance, 'decimal') }}</b>
+                <span v-if="acc.accountTypeId===4"> ({{ $n(availableBalanceCC(acc), 'decimal') }})</span>
+                {{ acc.currency.code }}
+              </div>
+              <div>
+                ({{ $n(acc.balanceInBaseCurrency, 'decimal') }} {{ baseCurrencyCode }})
+              </div>
+
             </div>
             <div class="col-2 account-marks">
               <span v-if="acc.showInReports"
