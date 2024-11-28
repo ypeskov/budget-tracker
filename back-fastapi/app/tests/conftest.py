@@ -124,6 +124,7 @@ def one_account(token):
 
     account_dict['initial_balance'] = float(account_dict['initial_balance'])
     account_dict['balance'] = float(account_dict['balance'])
+    account_dict['credit_limit'] = float(0)
     account_dict['opening_date'] = str(account_dict['opening_date'])
     account_dict['updated_at'] = str(account_dict['updated_at'])
     account_dict['created_at'] = str(account_dict['created_at'])

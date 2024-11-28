@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-source venv/bin/activate
-
 OLD_PYTHONPATH=$PYTHONPATH
 export PYTHONPATH=$(pwd):$PYTHONPATH
 export TEST_MODE=True
