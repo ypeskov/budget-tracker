@@ -123,6 +123,7 @@ onUnmounted(() => {
             <div :class="transactionClass(transaction)">
               <b>{{ $n(transaction.amount, 'decimal') }}{{ transaction.account.currency.code }}</b>
             </div>
+            <div>({{ $n(transaction.baseCurrencyAmount, 'decimal')}} {{ transaction.baseCurrencyCode }})</div>
             <div :class="balanceClass(transaction)">
               <span class="acc-name">{{ accountName(transaction.account) }}</span>
               | <span v-if="transaction.newBalance !== null">{{ $n(transaction.newBalance, 'decimal') }}</span>
