@@ -12,6 +12,7 @@ from app.models.Currency import Currency
 from app.models.User import User
 from app.schemas.account_schema import CreateAccountSchema, UpdateAccountSchema
 from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied
+from app.services.CurrencyProcessor import calc_amount
 
 ic.configureOutput(includeContext=True)
 
@@ -84,7 +85,13 @@ def get_user_accounts(user_id: int,
     else:
         query = query.filter(Account.is_hidden == False)
 
-    accounts = query.all()
+    accounts: list[Account] = query.all()
+    for account in accounts:
+        account.balance_in_base_currency = calc_amount(account.balance,
+                                                       account.currency.code,
+                                                       datetime.now(UTC).date(),
+                                                       account.user.base_currency.code,
+                                                       db)
 
     return accounts
 

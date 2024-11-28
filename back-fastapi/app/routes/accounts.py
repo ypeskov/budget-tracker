@@ -1,17 +1,14 @@
 from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.orm import Session
 
-from icecream import ic
-
 from app.database import get_db
+from app.dependencies.check_token import check_token
 from app.logger_config import logger
 from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema, UpdateAccountSchema
 from app.schemas.account_type_schema import AccountTypeResponseSchema
-from app.dependencies.check_token import check_token
 from app.services.accounts import (create_account, get_user_accounts, get_account_details, get_account_types,
                                    delete_account)
 from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied
-from app.models.User import User
 
 router = APIRouter(
     tags=['Accounts'],
