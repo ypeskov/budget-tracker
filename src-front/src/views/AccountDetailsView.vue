@@ -91,8 +91,8 @@ const availableBalanceCC = computed(() => {
         <div class="account-balance">
           <span>
             {{$t('message.balance')}}: <b>{{ formattedBalance }}
-            <span v-if="accountDetails.accountTypeId==CREDIT_CARD_ACC_TYPE_ID">({{ availableBalanceCC }})</span>
-            &nbsp;{{ accountDetails?.currency?.code }}</b>
+            <span v-if="accountDetails.accountTypeId==CREDIT_CARD_ACC_TYPE_ID"
+            >({{ $n(availableBalanceCC, 'decimal') }})</span>&nbsp;{{ accountDetails?.currency?.code }}</b>
           </span>
           <a class="edit-acc-icon" href="" @click.prevent="handleDeleteClick">
             <img src="/images/icons/delete-icon.svg" alt="Delete account" width="24" height="24"
