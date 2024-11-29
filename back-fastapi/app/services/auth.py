@@ -14,7 +14,7 @@ from app.models.Currency import Currency
 from app.models.DefaultCategory import DefaultCategory
 from app.models.UserCategory import UserCategory
 from app.models.ActivationToken import ActivationToken
-from app.schemas.user_schema import UserRegistration, UserLoginSchema
+from app.schemas.user_schema import UserRegistration, UserLoginSchema, UserBase
 from app.services.user_settings import generate_initial_settings
 from app.tasks.tasks import send_activation_email
 from app.services.errors import UserNotActivated, NotFoundError
@@ -25,7 +25,7 @@ ic.configureOutput(includeContext=True)
 SECRET_KEY = "your-secret-key"
 
 # JWT expiration time (30 minutes in this example)
-ACCESS_TOKEN_EXPIRE_MINUTES = 180
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 ACTIVATION_TOKEN_LENGTH = 16
 ACTIVATION_TOKEN_EXPIRES_HOURS = 24
@@ -111,10 +111,11 @@ def create_activation_token(user_id: int, db: Session):
     return activation_token
 
 
-def get_jwt_token(user_login: UserLoginSchema, db: Session):
+def get_jwt_token(user_login: UserBase | UserLoginSchema, db: Session):
     """
     Authenticate user and generate JWT.
     """
+    ic(user_login)
     user: User = db.query(User).filter(User.email == user_login.email).first()  # type: ignore
 
     if not user:

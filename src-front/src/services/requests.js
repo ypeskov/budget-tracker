@@ -28,6 +28,11 @@ export async function request(endPoint, params = {}, services = {}, authRequired
   const response = await fetch(`${BACKEND_HOST}${endPoint}`, params);
 
   if ([200, 201, 204].includes(response.status)) {
+    const newAccessToken = response.headers.get('new_access_token');
+    if (newAccessToken) {
+      userStore.accessToken = newAccessToken;
+      localStorage.setItem('accessToken', newAccessToken);
+    }
     try {
       if (response.status === 204) {
         return null;
