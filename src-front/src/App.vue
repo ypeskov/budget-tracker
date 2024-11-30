@@ -19,6 +19,7 @@ const updateTimeLeft = () => {
   const accessToken = localStorage.getItem('accessToken');
   if (!accessToken) {
     timeLeft.value = '00:00';
+    router.push({ name: 'login' });
     return;
   }
 
@@ -40,6 +41,7 @@ const updateTimeLeft = () => {
     console.warn('Token expired');
     timeLeft.value = '00:00';
     clearInterval(timer);
+    router.push({ name: 'login' });
     return;
   }
 
