@@ -13,6 +13,7 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import Settings
 from app.routes.auth import router as auth_router
@@ -25,6 +26,7 @@ from app.routes.exchange_rates import router as exchange_rates_router
 from app.routes.reports import router as reports_router
 from app.routes.management import router as management_router
 from app.routes.budgets import router as budgets_router
+from app.middleware.token_update import update_token
 
 from icecream import install, ic
 install()
@@ -43,6 +45,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(BaseHTTPMiddleware, dispatch=update_token)
 
 app.include_router(auth_router)
 app.include_router(accounts_router)

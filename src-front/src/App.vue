@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount } from 'vue';
+import { onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink, RouterView, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
@@ -11,6 +11,52 @@ const { locale } = useI18n();
 
 const userStore = useUserStore();
 const userService = new UserService(userStore);
+
+const timeLeft = ref('00:00');
+let timer = null;
+
+const updateTimeLeft = () => {
+  const accessToken = localStorage.getItem('accessToken');
+  if (!accessToken) {
+    timeLeft.value = '00:00';
+    return;
+  }
+
+  const base64Url = accessToken.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+      .join(''),
+  );
+
+  const decoded = JSON.parse(jsonPayload);
+
+  const currentTime = Math.floor(Date.now() / 1000);
+  const timeRemaining = decoded.exp - currentTime;
+
+  if (timeRemaining <= 0) {
+    console.warn('Token expired');
+    timeLeft.value = '00:00';
+    clearInterval(timer);
+    return;
+  }
+
+  const minutes = Math.floor(timeRemaining / 60);
+  const seconds = timeRemaining % 60;
+
+  timeLeft.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+onMounted(() => {
+  updateTimeLeft();
+  timer = setInterval(updateTimeLeft, 1000);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(timer);
+});
 
 onBeforeMount(async () => {
   let isLoggedIn, accessToken, localStorageUser;
@@ -31,6 +77,7 @@ onBeforeMount(async () => {
 const goToSettings = () => {
   router.push({ name: 'settings' });
 };
+
 </script>
 
 <template>
@@ -38,6 +85,7 @@ const goToSettings = () => {
     <div class="row ">
       <div class="col header-row">
         <div>{{ $t('message.anotherBudgeter') }}</div>
+        <div>{{ timeLeft }}</div>
         <div v-if="userStore.isLoggedIn" class="settings-icon" @click="goToSettings">
           <img src="/images/icons/settings-icon.svg"
                :title="$t('message.settings')"
