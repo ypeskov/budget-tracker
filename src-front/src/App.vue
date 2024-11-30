@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount } from 'vue';
+import { onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink, RouterView, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
@@ -11,6 +11,56 @@ const { locale } = useI18n();
 
 const userStore = useUserStore();
 const userService = new UserService(userStore);
+
+const timeLeft = ref('00:00');
+let timer = null;
+
+const updateTimeLeft = () => {
+  const accessToken = localStorage.getItem('accessToken');
+  if (!accessToken) {
+    timeLeft.value = '00:00';
+    return;
+  }
+
+  const base64Url = accessToken.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+      .join(''),
+  );
+
+  const decoded = JSON.parse(jsonPayload);
+
+  const currentTime = Math.floor(Date.now() / 1000); // Текущее время в секундах
+  const timeRemaining = decoded.exp - currentTime; // Разница в секундах
+
+  if (timeRemaining <= 0) {
+    console.warn('Токен истек');
+    timeLeft.value = '00:00';
+    clearInterval(timer); // Останавливаем таймер
+    return;
+  }
+
+  const minutes = Math.floor(timeRemaining / 60); // Полные минуты
+  const seconds = timeRemaining % 60; // Оставшиеся секунды
+
+  timeLeft.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+onMounted(() => {
+  // Первоначальный расчет времени
+  updateTimeLeft();
+
+  // Устанавливаем интервал обновления каждую секунду
+  timer = setInterval(updateTimeLeft, 1000);
+});
+
+onBeforeUnmount(() => {
+  // Очищаем интервал, чтобы избежать утечек памяти
+  clearInterval(timer);
+});
 
 onBeforeMount(async () => {
   let isLoggedIn, accessToken, localStorageUser;
@@ -31,6 +81,7 @@ onBeforeMount(async () => {
 const goToSettings = () => {
   router.push({ name: 'settings' });
 };
+
 </script>
 
 <template>
@@ -38,6 +89,7 @@ const goToSettings = () => {
     <div class="row ">
       <div class="col header-row">
         <div>{{ $t('message.anotherBudgeter') }}</div>
+        <div>{{ timeLeft }}</div>
         <div v-if="userStore.isLoggedIn" class="settings-icon" @click="goToSettings">
           <img src="/images/icons/settings-icon.svg"
                :title="$t('message.settings')"

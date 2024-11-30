@@ -10,11 +10,17 @@ def clean_db(db: Session | None = None):
     logger.info('Cleaning database')
 
     if db is None:
-        db = next(get_db())  # pragma: no cover
+        logger.info("Trying to get DB session")
+        db = next(get_db())
+        logger.info("DB session acquired")
 
     meta = MetaData()
-    meta.reflect(bind=db.get_bind())
-    logger.info(f'Meta tables {meta.tables.keys()}')
+    logger.info("Reflecting database metadata")
+    try:
+        meta.reflect(bind=db.get_bind())
+        logger.info(f"Metadata reflected: {list(meta.tables.keys())}")
+    except Exception as e:
+        logger.error(f"Error reflecting metadata: {e}")
 
     for table in reversed(meta.sorted_tables):
         logger.info('Dropping table [%s]', table)
