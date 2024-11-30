@@ -33,32 +33,28 @@ const updateTimeLeft = () => {
 
   const decoded = JSON.parse(jsonPayload);
 
-  const currentTime = Math.floor(Date.now() / 1000); // Текущее время в секундах
-  const timeRemaining = decoded.exp - currentTime; // Разница в секундах
+  const currentTime = Math.floor(Date.now() / 1000);
+  const timeRemaining = decoded.exp - currentTime;
 
   if (timeRemaining <= 0) {
-    console.warn('Токен истек');
+    console.warn('Token expired');
     timeLeft.value = '00:00';
-    clearInterval(timer); // Останавливаем таймер
+    clearInterval(timer);
     return;
   }
 
-  const minutes = Math.floor(timeRemaining / 60); // Полные минуты
-  const seconds = timeRemaining % 60; // Оставшиеся секунды
+  const minutes = Math.floor(timeRemaining / 60);
+  const seconds = timeRemaining % 60;
 
   timeLeft.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
 onMounted(() => {
-  // Первоначальный расчет времени
   updateTimeLeft();
-
-  // Устанавливаем интервал обновления каждую секунду
   timer = setInterval(updateTimeLeft, 1000);
 });
 
 onBeforeUnmount(() => {
-  // Очищаем интервал, чтобы избежать утечек памяти
   clearInterval(timer);
 });
 
