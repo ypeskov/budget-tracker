@@ -5,6 +5,7 @@ from app.database import get_db
 from icecream import ic
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
+from app.models.Account import Account
 from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema, UpdateAccountSchema
 from app.schemas.account_type_schema import AccountTypeResponseSchema
 from app.services.accounts import (create_account, get_user_accounts, get_account_details, get_account_types,
@@ -31,9 +32,19 @@ def add_account(account_dto: CreateAccountSchema, request: Request, db: Session 
 
 
 @router.get('/', response_model=list[AccountResponseSchema] | None)
-def get_accounts(request: Request, includeHidden: bool, db: Session = Depends(get_db)):
+def get_accounts(request: Request,
+                 includeHidden: bool = False,
+                 includeArchived: bool = False,
+                 archivedOnly: bool = False,
+                 db: Session = Depends(get_db)):
     try:
-        return get_user_accounts(request.state.user['id'], db, include_hidden=includeHidden)
+        accounts: list[Account] = get_user_accounts(request.state.user['id'],
+                                                    db,
+                                                    include_deleted=False,
+                                                    include_hidden=includeHidden,
+                                                    include_archived=includeArchived,
+                                                    archived_only=archivedOnly)
+        return accounts
     except InvalidUser as e:
         logger.exception(f'Error getting user accounts: {e}')
         raise HTTPException(status_code=400, detail=str(e))

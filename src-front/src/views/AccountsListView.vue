@@ -2,9 +2,11 @@
 import { onBeforeMount, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
-import { Services } from '../services/servicesConfig';
-import { processError } from '../errors/errorHandlers';
-import newAccount from '../components/account/newAccount.vue';
+import { Services } from '@/services/servicesConfig';
+import { processError } from '@/errors/errorHandlers';
+import newAccount from '@/components/account/newAccount.vue';
+import ArchivedAccountsList from '@/components/account/ArchivedAccountsList.vue';
+import MainAccountsList from '@/components/account/MainAccountsList.vue';
 import { DateTime } from 'luxon';
 
 const router = useRouter();
@@ -12,6 +14,8 @@ const router = useRouter();
 let accounts = reactive([]);
 const showNewAccForm = ref(false);
 const showHiddenAccounts = ref(false);
+const showArchivedAccounts = ref(false);
+const showMainAccountsList = ref(true);
 const totalBalance = ref(0);
 const baseCurrencyCode = ref('');
 const today = DateTime.now().toISODate();
@@ -27,7 +31,13 @@ onBeforeMount(async () => {
 async function reReadAllAccounts(shouldUpdate = false) {
   accounts.length = 0;
   try {
-    const tmpAccounts = await Services.accountsService.getUserAccounts(showHiddenAccounts.value, shouldUpdate);
+    const params = {
+      includeHidden: showHiddenAccounts.value,
+      shouldUpdate: shouldUpdate,
+      includeArchived: true,
+      archivedOnly: false,
+    };
+    const tmpAccounts = await Services.accountsService.getUserAccounts(params);
     if (tmpAccounts) {
       accounts.push(...tmpAccounts);
     }
@@ -69,13 +79,12 @@ function toggleHiddenAccounts(event) {
   reReadAllAccounts(true);
 }
 
-function balanceClass(balance) {
-  return balance < 0 ? 'text-danger' : 'text-success';
+function toggleArchivedAccounts(event) {
+  showArchivedAccounts.value = event.target.checked;
+  showMainAccountsList.value = !event.target.checked;
 }
 
-function availableBalanceCC(acc) {
-  return acc.balance + acc.creditLimit;
-}
+
 </script>
 
 <template>
@@ -86,6 +95,12 @@ function availableBalanceCC(acc) {
           <label class="btn btn-secondary">
             <input type="checkbox" @change="toggleHiddenAccounts">
             {{ $t('message.showHiddenAccounts') }}
+          </label>
+        </div>
+        <div class="col">
+          <label class="btn btn-secondary">
+            <input type="checkbox" @change="toggleArchivedAccounts">
+            {{ $t('buttons.showArchivedAccounts') }}
           </label>
         </div>
         <div class="col sub-menu">
@@ -112,61 +127,18 @@ function availableBalanceCC(acc) {
         </div>
       </div>
 
-      <div class="row">
-        <div class="col">
-          <div>
-            <b>{{ $t('message.yourAccounts') }}</b>
-            ( {{ $t('message.totalBalance') }}: {{ $n(totalBalance, 'decimal') }} {{ baseCurrencyCode }})
-          </div>
-        </div>
+      <div v-if="showArchivedAccounts">
+        <archivedAccountsList />
       </div>
-      <div v-for="acc in accounts" :key="acc.id" class="list-item">
-        <RouterLink class="account-link" :to="{name: 'accountDetails', params: {id: acc.id}}">
-          <div class="row account-item">
-            <div class="col-4 account-name">
-              {{ acc.name }}
-            </div>
-            <div class="col account-balance" :class="balanceClass(acc.balance)">
-              <div>
-                <b>{{ $n(acc.balance, 'decimal') }}</b>
-                <span v-if="acc.accountTypeId===4"> ({{ $n(availableBalanceCC(acc), 'decimal') }})</span>
-                {{ acc.currency.code }}
-              </div>
-              <div>
-                ({{ $n(acc.balanceInBaseCurrency, 'decimal') }} {{ baseCurrencyCode }})
-              </div>
-            </div>
-          </div>
-        </RouterLink>
+
+      <div v-if="showMainAccountsList">
+        <mainAccountsList :accounts="accounts" :total-balance="totalBalance" :base-currency-code="baseCurrencyCode" />
       </div>
+
     </div>
   </main>
 </template>
 
 <style scoped lang="scss">
-@use '@/assets/main.scss' as *;
 
-.account-name {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
-  -webkit-line-clamp: 3;
-  max-height: calc(3 * 1.2em);
-  line-height: 1.2;
-}
-
-.account-balance {
-  text-align: right;
-}
-
-.list-item > a {
-  text-decoration: none;
-  color: black;
-}
-
-.account-marks {
-  text-align: right;
-}
 </style>

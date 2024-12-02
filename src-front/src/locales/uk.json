@@ -106,6 +106,7 @@
     "newBudget": "Новий бюджет",
     "archive": "Архівувати",
     "showArchivedBudgets": "Показати архівовані бюджети",
-    "hideArchivedBudgets": "Приховати архівовані бюджети"
+    "hideArchivedBudgets": "Приховати архівовані бюджети",
+    "showArchivedAccounts": "Показати архівовані рахунки"
   }
 }

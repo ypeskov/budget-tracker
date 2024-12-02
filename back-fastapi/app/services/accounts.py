@@ -2,7 +2,7 @@ from datetime import UTC
 from datetime import datetime
 
 from icecream import ic
-from sqlalchemy import asc, select, or_
+from sqlalchemy import asc, select
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
@@ -11,8 +11,8 @@ from app.models.AccountType import AccountType
 from app.models.Currency import Currency
 from app.models.User import User
 from app.schemas.account_schema import CreateAccountSchema, UpdateAccountSchema
-from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied
 from app.services.CurrencyProcessor import calc_amount
+from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied
 
 ic.configureOutput(includeContext=True)
 
@@ -36,7 +36,7 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
 
     if hasattr(account_dto, 'id'):
         account = (db.execute(select(Account)
-                   .where(Account.id == account_dto.id, Account.user_id == user_id))
+                              .where(Account.id == account_dto.id, Account.user_id == user_id))
                    .scalar_one_or_none())
         if account is None:
             raise InvalidAccount()
@@ -74,24 +74,30 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
 def get_user_accounts(user_id: int,
                       db: Session,
                       include_deleted: bool = False,
-                      include_hidden: bool = False) -> list[Account]:
+                      include_hidden: bool = False,
+                      include_archived: bool = False,
+                      archived_only: bool = False) -> list[Account]:
     query = db.query(Account).filter_by(user_id=user_id).order_by(asc(Account.name))
 
-    if not include_deleted:
-        query = query.filter(Account.is_deleted == False)
-
-    if include_hidden:
-        query = query.filter(or_(Account.is_hidden == False, Account.is_hidden == True))
+    if archived_only:
+        query = query.filter(Account.is_archived == True)
     else:
-        query = query.filter(Account.is_hidden == False)
+        if not include_deleted:
+            query = query.filter(Account.is_deleted == False)
+        if not include_archived:
+            query = query.filter(Account.is_archived == False)
+        if not include_hidden:
+            query = query.filter(Account.is_hidden == False)
 
     accounts: list[Account] = query.all()
     for account in accounts:
-        account.balance_in_base_currency = calc_amount(account.balance,
-                                                       account.currency.code,
-                                                       datetime.now(UTC).date(),
-                                                       account.user.base_currency.code,
-                                                       db)
+        account.balance_in_base_currency = calc_amount(
+            account.balance,
+            account.currency.code,
+            datetime.now(UTC).date(),
+            account.user.base_currency.code,
+            db
+        )
 
     return accounts
 

@@ -64,7 +64,7 @@ onBeforeMount(async () => {
   try {
     categories = await Services.categoriesService.getUserCategories();
     accounts.length = 0;
-    accounts.push(...(await Services.accountsService.getUserAccounts()));
+    accounts.push(...(await Services.accountsService.getUserAccounts({})));
     if (props.accountId) {
       currentAccount = accounts.find((item) => item.id === parseInt(props.accountId, 10));
     } else {

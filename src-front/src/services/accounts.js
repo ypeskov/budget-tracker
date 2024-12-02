@@ -1,20 +1,25 @@
-import {DateTime} from 'luxon';
+import { DateTime } from 'luxon';
 
-import {request} from './requests';
+import { request } from './requests';
 
 
 export class AccountService {
   accountStore;
   userService;
 
-  timeToCacheAccountsList = 600000 * 6; // 60 minutes
+  timeToCacheAccountsList = 60000 * 2; // 2 minutes
 
   constructor(accountStore, userService) {
     this.accountStore = accountStore;
     this.userService = userService;
   }
 
-  async getUserAccounts(includeHidden = false, shouldUpdate = false) {
+  async getUserAccounts({
+                          includeHidden = false,
+                          shouldUpdate = false,
+                          includeArchived = false,
+                          archivedOnly = false,
+                        }) {
     const currentTime = DateTime.now();
     const deltaFromLastUpdate = currentTime - this.accountStore.lastUpdated;
 
@@ -27,7 +32,9 @@ export class AccountService {
       return this.accountStore.accounts;
     }
 
-    const accountsUrl = `/accounts/?includeHidden=${includeHidden ? 'true' : 'false'}`;
+    const accountsUrl = `/accounts/?includeHidden=${includeHidden ? 'true' : 'false'}` +
+      `&includeArchived=${includeArchived ? 'true' : 'false'}` +
+      `&archivedOnly=${archivedOnly ? 'true' : 'false'}`;
 
     const accounts = await request(accountsUrl, {}, { userService: this.userService });
     if (accounts) {
@@ -41,7 +48,7 @@ export class AccountService {
 
   async getAccountDetails(accountId) {
     const accDetailsUrl = '/accounts/' + accountId;
-    return await request(accDetailsUrl, {}, {userService: this.userService});
+    return await request(accDetailsUrl, {}, { userService: this.userService });
   }
 
   setShouldUpdateAccountsList(shouldUpdate) {
@@ -54,14 +61,14 @@ export class AccountService {
         method: 'POST',
         body: JSON.stringify(accountDetails),
       },
-      {userService: this.userService});
+      { userService: this.userService });
     this.setShouldUpdateAccountsList(true);
     return createdAccount;
   }
 
   async getAccountTypes() {
     const accTypesUrl = '/accounts/types/';
-    const types = await request(accTypesUrl, {}, {userService: this.userService});
+    const types = await request(accTypesUrl, {}, { userService: this.userService });
     this.accountStore.accountTypes.length = 0;
     this.accountStore.accountTypes.push(...types);
     return this.accountStore.accountTypes;
@@ -71,7 +78,7 @@ export class AccountService {
     const accUrl = '/accounts/' + accountId;
     await request(accUrl, {
       method: 'DELETE',
-    }, {userService: this.userService});
+    }, { userService: this.userService });
     this.setShouldUpdateAccountsList(true);
   }
 
@@ -80,7 +87,7 @@ export class AccountService {
     await request(accUrl, {
       method: 'PUT',
       body: JSON.stringify(accountDetails),
-    }, {userService: this.userService});
+    }, { userService: this.userService });
     this.setShouldUpdateAccountsList(true);
   }
 
