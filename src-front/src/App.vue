@@ -175,9 +175,13 @@ const goToSettings = () => {
   <RouterView />
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 nav a {
   margin: 0 0.2rem;
+}
+
+nav img:hover {
+  cursor: pointer;
 }
 
 .nav-row {
@@ -191,11 +195,11 @@ nav a {
 }
 
 .settings-icon img {
-  cursor: pointer;
   transition: transform 0.2s ease;
 }
 
 .settings-icon img:hover {
+  cursor: pointer;
   transform: scale(1.1);
 }
 </style>

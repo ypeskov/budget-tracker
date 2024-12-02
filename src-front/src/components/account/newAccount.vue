@@ -16,10 +16,11 @@ const currency = ref(1);
 const name = ref('');
 const balance = ref(0);
 const creditLimit = ref(0);
-const openingDate = ref(DateTime.now().toFormat("yyyy-LL-dd'T'HH:mm"));
+const openingDate = ref(DateTime.now().toFormat('yyyy-LL-dd\'T\'HH:mm'));
 const comment = ref('');
 const isHidden = ref(false);
 const showInReports = ref(false);
+const showArchiveConfirmation = ref(false);
 
 if (props.accountDetails) {
   accountType.value = props.accountDetails.accountTypeId;
@@ -27,7 +28,7 @@ if (props.accountDetails) {
   name.value = props.accountDetails.name;
   balance.value = props.accountDetails.balance;
   creditLimit.value = props.accountDetails.creditLimit;
-  openingDate.value = new DateTime(props.accountDetails.openingDate).toFormat("yyyy-LL-dd'T'HH:mm");
+  openingDate.value = new DateTime(props.accountDetails.openingDate).toFormat('yyyy-LL-dd\'T\'HH:mm');
   comment.value = props.accountDetails.comment;
   isHidden.value = props.accountDetails.isHidden;
   showInReports.value = props.accountDetails.showInReports;
@@ -99,6 +100,17 @@ async function createAccount() {
     await processError(e, router);
   }
 }
+
+const archiveAccount = async (id) => {
+  const updated = await Services.accountsService.setArchivedStatus(id, true);
+  if (updated) {
+    await router.push({ name: 'accounts' });
+  }
+};
+
+function toggleArchiveConfirmation() {
+  showArchiveConfirmation.value = true;
+}
 </script>
 
 <template>
@@ -120,7 +132,7 @@ async function createAccount() {
         </div>
       </div>
 
-      <div v-if="accountType==CREDIT_CARD_ACC_TYPE_ID" class="form-group">
+      <div v-if="accountType===CREDIT_CARD_ACC_TYPE_ID" class="form-group">
         <label for="balance">{{ $t('message.creditLimit') }}</label>
         <input type="number" id="balance" v-model="creditLimit" step="0.01">
       </div>
@@ -165,7 +177,25 @@ async function createAccount() {
       </div>
 
       <button type="submit">{{ formSubmitLabel }}</button>
+      <button v-if="accountDetails"
+              type="button"
+
+              @click="toggleArchiveConfirmation"
+              class="btn btn-danger">{{ $t('buttons.archiveAccount') }}
+      </button>
     </form>
+
+    <div v-if="showArchiveConfirmation" class="overlay"></div>
+
+    <div v-if="showArchiveConfirmation" class="archive-confirmation">
+      <p>{{ $t('buttons.archiveAccount') }}?</p>
+      <div class="buttons-container">
+        <button @click="archiveAccount(accountDetails.id)" class="btn btn-danger">{{ $t('buttons.yes') }}</button>
+        <button @click="showArchiveConfirmation = false"
+                class="btn btn-secondary">{{ $t('buttons.cancel') }}
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -264,5 +294,42 @@ select:focus {
   border-width: 0.25rem 0.25rem 0 0.25rem;
   border-color: #333 transparent transparent transparent;
   pointer-events: none;
+}
+
+.buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.archive-confirmation {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+  width: auto;
+}
+
+.archive-confirmation p {
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #333;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
 }
 </style>

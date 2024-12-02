@@ -72,7 +72,8 @@
     "budgetDetails": "Деталі бюджету",
     "budgetLeft": "Залишилось бюджету",
     "loadingDiagram": "Завантаження діаграми",
-    "creditLimit": "Кредитний ліміт"
+    "creditLimit": "Кредитний ліміт",
+    "archiveDate": "Дата архівації"
   },
   "menu": {
     "home": "Початок",
@@ -106,6 +107,9 @@
     "newBudget": "Новий бюджет",
     "archive": "Архівувати",
     "showArchivedBudgets": "Показати архівовані бюджети",
-    "hideArchivedBudgets": "Приховати архівовані бюджети"
+    "hideArchivedBudgets": "Приховати архівовані бюджети",
+    "showArchivedAccounts": "Показати архівовані рахунки",
+    "restore": "Відновити",
+    "archiveAccount": "Архівувати рахунок"
   }
 }
