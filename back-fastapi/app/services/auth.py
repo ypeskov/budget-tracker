@@ -115,7 +115,6 @@ def get_jwt_token(user_login: UserBase | UserLoginSchema, db: Session):
     """
     Authenticate user and generate JWT.
     """
-    ic(user_login)
     user: User = db.query(User).filter(User.email == user_login.email).first()  # type: ignore
 
     if not user:

@@ -124,9 +124,9 @@ def delete_account(account_id: int, user_id: int, db: Session) -> Account:
 
 
 def set_archive_status(account_id: int, is_archived: bool, user_id: int, db: Session) -> bool:
-    ic(account_id, is_archived, user_id)
     account = get_account_details(account_id, user_id, db)
     account.is_archived = is_archived
+    account.archived_at = datetime.now(UTC)
     db.commit()
 
     return True

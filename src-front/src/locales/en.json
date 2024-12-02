@@ -109,6 +109,7 @@
     "showArchivedBudgets": "Show archived budgets",
     "hideArchivedBudgets": "Hide archived budgets",
     "showArchivedAccounts": "Show archived accounts",
-    "restore": "Restore"
+    "restore": "Restore",
+    "archiveAccount": "Archive account"
   }
 }

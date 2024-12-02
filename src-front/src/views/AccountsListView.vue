@@ -18,6 +18,7 @@ const showNewAccForm = ref(false);
 const showHiddenAccounts = ref(false);
 const showArchivedAccounts = ref(false);
 const showMainAccountsList = ref(true);
+
 const totalBalance = ref(0);
 const baseCurrencyCode = ref('');
 const today = DateTime.now().toISODate();
@@ -41,6 +42,11 @@ async function getArchivedAccounts(shouldUpdate = true) {
     if (tmpAccounts) {
       archivedAccounts.push(...tmpAccounts);
     }
+
+    if (archivedAccounts.length === 0) {
+      showArchivedAccounts.value = false;
+      showMainAccountsList.value = true;
+    }
   } catch (e) {
     await processError(e, router);
   }
@@ -52,7 +58,7 @@ async function reReadAllAccounts(shouldUpdate = false) {
     const params = {
       includeHidden: showHiddenAccounts.value,
       shouldUpdate: shouldUpdate,
-      includeArchived: true,
+      includeArchived: false,
       archivedOnly: false,
     };
     const tmpAccounts = await Services.accountsService.getUserAccounts(params);
@@ -116,7 +122,7 @@ function toggleArchivedAccounts(event) {
           </label>
         </div>
         <div class="col">
-          <label class="btn btn-secondary">
+          <label v-if="archivedAccounts.length > 0" class="btn btn-secondary">
             <input type="checkbox" @change="toggleArchivedAccounts">
             {{ $t('buttons.showArchivedAccounts') }}
           </label>

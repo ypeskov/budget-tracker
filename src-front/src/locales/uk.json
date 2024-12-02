@@ -109,6 +109,7 @@
     "showArchivedBudgets": "Показати архівовані бюджети",
     "hideArchivedBudgets": "Приховати архівовані бюджети",
     "showArchivedAccounts": "Показати архівовані рахунки",
-    "restore": "Відновити"
+    "restore": "Відновити",
+    "archiveAccount": "Архівувати рахунок"
   }
 }
