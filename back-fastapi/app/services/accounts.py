@@ -104,7 +104,7 @@ def get_user_accounts(user_id: int,
 
 def get_account_details(account_id: int, user_id: int, db: Session) -> Account:
     try:
-        account = db.query(Account).filter_by(id=account_id).one()
+        account: Account = db.query(Account).filter_by(id=account_id).one()
     except NoResultFound:
         raise InvalidAccount()
     if account.user_id != user_id:
@@ -121,3 +121,12 @@ def delete_account(account_id: int, user_id: int, db: Session) -> Account:
     account.is_deleted = True
     db.commit()
     return account
+
+
+def set_archive_status(account_id: int, is_archived: bool, user_id: int, db: Session) -> bool:
+    ic(account_id, is_archived, user_id)
+    account = get_account_details(account_id, user_id, db)
+    account.is_archived = is_archived
+    db.commit()
+
+    return True

@@ -91,6 +91,21 @@ export class AccountService {
     this.setShouldUpdateAccountsList(true);
   }
 
+  async setArchivedStatus(accountId, status) {
+    const accUrl = `/accounts/set-archive-status/`;
+    const response = await request(accUrl, {
+      method: 'PUT',
+      body: JSON.stringify({
+        accountId,
+        isArchived: status,
+      }),
+    }, { userService: this.userService });
+
+    this.setShouldUpdateAccountsList(true);
+
+    return response;
+  }
+
   clearAccounts() {
     this.accountStore.accounts.length = 0;
     this.accountStore.lastUpdated = null;

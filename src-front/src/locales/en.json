@@ -70,7 +70,8 @@
     "budgetDetails": "Budget details",
     "budgetLeft": "Budget left",
     "loadingDiagram": "Loading diagram",
-    "creditLimit": "Credit limit"
+    "creditLimit": "Credit limit",
+    "archiveDate": "Archive date"
   },
   "menu": {
     "home": "Home",
@@ -107,6 +108,7 @@
     "archive": "Archive",
     "showArchivedBudgets": "Show archived budgets",
     "hideArchivedBudgets": "Hide archived budgets",
-    "showArchivedAccounts": "Show archived accounts"
+    "showArchivedAccounts": "Show archived accounts",
+    "restore": "Restore"
   }
 }

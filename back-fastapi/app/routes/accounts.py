@@ -6,10 +6,11 @@ from icecream import ic
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
 from app.models.Account import Account
-from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema, UpdateAccountSchema
+from app.schemas.account_schema import AccountResponseSchema, CreateAccountSchema, UpdateAccountSchema, \
+    AccountArchiveStatusSchema
 from app.schemas.account_type_schema import AccountTypeResponseSchema
 from app.services.accounts import (create_account, get_user_accounts, get_account_details, get_account_types,
-                                   delete_account)
+                                   delete_account, set_archive_status)
 from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied
 
 ic.configureOutput(includeContext=True)
@@ -48,6 +49,23 @@ def get_accounts(request: Request,
     except InvalidUser as e:
         logger.exception(f'Error getting user accounts: {e}')
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put('/set-archive-status')
+def archive_status(request: Request, account_archive_status: AccountArchiveStatusSchema, db: Session = Depends(get_db)):
+    account_id = account_archive_status.account_id
+    is_archived = account_archive_status.is_archived
+    user_id = request.state.user['id']
+
+    try:
+        account = get_account_details(account_id, user_id, db)
+    except (InvalidAccount, AccessDenied) as e:
+            raise HTTPException(status_code=401, detail='Access denied')
+    try:
+        return set_archive_status(account.id, is_archived, user_id, db)
+    except (InvalidUser, InvalidAccount) as e:
+        logger.exception(f'Error setting account archive status: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get('/types/', response_model=list[AccountTypeResponseSchema] | None)

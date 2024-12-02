@@ -60,6 +60,15 @@ class AccountResponseSchema(CreateAccountSchema):
     balance_in_base_currency: Annotated[Decimal, PlainSerializer(
         lambda x: float(x or 0), return_type=float, when_used='json'
     )] = None
+    archived_at: datetime | None = None
     model_config = ConfigDict(from_attributes=True,
                               populate_by_name=True,
+                              alias_generator=to_camel)
+
+
+class AccountArchiveStatusSchema(BaseModel):
+    account_id: int
+    is_archived: bool
+
+    model_config = ConfigDict(populate_by_name=True,
                               alias_generator=to_camel)

@@ -38,6 +38,7 @@ class Account(Base):
     currency: Mapped[Currency] = relationship()
     transactions: Mapped['Transaction'] = relationship(back_populates='account', foreign_keys='Transaction.account_id')
 
+    archived_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
     is_archived: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

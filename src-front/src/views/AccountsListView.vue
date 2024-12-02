@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeMount, reactive, ref } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import { Services } from '@/services/servicesConfig';
 import { processError } from '@/errors/errorHandlers';
@@ -12,6 +12,8 @@ import { DateTime } from 'luxon';
 const router = useRouter();
 
 let accounts = reactive([]);
+let archivedAccounts = reactive([]);
+
 const showNewAccForm = ref(false);
 const showHiddenAccounts = ref(false);
 const showArchivedAccounts = ref(false);
@@ -28,6 +30,22 @@ onBeforeMount(async () => {
   }
 });
 
+async function getArchivedAccounts(shouldUpdate = true) {
+  try {
+    const params = {
+      shouldUpdate: shouldUpdate,
+      archivedOnly: true,
+    };
+    archivedAccounts.length = 0;
+    const tmpAccounts = await Services.accountsService.getUserAccounts(params);
+    if (tmpAccounts) {
+      archivedAccounts.push(...tmpAccounts);
+    }
+  } catch (e) {
+    await processError(e, router);
+  }
+}
+
 async function reReadAllAccounts(shouldUpdate = false) {
   accounts.length = 0;
   try {
@@ -41,6 +59,8 @@ async function reReadAllAccounts(shouldUpdate = false) {
     if (tmpAccounts) {
       accounts.push(...tmpAccounts);
     }
+
+    await getArchivedAccounts();
 
     const accountIds = accounts.map((acc) => acc.id);
     const accountBalancesInBaseCurrency = await Services.reportsService
@@ -83,8 +103,6 @@ function toggleArchivedAccounts(event) {
   showArchivedAccounts.value = event.target.checked;
   showMainAccountsList.value = !event.target.checked;
 }
-
-
 </script>
 
 <template>
@@ -92,7 +110,7 @@ function toggleArchivedAccounts(event) {
     <div class="container">
       <div class="row">
         <div class="col">
-          <label class="btn btn-secondary">
+          <label v-if="!showArchivedAccounts" class="btn btn-secondary">
             <input type="checkbox" @change="toggleHiddenAccounts">
             {{ $t('message.showHiddenAccounts') }}
           </label>
@@ -128,7 +146,7 @@ function toggleArchivedAccounts(event) {
       </div>
 
       <div v-if="showArchivedAccounts">
-        <archivedAccountsList />
+        <archivedAccountsList :archived-accounts="archivedAccounts" :re-read-all-accounts="reReadAllAccounts" />
       </div>
 
       <div v-if="showMainAccountsList">
