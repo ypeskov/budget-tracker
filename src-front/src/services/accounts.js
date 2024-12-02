@@ -92,7 +92,7 @@ export class AccountService {
   }
 
   async setArchivedStatus(accountId, status) {
-    const accUrl = `/accounts/set-archive-status/`;
+    const accUrl = `/accounts/set-archive-status`;
     const response = await request(accUrl, {
       method: 'PUT',
       body: JSON.stringify({
