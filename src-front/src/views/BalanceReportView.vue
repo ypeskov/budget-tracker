@@ -32,7 +32,7 @@ const updateBalanceData = async (balanceDate, balancesData, totalBalance) => {
 onBeforeMount(async () => {
   let userAccounts = [];
   try {
-    userAccounts = await Services.accountsService.getUserAccounts();
+    userAccounts = await Services.accountsService.getUserAccounts({shouldUpdate: true});
   } catch (e) {
     await processError(e, router);
   }
