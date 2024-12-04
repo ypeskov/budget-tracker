@@ -18,7 +18,10 @@ matplotlib.use('Agg')
 
 def prepare_data(categories, category_id=None):
     """ @category_id - id of the parent category, if None - all top level categories will be used """
-    logger.info(f"Preparing data for diagram, for category_id: {category_id}")
+    if category_id is None:
+        logger.info("Preparing data for diagram, for all categories")
+    else:
+        logger.info(f"Preparing data for diagram, for category_id: {category_id}")
 
     def find_subcategories(cat_id):
         subcategories = []

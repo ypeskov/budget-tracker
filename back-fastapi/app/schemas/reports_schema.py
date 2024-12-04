@@ -16,8 +16,8 @@ class CashFlowReportInputSchema(BaseModel):
 
 
 class ExpensesReportInputSchema(BaseModel):
-    start_date: datetime
-    end_date: datetime
+    start_date: date
+    end_date: date
     categories: list[int] = []
     hide_empty_categories: bool = False
 

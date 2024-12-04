@@ -42,11 +42,10 @@ def get_balance_report(user_id: int,
 
 def get_expenses_by_categories(user_id: int,
                                db: Session,
-                               start_date: datetime,
-                               end_date: datetime,
+                               start_date: date,
+                               end_date: date,
                                hide_empty_categories: bool = False) -> dict:
     """ Get all expenses within a given time period """
-
     expenses_report_generator = ExpensesReportGenerator(user_id,
                                                         db,
                                                         start_date,
@@ -67,8 +66,8 @@ def get_diagram(expenses: dict, db: Session, user_id: int) -> dict:
 
 def get_expenses_diagram_data(user_id: int,
                               db: Session,
-                              start_date: datetime,
-                              end_date: datetime,
+                              start_date: date,
+                              end_date: date,
                               hide_empty_categories: bool = False) -> dict:
     expenses = get_expenses_by_categories(user_id, db, start_date, end_date, hide_empty_categories)
 
