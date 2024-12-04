@@ -11,7 +11,6 @@ from app.schemas.reports_schema import (CashFlowReportInputSchema, CashFlowRepor
                                         BalanceReportInputSchema, BalanceReportOutputSchema,
                                         ExpensesReportInputSchema, ExpensesReportOutputItemSchema,
                                         )
-from app.services.diagrams.builder import prepare_data
 from app.services.errors import AccessDenied
 from app.services.reports import (get_cash_flows, get_balance_report, get_expenses_by_categories,
                                   get_diagram, get_expenses_diagram_data,
@@ -103,7 +102,6 @@ def expenses_by_categories(request: Request,
                                                   input_data.start_date,
                                                   input_data.end_date,
                                                   input_data.hide_empty_categories)
-
         return result
     except Exception as e:
         logger.exception(e)
@@ -118,10 +116,16 @@ def diagram(request: Request, diagram_type: str, start_date: str, end_date: str,
 
     expenses = get_expenses_by_categories(user_id,
                                           db,
-                                          datetime.strptime(start_date, '%Y-%m-%d'),
-                                          datetime.strptime(end_date, '%Y-%m-%d'),
+                                          datetime.strptime(start_date, '%Y-%m-%d').date(),
+                                          datetime.strptime(end_date, '%Y-%m-%d').date(),
                                           hide_empty_categories=False)
-    return get_diagram(expenses, db, user_id)
+    try:
+        diagramImage: dict = get_diagram(expenses, db, user_id)
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error generting report')
+
+    return diagramImage
 
 
 @router.post('/expenses-data/')

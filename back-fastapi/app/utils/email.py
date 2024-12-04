@@ -34,7 +34,11 @@ async def send_html_email(subject: str,
                             subtype=MessageType.html,
                             attachments=[filename] if filename else []
                             )
-    logger.info(f'Sending backup file {filename} to {recipients}...')
+    if filename:
+        logger.info(f'Sending backup file {filename} to {recipients}...')
+    else:
+        logger.info(f'Sending email with template {template_name} to {recipients}...')
+
 
     fm = FastMail(conf)
     await fm.send_message(message, template_name=template_name)

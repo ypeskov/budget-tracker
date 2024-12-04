@@ -1,9 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import timedelta, date
 
 from icecream import ic
 from sqlalchemy import select
 from sqlalchemy.orm import Session, aliased
 
+from app.logger_config import logger
 from app.models.Account import Account
 from app.models.Currency import Currency
 from app.models.Transaction import Transaction
@@ -18,8 +19,8 @@ class ExpensesReportGenerator:
     def __init__(self,
                  user_id,
                  db: Session,
-                 start_date: datetime,
-                 end_date: datetime,
+                 start_date: date,
+                 end_date: date,
                  hide_empty_categories: bool = False):
         self._db = db
         self.user_id = user_id
