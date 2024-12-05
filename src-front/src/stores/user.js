@@ -1,5 +1,5 @@
-import { ref, reactive } from 'vue';
 import { defineStore } from 'pinia';
+import { ref, reactive } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
   const user = reactive({});
@@ -11,6 +11,50 @@ export const useUserStore = defineStore('user', () => {
   const settings = reactive({});
   const baseCurrency = ref('');
 
+  const timeLeft = ref('00:00');
+  let timer = null;
+
+  const updateTimeLeft = () => {
+    if (!accessToken.value) {
+      timeLeft.value = '00:00';
+      clearInterval(timer);
+      return;
+    }
+
+    const base64Url = accessToken.value.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = atob(base64);
+    const decoded = JSON.parse(jsonPayload);
+
+    const currentTime = Math.floor(Date.now() / 1000);
+    const timeRemaining = decoded.exp - currentTime;
+
+    if (timeRemaining <= 0) {
+      timeLeft.value = '00:00';
+      clearInterval(timer);
+      // Автоматически разлогиниваем пользователя
+      isLoggedIn.value = false;
+      accessToken.value = null;
+      localStorage.clear();
+    } else {
+      const minutes = Math.floor(timeRemaining / 60);
+      const seconds = timeRemaining % 60;
+      timeLeft.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+  };
+
+  const startTimer = () => {
+    if (timer) clearInterval(timer);
+    updateTimeLeft();
+    timer = setInterval(updateTimeLeft, 1000);
+  };
+
+  const stopTimer = () => {
+    if (timer) clearInterval(timer);
+    timer = null;
+    timeLeft.value = '00:00';
+  };
+
   return {
     user,
     accessToken,
@@ -19,5 +63,8 @@ export const useUserStore = defineStore('user', () => {
     categories,
     settings,
     baseCurrency,
+    timeLeft,
+    startTimer,
+    stopTimer,
   };
 });
