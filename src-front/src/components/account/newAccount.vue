@@ -28,7 +28,7 @@ if (props.accountDetails) {
   name.value = props.accountDetails.name;
   balance.value = props.accountDetails.balance;
   creditLimit.value = props.accountDetails.creditLimit;
-  openingDate.value = new DateTime(props.accountDetails.openingDate).toFormat('yyyy-LL-dd\'T\'HH:mm');
+  openingDate.value = DateTime.fromISO(props.accountDetails.openingDate).toFormat('yyyy-LL-dd\'T\'HH:mm');
   comment.value = props.accountDetails.comment;
   isHidden.value = props.accountDetails.isHidden;
   showInReports.value = props.accountDetails.showInReports;
