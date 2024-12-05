@@ -30,11 +30,12 @@ export class UserService {
           body: JSON.stringify(requestBody),
         },
         { userService: this },
-        false
+        false,
       );
 
       if (data.accessToken) {
         this.userStore.accessToken = data.accessToken;
+        this.userStore.startTimer();
         await this.getUserProfile(this.userStore.accessToken);
         await this.accountsService.getUserAccounts({});
         await this.categoriesService.getUserCategories(true);
@@ -60,7 +61,7 @@ export class UserService {
       `${activatePath}${token}`,
       { userService: this },
       false,
-      false
+      false,
     );
   }
 
@@ -92,6 +93,7 @@ export class UserService {
   }
 
   logOutUser() {
+    this.userStore.stopTimer();
     this.userStore.isLoggedIn = false;
     this.userStore.accessToken = '';
     this.setUser(
@@ -126,7 +128,7 @@ export class UserService {
           body: JSON.stringify(requestBody),
         },
         { userService: this },
-        false
+        false,
       );
     } catch (e) {
       if (e instanceof HttpError) {

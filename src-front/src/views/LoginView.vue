@@ -32,11 +32,9 @@ async function submitLogin() {
       console.log(error.message);
       if (error.message === 'User not activated') {
         alert(t('message.userNotActivated'));
-        return;
       } else {
         alert(t('message.invalidCredentials'));
       }
-      return;
     } else {
       console.log('Something went wrong');
       console.log(error);
