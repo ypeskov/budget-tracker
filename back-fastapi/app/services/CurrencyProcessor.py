@@ -2,11 +2,11 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import TypedDict
 
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from icecream import ic
 
 from app.models.ExchangeRateHistory import ExchangeRateHistory
+from app.logger_config import logger
 
 ic.configureOutput(includeContext=True)
 
@@ -47,12 +47,13 @@ def fetch_exchange_rate_rows(db: Session, start_date: date):
     """
     Fetch exchange rate rows from the database for dates >= start_date.
     """
+    logger.info("Fetching exchange rate data from the database.")
     rows = db.query(ExchangeRateHistory).filter(
         ExchangeRateHistory.actual_date >= start_date
     ).order_by(ExchangeRateHistory.actual_date).all()
 
     if not rows:
-        raise ValueError("No exchange rate data available in the database.")
+        raise ExchangeRateAbsentError("All", start_date)
     return rows
 
 
@@ -101,15 +102,31 @@ def forward_fill(rows, current_date_str, rates):
         return next_row.rates
     else:
         # If no rates exist in the future, raise an error
-        raise ValueError(f"No exchange rate data available for {current_date_str} or any earlier/later dates.")
+        raise ExchangeRateAbsentError("All", date.fromisoformat(current_date_str))
 
 
 def update_cache(rates):
     """
-    Update the global cache with the newly generated rates.
+    Update the global cache with the newly generated rates, sorting the data by date.
     """
-    currency_cache["data"] = rates
+    logger.info("Updating the cache with the latest exchange rates.")
+    global currency_cache
+    sorted_rates = dict(sorted(rates.items(), key=lambda x: x[0], reverse=True))
+    currency_cache["data"] = sorted_rates
     currency_cache["last_updated"] = datetime.now()
+
+
+def get_rate_with_fallback(exchange_rates: dict, calc_date: date, currency_code: str) -> Decimal:
+    """
+    Get the exchange rate for the given currency code and if absent, return the latest available rate.
+    """
+    for date_str, rates in exchange_rates.items():
+        if date.fromisoformat(date_str) <= calc_date:
+            if currency_code in rates:
+                return Decimal(rates[currency_code])
+
+    logger.error(f"Exchange rate not found for {currency_code} for date {calc_date}")
+    raise ExchangeRateAbsentError(currency_code, calc_date)
 
 
 def calc_amount(src_amount: Decimal,
@@ -133,29 +150,23 @@ def calc_amount(src_amount: Decimal,
     if currency_code_from == user_base_currency_code:
         return src_amount
 
-        # Load exchange rates for the last year (from cache or database)
+    # Load exchange rates for the last year (from cache or database)
     exchange_rates = get_exchange_rates_for_year(db)
 
-    calc_date_str = calc_date.isoformat()
-
-    # Check if rates for the calculation date exist
-    if calc_date_str not in exchange_rates:
-        raise HTTPException(500, f'Exchange rates not found for {calc_date_str}')
-
-    # Retrieve the rates for the given date
-    rates = exchange_rates[calc_date_str]
-
     # Get the exchange rate for the source currency
-    exchange_rate_HBCR = rates.get(currency_code_from)
-    if exchange_rate_HBCR is None:
-        raise HTTPException(500, f'Exchange rate not found for {currency_code_from}')
+    exchange_rate_HBCR = get_rate_with_fallback(exchange_rates, calc_date, currency_code_from)
 
     # Get the exchange rate for the user's base currency
-    user_base_currency_rate = rates.get(user_base_currency_code)
-    if user_base_currency_rate is None:
-        raise HTTPException(500, f'Exchange rate not found for {user_base_currency_code}')
+    user_base_currency_rate = get_rate_with_fallback(exchange_rates, calc_date, user_base_currency_code)
 
     # Perform the conversion
     converted_amount = src_amount / Decimal(exchange_rate_HBCR) * Decimal(user_base_currency_rate)
 
     return converted_amount
+
+
+class ExchangeRateAbsentError(Exception):
+    def __init__(self, currency_code: str, target_date: date):
+        self.currency_code = currency_code
+        self.date = target_date
+        super().__init__(f"Exchange rate not found for {currency_code} for date {target_date}")
