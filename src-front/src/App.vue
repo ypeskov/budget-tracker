@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeMount, onBeforeUnmount, onMounted } from 'vue';
 import { RouterLink, RouterView, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
@@ -11,8 +11,6 @@ const { locale } = useI18n();
 
 const userStore = useUserStore();
 const userService = new UserService(userStore);
-
-const timeLeft = ref('00:00');
 
 onMounted(() => {
   if (userStore.isLoggedIn) {
@@ -27,7 +25,7 @@ onBeforeMount(async () => {
     isLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn'));
     accessToken = localStorage.getItem('accessToken');
   } catch (e) {
-    userService.logOutUser();
+    await userService.logOutUser();
   }
 
   if (isLoggedIn) {
