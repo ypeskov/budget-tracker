@@ -1,5 +1,6 @@
 import { HttpError } from '../errors/HttpError';
 import { request } from './requests';
+import router from '../router';
 
 export class UserService {
   userStore;
@@ -92,7 +93,7 @@ export class UserService {
     localStorage.setItem('baseCurrency', this.userStore.baseCurrency);
   }
 
-  logOutUser() {
+  async logOutUser() {
     this.userStore.stopTimer();
     this.userStore.isLoggedIn = false;
     this.userStore.accessToken = '';
@@ -110,6 +111,7 @@ export class UserService {
     );
     this.accountsService.clearAccounts();
     localStorage.clear();
+    await router.push({ name: 'login' });
   }
 
   async registerUser(email, password, firstName, lastName) {

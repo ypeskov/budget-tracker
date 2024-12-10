@@ -44,7 +44,7 @@ export async function request(endPoint, params = {}, services = {}, authRequired
     }
   } else {
     if (response.status === 401) {
-      services.userService.logOutUser();
+      await services.userService.logOutUser();
       const body = await response.json();
       if (body.detail === 'User not activated') {
         throw new HttpError('User not activated', response.status);
