@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, reactive } from 'vue';
+import router from '@/router';
 
 export const useUserStore = defineStore('user', () => {
   const user = reactive({});
@@ -14,7 +15,7 @@ export const useUserStore = defineStore('user', () => {
   const timeLeft = ref('00:00');
   let timer = null;
 
-  const updateTimeLeft = () => {
+  const updateTimeLeft = async () => {
     if (!accessToken.value) {
       timeLeft.value = '00:00';
       clearInterval(timer);
@@ -32,10 +33,10 @@ export const useUserStore = defineStore('user', () => {
     if (timeRemaining <= 0) {
       timeLeft.value = '00:00';
       clearInterval(timer);
-      // Автоматически разлогиниваем пользователя
       isLoggedIn.value = false;
       accessToken.value = null;
       localStorage.clear();
+      await router.push({ name: 'login' });
     } else {
       const minutes = Math.floor(timeRemaining / 60);
       const seconds = timeRemaining % 60;

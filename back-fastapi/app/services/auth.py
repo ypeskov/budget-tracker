@@ -18,14 +18,17 @@ from app.schemas.user_schema import UserRegistration, UserLoginSchema, UserBase
 from app.services.user_settings import generate_initial_settings
 from app.tasks.tasks import send_activation_email
 from app.services.errors import UserNotActivated, NotFoundError
+from app.config import Settings
 
 ic.configureOutput(includeContext=True)
+
+settings = Settings()
 
 # Secret key for JWT generation
 SECRET_KEY = "your-secret-key"
 
-# JWT expiration time (30 minutes in this example)
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+# JWT expiration time (30 default minutes in settings)
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.LOGIN_SESSION_EXPIRATION_MINUTES
 
 ACTIVATION_TOKEN_LENGTH = 16
 ACTIVATION_TOKEN_EXPIRES_HOURS = 24
