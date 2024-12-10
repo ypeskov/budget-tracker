@@ -43,4 +43,7 @@ class Settings(BaseSettings):
     MAIL_SSL_TLS: bool = False
     USE_CREDENTIALS: bool = True
 
+    # JWT expiration time in minutes
+    LOGIN_SESSION_EXPIRATION_MINUTES: int = 30
+
     model_config = SettingsConfigDict(env_file=('.env', '.env.local', '.env.prod'))
