@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source venv/bin/activate
+#source venv/bin/activate
 
 if [ $# -eq 0 ]; then
     echo "Start main app"
