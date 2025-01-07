@@ -1,13 +1,14 @@
 <script setup>
-import {useRouter} from 'vue-router';
-
+import { useRouter } from 'vue-router';
 import { Services } from '../services/servicesConfig';
-
-await Services.userService.logOutUser();
+import { onMounted } from 'vue';
 
 const router = useRouter();
-router.push({name: 'login'});
 
+onMounted(async () => {
+  await Services.userService.logOutUser();
+  await router.push({name: 'login'});
+});
 </script>
 
 <template>
