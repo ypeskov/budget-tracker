@@ -68,17 +68,14 @@ async function reReadAllAccounts(shouldUpdate = false) {
 
     await getArchivedAccounts();
 
-    const accountIds = accounts.map((acc) => acc.id);
-    const accountBalancesInBaseCurrency = await Services.reportsService
-      .getReport('balance/non-hidden', {
-        accountIds: accountIds,
-        'balanceDate': today,
-      });
+    totalBalance.value = accounts.reduce((acc, item) => acc + item.balanceInBaseCurrency, 0);
 
-    if (accountBalancesInBaseCurrency.length > 0) {
-      totalBalance.value = accountBalancesInBaseCurrency.reduce((acc, item) => acc + item.baseCurrencyBalance, 0);
-      baseCurrencyCode.value = accountBalancesInBaseCurrency[0].baseCurrencyCode;
+    if (localStorage.getItem('baseCurrency')) {
+      baseCurrencyCode.value = localStorage.getItem('baseCurrency');
+    } else {
+      baseCurrencyCode.value = await Services.settingsService.getBaseCurrency();
     }
+
   } catch (e) {
     await processError(e, router);
   }
