@@ -90,19 +90,26 @@ def activate(token: str, db: Session = Depends(get_db)):
 async def oauth(JWT: OAuthToken, db: Session = Depends(get_db)):
     payload = id_token.verify_oauth2_token(JWT.credential, requests.Request(), GOOGLE_CLIENT_ID)
 
-    if payload['email'] and payload['email_verified']:
-        try:
-            token = login_or_register(payload['email'], payload['given_name'], payload['family_name'], db)
-        except UserNotActivated as e:
-            logger.error(f"Error while logging in user: '{payload.email}': {e}")
-            raise HTTPException(status_code=401, detail="User not activated")
-        except NotFoundError as e:
-            logger.error(f"Error while logging in user: '{payload.email}': {e}")
-            raise HTTPException(status_code=401, detail="Invalid credentials or user not found")
-        except HTTPException as e:
-            logger.error(f"Error while logging in user: '{payload.email}': {e.detail}")
-            raise HTTPException(status_code=401, detail="Invalid credentials. See logs for details")
+    if payload['email']:
+        if payload['email_verified']:
+            try:
+                token = login_or_register(payload['email'], payload['given_name'], payload['family_name'], db)
+            except UserNotActivated as e:
+                logger.error(f"Error while logging in user: [{payload['email']}]: {e}")
+                raise HTTPException(status_code=401, detail="User not activated")
+            except NotFoundError as e:
+                logger.error(f"Error while logging in user: [{payload['email']}]: {e}")
+                raise HTTPException(status_code=401, detail="Invalid credentials or user not found")
+            except HTTPException as e:
+                logger.error(f"Error while logging in user: [{payload['email']}]: {e.detail}")
+                raise HTTPException(status_code=401, detail="Invalid credentials. See logs for details")
+            except Exception as e:
+                logger.exception(f"Error while logging in user: [{payload['email']}]: {e}")
+                raise HTTPException(status_code=500, detail="Internal server error. See logs for details")
+        else:
+            logger.error(f"Error while logging in user: [{payload['email']}]: Email not verified")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email not verified")
     else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email not verified")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No email provided")
 
     return token
