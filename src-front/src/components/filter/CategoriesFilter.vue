@@ -25,12 +25,16 @@ function applyCategories() {
 }
 
 function updateSelectedCategories(event) {
-  const categoryId = parseInt(event.target.value);
+  const categoryId = parseInt(event.target.id);
   if (event.target.checked) {
-    selectedCategories.value.push(categoryId);
+    if (!selectedCategories.value.includes(categoryId)) {
+      selectedCategories.value.push(categoryId);
+    }
   } else {
     const index = selectedCategories.value.indexOf(categoryId);
-    selectedCategories.value.splice(index, 1);
+    if (index > -1) {
+      selectedCategories.value.splice(index, 1);
+    }
   }
 }
 
@@ -50,8 +54,7 @@ function updateSelectedCategories(event) {
                class="form-check-input"
                :id="category.id"
                @change="updateSelectedCategories"
-               v-model="selectedCategories"
-               :value="category.id" />
+               :checked="selectedCategories.includes(category.id)" />
         <label :for="category.id">{{ category.name }}</label>
       </div>
       <button class="btn btn-primary" @click="applyCategories">{{ $t('buttons.apply') }}</button>
