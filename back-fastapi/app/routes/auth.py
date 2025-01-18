@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 from icecream import ic
 
@@ -8,12 +10,18 @@ from app.logger_config import logger
 from app.models.User import User
 from app.schemas.user_schema import UserRegistration, UserLoginSchema, UserResponse
 from app.schemas.token_schema import Token
+from app.schemas.oauth_schema import OAuthToken
 from app.dependencies.check_token import check_token
 from app.services.auth import create_users, get_jwt_token, activate_user
 from app.services.user_settings import get_user_settings
 from app.services.errors import UserNotActivated, NotFoundError
+from app.config import Settings
 
 ic.configureOutput(includeContext=True)
+
+settings = Settings()
+
+GOOGLE_CLIENT_ID = settings.GOOGLE_CLIENT_ID
 
 router = APIRouter(
     tags=['Auth'],
@@ -76,3 +84,13 @@ def activate(token: str, db: Session = Depends(get_db)):
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=500, detail="Internal server error. See logs for details")
+
+
+@router.post('/oauth/')
+async def oauth(JWT: OAuthToken, db: Session = Depends(get_db)):
+    payload = id_token.verify_oauth2_token(JWT.credential, requests.Request(), GOOGLE_CLIENT_ID)
+    if payload.email and payload.email_verified:
+        pass
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email not verified")
+    return {"message": "Oauth"}

@@ -76,7 +76,7 @@ const router = createRouter({
         requiresAuth: true,
         requiresUnAuth: false,
       },
-      props: route => ({
+      props: (route) => ({
         categories: route.query.categories,
         startDate: route.query.startDate,
         endDate: route.query.endDate,
@@ -135,7 +135,7 @@ const router = createRouter({
         requiresAuth: true,
         requiresUnAuth: false,
       },
-      props: route => ({
+      props: (route) => ({
         isEdit: true,
         returnUrl: route.query.returnUrl,
         accountId: route.query.accountId,
@@ -149,7 +149,7 @@ const router = createRouter({
         requiresAuth: true,
         requiresUnAuth: false,
       },
-      props: route => ({
+      props: (route) => ({
         returnUrl: route.query.returnUrl,
         accountId: route.query.accountId,
       }),
@@ -176,7 +176,6 @@ router.beforeEach((to, from, next) => {
   } else {
     next();
   }
-
 });
 
 export default router;

@@ -23,36 +23,8 @@ export class UserService {
       email: loginEmail,
       password,
     };
-    try {
-      const data = await request(
-        loginPath,
-        {
-          method: 'POST',
-          body: JSON.stringify(requestBody),
-        },
-        { userService: this },
-        false,
-      );
 
-      if (data.accessToken) {
-        this.userStore.accessToken = data.accessToken;
-        this.userStore.startTimer();
-        await this.getUserProfile(this.userStore.accessToken);
-        await this.accountsService.getUserAccounts({});
-        await this.categoriesService.getUserCategories(true);
-      } else {
-        console.log('No access token in response!');
-      }
-    } catch (e) {
-      if (e instanceof HttpError && e.statusCode === 401) {
-        if (e.message === 'User not activated') {
-          console.log('User not activated!');
-        } else {
-          console.log('Wrong email or password!');
-        }
-      }
-      throw e;
-    }
+    await this.tryToLogin(loginPath, requestBody);
   }
 
   async activateUser(token) {
@@ -137,6 +109,48 @@ export class UserService {
         console.error('Registration error:', e.message);
       } else {
         console.error('Unexpected error:', e);
+      }
+      throw e;
+    }
+  }
+
+  async oauthLogin(credential) {
+    const loginPath = '/auth/oauth/';
+    const requestBody = {
+      credential: credential,
+    };
+
+    await this.tryToLogin(loginPath, requestBody);
+  }
+
+  async tryToLogin(loginPath, requestBody) {
+    try {
+      const data = await request(
+        loginPath,
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody),
+        },
+        { userService: this },
+        false,
+      );
+
+      if (data.accessToken) {
+        this.userStore.accessToken = data.accessToken;
+        this.userStore.startTimer();
+        await this.getUserProfile(this.userStore.accessToken);
+        await this.accountsService.getUserAccounts({});
+        await this.categoriesService.getUserCategories(true);
+      } else {
+        console.log('No access token in response!');
+      }
+    } catch (e) {
+      if (e instanceof HttpError && e.statusCode === 401) {
+        if (e.message === 'User not activated') {
+          console.log('User not activated!');
+        } else {
+          console.log('Wrong email or password!');
+        }
       }
       throw e;
     }

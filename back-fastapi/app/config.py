@@ -46,4 +46,6 @@ class Settings(BaseSettings):
     # JWT expiration time in minutes
     LOGIN_SESSION_EXPIRATION_MINUTES: int = 30
 
+    GOOGLE_CLIENT_ID: str = '123'
+
     model_config = SettingsConfigDict(env_file=('.env', '.env.local', '.env.prod'))

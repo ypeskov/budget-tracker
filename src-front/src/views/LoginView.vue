@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
 import { useUserStore } from '../stores/user';
+import {GoogleLogin} from "vue3-google-login";
 
 const userStore = useUserStore();
 
@@ -26,10 +27,10 @@ async function submitLogin() {
     loginEmail.value = '';
     loginPassword.value = '';
     locale.value = userStore.settings.language;
-    await router.push({name: 'accounts'});
+    await router.push({ name: 'accounts' });
   } catch (error) {
     if (error instanceof HttpError && error.statusCode === 401) {
-      console.log(error.message);
+      // console.log(error.message);
       if (error.message === 'User not activated') {
         alert(t('message.userNotActivated'));
       } else {
@@ -37,7 +38,7 @@ async function submitLogin() {
       }
     } else {
       console.log('Something went wrong');
-      console.log(error);
+      // console.log(error);
     }
   }
 }
@@ -48,29 +49,67 @@ onMounted(() => {
     emailInputRef.value.focus();
   }
 });
+
+const callback = async (response) => {
+  await Services.userService.oauthLogin(response.credential);
+};
+
 </script>
 
 <template>
   <div class="container mt-5">
     <main>
-      <form @submit.prevent="submitLogin" autocomplete="on">
-        <div class="mb-3">
-          <label for="emailInput" class="form-label">
-            {{ $t('message.emailAddress') }} <span class="text-danger">*</span>
-          </label>
-          <input type="email" class="form-control" id="emailInput" :value="loginEmail" @change="updateEmail"
-            ref="emailInputRef" :placeholder="t('message.enterEmail')" required />
+      <div class="row">
+        <div class="col">
+          <form
+            @submit.prevent="submitLogin"
+            autocomplete="on">
+            <div class="mb-3">
+              <label
+                for="emailInput"
+                class="form-label">
+                {{ $t('message.emailAddress') }}
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="email"
+                class="form-control"
+                id="emailInput"
+                :value="loginEmail"
+                @change="updateEmail"
+                ref="emailInputRef"
+                :placeholder="t('message.enterEmail')"
+                required />
+            </div>
+            <div class="mb-3">
+              <label
+                for="passwordInput"
+                class="form-label">
+                Password
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="password"
+                class="form-control"
+                id="passwordInput"
+                v-model="loginPassword"
+                :placeholder="t('message.enterPassword')"
+                required />
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary">
+              {{ $t('menu.login') }}
+            </button>
+          </form>
         </div>
-        <div class="mb-3">
-          <label for="passwordInput" class="form-label">
-            Password <span class="text-danger">*</span>
-          </label>
-          <input type="password" class="form-control" id="passwordInput" v-model="loginPassword"
-            :placeholder="t('message.enterPassword')" required />
+      </div>
+
+      <div class="row">
+        <div class="col-3">
+           <GoogleLogin :callback="callback"/>
         </div>
-        <button type="submit" class="btn btn-primary">{{$t('menu.login')}}</button>
-      </form>
+      </div>
     </main>
   </div>
 </template>
-
