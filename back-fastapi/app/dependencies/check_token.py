@@ -4,9 +4,13 @@ import jwt
 from fastapi import Header, Request, HTTPException, status
 from icecream import ic
 
+from app.config import Settings
+
 ic.configureOutput(includeContext=True)
 
-SECRET_KEY = "your-secret-key"
+settings = Settings()
+
+SECRET_KEY = settings.SECRET_KEY
 
 
 async def check_token(request: Request, auth_token: Annotated[str, Header()]) -> dict:

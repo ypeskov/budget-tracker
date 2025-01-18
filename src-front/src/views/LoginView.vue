@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { Services } from '../services/servicesConfig';
 import { HttpError } from '../errors/HttpError';
 import { useUserStore } from '../stores/user';
-import {GoogleLogin} from "vue3-google-login";
+import { GoogleLogin } from 'vue3-google-login';
 
 const userStore = useUserStore();
 
@@ -24,24 +24,18 @@ function updateEmail(event) {
 async function submitLogin() {
   try {
     await Services.userService.loginUser(loginEmail.value, loginPassword.value);
-    loginEmail.value = '';
-    loginPassword.value = '';
-    locale.value = userStore.settings.language;
-    await router.push({ name: 'accounts' });
+    await afterLogin();
   } catch (error) {
-    if (error instanceof HttpError && error.statusCode === 401) {
-      // console.log(error.message);
-      if (error.message === 'User not activated') {
-        alert(t('message.userNotActivated'));
-      } else {
-        alert(t('message.invalidCredentials'));
-      }
-    } else {
-      console.log('Something went wrong');
-      // console.log(error);
-    }
+    processError(error);
   }
 }
+
+const afterLogin = async () => {
+  loginEmail.value = '';
+  loginPassword.value = '';
+  locale.value = userStore.settings.language;
+  await router.push({ name: 'accounts' });
+};
 
 const emailInputRef = ref(null);
 onMounted(() => {
@@ -50,10 +44,26 @@ onMounted(() => {
   }
 });
 
-const callback = async (response) => {
-  await Services.userService.oauthLogin(response.credential);
+const processError = function (error) {
+  if (error instanceof HttpError && error.statusCode === 401) {
+    if (error.message === 'User not activated') {
+      alert(t('message.userNotActivated'));
+    } else {
+      alert(t('message.invalidCredentials'));
+    }
+  } else {
+    console.log('Something went wrong');
+  }
 };
 
+const callback = async (response) => {
+  try {
+    await Services.userService.oauthLogin(response.credential);
+    await afterLogin();
+  } catch (error) {
+    processError(error);
+  }
+};
 </script>
 
 <template>
@@ -106,8 +116,10 @@ const callback = async (response) => {
       </div>
 
       <div class="row">
-        <div class="col-3">
-           <GoogleLogin :callback="callback"/>
+        <div class="col-3 mt-4">
+          <GoogleLogin
+            :callback="callback"
+            opt />
         </div>
       </div>
     </main>

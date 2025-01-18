@@ -12,7 +12,7 @@ from app.schemas.user_schema import UserRegistration, UserLoginSchema, UserRespo
 from app.schemas.token_schema import Token
 from app.schemas.oauth_schema import OAuthToken
 from app.dependencies.check_token import check_token
-from app.services.auth import create_users, get_jwt_token, activate_user
+from app.services.auth import create_users, get_jwt_token, activate_user, login_or_register
 from app.services.user_settings import get_user_settings
 from app.services.errors import UserNotActivated, NotFoundError
 from app.config import Settings
@@ -86,11 +86,23 @@ def activate(token: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Internal server error. See logs for details")
 
 
-@router.post('/oauth/')
+@router.post('/oauth/', response_model=Token)
 async def oauth(JWT: OAuthToken, db: Session = Depends(get_db)):
     payload = id_token.verify_oauth2_token(JWT.credential, requests.Request(), GOOGLE_CLIENT_ID)
-    if payload.email and payload.email_verified:
-        pass
+
+    if payload['email'] and payload['email_verified']:
+        try:
+            token = login_or_register(payload['email'], payload['given_name'], payload['family_name'], db)
+        except UserNotActivated as e:
+            logger.error(f"Error while logging in user: '{payload.email}': {e}")
+            raise HTTPException(status_code=401, detail="User not activated")
+        except NotFoundError as e:
+            logger.error(f"Error while logging in user: '{payload.email}': {e}")
+            raise HTTPException(status_code=401, detail="Invalid credentials or user not found")
+        except HTTPException as e:
+            logger.error(f"Error while logging in user: '{payload.email}': {e.detail}")
+            raise HTTPException(status_code=401, detail="Invalid credentials. See logs for details")
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email not verified")
-    return {"message": "Oauth"}
+
+    return token

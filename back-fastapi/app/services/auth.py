@@ -25,7 +25,7 @@ ic.configureOutput(includeContext=True)
 settings = Settings()
 
 # Secret key for JWT generation
-SECRET_KEY = "your-secret-key"
+SECRET_KEY = settings.SECRET_KEY
 
 # JWT expiration time (30 default minutes in settings)
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.LOGIN_SESSION_EXPIRATION_MINUTES
@@ -141,6 +141,32 @@ def get_jwt_token(user_login: UserBase | UserLoginSchema, db: Session):
 
     return {"access_token": access_token, "token_type": "bearer"}
 
+
+def login_or_register(email: str, first_name: str, last_name: str, db: Session):
+    """
+    Login user or register if not exists.
+    """
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        # user_request = UserRegistration(email=email, first_name=first_name, last_name=last_name, password='')
+        # user = create_users(user_request, db)
+        raise NotFoundError("User not found")
+
+    if not user.is_active:
+        raise UserNotActivated
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+        },
+        expires_delta=access_token_expires)
+
+    return {"access_token": access_token, "token_type": "bearer"}
 
 def create_access_token(data: dict, expires_delta: timedelta):
     """
