@@ -17,6 +17,10 @@ const router = useRouter();
 const { t } = useI18n();
 const { locale } = useI18n();
 
+const options = {
+  text: '***',
+};
+
 function updateEmail(event) {
   loginEmail.value = event.target.value;
 }
@@ -117,9 +121,7 @@ const callback = async (response) => {
 
       <div class="row">
         <div class="col-3 mt-4">
-          <GoogleLogin
-            :callback="callback"
-            opt />
+          <GoogleLogin :callback="callback" />
         </div>
       </div>
     </main>
