@@ -15,7 +15,6 @@ from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType
 
 ic.configureOutput(includeContext=True)
 
-
 router = APIRouter(
     tags=['Accounts'],
     prefix='/accounts',
@@ -60,7 +59,7 @@ def archive_status(request: Request, account_archive_status: AccountArchiveStatu
     try:
         account = get_account_details(account_id, user_id, db)
     except (InvalidAccount, AccessDenied) as e:
-            raise HTTPException(status_code=401, detail='Access denied')
+        raise HTTPException(status_code=401, detail='Access denied')
     try:
         return set_archive_status(account.id, is_archived, user_id, db)
     except (InvalidUser, InvalidAccount) as e:

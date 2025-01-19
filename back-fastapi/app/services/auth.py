@@ -1,11 +1,13 @@
 import secrets
 from datetime import timedelta, datetime, UTC
+from typing import cast
+
 import bcrypt
 
 import jwt
 from fastapi import HTTPException, status
+from pydantic import EmailStr
 from sqlalchemy.orm import Session
-
 
 from icecream import ic
 
@@ -60,34 +62,39 @@ def copy_all_categories(user_id: int, db: Session):
         copy_categories(root_category, user_id, db, None)
 
 
-def create_users(user_request: UserRegistration, db: Session):
-    existing_user = db.query(User).filter(
-        User.email == user_request.email).first()  # type: ignore
+def create_users(user_request: UserRegistration, db: Session, is_oauth: bool = False):
+    existing_user: User = db.query(User).filter(User.email == user_request.email).first()  # type: ignore
 
     if existing_user:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                             detail="User with this email already exists")
 
-    currency = db.query(Currency).filter_by(code=DEFAULT_CURRENCY_CODE).one()
+    currency: Currency = db.query(Currency).filter_by(code=DEFAULT_CURRENCY_CODE).one() # type: ignore
 
     hashed_password = bcrypt.hashpw(user_request.password.encode('utf-8'), bcrypt.gensalt())
-    new_user = User(
-        email=user_request.email,
+    new_user: User = User(
+        email=cast(str, user_request.email),
         first_name=user_request.first_name,
         last_name=user_request.last_name,
         password_hash=hashed_password.decode('utf-8'),
         base_currency=currency,
         is_active=False)
+    if is_oauth:
+        new_user.is_active = True
+
     if user_request.id is not None:
         new_user.id = user_request.id
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
-    create_activation_token(new_user.id, db)
-    generate_initial_settings(new_user.id, db)
-    copy_all_categories(new_user.id, db)
+    generate_initial_settings(cast(int, new_user.id), db)
+    copy_all_categories(cast(int, new_user.id), db)
 
+    if is_oauth:
+        return new_user
+
+    create_activation_token(cast(int, new_user.id), db)
     send_activation_email.delay(new_user.id)
 
     return new_user
@@ -130,43 +137,51 @@ def get_jwt_token(user_login: UserBase | UserLoginSchema, db: Session):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={
-            'id': user.id,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email,
-        },
-        expires_delta=access_token_expires)
+    access_token = create_access_token(_prepare_user_data(user), expires_delta=access_token_expires)
 
     return {"access_token": access_token, "token_type": "bearer"}
 
+
+def _prepare_user_data(user: User):
+    return {
+        'id': user.id,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email,
+    }
+
+
+def register_user_oauth(email: str, first_name: str, last_name: str, db: Session):
+    # generate random password
+    password = secrets.token_hex(16)
+    user_request = UserRegistration(email=cast(EmailStr, email),
+                                    first_name=first_name,
+                                    last_name=last_name,
+                                    password=password)
+    user = create_users(user_request, db, is_oauth=True)
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(_prepare_user_data(user), access_token_expires)
+
+    return {"access_token": access_token, "token_type": "bearer"}
 
 def login_or_register(email: str, first_name: str, last_name: str, db: Session):
     """
     Login user or register if not exists.
     """
-    user = db.query(User).filter(User.email == email).first()
+    user: User = db.query(User).filter(User.email == email).first()  # type: ignore
 
     if not user:
-        # user_request = UserRegistration(email=email, first_name=first_name, last_name=last_name, password='')
-        # user = create_users(user_request, db)
-        raise NotFoundError("User not found")
+        return register_user_oauth(email, first_name, last_name, db)
 
     if not user.is_active:
         raise UserNotActivated
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={
-            'id': user.id,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email,
-        },
-        expires_delta=access_token_expires)
+    access_token = create_access_token(_prepare_user_data(user), access_token_expires)
 
     return {"access_token": access_token, "token_type": "bearer"}
+
 
 def create_access_token(data: dict, expires_delta: timedelta):
     """

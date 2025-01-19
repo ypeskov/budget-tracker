@@ -89,7 +89,7 @@ def get_user_accounts(user_id: int,
         if not include_hidden:
             query = query.filter(Account.is_hidden == False)
 
-    accounts: list[Account] = query.all()
+    accounts: list[Account] = query.all() # type: ignore
     for account in accounts:
         account.balance_in_base_currency = calc_amount(
             account.balance,

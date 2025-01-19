@@ -3,7 +3,7 @@ from pydantic.alias_generators import to_camel
 
 
 PASSWORD_MIN_LENGTH = 3
-PASSWORD_MAX_LENGTH = 15
+PASSWORD_MAX_LENGTH = 50
 password_field: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
 
 
