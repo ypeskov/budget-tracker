@@ -32,7 +32,7 @@ function availableBalanceCC(acc) {
             <span v-if="acc.accountTypeId===4"> ({{ $n(availableBalanceCC(acc), 'decimal') }})</span>
             {{ acc.currency.code }}
           </div>
-          <div>
+          <div v-if="baseCurrencyCode !== acc.currency.code">
             ({{ $n(acc.balanceInBaseCurrency, 'decimal') }} {{ baseCurrencyCode }})
           </div>
         </div>

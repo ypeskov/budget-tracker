@@ -14,6 +14,7 @@ const t = useI18n().t;
 
 const categories = reactive([]);
 
+
 onBeforeMount(async () => {
   await fetchCategories();
 });
@@ -123,7 +124,9 @@ onUnmounted(() => {
             <div :class="transactionClass(transaction)">
               <b>{{ $n(transaction.amount, 'decimal') }}{{ transaction.account.currency.code }}</b>
             </div>
-            <div>({{ $n(transaction.baseCurrencyAmount, 'decimal')}} {{ transaction.baseCurrencyCode }})</div>
+            <div v-if="transaction.account.currency.code !== transaction.baseCurrencyCode">
+              ({{ $n(transaction.baseCurrencyAmount, 'decimal')}} {{ transaction.baseCurrencyCode }})
+            </div>
             <div :class="balanceClass(transaction)">
               <span class="acc-name">{{ accountName(transaction.account) }}</span>
               | <span v-if="transaction.newBalance !== null">{{ $n(transaction.newBalance, 'decimal') }}</span>

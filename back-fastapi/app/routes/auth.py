@@ -110,6 +110,6 @@ async def oauth(JWT: OAuthToken, db: Session = Depends(get_db)):
             logger.error(f"Error while logging in user: [{payload['email']}]: Email not verified")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email not verified")
     else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No email provided")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No email provided")
 
     return token
