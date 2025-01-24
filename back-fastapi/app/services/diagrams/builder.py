@@ -1,3 +1,4 @@
+import base64
 from decimal import Decimal
 from io import BytesIO
 
@@ -109,4 +110,5 @@ def build_diagram(aggregated_categories, currency_code):
 
     plt.close(fig)
 
-    return StreamingResponse(buf, media_type="image/png")
+    base64_image = base64.b64encode(buf.getvalue()).decode('utf-8')
+    return {"image": f"data:image/png;base64,{base64_image}"}

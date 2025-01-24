@@ -18,7 +18,7 @@ let expensesReportData = reactive([]);
 let groupSum = 0;
 let currentParentId = null;
 
-const pieDiagramUrl = ref(''); // 'http://localhost:8000/reports/diagram/pie/2024-07-01/2024-07-31'
+const pieDiagram = ref(''); // 'http://localhost:8000/reports/diagram/pie/2024-07-01/2024-07-31'
 const aggregatedCategories = ref([]);
 const aggregatedSum = ref(0);
 
@@ -100,8 +100,7 @@ async function fetchPieDiagram() {
   const end = endDate.value;
 
   try {
-    const diagramUrl = await Services.reportsService.getDiagram('pie', start, end);
-    pieDiagramUrl.value = `${diagramUrl}`;
+    pieDiagram.value = await Services.reportsService.getDiagram('pie', start, end);
   } catch (e) {
     await processError(e, router);
   }
@@ -164,8 +163,8 @@ async function changeHideEmptyCategories() {
 
           <div class="diagram-container" v-if="aggregatedSum > 0">
             <div class="diagram-img-container">
-              <div v-if="pieDiagramUrl">
-                <img :src="pieDiagramUrl" alt="No Diagram" class="img-fluid" />
+              <div v-if="pieDiagram">
+                <img :src="pieDiagram.image" alt="No Diagram" class="img-fluid" />
               </div>
               <div v-else>
                 <span class="text-muted">{{ $t('message.loadingDiagram') }}</span>

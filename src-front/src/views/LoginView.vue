@@ -17,10 +17,6 @@ const router = useRouter();
 const { t } = useI18n();
 const { locale } = useI18n();
 
-const options = {
-  text: '***',
-};
-
 function updateEmail(event) {
   loginEmail.value = event.target.value;
 }

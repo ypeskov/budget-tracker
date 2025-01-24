@@ -35,7 +35,6 @@ export class ReportsService {
       throw new Error('Failed to fetch diagram');
     }
 
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
+    return await response.json(); // { image: 'data:image/png;base64,...' }
   }
 }

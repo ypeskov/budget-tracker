@@ -1,7 +1,8 @@
 from datetime import datetime, date
 from decimal import Decimal
+from typing import Annotated
 
-from pydantic import ConfigDict, BaseModel
+from pydantic import ConfigDict, BaseModel, PlainSerializer
 from pydantic.alias_generators import to_camel
 
 
@@ -31,7 +32,9 @@ class ExpensesReportOutputItemSchema(BaseModel):
     name: str
     parent_id: int | None = None
     parent_name: str | None = None
-    total_expenses: Decimal = Decimal(0)
+    total_expenses: Annotated[Decimal, PlainSerializer(
+        lambda x: float(x), return_type=float, when_used='json'
+    )]
     currency_code: str | None = None
     is_parent: bool = False
 

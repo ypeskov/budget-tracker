@@ -58,6 +58,7 @@ class AccountResponseSchema(CreateAccountSchema):
     currency: CurrencyResponseSchema
     account_type: AccountTypeResponseSchema
     is_deleted: bool
+    is_archived: bool
     balance_in_base_currency: Annotated[Decimal, PlainSerializer(
         lambda x: float(x or 0), return_type=float, when_used='json'
     )] = None
