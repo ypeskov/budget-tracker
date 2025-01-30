@@ -30,12 +30,14 @@ from app.routes.auth import router as auth_router
 from app.middleware.token_update import update_token
 
 from icecream import install, ic
+
 install()
 
 settings = Settings()
 is_production = (settings.ENVIRONMENT == 'prod')
 
-app = FastAPI(docs_url=None if is_production else "/docs",
+app = FastAPI(redirect_slashes=True,
+              docs_url=None if is_production else "/docs",
               redoc_url=None if is_production else "/redoc")
 
 origins = ['*', ]
