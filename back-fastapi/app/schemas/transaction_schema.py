@@ -11,7 +11,7 @@ from pydantic.alias_generators import to_camel
 
 class CreateTransactionSchema(BaseModel):
     id: int | None = None
-    user_id: int | None = None
+    # user_id: int | None = None
     account_id: int
     target_account_id: int | None = None
     category_id: int | None = None
@@ -34,7 +34,7 @@ class CreateTransactionSchema(BaseModel):
 
 class UpdateTransactionSchema(CreateTransactionSchema):
     id: int
-    user_id: int
+    # user_id: int
 
 
 class ResponseTransactionSchema(CreateTransactionSchema):
