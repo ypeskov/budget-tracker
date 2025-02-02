@@ -26,7 +26,6 @@ from app.routes.exchange_rates import router as exchange_rates_router
 from app.routes.reports import router as reports_router
 from app.routes.management import router as management_router
 from app.routes.budgets import router as budgets_router
-from app.routes.auth import router as auth_router
 from app.middleware.token_update import update_token
 
 from icecream import install, ic
