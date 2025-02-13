@@ -8,7 +8,7 @@ from app.database import get_db
 from app.schemas.transaction_schema import CreateTransactionSchema, ResponseTransactionSchema, UpdateTransactionSchema
 from app.dependencies.check_token import check_token
 from app.services.errors import AccessDenied, InvalidCategory, InvalidAccount
-from app.services.transactions import create_transaction, get_transactions, get_transaction_details, update, delete
+from app.services.transactions import create_template, create_transaction, get_transactions, get_transaction_details, update, delete
 from app.services.transaction_management.errors import InvalidTransaction
 from app.utils.sanitize_transaction_filters import prepare_filters
 
@@ -27,6 +27,9 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
 
     try:
         transaction = create_transaction(transaction_dto, request.state.user['id'], db)
+        if transaction_dto.is_template:
+            create_template(transaction_dto, request.state.user['id'], db)
+        return transaction
     except AccessDenied:
         logger.error(f'Access denied')
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
@@ -39,8 +42,6 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
     except Exception as e:  # pragma: no cover
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to create transaction')
-
-    return transaction
 
 
 @router.get('/', response_model=list[ResponseTransactionSchema])
@@ -67,9 +68,13 @@ def get_transaction(transaction_id: int, request: Request, db: Session = Depends
 def update_transaction(transaction_details: UpdateTransactionSchema,
                        request: Request,
                        db: Session = Depends(get_db)) -> ResponseTransactionSchema:
-    """ Update transaction details """
+    """ Update transaction details and create a template if the transaction is a template """
     try:
         transaction = update(transaction_details, request.state.user['id'], db)
+        
+        if transaction_details.is_template:
+            create_template(transaction_details, request.state.user['id'], db)
+        
         return transaction
     except InvalidTransaction as e:
         logger.error(f'Error updating transaction: {e.detail}')

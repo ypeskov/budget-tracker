@@ -8,7 +8,7 @@ from app.database import Base
 
 if TYPE_CHECKING:  # pragma: no cover
     from app.models.User import User
-
+    from app.models.TransactionTemplate import TransactionTemplate
 
 class UserCategory(Base):
     __tablename__ = 'user_categories'

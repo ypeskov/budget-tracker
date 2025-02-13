@@ -73,7 +73,8 @@
     "budgetLeft": "Залишилось бюджету",
     "loadingDiagram": "Завантаження діаграми",
     "creditLimit": "Кредитний ліміт",
-    "archiveDate": "Дата архівації"
+    "archiveDate": "Дата архівації",
+    "saveAsTemplate": "Зберегти як шаблон"
   },
   "menu": {
     "home": "Початок",

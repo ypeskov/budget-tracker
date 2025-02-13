@@ -71,7 +71,8 @@
     "budgetLeft": "Budget left",
     "loadingDiagram": "Loading diagram",
     "creditLimit": "Credit limit",
-    "archiveDate": "Archive date"
+    "archiveDate": "Archive date",
+    "saveAsTemplate": "Save as template"
   },
   "menu": {
     "home": "Home",

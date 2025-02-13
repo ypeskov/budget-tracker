@@ -27,6 +27,7 @@ let categories = reactive([]);
 const showDeleteConfirmation = ref(false);
 
 let transaction = reactive({});
+const saveAsTemplate = ref(false);
 let filteredCategories = reactive([]);
 
 const itemType = ref('expense');
@@ -148,6 +149,12 @@ function dateTimeChanged({ date, time }) {
 }
 
 async function submitTransaction() {
+  if (saveAsTemplate.value) {
+    transaction.isTemplate = true;
+  } else {
+    transaction.isTemplate = false;
+  }
+  
   try {
     if (props.isEdit) {
       await Services.transactionsService.updateTransaction(transaction);
@@ -193,6 +200,11 @@ async function deleteTransaction() {
                                  :item-type="itemType" />
 
             <TransactionLabel :transaction="transaction" />
+
+            <div class="mb-3">
+              <input type="checkbox" id="saveAsTemplate" v-model="saveAsTemplate" class="form-check-input" />
+              <label for="saveAsTemplate" class="form-label ms-2">{{ $t('message.saveAsTemplate') }}</label>
+            </div>
 
             <AccountSelector @account-changed="changeAccount"
                              :label="$t('message.account')"
