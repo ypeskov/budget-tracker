@@ -3,3 +3,4 @@ logs/
 celerybeat-schedule.db
 
 backup/
+.venv/

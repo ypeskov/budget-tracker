@@ -2,9 +2,9 @@
 import { onBeforeMount, reactive, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
-import { Services } from '../../services/servicesConfig';
-import { processError } from '../../errors/errorHandlers';
-import { useUserStore } from '../../stores/user';
+import { Services } from '@/services/servicesConfig';
+import { processError } from '@/errors/errorHandlers';
+import { useUserStore } from '@/stores/user';
 import Filter from '../filter/TransactionsFilter.vue';
 import ListOfTransactions from './ListOfTransactions.vue';
 
