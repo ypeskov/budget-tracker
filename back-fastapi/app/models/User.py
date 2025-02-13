@@ -8,6 +8,9 @@ from app.database import Base
 from app.models import Currency
 from app.models import UserCategory
 
+if TYPE_CHECKING:
+    from app.models.TransactionTemplate import TransactionTemplate
+
 DEFAULT_CURRENCY_CODE = 'USD'
 
 
@@ -24,7 +27,8 @@ class User(Base):
 
     base_currency: Mapped[Currency.Currency] = relationship()
     categories: Mapped[list[UserCategory.UserCategory]] = relationship(back_populates="user", passive_deletes=True)
-
+    transaction_templates: Mapped[list['TransactionTemplate']] = relationship('TransactionTemplate', back_populates='user')
+    
     is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),

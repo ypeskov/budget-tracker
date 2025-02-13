@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.logger_config import logger
 from app.models.Account import Account
 from app.models.Transaction import Transaction
+from app.models.TransactionTemplate import TransactionTemplate
 from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
 from app.services.errors import AccessDenied
 from app.services.transaction_management.TransactionManager import TransactionManager
@@ -154,3 +155,26 @@ def delete(transaction_id: int, user_id: int, db: Session) -> Transaction:
     processed_transaction = transaction_manager.delete_transaction().get_transaction()
 
     return processed_transaction
+
+def create_template(transaction_details: CreateTransactionSchema, user_id: int, db: Session) -> bool:
+    """
+    This function creates a template for a transaction
+    :param transaction_details: CreateTransactionSchema
+    :param user_id: int
+    :param db: Session
+    :return: bool
+    """
+    try:
+        transaction_template = TransactionTemplate(
+            user_id=user_id,
+            label=transaction_details.label,
+            category_id=transaction_details.category_id
+        )
+        db.add(transaction_template)
+        db.commit()
+        db.refresh(transaction_template)
+    except Exception as e:
+        logger.error(f'Error creating template: {e}')
+        return False
+
+    return True
