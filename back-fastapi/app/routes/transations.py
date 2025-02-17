@@ -5,10 +5,10 @@ from icecream import ic
 
 from app.logger_config import logger
 from app.database import get_db
-from app.schemas.transaction_schema import CreateTransactionSchema, ResponseTransactionSchema, UpdateTransactionSchema
+from app.schemas.transaction_schema import CreateTransactionSchema, ResponseTransactionSchema, ResponseTransactionTemplateSchema, UpdateTransactionSchema
 from app.dependencies.check_token import check_token
 from app.services.errors import AccessDenied, InvalidCategory, InvalidAccount
-from app.services.transactions import create_template, create_transaction, get_transactions, get_transaction_details, update, delete
+from app.services.transactions import create_template, create_transaction, get_templates, get_transactions, get_transaction_details, update, delete
 from app.services.transaction_management.errors import InvalidTransaction
 from app.utils.sanitize_transaction_filters import prepare_filters
 
@@ -57,6 +57,11 @@ def get_user_transactions(request: Request, db: Session = Depends(get_db)):
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Unable to get transactions')
 
+
+@router.get('/templates', response_model=list[ResponseTransactionTemplateSchema])
+def get_user_templates(request: Request, db: Session = Depends(get_db)):
+    """ Get all templates for a user """
+    return get_templates(request.state.user['id'], db)
 
 @router.get('/{transaction_id}', response_model=ResponseTransactionSchema)
 def get_transaction(transaction_id: int, request: Request, db: Session = Depends(get_db)) -> ResponseTransactionSchema:

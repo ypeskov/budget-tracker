@@ -178,3 +178,13 @@ def create_template(transaction_details: CreateTransactionSchema, user_id: int, 
         return False
 
     return True
+
+
+def get_templates(user_id: int, db: Session) -> list[TransactionTemplate]:
+    """
+    This function gets all templates for a user
+    :param user_id: int
+    :param db: Session
+    :return: list[TransactionTemplate]
+    """
+    return db.query(TransactionTemplate).filter_by(user_id=user_id).all()

@@ -1,6 +1,11 @@
 <script setup>
+import { ref, defineExpose } from 'vue';
+
 const props = defineProps(['amount', 'currentAccount', 'label', 'type',]);
 const emit = defineEmits(['amountChanged']);
+
+const amountInput = ref(null);
+defineExpose({ amountInput });
 
 function changeAmount($value) {
   let value = $value.target.value;
@@ -21,6 +26,7 @@ function changeAmount($value) {
           {{ label }}
         </label>
         <input type="text"
+               ref="amountInput"
                @input="changeAmount"
                :value="amount"
                class="form-control"

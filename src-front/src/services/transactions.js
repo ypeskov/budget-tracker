@@ -73,4 +73,10 @@ export class TransactionsService {
     this.accountService.setShouldUpdateAccountsList(true);
     return deletedTransaction;
   }
+
+  async getUserTemplates() {
+    const templatesUrl = '/transactions/templates';
+    const templates = await request(templatesUrl, {}, {userService: this.userService});
+    return templates;
+  }
 }
