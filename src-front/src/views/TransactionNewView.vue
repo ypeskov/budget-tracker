@@ -14,11 +14,13 @@ import Category from '../components/transactions/Category.vue';
 import AccountSelector from '../components/transactions/AccountSelector.vue';
 import ExchangeRate from '../components/transactions/ExchangeRate.vue';
 import TransactionDateTime from '../components/transactions/TransactionDateTIme.vue';
+import { useUserStore } from '@/stores/user';
 
 const props = defineProps(['isEdit', 'returnUrl', 'accountId']);
 const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
+const userStore = useUserStore();
 
 let accounts = reactive([]);
 let currentAccount = reactive({});
@@ -174,6 +176,15 @@ async function submitTransaction() {
     } else {
       await Services.transactionsService.addTransaction(transaction);
     }
+
+    if (transaction.isTemplate) {
+      userStore.transactionTemplates.push({
+        id: null,
+        label: transaction.label,
+        categoryId: transaction.categoryId,
+      });
+    }
+
     await router.push({
       name: returnUrlName.value,
       params: {
