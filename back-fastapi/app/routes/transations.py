@@ -106,12 +106,12 @@ def delete_transaction(transaction_id: int, request: Request,
     """ Delete transaction """
     try:
         transaction = delete(transaction_id, request.state.user['id'], db)
-        return ResponseTransactionSchema.validate(transaction)
+        return ResponseTransactionSchema.model_validate(transaction)
     except InvalidTransaction as e:
         logger.error(f'Error deleting transaction: {e.detail}')
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
-    except AccessDenied as e:
-        logger.error(f'Error deleting transaction: Access denied')
+    except AccessDenied:
+        logger.error('Error deleting transaction: Access denied')
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     except Exception as e:
         logger.exception(e)

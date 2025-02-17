@@ -150,6 +150,7 @@ def delete(transaction_id: int, user_id: int, db: Session) -> Transaction:
         raise AccessDenied()
 
     transaction.is_deleted = True
+    transaction.is_template = False
     schema = UpdateTransactionSchema.model_validate(transaction)
     transaction_manager: TransactionManager = TransactionManager(schema, user_id, db)
     processed_transaction = transaction_manager.delete_transaction().get_transaction()
