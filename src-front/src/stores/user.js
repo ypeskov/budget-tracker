@@ -11,6 +11,7 @@ export const useUserStore = defineStore('user', () => {
   const categories = reactive([]);
   const settings = reactive({});
   const baseCurrency = ref('');
+  const transactionTemplates = reactive([]);
 
   const timeLeft = ref('00:00');
   let timer = null;
@@ -67,5 +68,6 @@ export const useUserStore = defineStore('user', () => {
     timeLeft,
     startTimer,
     stopTimer,
+    transactionTemplates,
   };
 });

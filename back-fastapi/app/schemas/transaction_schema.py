@@ -15,26 +15,34 @@ class CreateTransactionSchema(BaseModel):
     account_id: int
     target_account_id: int | None = None
     category_id: int | None = None
-    amount: Annotated[Decimal, PlainSerializer(
-        lambda x: float(x), return_type=float, when_used='json'
-    )]
-    target_amount: Annotated[Decimal, PlainSerializer(
-        lambda x: float(x), return_type=float, when_used='json'
-    )] | None = None
-    label: str = ''
-    notes: str | None = ''
+    amount: Annotated[
+        Decimal,
+        PlainSerializer(lambda x: float(x), return_type=float, when_used="json"),
+    ]
+    target_amount: (
+        Annotated[
+            Decimal,
+            PlainSerializer(lambda x: float(x), return_type=float, when_used="json"),
+        ]
+        | None
+    ) = None
+    label: str = ""
+    notes: str | None = ""
     date_time: datetime | None = None
     is_transfer: bool
     is_income: bool
     is_template: bool
-    model_config = ConfigDict(from_attributes=True,
-                              populate_by_name=True,
-                              alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
 
 
 class UpdateTransactionSchema(CreateTransactionSchema):
     id: int
     # user_id: int
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
 
 
 class ResponseTransactionSchema(CreateTransactionSchema):
@@ -42,13 +50,38 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     user_id: int
     user: UserResponse
     account: AccountResponseSchema
-    base_currency_amount: Annotated[Decimal, PlainSerializer(
-        lambda x: float(x), return_type=float, when_used='json'
-    )] | None = None
+    base_currency_amount: (
+        Annotated[
+            Decimal,
+            PlainSerializer(lambda x: float(x), return_type=float, when_used="json"),
+        ]
+        | None
+    ) = None
     base_currency_code: str | None = None
-    new_balance: Annotated[Decimal, PlainSerializer(
-        lambda x: float(x), return_type=float, when_used='json'
-    )] | None = None
+    new_balance: (
+        Annotated[
+            Decimal,
+            PlainSerializer(lambda x: float(x), return_type=float, when_used="json"),
+        ]
+        | None
+    ) = None
     category: ResponseCategorySchema | None = None
     linked_transaction_id: int | None = None
     is_template: bool | None = None
+
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
+
+
+class ResponseTransactionTemplateSchema(BaseModel):
+    id: int
+    user_id: int
+    category_id: int
+    label: str
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )

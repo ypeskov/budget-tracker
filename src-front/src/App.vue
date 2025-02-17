@@ -3,14 +3,16 @@ import { onBeforeMount, onBeforeUnmount, onMounted } from 'vue';
 import { RouterLink, RouterView, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-import { useUserStore } from './stores/user';
-import { UserService } from './services/users';
+import { useUserStore } from '@/stores/user';
+import { UserService } from '@/services/users';
+import { TransactionsService } from '@/services/transactions';
 
 const router = useRouter();
 const { locale } = useI18n();
 
 const userStore = useUserStore();
 const userService = new UserService(userStore);
+const transactionsService = new TransactionsService(userStore);
 
 onMounted(() => {
   if (userStore.isLoggedIn) {
@@ -31,6 +33,7 @@ onBeforeMount(async () => {
   if (isLoggedIn) {
     locale.value = localStorageUser.settings.language;
     userService.setUser(localStorageUser, isLoggedIn, accessToken);
+    userStore.transactionTemplates.splice(0, userStore.transactionTemplates.length, ...(await transactionsService.getUserTemplates()));
   }
 });
 

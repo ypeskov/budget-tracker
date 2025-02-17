@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive, ref } from 'vue';
+import { onBeforeMount, reactive, ref, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { DateTime } from 'luxon';
@@ -26,7 +26,20 @@ let targetAccount = reactive({});
 let categories = reactive([]);
 const showDeleteConfirmation = ref(false);
 
-let transaction = reactive({});
+const amountComponent = ref(null);
+
+let transaction = reactive({
+  label: '',
+  amount: 0,
+  categoryId: null,
+  accountId: null,
+  targetAccountId: null,
+  targetAmount: null,
+  isTransfer: false,
+  isIncome: false,
+  dateTime: null,
+  notes: ''
+});
 const saveAsTemplate = ref(false);
 let filteredCategories = reactive([]);
 
@@ -65,7 +78,7 @@ onBeforeMount(async () => {
   try {
     categories = await Services.categoriesService.getUserCategories();
     accounts.length = 0;
-    accounts.push(...(await Services.accountsService.getUserAccounts({shouldUpdate: true, includeHidden: true})));
+    accounts.push(...(await Services.accountsService.getUserAccounts({ shouldUpdate: true, includeHidden: true })));
     if (props.accountId) {
       currentAccount = accounts.find((item) => item.id === parseInt(props.accountId, 10));
     } else {
@@ -77,7 +90,7 @@ onBeforeMount(async () => {
 
     if (props.isEdit) {
       let details = await Services.transactionsService.getTransactionDetails(route.params.id);
-      transaction = Object.assign(transaction, details);
+      Object.assign(transaction, details);
       itemType.value = transaction.isTransfer ? 'transfer' : transaction.isIncome ? 'income' : 'expense';
 
       // !!!!!!!
@@ -154,7 +167,7 @@ async function submitTransaction() {
   } else {
     transaction.isTemplate = false;
   }
-  
+
   try {
     if (props.isEdit) {
       await Services.transactionsService.updateTransaction(transaction);
@@ -186,6 +199,26 @@ async function deleteTransaction() {
     showDeleteConfirmation.value = false;
   }
 }
+
+function updateLabel(value) {
+  if (typeof value === 'string') {
+    transaction.label = value;
+    transaction.categoryId = null;
+  } else if (typeof value === 'object' && value !== null) {
+    const selectedCategory = categories.find((item) => item.id === value.categoryId);
+    transaction.label = value.label;
+    transaction.categoryId = selectedCategory.id;
+    transaction.isIncome = selectedCategory.isIncome;
+    transaction.isTransfer = selectedCategory.isTransfer;
+    itemType.value = selectedCategory.isIncome ? 'income' : 'expense';
+
+    filterCategories();
+
+    nextTick(() => {
+      amountComponent.value?.amountInput?.focus();
+    });
+  }
+}
 </script>
 
 <template>
@@ -194,61 +227,42 @@ async function deleteTransaction() {
       <div class="row">
         <div class="col">
           <form @submit.prevent="submitTransaction">
-            <TransactionTypeTabs @type-changed="changeItemType"
-                                 :is-edit="props.isEdit"
-                                 :transaction="transaction"
-                                 :item-type="itemType" />
+            <TransactionTypeTabs @type-changed="changeItemType" :is-edit="props.isEdit" :transaction="transaction"
+              :item-type="itemType" />
 
-            <TransactionLabel :transaction="transaction" />
+            <TransactionLabel :transaction="transaction" @update:label="updateLabel" />
 
             <div class="mb-3">
               <input type="checkbox" id="saveAsTemplate" v-model="saveAsTemplate" class="form-check-input" />
               <label for="saveAsTemplate" class="form-label ms-2">{{ $t('message.saveAsTemplate') }}</label>
             </div>
 
-            <AccountSelector @account-changed="changeAccount"
-                             :label="$t('message.account')"
-                             account-type="src"
-                             :accountId="transaction.accountId"
-                             :accounts="accounts" />
+            <AccountSelector @account-changed="changeAccount" :label="$t('message.account')" account-type="src"
+              :accountId="transaction.accountId" :accounts="accounts" />
 
-            <TransactionAmount :label="t('message.amount')"
-                               type="src"
-                               @amount-changed="amountChanged"
-                               :amount="transaction.amount"
-                               :current-account="currentAccount" />
+            <TransactionAmount :label="t('message.amount')" ref="amountComponent" :amount-input="amountInput" type="src"
+              @amount-changed="amountChanged" :amount="transaction.amount" :current-account="currentAccount" />
 
-            <AccountSelector v-if="itemType === 'transfer'"
-                             @account-changed="changeAccount"
-                             :label="$t('message.targetAccount')"
-                             account-type="target"
-                             :accountId="transaction.targetAccountId"
-                             :accounts="accounts" />
+            <AccountSelector v-if="itemType === 'transfer'" @account-changed="changeAccount"
+              :label="$t('message.targetAccount')" account-type="target" :accountId="transaction.targetAccountId"
+              :accounts="accounts" />
 
-            <TransactionAmount v-if="itemType === 'transfer'"
-                               type="target"
-                               :label="t('message.amount')"
-                               @amount-changed="amountChanged"
-                               :amount="transaction.targetAmount"
-                               :current-account="targetAccount" />
+            <TransactionAmount v-if="itemType === 'transfer'" type="target" :label="t('message.amount')"
+              @amount-changed="amountChanged" :amount="transaction.targetAmount" :current-account="targetAccount" />
 
-            <ExchangeRate v-if="itemType === 'transfer'"
-                          :currency-src-code="currentAccount.currency.code"
-                          :src-amount="transaction.amount"
-                          :currency-target-code="targetAccount.currency.code"
-                          :target-amount="transaction.targetAmount" />
+            <ExchangeRate v-if="itemType === 'transfer'" :currency-src-code="currentAccount.currency.code"
+              :src-amount="transaction.amount" :currency-target-code="targetAccount.currency.code"
+              :target-amount="transaction.targetAmount" />
 
-            <Category v-if="!transaction.isTransfer"
-                      :transaction="transaction"
-                      :categories="filteredCategories"
-                      @update:categoryId="transaction.categoryId = $event" />
+            <Category v-if="!transaction.isTransfer" :transaction="transaction" :categories="filteredCategories"
+              @update:categoryId="transaction.categoryId = $event" />
 
             <TransactionDateTime :transaction="transaction" :is-edit="isEdit" @date-time-changed="dateTimeChanged" />
 
             <div class="mb-3">
               <label for="notes" class="form-label">{{ $t('message.notes') }}</label>
               <textarea @keyup="changeNotes" class="form-control" id="notes" v-model="transaction.notes"
-                        rows="3"></textarea>
+                rows="3"></textarea>
             </div>
 
             <div class="flex-container">
@@ -263,8 +277,7 @@ async function deleteTransaction() {
             <p>Delete the transaction?</p>
             <div class="buttons-container">
               <button @click="deleteTransaction" class="btn btn-danger">{{ $t('buttons.yes') }}</button>
-              <button @click="showDeleteConfirmation = false"
-                      class="btn btn-secondary">{{ $t('buttons.cancel') }}
+              <button @click="showDeleteConfirmation = false" class="btn btn-secondary">{{ $t('buttons.cancel') }}
               </button>
             </div>
           </div>
