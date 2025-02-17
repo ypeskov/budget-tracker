@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from icecream import ic
 
 from app.config import Settings
@@ -22,13 +22,16 @@ router = APIRouter(
 
 
 @router.get('/backup/')
-async def backup_db():
+async def backup_db(request: Request):
     """ Create a backup of the database """
     logger.info('Backup of the database is requested')
     base_dir = Path(os.getcwd())
     backup_dir = base_dir / settings.DB_BACKUP_DIR
 
     environment = settings.ENVIRONMENT
+
+    if request.state.user['email'] not in settings.ADMINS_NOTIFICATION_EMAILS:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You are not authorized')
 
     try:
         filename = backup_postgres_db(env_name=environment,
