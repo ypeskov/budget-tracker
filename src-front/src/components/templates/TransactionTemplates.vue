@@ -12,6 +12,9 @@ const props = defineProps({
 const selectedTemplates = ref([]);
 
 const handleTemplateSelection = (templateId) => {
+  console.log(selectedTemplates.value);
+  console.log(templateId);
+  console.log('=========');
   if (selectedTemplates.value.includes(templateId)) {
     selectedTemplates.value = selectedTemplates.value.filter(id => id !== templateId);
   } else {
@@ -20,6 +23,7 @@ const handleTemplateSelection = (templateId) => {
 };
 
 const deleteTemplates = async () => {
+  console.log(selectedTemplates.value);
   await Services.transactionsService.deleteUserTemplates(selectedTemplates.value);
   const updatedTemplates = await Services.transactionsService.getUserTemplates();
   userStore.transactionTemplates = updatedTemplates;
