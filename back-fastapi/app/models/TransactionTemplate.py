@@ -19,7 +19,7 @@ class TransactionTemplate(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    user: Mapped[User] = relationship('User', back_populates='transaction_templates')
+    user: Mapped['User'] = relationship('User', back_populates='transaction_templates')
     
     def __repr__(self):
         return (f'TransactionTemplate(id={self.id}, user_id={self.user_id}, label={self.label}, category_id={self.category_id}, '

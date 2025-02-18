@@ -16,24 +16,31 @@ from app.services.errors import NotFoundError, InvalidPeriod
 ic.configureOutput(includeContext=True)
 
 
-def create_new_budget(user_id: int,
-                      db: Session,
-                      budget_dto: NewBudgetInputSchema | EditBudgetInputSchema) -> Budget:
-    """ Create new budget """
+def create_new_budget(
+    user_id: int, db: Session, budget_dto: NewBudgetInputSchema | EditBudgetInputSchema
+) -> Budget:
+    """Create new budget"""
     logger.info(f"Creating new budget for user_id: {user_id}, budget_dto: {budget_dto}")
 
     # Filter out categories that are not included in the user's categories
-    user_categories = db.query(UserCategory).filter(UserCategory.user_id == user_id).all()
-    included_categories = [category.id for category in user_categories if category.id in budget_dto.categories]
+    user_categories = (
+        db.query(UserCategory).filter(UserCategory.user_id == user_id).all()
+    )
+    included_categories = [
+        category.id
+        for category in user_categories
+        if category.id in budget_dto.categories
+    ]
     included_categories_str = ",".join(map(str, included_categories))
 
     try:
         # Check if it's an update operation
         if hasattr(budget_dto, "id") and budget_dto.id:
-            budget: Budget | None = (db.query(Budget)
-                                     .filter(Budget.id == budget_dto.id,
-                                             Budget.user_id == user_id)
-                                     .one_or_none())
+            budget: Budget | None = (
+                db.query(Budget)
+                .filter(Budget.id == budget_dto.id, Budget.user_id == user_id)
+                .one_or_none()
+            )
             if budget is None:
                 raise NotFoundError(f"Budget with id {budget_dto.id} not found.")
 
@@ -50,7 +57,9 @@ def create_new_budget(user_id: int,
         budget.period = budget_dto.period
         budget.repeat = budget_dto.repeat
         budget.start_date = budget_dto.start_date
-        budget.end_date = budget_dto.end_date + timedelta(days=1)  # add 1 day to include the full end date
+        budget.end_date = budget_dto.end_date + timedelta(
+            days=1
+        )  # add 1 day to include the full end date
         budget.included_categories = included_categories_str
         budget.comment = str(budget_dto.comment)
 
@@ -67,47 +76,64 @@ def create_new_budget(user_id: int,
     return budget
 
 
-def update_budget(user_id: int,
-                  db: Session,
-                  budget_dto: NewBudgetInputSchema | EditBudgetInputSchema) -> Budget:
-    """ Update budget """
+def update_budget(
+    user_id: int, db: Session, budget_dto: NewBudgetInputSchema | EditBudgetInputSchema
+) -> Budget:
+    """Update budget"""
     logger.info(f"Updating budget for user_id: {user_id}, budget_dto: {budget_dto.id}")  # type: ignore
     return create_new_budget(user_id, db, budget_dto)
 
 
 def fill_budget_with_existing_transactions(db: Session, budget: Budget):
-    """ Fill budget with existing transactions """
+    """Fill budget with existing transactions"""
     logger.info(f"Filling budget with existing transactions for budget: {budget.id}")
 
-    transactions: list[Transaction] = db.query(Transaction).filter(  # type: ignore
-        Transaction.user_id == budget.user_id,
-        Transaction.is_deleted.is_(False),
-        Transaction.is_transfer.is_(False),
-        Transaction.is_income.is_(False),
-        Transaction.date_time.between(budget.start_date, budget.end_date)
-    ).all()
+    transactions: list[Transaction] = (
+        db.query(Transaction)
+        .filter(  # type: ignore
+            Transaction.user_id == budget.user_id,
+            Transaction.is_deleted.is_(False),
+            Transaction.is_transfer.is_(False),
+            Transaction.is_income.is_(False),
+            Transaction.date_time.between(budget.start_date, budget.end_date),
+        )
+        .all()
+    )
 
-    included_categories = [int(category_id) for category_id in budget.included_categories.split(",")]
+    included_categories = [
+        int(category_id) for category_id in budget.included_categories.split(",")
+    ]
 
     budget.collected_amount = Decimal(0)
     for transaction in transactions:
         if transaction.category_id in included_categories:
-            adjusted_amount: Decimal = calc_amount(transaction.amount,
-                                                   transaction.account.currency.code,
-                                                   transaction.date_time.date(),
-                                                   budget.currency.code,
-                                                   db)
+            adjusted_amount: Decimal = calc_amount(
+                transaction.amount,
+                transaction.account.currency.code,
+                transaction.date_time.date(),
+                budget.currency.code,
+                db,
+            )
             budget.collected_amount += adjusted_amount
 
     db.commit()
     logger.info(f"Filled budget with existing transactions for budget: {budget.id}")
 
 
-def update_budget_with_amount(db: Session, user_id: int, ):
-    """ Update collected amount for all applicable budgets """
+def update_budget_with_amount(
+    db: Session,
+    user_id: int,
+):
+    """Update collected amount for all applicable budgets"""
     logger.info(f"Updating budgets for user with id: {user_id}")
 
-    user_budgets: list[Budget] = db.query(Budget).filter(Budget.user_id == user_id, ).all()
+    user_budgets: list[Budget] = (
+        db.query(Budget)
+        .filter(
+            Budget.user_id == user_id,
+        )
+        .all()
+    )
 
     # just update all budgets not to complicate the logic
     for budget in user_budgets:
@@ -116,8 +142,8 @@ def update_budget_with_amount(db: Session, user_id: int, ):
     logger.info(f"Updated budgets for user with id: {user_id}")
 
 
-def get_user_budgets(user_id: int, db: Session, include: str = 'all') -> list[Budget]:
-    """ Get all budgets for user """
+def get_user_budgets(user_id: int, db: Session, include: str = "all") -> list[Budget]:
+    """Get all budgets for user"""
     logger.info(f"Getting all budgets for user_id: {user_id}")
 
     budgets_query = (
@@ -130,27 +156,33 @@ def get_user_budgets(user_id: int, db: Session, include: str = 'all') -> list[Bu
         .order_by(Budget.is_archived, Budget.end_date.asc(), Budget.name.asc())
     )
 
-    if include == 'all':
+    if include == "all":
         pass
-    elif include == 'active':
+    elif include == "active":
         budgets_query = budgets_query.filter(Budget.is_archived.is_(False))
-    elif include == 'archived':
+    elif include == "archived":
         budgets_query = budgets_query.filter(Budget.is_archived.is_(True))
     else:
         raise ValueError(f"Invalid value for include: {include}")
 
     budgets: list[Budget] = budgets_query.all()  # type: ignore
     for budget in budgets:
-        budget.end_date -= timedelta(days=1)  # subtract 1 day to exclude the full end date stored in the database
+        budget.end_date -= timedelta(
+            days=1
+        )  # subtract 1 day to exclude the full end date stored in the database
 
     return budgets
 
 
 def delete_budget(user_id: int, db: Session, budget_id: int):
-    """ Delete budget """
+    """Delete budget"""
     logger.info(f"Deleting budget with id: {budget_id}")
 
-    budget = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == user_id).one_or_none()
+    budget = (
+        db.query(Budget)
+        .filter(Budget.id == budget_id, Budget.user_id == user_id)
+        .one_or_none()
+    )
     if budget is None:
         raise NotFoundError(f"Budget with id {budget_id} not found.")
 
@@ -163,10 +195,21 @@ def delete_budget(user_id: int, db: Session, budget_id: int):
 
 
 def archive_budget(user_id: int, db: Session, budget_id: int):
-    """ Archive budget """
+    """Archive budget"""
     logger.info(f"Archiving budget with id: {budget_id}")
 
-    budget = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == user_id).one_or_none()
+    try:
+        budget = (
+            db.query(Budget)
+            .filter(Budget.id == budget_id, Budget.user_id == user_id)
+            .one_or_none()
+        )
+    except Exception as e:
+        logger.exception(
+            f"Error archiving budget with id: {budget_id}, the error is: {e}"
+        )
+        raise e
+
     if budget is None:
         logger.error(f"Budget with id {budget_id} not found for user_id: {user_id}")
         raise NotFoundError(f"Budget with id {budget_id} not found.")
@@ -180,13 +223,20 @@ def archive_budget(user_id: int, db: Session, budget_id: int):
 
 
 def put_outdated_budgets_to_archive(db: Session):
-    """ Put budget to archive """
-    logger.info("Putting outdated budgets to archive")
-
+    """Put budget to archive"""
     now = datetime.now(timezone.utc)
-    logger.info(f"Now: {now}")
-    outdated_budgets: list[Budget] = (
-        db.query(Budget).filter(Budget.end_date < now, Budget.is_archived.is_(False)).all())
+    logger.info(f"Putting outdated budgets to archive at {now} UTC time")
+
+    try:
+        outdated_budgets: list[Budget] = (
+            db.query(Budget)
+            .filter(Budget.end_date < now, Budget.is_archived.is_(False))
+            .all()
+        )
+    except Exception as e:
+        logger.exception(f"Error getting outdated budgets, the error is: {e}")
+        raise e
+
     logger.info(f"Outdated budgets: {outdated_budgets}")
     archiving_budgets = []
     for budget in outdated_budgets:
@@ -202,7 +252,7 @@ def put_outdated_budgets_to_archive(db: Session):
 
 
 def create_copy_of_outdated_budget(db: Session, budget: Budget):
-    """ Create copy of outdated budget """
+    """Create copy of outdated budget"""
     logger.info(f"Creating copy of outdated budget: {budget.id}")
 
     end_date = pendulum.instance(budget.end_date)
@@ -242,6 +292,8 @@ def create_copy_of_outdated_budget(db: Session, budget: Budget):
     db.commit()
     db.refresh(new_budget)
 
-    logger.info(f"Created copy of outdated budget: {budget.id} as new budget: {new_budget.id}")
+    logger.info(
+        f"Created copy of outdated budget: {budget.id} as new budget: {new_budget.id}"
+    )
 
     return new_budget

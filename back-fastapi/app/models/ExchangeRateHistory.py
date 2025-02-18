@@ -1,4 +1,4 @@
-from datetime import datetime,date
+from datetime import date
 
 from sqlalchemy import Integer, DateTime, Date, func, Boolean, String
 from sqlalchemy.schema import UniqueConstraint
