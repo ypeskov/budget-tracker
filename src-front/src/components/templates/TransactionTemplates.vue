@@ -1,8 +1,9 @@
 <script setup>
 import ModalWindow from '@/components/utils/ModalWindow.vue';
 import { useUserStore } from '@/stores/user';
-import { ref } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 import { Services } from '@/services/servicesConfig';
+
 const userStore = useUserStore();
 
 const props = defineProps({
@@ -10,6 +11,10 @@ const props = defineProps({
 });
 
 const selectedTemplates = ref([]);
+
+onBeforeMount(async () => {
+  userStore.transactionTemplates = await Services.transactionsService.getUserTemplates();
+});
 
 const handleTemplateSelection = (templateId) => {
   if (selectedTemplates.value.includes(templateId)) {
