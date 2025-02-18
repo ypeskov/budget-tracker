@@ -20,7 +20,7 @@ const handleTemplateSelection = (templateId) => {
 };
 
 const deleteTemplates = async () => {
-  const deletedTemplates = await Services.transactionsService.deleteUserTemplates(selectedTemplates.value);
+  await Services.transactionsService.deleteUserTemplates(selectedTemplates.value);
   const updatedTemplates = await Services.transactionsService.getUserTemplates();
   userStore.transactionTemplates = updatedTemplates;
 
