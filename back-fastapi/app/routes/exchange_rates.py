@@ -35,7 +35,7 @@ def get_rates(db: Session = Depends(get_db)):
 
 @router.get('/update/', status_code=status.HTTP_200_OK, response_model=ExchangeRateSchema)
 def update_rates(db: Session = Depends(get_db)):
-    """ Update exchange rates """
+    """ Update exchange rates just for today """
     try:
         exchange_rates: ExchangeRateHistory = update_exchange_rates(db, when=date.today())
         return exchange_rates

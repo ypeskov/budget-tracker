@@ -45,18 +45,18 @@ def get_transactions(user_id: int, db: Session, params: dict | None = None, incl
             .order_by(Transaction.date_time.desc()))
 
     if not include_deleted:
-        stmt = stmt.filter(Transaction.is_deleted == False)
+        stmt = stmt.filter(Transaction.is_deleted == False)  # noqa: E712
 
     if 'types' in params:
         type_filters = []
         expense_or_income = []
         if 'expense' in params['types']:
-            expense_or_income.append(Transaction.is_income == False)
+            expense_or_income.append(Transaction.is_income == False)  # noqa: E712
         if 'income' in params['types']:
-            expense_or_income.append(Transaction.is_income == True)
+            expense_or_income.append(Transaction.is_income == True)  # noqa: E712
         if len(expense_or_income) > 0:
             if 'categories' not in params:
-                type_filters.append(and_(or_(*expense_or_income), Transaction.is_transfer == False))
+                type_filters.append(and_(or_(*expense_or_income), Transaction.is_transfer == False))  # noqa: E712
             else:
                 type_filters.append(and_(or_(*expense_or_income), Transaction.category_id.in_(params['categories'])))
 

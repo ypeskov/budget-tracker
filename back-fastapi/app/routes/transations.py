@@ -31,7 +31,7 @@ def add_user_transaction(transaction_dto: CreateTransactionSchema, request: Requ
             create_template(transaction_dto, request.state.user['id'], db)
         return transaction
     except AccessDenied:
-        logger.error(f'Access denied')
+        logger.error('Access denied')
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     except InvalidCategory:
         logger.error(f'Invalid category: {transaction_dto}')
@@ -84,8 +84,8 @@ def update_transaction(transaction_details: UpdateTransactionSchema,
     except InvalidTransaction as e:
         logger.error(f'Error updating transaction: {e.detail}')
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
-    except AccessDenied as e:
-        logger.error(f'Error updating transaction: Access denied')
+    except AccessDenied:
+        logger.error('Error updating transaction: Access denied')
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     except InvalidCategory:
         logger.error(f'Invalid category: {transaction_details}')
