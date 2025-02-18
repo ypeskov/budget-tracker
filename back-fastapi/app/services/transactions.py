@@ -233,6 +233,7 @@ def get_templates(user_id: int, db: Session) -> list[TransactionTemplate]:
         db.query(TransactionTemplate)
         .filter_by(user_id=user_id)
         .options(joinedload(TransactionTemplate.category))
+        .order_by(TransactionTemplate.label)
         .all()
     )
     
