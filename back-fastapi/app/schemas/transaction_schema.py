@@ -75,12 +75,8 @@ class ResponseTransactionSchema(CreateTransactionSchema):
 
 
 class ResponseTransactionTemplateSchema(BaseModel):
-    id: int
-    user_id: int
     category_id: int
     label: str
-    created_at: datetime
-    updated_at: datetime
 
     model_config = ConfigDict(
         from_attributes=True, populate_by_name=True, alias_generator=to_camel
