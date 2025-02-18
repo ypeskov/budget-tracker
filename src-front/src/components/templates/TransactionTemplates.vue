@@ -20,7 +20,7 @@ const handleTemplateSelection = (templateId) => {
 };
 
 const deleteTemplates = async () => {
-  const deletedTemplates = await Services.transactionsService.deleteUserTemplates(selectedTemplates.value);
+  await Services.transactionsService.deleteUserTemplates(selectedTemplates.value);
   const updatedTemplates = await Services.transactionsService.getUserTemplates();
   userStore.transactionTemplates = updatedTemplates;
 
@@ -44,11 +44,11 @@ const deleteTemplates = async () => {
         <div class="row">
           <div class="col-12">
             <div v-for="template in userStore.transactionTemplates" :key="template.id"
-              class="list-item d-flex align-items-center gap-2">
-              <input class="form-check-input" type="checkbox" :value="template.id" :id="'template-' + template.id"
-                @change="handleTemplateSelection(template.id)">
-              <label class="form-check-label" :for="'template-' + template.id">{{ template.label }} ({{
-                template.categoryId }})</label>
+              @click="handleTemplateSelection(template.id)" class="list-item d-flex align-items-center gap-2">
+              <input class="form-check-input" type="checkbox" :value="template.id" :id="'template-' + template.id">
+              <label class="form-check-label" :for="'template-' + template.id">
+                {{ template.label }} ({{ template.categoryId }})
+              </label>
             </div>
           </div>
 
