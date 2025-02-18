@@ -1,10 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.database import Base
-from app.models.User import User
+
+if TYPE_CHECKING:
+    from app.models.User import User
 
 LABEL_MAX_LENGTH = 255
 

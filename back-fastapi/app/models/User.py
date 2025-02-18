@@ -38,3 +38,6 @@ class User(Base):
         return f'User(id={self.id}, email="{self.email}", first_name="{self.first_name}", ' + \
             f'last_name="{self.last_name}", is_active={self.is_active}, base_currency_id={self.base_currency_id}, ' + \
             f'is_deleted={self.is_deleted}, created_at={self.created_at}, updated_at={self.updated_at})'
+
+
+from app.models.TransactionTemplate import TransactionTemplate  # noqa: E402
