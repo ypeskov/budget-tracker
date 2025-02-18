@@ -79,4 +79,14 @@ export class TransactionsService {
     const templates = await request(templatesUrl, {}, {userService: this.userService});
     return templates;
   }
+
+  async deleteUserTemplates(templateIds) {
+    const templateIdsString = templateIds.join(',');
+    const templatesUrl = `/transactions/templates?ids=${templateIdsString}`;
+    const deletedTemplates = await request(templatesUrl, {
+      method: 'DELETE',
+    }, {userService: this.userService});
+
+    return deletedTemplates;
+  }
 }

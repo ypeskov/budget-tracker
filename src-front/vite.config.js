@@ -8,8 +8,9 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-         // additionalData: '@import "./src/assets/common.scss";',
-     },
+        api: 'modern-compiler',
+        // additionalData: '@import "./src/assets/common.scss";',
+      },
     },
   },
   plugins: [

@@ -1,11 +1,13 @@
 <script setup>
 import { ref } from 'vue';
 
-import UserProfile from '../components/settings/UserProfile.vue';
-import CategoriesManager from '../components/settings/CategoriesManager.vue';
+import UserProfile from '@/components/settings/UserProfile.vue';
+import CategoriesManager from '@/components/settings/CategoriesManager.vue';
+import TransactionTemplates from '@/components/templates/TransactionTemplates.vue';
 
 const showProfileModal = ref(false);
 const showCategoriesModal = ref(false);
+const showTemplatesModal = ref(false);
 
 const openProfileModal = () => {
   showProfileModal.value = true;
@@ -23,6 +25,13 @@ const closeCategoriesModal = () => {
   showCategoriesModal.value = false;
 };
 
+const openTemplatesModal = () => {
+  showTemplatesModal.value = true;
+};
+
+const closeTemplatesModal = () => {
+  showTemplatesModal.value = false;
+};
 </script>
 
 <template>
@@ -39,7 +48,16 @@ const closeCategoriesModal = () => {
           <button @click="openProfileModal" class="btn btn-primary w-100">{{ $t('buttons.profile') }}</button>
         </div>
         <teleport to="body">
-          <UserProfile :show-profile-modal="showProfileModal" :close-modal="closeProfileModal" />
+          <UserProfile v-if="showProfileModal" :close-modal="closeProfileModal" />
+        </teleport>
+      </div>
+
+      <div class="row">
+        <div class="col-12 profile-section">
+          <button @click="openTemplatesModal" class="btn btn-primary w-100">{{ $t('buttons.templates') }}</button>
+        </div>
+        <teleport to="body">
+          <TransactionTemplates v-if="showTemplatesModal" :close-modal="closeTemplatesModal" />
         </teleport>
       </div>
 

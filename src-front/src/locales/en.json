@@ -72,7 +72,8 @@
     "loadingDiagram": "Loading diagram",
     "creditLimit": "Credit limit",
     "archiveDate": "Archive date",
-    "saveAsTemplate": "Save as template"
+    "saveAsTemplate": "Save as template",
+    "templates": "Templates"
   },
   "menu": {
     "home": "Home",
@@ -111,6 +112,7 @@
     "hideArchivedBudgets": "Hide archived budgets",
     "showArchivedAccounts": "Show archived accounts",
     "restore": "Restore",
-    "archiveAccount": "Archive account"
+    "archiveAccount": "Archive account",
+    "templates": "Templates"
   }
 }

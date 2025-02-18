@@ -74,7 +74,8 @@
     "loadingDiagram": "Завантаження діаграми",
     "creditLimit": "Кредитний ліміт",
     "archiveDate": "Дата архівації",
-    "saveAsTemplate": "Зберегти як шаблон"
+    "saveAsTemplate": "Зберегти як шаблон",
+    "templates": "Шаблони"
   },
   "menu": {
     "home": "Початок",
@@ -111,6 +112,7 @@
     "hideArchivedBudgets": "Приховати архівовані бюджети",
     "showArchivedAccounts": "Показати архівовані рахунки",
     "restore": "Відновити",
-    "archiveAccount": "Архівувати рахунок"
+    "archiveAccount": "Архівувати рахунок",
+    "templates": "Шаблони"
   }
 }
