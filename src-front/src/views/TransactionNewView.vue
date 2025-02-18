@@ -214,7 +214,6 @@ async function deleteTransaction() {
 function updateLabel(value) {
   if (typeof value === 'string') {
     transaction.label = value;
-    transaction.categoryId = null;
   } else if (typeof value === 'object' && value !== null) {
     const selectedCategory = categories.find((item) => item.id === value.categoryId);
     transaction.label = value.label;
