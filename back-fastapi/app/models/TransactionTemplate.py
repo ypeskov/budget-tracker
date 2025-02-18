@@ -8,7 +8,7 @@ from app.database import Base
 
 if TYPE_CHECKING:
     from app.models.User import User
-
+    from app.models.UserCategory import UserCategory
 LABEL_MAX_LENGTH = 255
 
 class TransactionTemplate(Base):
@@ -23,7 +23,7 @@ class TransactionTemplate(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user: Mapped['User'] = relationship('User', back_populates='transaction_templates')
-    
+    category: Mapped['UserCategory'] = relationship('UserCategory', back_populates='templates')
     def __repr__(self):
         return (f'TransactionTemplate(id={self.id}, user_id={self.user_id}, label={self.label}, category_id={self.category_id}, '
             f'created_at={self.created_at}, updated_at={self.updated_at})')

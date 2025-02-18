@@ -22,6 +22,7 @@ class UserCategory(Base):
 
     user: Mapped['User'] = relationship(back_populates="categories")
     parent: Mapped['UserCategory'] = relationship()
+    templates: Mapped[list['TransactionTemplate']] = relationship(back_populates="category")
 
     is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

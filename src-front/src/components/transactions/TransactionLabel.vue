@@ -46,7 +46,7 @@ function labelChanged($event) {
     <ul v-if="suggestions.length" class="list-group position-absolute w-100 mt-1 shadow">
       <li v-for="suggestion in suggestions" :key="suggestion.label" class="list-group-item list-group-item-action"
         @click="selectSuggestion(suggestion)">
-        {{ suggestion.label }}
+        {{ suggestion.label }} <b>({{ suggestion.category.name }})</b>
       </li>
     </ul>
   </div>

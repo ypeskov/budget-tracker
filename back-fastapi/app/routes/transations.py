@@ -25,7 +25,7 @@ from app.services.transactions import (
 )
 from app.services.transaction_management.errors import InvalidTransaction
 from app.utils.sanitize_transaction_filters import prepare_filters
-
+from app.models.TransactionTemplate import TransactionTemplate
 ic.configureOutput(includeContext=True)
 
 router = APIRouter(
@@ -89,8 +89,9 @@ def get_user_transactions(request: Request, db: Session = Depends(get_db)):
 @router.get("/templates", response_model=list[ResponseTransactionTemplateSchema])
 def get_user_templates(request: Request, db: Session = Depends(get_db)):
     """Get all templates for a user"""
-    return get_templates(request.state.user["id"], db)
+    templates: list[TransactionTemplate] = get_templates(request.state.user["id"], db)
 
+    return templates
 
 @router.delete("/templates", response_model=list[ResponseTransactionTemplateSchema])
 def delete_user_templates(
