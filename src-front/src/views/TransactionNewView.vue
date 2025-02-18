@@ -226,7 +226,11 @@ function updateLabel(value) {
     filterCategories();
 
     nextTick(() => {
-      amountComponent.value?.amountInput?.focus();
+      if (amountComponent.value?.amountInput) {
+        const inputElement = amountComponent.value.amountInput;
+        inputElement.focus();
+        inputElement.select();
+      }
     });
   }
 }
