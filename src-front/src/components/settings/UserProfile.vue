@@ -31,7 +31,7 @@ const openCurrencyModal = () => {
 </script>
 
 <template>
-  <ModalWindow v-if="showProfileModal" :close-modal="closeModal">
+  <ModalWindow :close-modal="closeModal">
     <template #header>
       <div class="row">
         <h2>{{ $t('message.profile') }}</h2>

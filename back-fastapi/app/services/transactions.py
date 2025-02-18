@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 
 from fastapi import HTTPException, status
 from icecream import ic
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, delete as sa_delete
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, joinedload
@@ -189,3 +189,26 @@ def get_templates(user_id: int, db: Session) -> list[TransactionTemplate]:
     :return: list[TransactionTemplate]
     """
     return db.query(TransactionTemplate).filter_by(user_id=user_id).all()
+
+
+def delete_templates(user_id: int, db: Session, ids: list[int]) -> int:
+    """
+    This function deletes templates for a user in a more efficient way.
+    :param user_id: int
+    :param db: Session
+    :param ids: list[int]
+    :return: int (number of deleted rows)
+    """
+    logger.debug(f'Deleting templates for user {user_id} with ids {ids}')
+    
+    stmt = sa_delete(TransactionTemplate).where(
+        TransactionTemplate.user_id == user_id,
+        TransactionTemplate.id.in_(ids)
+    )
+
+    result = db.execute(stmt)
+    db.commit()
+    
+    logger.debug(f'Deleted {result.rowcount} templates for user {user_id}')
+    
+    return result.rowcount
