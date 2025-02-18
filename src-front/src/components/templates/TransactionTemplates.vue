@@ -52,8 +52,8 @@ const deleteTemplates = async () => {
               class="list-item d-flex align-items-center gap-2">
               <input class="form-check-input" type="checkbox" :value="template.id" :id="'template-' + template.id"
                 @change="handleTemplateSelection(template.id)">
-              <label class="form-check-label" :for="'template-' + template.id">{{ template.label }} ({{
-                template.categoryId }})</label>
+              <label class="form-check-label" :for="'template-' + template.id">{{ template.label }} <b>({{
+                template.category.name }})</b></label>
             </div>
           </div>
 

@@ -77,6 +77,7 @@ class ResponseTransactionSchema(CreateTransactionSchema):
 class ResponseTransactionTemplateSchema(BaseModel):
     category_id: int
     label: str
+    category: ResponseCategorySchema
 
     model_config = ConfigDict(
         from_attributes=True, populate_by_name=True, alias_generator=to_camel
