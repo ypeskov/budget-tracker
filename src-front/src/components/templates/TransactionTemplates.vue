@@ -13,7 +13,8 @@ const props = defineProps({
 const selectedTemplates = ref([]);
 
 onBeforeMount(async () => {
-  userStore.transactionTemplates = await Services.transactionsService.getUserTemplates();
+  const templates = await Services.transactionsService.getUserTemplates();
+  userStore.transactionTemplates.splice(0, userStore.transactionTemplates.length, ...templates);
 });
 
 const handleTemplateSelection = (templateId) => {
@@ -52,8 +53,8 @@ const deleteTemplates = async () => {
               class="list-item d-flex align-items-center gap-2">
               <input class="form-check-input" type="checkbox" :value="template.id" :id="'template-' + template.id"
                 @change="handleTemplateSelection(template.id)">
-              <label class="form-check-label" :for="'template-' + template.id">{{ template.label }} <b>({{
-                template.category.name }})</b></label>
+              <label class="form-check-label" :for="'template-' + template.id">{{ template.label }}
+                <b>({{ template.category?.name }})</b></label>
             </div>
           </div>
 

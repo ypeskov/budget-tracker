@@ -75,6 +75,7 @@ class ResponseTransactionSchema(CreateTransactionSchema):
 
 
 class ResponseTransactionTemplateSchema(BaseModel):
+    id: int
     category_id: int
     label: str
     category: ResponseCategorySchema
