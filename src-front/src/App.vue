@@ -33,7 +33,6 @@ onBeforeMount(async () => {
   if (isLoggedIn) {
     locale.value = localStorageUser.settings.language;
     userService.setUser(localStorageUser, isLoggedIn, accessToken);
-    userStore.transactionTemplates.splice(0, userStore.transactionTemplates.length, ...(await transactionsService.getUserTemplates()));
   }
 });
 
