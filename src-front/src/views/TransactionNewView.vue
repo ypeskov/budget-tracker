@@ -181,14 +181,6 @@
         await Services.transactionsService.addTransaction(transaction);
       }
 
-      if (transaction.isTemplate) {
-        userStore.transactionTemplates.push({
-          id: null,
-          label: transaction.label,
-          categoryId: transaction.categoryId,
-        });
-      }
-
       await router.push({
         name: returnUrlName.value,
         params: {

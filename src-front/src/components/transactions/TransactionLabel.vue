@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, watch, onBeforeMount } from 'vue';
+  import { ref, watch } from 'vue';
   import { useUserStore } from '@/stores/user';
   import debounce from 'lodash/debounce';
 
@@ -9,11 +9,6 @@
   const userStore = useUserStore();
   const label = ref(props.transaction.label || '');
   const suggestions = ref([]);
-  const allTemplates = ref([]);
-
-  onBeforeMount(() => {
-    allTemplates.value = userStore.transactionTemplates;
-  });
 
   const filterSuggestions = debounce(() => {
     if (!label.value.trim() || label.value.length < 3) {
@@ -21,7 +16,7 @@
       return;
     }
     const searchTerm = label.value.toLowerCase();
-    suggestions.value = allTemplates.value
+    suggestions.value = userStore.transactionTemplates
       .filter(t => t.label.toLowerCase().includes(searchTerm));
   }, 500);
 
@@ -41,6 +36,12 @@
     filterSuggestions();
   }
 
+  function blurHandler() {
+    setTimeout(() => {
+      suggestions.value = [];
+    }, 200);
+  }
+
 </script>
 
 <template>
@@ -53,12 +54,13 @@
            :value="label"
            autocomplete="off"
            @focus="filterSuggestions"
-           @blur="suggestions = []" />
+           @blur="blurHandler" />
 
     <ul v-if="suggestions.length" class="list-group position-absolute w-100 mt-1 shadow">
-      <li v-for="suggestion in suggestions" :key="suggestion.label"
+      <li v-for="suggestion in suggestions"
+          :key="suggestion.label"
           class="list-group-item list-group-item-action"
-          @click="selectSuggestion(suggestion)">
+          @click="() => selectSuggestion(suggestion)">
         {{ suggestion.label }} <b>({{ suggestion.category.name }})</b>
       </li>
     </ul>
