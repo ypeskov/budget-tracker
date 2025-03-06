@@ -9,6 +9,7 @@
   const userStore = useUserStore();
   const label = ref(props.transaction.label || '');
   const suggestions = ref([]);
+  const insideClick = ref(false);
 
   const filterSuggestions = debounce(() => {
     if (!label.value.trim() || label.value.length < 3) {
@@ -38,8 +39,10 @@
 
   function blurHandler() {
     setTimeout(() => {
-      suggestions.value = [];
-    }, 200);
+      if (!insideClick.value) {
+        suggestions.value = [];
+      }
+    }, 10);
   }
 
 </script>
@@ -56,7 +59,10 @@
            @focus="filterSuggestions"
            @blur="blurHandler" />
 
-    <ul v-if="suggestions.length" class="list-group position-absolute w-100 mt-1 shadow">
+    <ul v-if="suggestions.length"
+        @mousedown="insideClick = true"
+        @mouseup="insideClick = false"
+        class="list-group position-absolute w-100 mt-1 shadow">
       <li v-for="suggestion in suggestions"
           :key="suggestion.label"
           class="list-group-item list-group-item-action"
