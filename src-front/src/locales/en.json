@@ -73,7 +73,8 @@
     "creditLimit": "Credit limit",
     "archiveDate": "Archive date",
     "saveAsTemplate": "Save as template",
-    "templates": "Templates"
+    "templates": "Templates",
+    "searchTemplates": "Search templates"
   },
   "menu": {
     "home": "Home",

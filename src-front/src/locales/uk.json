@@ -75,7 +75,8 @@
     "creditLimit": "Кредитний ліміт",
     "archiveDate": "Дата архівації",
     "saveAsTemplate": "Зберегти як шаблон",
-    "templates": "Шаблони"
+    "templates": "Шаблони",
+    "searchTemplates": "Пошук шаблонів"
   },
   "menu": {
     "home": "Початок",
