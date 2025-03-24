@@ -92,9 +92,7 @@ async def oauth(JWT: OAuthToken, db: Session = Depends(get_db)):
 
     if payload['email']:
         if payload['email_verified']:
-            payload['family_name'] = payload['family_name'] if payload['family_name'] else ""
-            print(payload)
-            print('--------------------------------')
+            payload['family_name'] = payload.get('family_name', '')
             try:
                 token = login_or_register(payload['email'], payload['given_name'], payload['family_name'], db)
             except UserNotActivated as e:
