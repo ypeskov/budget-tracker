@@ -27,6 +27,7 @@
   let targetAccount = reactive({});
   let categories = reactive([]);
   const showDeleteConfirmation = ref(false);
+  const showSubmittedOverlay = ref(false);
 
   const amountComponent = ref(null);
 
@@ -168,6 +169,7 @@
   }
 
   async function submitTransaction() {
+    showSubmittedOverlay.value = true; // disable submit button
     if (saveAsTemplate.value) {
       transaction.isTemplate = true;
     } else {
@@ -187,6 +189,7 @@
           id: props.accountId,
         },
       });
+      showSubmittedOverlay.value = false; // enable submit button
     } catch (e) {
       await processError(e, router);
     }
@@ -283,6 +286,8 @@
               <button @click.prevent="confirmDelete" class="btn btn-danger">{{ $t('buttons.delete') }}</button>
             </div>
           </form>
+
+          <div v-if="showSubmittedOverlay" id="submitted-overlay" class="overlay"></div>
 
           <div v-if="showDeleteConfirmation" class="overlay"></div>
 
