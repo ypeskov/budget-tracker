@@ -276,7 +276,7 @@ requires-dist = [
     { name = "flower", specifier = ">=2.0.1" },
     { name = "fonttools", specifier = ">=4.53.1" },
     { name = "google-auth", specifier = ">=2.37.0" },
-    { name = "gunicorn", specifier = ">=22.0.0" },
+    { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "h11", specifier = ">=0.14.0" },
     { name = "httpcore", specifier = ">=1.0.5" },
     { name = "httptools", specifier = ">=0.6.1" },

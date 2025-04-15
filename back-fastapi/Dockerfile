@@ -7,7 +7,7 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml uv.lock /app/
+COPY pyproject.toml uv.lock requirements.txt /app/
 RUN uv sync --no-cache-dir
 
 COPY . /app
@@ -37,11 +37,14 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg ma
 
 RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml uv.lock README.md /app/
+COPY pyproject.toml uv.lock requirements.txt /app/
+# RUN uv pip install --system -r requirements.txt
 RUN uv sync --no-cache-dir
 
 COPY . /app
 
 EXPOSE 8000
+
+# RUN which gunicorn && gunicorn --version
 
 CMD ["gunicorn", "app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
