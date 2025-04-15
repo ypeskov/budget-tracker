@@ -10,6 +10,7 @@ backup/
 
 .coverage*
 *.pyc
+**__pycache__**
 .gitignore
 celerybeat-schedule
 celerybeat-schedule.db
