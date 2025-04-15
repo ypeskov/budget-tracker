@@ -1,22 +1,22 @@
-FROM python:3.12.3-bookworm AS dev
+# FROM python:3.12.3-bookworm AS dev
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# ENV PYTHONDONTWRITEBYTECODE=1
+# ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app
+# WORKDIR /app
 
-RUN pip install --no-cache-dir uv
+# RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml uv.lock requirements.txt /app/
-RUN uv pip install --system -r requirements.txt
-# RUN uv sync --no-cache-dir
+# COPY pyproject.toml uv.lock requirements.txt /app/
+# RUN uv pip install --system -r requirements.txt
+# # RUN uv sync --no-cache-dir
 
-COPY . /app
+# COPY . /app
 
-EXPOSE 8000
-EXPOSE 5678
+# EXPOSE 8000
+# EXPOSE 5678
 
-CMD ["python", "-Xfrozen_modules=off", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload"]
+# CMD ["python", "-Xfrozen_modules=off", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload"]
 
 # --------------------------------------
 
@@ -45,8 +45,10 @@ RUN apt-get purge -y --auto-remove gcc libpq-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+RUN pwd && sleep 5
 COPY . /app
 
+RUN ls -a /app && sleep 10
 RUN rm -rf /app/backup
 
 EXPOSE 8000
