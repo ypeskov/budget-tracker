@@ -1,22 +1,21 @@
-# FROM python:3.12.3-bookworm AS dev
+FROM python:3.12.3-slim-bookworm AS build
 
-# ENV PYTHONDONTWRITEBYTECODE=1
-# ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# WORKDIR /app
+WORKDIR /app
 
-# RUN pip install --no-cache-dir uv
+RUN apt-get update && apt-get install -y gcc libpq-dev
 
-# COPY pyproject.toml uv.lock requirements.txt /app/
-# RUN uv pip install --system -r requirements.txt
-# # RUN uv sync --no-cache-dir
+COPY pyproject.toml uv.lock requirements.txt ./
+RUN pip install --no-cache-dir uv && uv pip install --system -r requirements.txt
 
-# COPY . /app
+COPY . /app
 
-# EXPOSE 8000
-# EXPOSE 5678
+EXPOSE 8000
+EXPOSE 5678
 
-# CMD ["python", "-Xfrozen_modules=off", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload"]
+CMD ["python", "-Xfrozen_modules=off", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload"]
 
 # --------------------------------------
 
@@ -27,25 +26,30 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y wget gnupg2 lsb-release
+COPY --from=build /usr/local/lib/python3.12 /usr/local/lib/python3.12
+COPY --from=build /usr/local/bin /usr/local/bin
 
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
-    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
-    && apt-get update \
-    && apt-get install -y gcc libpq-dev postgresql-client-16 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+COPY --from=build /app /app
 
-RUN pip install --no-cache-dir uv
+# RUN apt-get update && apt-get install -y wget gnupg2 lsb-release
 
-COPY pyproject.toml uv.lock requirements.txt /app/
-RUN uv pip install --system -r requirements.txt
+# RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+#     && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+#     && apt-get update \
+#     && apt-get install -y gcc libpq-dev postgresql-client-16 \
+#     && apt-get clean \
+#     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get purge -y --auto-remove gcc libpq-dev \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+# RUN pip install --no-cache-dir uv
 
-COPY . /app
+# COPY pyproject.toml uv.lock requirements.txt /app/
+# RUN uv pip install --system -r requirements.txt
+
+# RUN apt-get purge -y --auto-remove gcc libpq-dev \
+#  && apt-get clean \
+#  && rm -rf /var/lib/apt/lists/*
+
+# COPY . /app
 
 EXPOSE 8000
 
