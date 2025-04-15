@@ -20,15 +20,18 @@ currency_cache: CurrencyCache = {"data": {}, "last_updated": None}
 
 def get_exchange_rates_for_year(db: Session):
     """
-    Load exchange rates for the last year, apply back-fill and forward-fill for missing dates, and cache them in memory.
+    --- Load exchange rates for the last year. 
+        This is changed to 3 years as a dirty hack to fix the error for longer than a year transactions.
+    ---
+    Apply back-fill and forward-fill for missing dates, and cache them in memory.
     """
     global currency_cache
     today = date.today()
-    one_year_ago = today - timedelta(days=365)
+    three_years_ago = today - timedelta(days=365 * 3)
 
     if not is_cache_valid():
-        rows = fetch_exchange_rate_rows(db, one_year_ago)
-        rates = fill_exchange_rates(rows, one_year_ago, today)
+        rows = fetch_exchange_rate_rows(db, three_years_ago)
+        rates = fill_exchange_rates(rows, three_years_ago, today)
         update_cache(rates)
 
     return currency_cache["data"]
