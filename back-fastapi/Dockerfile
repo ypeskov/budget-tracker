@@ -7,8 +7,8 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml /app/
-RUN uv pip install --system --no-cache-dir
+COPY pyproject.toml uv.lock /app/
+RUN uv sync --no-cache-dir
 
 COPY . /app
 
@@ -37,9 +37,8 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg ma
 
 RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml README.md /app/
-
-RUN uv pip install --system --no-cache-dir --requirements pyproject.toml
+COPY pyproject.toml uv.lock README.md /app/
+RUN uv sync --no-cache-dir
 
 COPY . /app
 
