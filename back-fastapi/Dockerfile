@@ -47,7 +47,7 @@ RUN apt-get purge -y --auto-remove gcc libpq-dev \
 
 COPY . /app
 
-RUN rm -rf /app/backup
+RUN rm -rf /backup
 
 EXPOSE 8000
 
