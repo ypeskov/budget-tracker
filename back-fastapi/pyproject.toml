@@ -4,9 +4,9 @@ version = "1.5.17"
 requires-python = ">=3.12"
 dependencies = [
     "aiofiles>=24.1.0",
-    "aiosmtplib>=2.0.2",
-    "alembic>=1.13.2",
-    "amqp>=5.2.0",
+    "aiosmtplib>=3.0.2",
+    "alembic>=1.15.2",
+    "amqp>=5.3.1",
     "annotated-types>=0.7.0",
     "anyio>=4.4.0",
     "appnope>=0.1.4",
