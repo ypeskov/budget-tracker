@@ -3,10 +3,7 @@
 venv/
 .venv/
 
-backup
 backup/
-**/backup
-**/backup/
 
 .coverage*
 *.pyc

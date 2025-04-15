@@ -45,11 +45,7 @@ RUN apt-get purge -y --auto-remove gcc libpq-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-RUN pwd && sleep 5
 COPY . /app
-
-RUN ls -a /app && sleep 10
-RUN rm -rf /app/backup
 
 EXPOSE 8000
 
