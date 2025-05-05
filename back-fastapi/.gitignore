@@ -2,5 +2,6 @@ logs/
 
 celerybeat-schedule.db
 
+back_fastapi.egg-info/
 backup/
 .venv/
