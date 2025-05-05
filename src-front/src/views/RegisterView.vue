@@ -1,92 +1,131 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
-import { Services } from '../services/servicesConfig';
-
-let registerEmail = ref('');
-let registerPassword = ref('');
-let firstName = ref('');
-let lastName = ref('');
-let errorMessage = ref(''); // Add this line for the error message
-const showForm = ref(true);
-const showSuccess = ref(false);
+import { Services } from '@/services/servicesConfig';
+import { GoogleLogin } from 'vue3-google-login';
 
 const router = useRouter();
+const { t }  = useI18n();
 
-function updateEmail(event) {
-  registerEmail.value = event.target.value;
-  errorMessage.value = ''; // Clear error message when email is changed
-}
+const firstName        = ref('');
+const lastName         = ref('');
+const registerEmail    = ref('');
+const registerPassword = ref('');
+const errorMessage     = ref('');
+const showSuccess      = ref(false);
+
+const emailRef = ref(null);
+onMounted(() => emailRef.value?.focus());
 
 async function submitRegistration() {
+  errorMessage.value = '';
   try {
-    await Services.userService.registerUser(registerEmail.value,
+    await Services.userService.registerUser(
+      registerEmail.value,
       registerPassword.value,
       firstName.value,
-      lastName.value);
-    registerEmail.value = '';
-    registerPassword.value = '';
-    firstName.value = '';
-    lastName.value = '';
-    showForm.value = false;
+      lastName.value
+    );
     showSuccess.value = true;
-  } catch (error) {
-    errorMessage.value = `Registration failed: ${error.message}`;
+  } catch (err) {
+    errorMessage.value = `Registration failed: ${err.message}`;
   }
 }
 
-const emailInputRef = ref(null);
-
-onMounted(() => {
-  if (emailInputRef.value) {
-    emailInputRef.value.focus();
+const callback = async (response) => {
+  errorMessage.value = '';
+  try {
+    await Services.userService.oauthLogin(response.credential);
+    await router.push({ name: 'accounts' });
+  } catch (err) {
+    errorMessage.value = `Registration failed: ${err.message}`;
   }
-});
+};
 </script>
 
 <template>
-  <div class="container mt-5">
-    <div class="row">
-      <div v-if="showForm" class="col">
-        <form @submit.prevent="submitRegistration" autocomplete="on">
-          <div class="mb-3">
-            <label for="firstNameInput" class="form-label">First Name</label>
-            <input type="text" class="form-control" id="firstNameInput" v-model="firstName" placeholder="First Name" />
+  <div class="login-page">
+    <div class="box">
+
+      <div class="left">
+        <form
+          v-if="!showSuccess"
+          @submit.prevent="submitRegistration"
+          autocomplete="on"
+        >
+          <h1>Orgfin.run</h1>
+          <small>{{ t('message.registerAccount') }}</small>
+
+          <div class="field">
+            <span><i class="fa fa-user"></i></span>
+            <input
+              type="text"
+              v-model="firstName"
+              :placeholder="t('message.firstName')"
+            />
           </div>
 
-          <div class="mb-3">
-            <label for="lastNameInput" class="form-label">Last Name</label>
-            <input type="text" class="form-control" id="lastNameInput" v-model="lastName" placeholder="Last Name" />
+          <div class="field">
+            <span><i class="fa fa-user"></i></span>
+            <input
+              type="text"
+              v-model="lastName"
+              :placeholder="t('message.lastName')"
+            />
           </div>
 
-          <div class="mb-3">
-            <label for="emailInput" class="form-label">
-              Email Address <span class="text-danger">*</span> <!-- Red asterisk for required field -->
-            </label>
-            <input type="email" class="form-control" id="emailInput" :value="registerEmail" @change="updateEmail"
-                   ref="emailInputRef" placeholder="Enter Email" required /> <!-- 'required' attribute added -->
-            <div v-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</div>
+          <div class="field">
+            <span><i class="fa fa-envelope"></i></span>
+            <input
+              ref="emailRef"
+              type="email"
+              v-model="registerEmail"
+              :placeholder="t('message.enterEmail')"
+              required
+            />
           </div>
 
-          <div class="mb-3">
-            <label for="passwordInput" class="form-label">
-              Password <span class="text-danger">*</span> <!-- Red asterisk for required field -->
-            </label>
-            <input type="password" class="form-control" id="passwordInput" v-model="registerPassword"
-                   placeholder="Password" required /> <!-- 'required' attribute added -->
+          <div class="field">
+            <span><i class="fa fa-lock"></i></span>
+            <input
+              type="password"
+              v-model="registerPassword"
+              :placeholder="t('message.enterPassword')"
+              required
+            />
           </div>
-          <button type="submit" class="btn btn-primary">Register</button>
+
+          <button type="submit">{{ t('menu.register') }}</button>
+
+          <div class="oauth-container">
+            <GoogleLogin :callback="callback" />
+          </div>
+
+          <div v-if="errorMessage" class="alert" style="margin-top:20px">
+            {{ errorMessage }}
+          </div>
         </form>
-      </div>
-      <div v-if="showSuccess" class="col">
-        <div class="alert alert-success" role="alert">
-          Registration successful! Please check your email to verify your account.
+
+        <div v-else>
+          <h1>{{ t('message.success') }}</h1>
+          <p>{{ t('message.checkEmailForVerification') }}</p>
+          <button @click="router.push({ name: 'login' })">
+            {{ t('menu.login') }}
+          </button>
         </div>
-        <button @click="router.push('/login')" class="btn btn-primary">Login</button>
+      </div>
+
+      <div class="right">
+        <h2>{{ t('message.alreadyRegistered') }}</h2>
+        <p>{{ t('message.justLoginBelow') }}</p>
+        <RouterLink class="register-link" :to="{ name: 'login' }">
+          {{ t('menu.login') }}
+        </RouterLink>
       </div>
     </div>
-
   </div>
 </template>
 
+<style scoped src="@/assets/auth.css"></style>
