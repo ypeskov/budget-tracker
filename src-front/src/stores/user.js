@@ -57,6 +57,19 @@ export const useUserStore = defineStore('user', () => {
     timeLeft.value = '00:00';
   };
 
+  if (localStorage.getItem('accessToken')) {
+    accessToken.value = localStorage.getItem('accessToken');
+    isLoggedIn.value = localStorage.getItem('isLoggedIn') === 'true';
+    try {
+      Object.assign(user, JSON.parse(localStorage.getItem('user')));
+      Object.assign(settings, JSON.parse(localStorage.getItem('settings') || '{}'));
+      baseCurrency.value = localStorage.getItem('baseCurrency') || '';
+    } catch (e) {
+      console.warn('Failed to hydrate user store:', e);
+    }
+    startTimer();
+  }
+
   return {
     user,
     accessToken,

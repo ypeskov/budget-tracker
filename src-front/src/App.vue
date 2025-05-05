@@ -145,26 +145,4 @@ const goToSettings = () => router.push({ name: 'settings' });
   <RouterView />
 </template>
 
-<style scoped lang="scss">
-nav a {
-  margin: 0 0.2rem;
-}
-nav img:hover {
-  cursor: pointer;
-}
-.nav-row {
-  margin-bottom: 0.5rem;
-}
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.settings-icon img {
-  transition: transform 0.2s ease;
-}
-.settings-icon img:hover {
-  transform: scale(1.1);
-  cursor: pointer;
-}
-</style>
+<style src="@/assets/style.css"></style>

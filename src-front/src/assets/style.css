@@ -1,0 +1,357 @@
+/* --------------------------------------------------
+   Global / Shared styles
+-------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
+    Arial, sans-serif;
+  background: #f0f8ff;
+  color: #000;
+}
+
+/* Utility buttons reused across pages */
+.btn {
+  display: inline-block;
+  padding: 8px 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+.btn.primary {
+  background: #1e90ff;
+  color: #fff;
+  border: none;
+}
+.btn.primary:hover {
+  background: #007eeb;
+}
+.btn.outline {
+  background: transparent;
+  color: #1e90ff;
+  border: 1px solid #1e90ff;
+}
+.btn.outline:hover {
+  background: #1e90ff;
+  color: #fff;
+}
+.btn.cta {
+  margin-top: 24px;
+  padding: 12px 36px;
+  font-size: 16px;
+}
+
+/* --------------------------------------------------
+   Login Page styles (original)
+-------------------------------------------------- */
+.login-page {
+  position: relative;
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f0f8ff;
+  overflow: hidden;
+}
+
+.login-page .box {
+  width: 700px;
+  display: flex;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.login-page .left {
+  flex: 1 1 55%;
+  padding: 40px 50px;
+  background: #fff;
+  overflow: auto;
+}
+.login-page .left h1 {
+  margin: 0 0 4px;
+  font-size: 32px;
+  font-weight: 700;
+}
+.login-page .left small {
+  display: block;
+  color: #6c757d;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.login-page .field {
+  display: flex;
+  margin-bottom: 16px;
+}
+.login-page .field span {
+  background: #f1f1f1;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-right: 0;
+  border-radius: 4px 0 0 4px;
+  color: #6c757d;
+  font-size: 14px;
+}
+.login-page .field input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-left: 0;
+  border-radius: 0 4px 4px 0;
+  font-size: 14px;
+}
+
+.login-page button {
+  background: #1e90ff;
+  color: #fff;
+  padding: 8px 24px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+  border-radius: 4px;
+}
+.login-page button:hover {
+  background: #007eeb;
+}
+
+.oauth-container {
+  margin-top: 20px;
+}
+
+.login-page .alert {
+  margin-top: 20px;
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.login-page .right {
+  flex: 1 1 45%;
+  background: #00bfff;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px 30px;
+}
+.login-page .right h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+.login-page .right p {
+  font-size: 15px;
+  line-height: 1.45;
+  margin-bottom: 30px;
+}
+.login-page .right .register-link {
+  background: #1e90ff;
+  color: #fff;
+  padding: 8px 24px;
+  border: none;
+  display: inline-block;
+  text-decoration: none;
+  transition: background 0.2s;
+  border-radius: 4px;
+}
+.login-page .right .register-link:hover {
+  background: #007eeb;
+}
+
+@media (max-width: 768px) {
+  .login-page {
+    background: none;
+  }
+
+  .login-page .box {
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
+
+  .login-page .left {
+    flex: 1 1 auto;
+    padding: 30px 25px;
+  }
+
+  .login-page .right {
+    flex: 0 0 120px;
+    padding: 20px 25px;
+  }
+
+  .login-page .right p {
+    display: none;
+  }
+
+  .login-page .right h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+}
+
+/* --------------------------------------------------
+   Home Page styles
+-------------------------------------------------- */
+.home-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ---- Navigation ---- */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  z-index: 1;
+}
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e90ff;
+}
+.nav .btn + .btn {
+  margin-left: 12px;
+}
+
+/* ---- Hero ---- */
+.hero {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+  padding: 60px 40px;
+}
+.hero-content {
+  max-width: 480px;
+}
+.hero h1 {
+  font-size: 42px;
+  font-weight: 700;
+  margin: 0 0 20px;
+  line-height: 1.2;
+  color: #000;
+}
+.hero p {
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0 0 25px;
+  color: #444;
+}
+.hero-img img {
+  width: 460px;
+  max-width: 100%;
+}
+
+/* ---- Features ---- */
+.features {
+  padding: 60px 40px;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+.feature-card {
+  flex: 0 1 300px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 30px 25px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+.feature-card .icon {
+  font-size: 34px;
+  color: #1e90ff;
+  margin-bottom: 16px;
+}
+.feature-card h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.feature-card p {
+  font-size: 15px;
+  line-height: 1.45;
+  color: #555;
+}
+
+/* ---- Footer ---- */
+.footer {
+  padding: 20px 30px;
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* ---- Adaptive ---- */
+@media (max-width: 992px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    gap: 40px;
+  }
+  .hero-content {
+    max-width: 100%;
+  }
+}
+@media (max-width: 576px) {
+  .nav {
+    padding: 15px 20px;
+  }
+  .logo {
+    font-size: 20px;
+  }
+  .hero {
+    padding: 40px 20px;
+  }
+  .hero h1 {
+    font-size: 32px;
+  }
+  .btn {
+    padding: 8px 20px;
+  }
+}
+
+
+
+
+
+nav a {
+  margin: 0 0.2rem;
+}
+nav img:hover {
+  cursor: pointer;
+}
+.nav-row {
+  margin-bottom: 0.5rem;
+}
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.settings-icon img {
+  transition: transform 0.2s ease;
+}
+.settings-icon img:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+}
