@@ -1,125 +1,109 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-
-import { Services } from '../services/servicesConfig';
-import { HttpError } from '../errors/HttpError';
-import { useUserStore } from '../stores/user';
+import { Services } from '@/services/servicesConfig';
+import { HttpError } from '@/errors/HttpError';
+import { useUserStore } from '@/stores/user';
 import { GoogleLogin } from 'vue3-google-login';
 
 const userStore = useUserStore();
+const router    = useRouter();
+const { t, locale } = useI18n();
 
-let loginEmail = ref('');
-let loginPassword = ref('');
+const email      = ref('');
+const password   = ref('');
+const loginError = ref('');
+const emailRef   = ref(null);
 
-const router = useRouter();
-const { t } = useI18n();
-const { locale } = useI18n();
-
-function updateEmail(event) {
-  loginEmail.value = event.target.value;
-}
+onMounted(() => emailRef.value?.focus());
 
 async function submitLogin() {
+  loginError.value = '';
   try {
-    await Services.userService.loginUser(loginEmail.value, loginPassword.value);
+    await Services.userService.loginUser(email.value, password.value);
     await afterLogin();
-  } catch (error) {
-    processError(error);
+  } catch (err) {
+    processError(err);
   }
 }
 
-const afterLogin = async () => {
-  loginEmail.value = '';
-  loginPassword.value = '';
-  locale.value = userStore.settings.language;
+async function afterLogin() {
+  email.value    = '';
+  password.value = '';
+  locale.value   = userStore.settings.language;
   await router.push({ name: 'accounts' });
-};
+}
 
-const emailInputRef = ref(null);
-onMounted(() => {
-  if (emailInputRef.value) {
-    emailInputRef.value.focus();
-  }
-});
-
-const processError = function (error) {
-  if (error instanceof HttpError && error.statusCode === 401) {
-    if (error.message === 'User not activated') {
-      alert(t('message.userNotActivated'));
-    } else {
-      alert(t('message.invalidCredentials'));
-    }
+function processError(err) {
+  if (err instanceof HttpError && err.statusCode === 401) {
+    loginError.value = err.message === 'User not activated'
+      ? t('message.userNotActivated')
+      : t('message.invalidCredentials');
   } else {
-    console.log('Something went wrong');
+    console.error(err);
+    loginError.value = t('message.unexpectedError');
   }
-};
+}
 
 const callback = async (response) => {
   try {
     await Services.userService.oauthLogin(response.credential);
     await afterLogin();
-  } catch (error) {
-    processError(error);
+  } catch (err) {
+    processError(err);
   }
 };
 </script>
 
 <template>
-  <div class="container mt-5">
-    <main>
-      <div class="row">
-        <div class="col">
-          <form
-            @submit.prevent="submitLogin"
-            autocomplete="on">
-            <div class="mb-3">
-              <label
-                for="emailInput"
-                class="form-label">
-                {{ $t('message.emailAddress') }}
-                <span class="text-danger">*</span>
-              </label>
-              <input
-                type="email"
-                class="form-control"
-                id="emailInput"
-                :value="loginEmail"
-                @change="updateEmail"
-                ref="emailInputRef"
-                :placeholder="t('message.enterEmail')"
-                required />
-            </div>
-            <div class="mb-3">
-              <label
-                for="passwordInput"
-                class="form-label">
-                Password
-                <span class="text-danger">*</span>
-              </label>
-              <input
-                type="password"
-                class="form-control"
-                id="passwordInput"
-                v-model="loginPassword"
-                :placeholder="t('message.enterPassword')"
-                required />
-            </div>
-            <button
-              type="submit"
-              class="btn btn-primary">
-              {{ $t('menu.login') }}
-            </button>
-          </form>
-        </div>
-      </div>
+  <div class="login-page">
+    <div class="box">
+      <form class="left" @submit.prevent="submitLogin" autocomplete="on">
+        <h1>Orgfin.run</h1>
+        <small>{{ t('message.loginToAccount') }}</small>
 
-      <div class="row">
-        <div class="col-3 mt-4">
+        <div class="field">
+          <span><i class="fa fa-envelope"></i></span>
+          <input
+            ref="emailRef"
+            v-model="email"
+            type="email"
+            :placeholder="t('message.enterEmail')"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <span><i class="fa fa-lock"></i></span>
+          <input
+            v-model="password"
+            type="password"
+            :placeholder="t('message.enterPassword')"
+            required
+          />
+        </div>
+
+        <button type="submit">{{ t('menu.login') }}</button>
+
+        <div class="oauth-container">
           <GoogleLogin :callback="callback" />
         </div>
+
+        <div v-if="loginError" class="alert">
+          <strong>{{ t('message.error') }}</strong> {{ loginError }}
+        </div>
+      </form>
+
+      <div class="right">
+        <h2>{{ t('message.noAccount') }}</h2>
+        <p>{{ t('message.registerInvite') }}</p>
+        <RouterLink class="register-link" :to="{ name: 'register' }">
+          {{ t('menu.register') }}
+        </RouterLink>
       </div>
-    </main>
+    </div>
   </div>
 </template>
+
+<style scoped src="@/assets/auth.css"></style>
