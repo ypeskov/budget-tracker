@@ -1,33 +1,33 @@
 <script setup>
-import { RouterLink, useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user';
-import { useI18n } from 'vue-i18n';
+import { RouterLink, useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { useI18n } from 'vue-i18n'
 
-const router = useRouter();
-const userStore = useUserStore();
-const { t } = useI18n();
+const router = useRouter()
+const userStore = useUserStore()
+const { t } = useI18n()
 
 if (userStore.user.email) {
-  router.push({ name: 'accounts' });
+  router.push({ name: 'accounts' })
 }
 
 const features = [
   {
     icon: 'fa fa-chart-line',
     titleKey: 'home.features.analytics.title',
-    descKey: 'home.features.analytics.desc',
+    descKey: 'home.features.analytics.desc'
   },
   {
     icon: 'fa fa-wallet',
     titleKey: 'home.features.budgeting.title',
-    descKey: 'home.features.budgeting.desc',
+    descKey: 'home.features.budgeting.desc'
   },
   {
     icon: 'fa fa-mobile-alt',
     titleKey: 'home.features.mobile.title',
-    descKey: 'home.features.mobile.desc',
-  },
-];
+    descKey: 'home.features.mobile.desc'
+  }
+]
 </script>
 
 <template>
@@ -71,7 +71,7 @@ const features = [
         </RouterLink>
       </div>
       <div class="hero-img">
-        <img src="/public/images/dashboard.png" alt="Finance dashboard illustration" />
+        <img src="/images/dashboard.png" alt="Finance dashboard illustration" />
       </div>
     </section>
 
