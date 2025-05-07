@@ -127,5 +127,3 @@ const callback = async (response) => {
     </div>
   </div>
 </template>
-
-<style scoped src="@/assets/auth.css"></style>

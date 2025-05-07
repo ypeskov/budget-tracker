@@ -7,7 +7,7 @@ const router = useRouter();
 
 onMounted(async () => {
   await Services.userService.logOutUser();
-  await router.push({name: 'login'});
+  await router.push({name: 'home'});
 });
 </script>
 
