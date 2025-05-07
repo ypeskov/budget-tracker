@@ -12,7 +12,7 @@
     "loginToAccount": "Access your account",
     "noAccount": "No account?",
     "registerInvite": "Sign up now and start managing your finances in one convenient app! Just click the button below to create your account.",
-    "error" : "Error!",
+    "error": "Error!",
     "welcome": "Welcome",
     "update": "Update",
     "newAccount": "New account",
@@ -82,7 +82,9 @@
     "archiveDate": "Archive date",
     "saveAsTemplate": "Save as template",
     "templates": "Templates",
-    "searchTemplates": "Search templates"
+    "searchTemplates": "Search templates",
+    "collectedExpenses": "Collected expenses",
+    "targetBudget": "Target budget"
   },
   "menu": {
     "home": "Home",
@@ -95,7 +97,10 @@
     "reports": "Reports",
     "budgets": "Budgets",
     "collectedExpenses": "Collected expenses",
-    "targetBudget": "Target budget"
+    "targetBudget": "Target budget",
+    "dashboard": "Dashboard",
+    "goToDashboard": "Go to Dashboard",
+    "getStartedFree": "Get Started for Free"
   },
   "buttons": {
     "login": "Login",
@@ -124,5 +129,23 @@
     "restore": "Restore",
     "archiveAccount": "Archive account",
     "templates": "Templates"
+  },
+  "home": {
+    "heroTitle": "Manage Your Finances Effortlessly",
+    "heroSubtitle": "Track expenses, set budgets, and visualize cash flows – all in one convenient app.",
+    "features": {
+      "analytics": {
+        "title": "Advanced Analytics",
+        "desc": "Gain insights into your spending habits with interactive charts."
+      },
+      "budgeting": {
+        "title": "Smart Budgeting",
+        "desc": "Plan and allocate budgets to stay on track with your financial goals."
+      },
+      "mobile": {
+        "title": "Mobile Access",
+        "desc": "Manage your finances on the go with our responsive mobile interface."
+      }
+    }
   }
 }
