@@ -19,4 +19,4 @@ dbdata/
 **/venv/
 .coverage
 
-celerybeat-schedule
+celerybeat-schedule*
