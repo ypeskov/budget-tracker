@@ -5,7 +5,7 @@ services:
     build:
       context: "./back-fastapi"
       dockerfile: "./Dockerfile"
-      target: ${TARGET:-dev}
+      target: ${TARGET:-prod}
     env_file:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     ports:

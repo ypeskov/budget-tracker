@@ -13,8 +13,22 @@ from dotenv import load_dotenv
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from app.database import Base
-from app.models import Account, AccountType, DefaultCategory, UserCategory, Currency, Transaction, User, Language, \
-    UserSettings, ExchangeRateHistory, ActivationToken, Budget, TransactionTemplate
+from app.models import (
+    Account,
+    AccountType,
+    DefaultCategory,
+    UserCategory,
+    Currency,
+    Transaction,
+    User,
+    Language,
+    UserSettings,
+    ExchangeRateHistory,
+    ActivationToken,
+    Budget,
+    TransactionTemplate,
+)
+
 target_metadata = [Base.metadata]
 
 env = os.environ.get("ENV")
@@ -28,14 +42,14 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD")
 DB_HOST = os.environ.get("DB_HOST")
 DB_NAME = os.environ.get("DB_NAME")
 DB_PORT = os.environ.get("DB_PORT")
-connection_string = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+connection_string = f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Update connection parameters
-config.set_main_option('sqlalchemy.url', connection_string)
+config.set_main_option("sqlalchemy.url", connection_string)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -86,9 +100,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
