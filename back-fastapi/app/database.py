@@ -5,7 +5,7 @@ from app.config import Settings
 
 s = Settings()
 
-SQLALCHEMY_DATABASE_URL = f'postgresql://{s.DB_USER}:{s.DB_PASSWORD}@{s.DB_HOST}:{s.DB_PORT}/{s.DB_NAME}'
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{s.DB_USER}:{s.DB_PASSWORD}@{s.DB_HOST}:{s.DB_PORT}/{s.DB_NAME}"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False)
 

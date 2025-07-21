@@ -10,7 +10,7 @@ services:
       - ${APP_ENV_FILE:-./back-fastapi/.env}
     ports:
       - 8000:8000
-#      - 5679:5678
+    #      - 5679:5678
     environment:
       - DB_HOST=db-orgfin
     tty: true
@@ -33,23 +33,23 @@ services:
       - /app/node_modules
 
   db-orgfin:
-    image: postgres:15.3-bullseye
+    image: postgres:16.3-bullseye
     container_name: Postgres-orgfin
     restart: always
     environment:
       # POSTGRES_USER: urlshortener
-      POSTGRES_PASSWORD: budgeter
+      POSTGRES_PASSWORD: 123
     ports:
       - 5432:5432
     volumes:
       - ./dbdata:/var/lib/postgresql/data
 
-#  adminer-orgfin:
-#    image: adminer
-#    container_name: Adminer-orgfin
-#    restart: always
-#    ports:
-#      - 8080:8080
+  #  adminer-orgfin:
+  #    image: adminer
+  #    container_name: Adminer-orgfin
+  #    restart: always
+  #    ports:
+  #      - 8080:8080
 
   redis-orgfin:
     image: redis:alpine
@@ -102,4 +102,3 @@ services:
       - 5556:5555
     depends_on:
       - redis-orgfin
-
