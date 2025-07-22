@@ -24,12 +24,12 @@ class CashFlowReportGenerator:
         self.period = None
         self.start_date = None
         self.end_date = None
-        self.period_str: str = ''
-        self.label: str = ''
+        self.period_str: str = ""
+        self.label: str = ""
 
         self._accounts_info: dict = {}
 
-    def set_parameters(self, period='monthly', start_date=None, end_date=None):
+    def set_parameters(self, period="monthly", start_date=None, end_date=None):
         self.period = period
         self.start_date = start_date
         self.end_date = end_date
@@ -40,15 +40,12 @@ class CashFlowReportGenerator:
         return self.get_cash_flows()
 
     def prepare_accounts_info(self):
-        accounts = self._db.query(
-            Account.id,
-            Account.name,
-            Currency.code.label("currency")
-        ).filter(
-            Account.user_id == self.user_id
-        ).join(
-            Currency, Account.currency_id == Currency.id
-        ).all()
+        accounts = (
+            self._db.query(Account.id, Account.name, Currency.code.label("currency"))
+            .filter(Account.user_id == self.user_id)
+            .join(Currency, Account.currency_id == Currency.id)
+            .all()
+        )
         self.account_ids = [account.id for account in accounts]
 
         self._accounts_info = {account.id: {"name": account.name, "currency": account.currency} for account in accounts}
@@ -65,25 +62,29 @@ class CashFlowReportGenerator:
 
         for result in prepared_results:
             account_id, period, total_income, total_expenses = result
-            income_in_period = Decimal(calc_amount(
-                total_income or Decimal(0),
-                self._accounts_info[account_id]["currency"],
-                today,
-                user.base_currency.code,
-                self._db
-            ))
+            income_in_period = Decimal(
+                calc_amount(
+                    total_income or Decimal(0),
+                    self._accounts_info[account_id]["currency"],
+                    today,
+                    user.base_currency.code,
+                    self._db,
+                )
+            )
             if period not in income_sum:
                 income_sum.setdefault(period, income_in_period)
             else:
                 income_sum[period] += income_in_period
 
-            expenses_in_period = Decimal(calc_amount(
-                total_expenses or Decimal(0),
-                self._accounts_info[account_id]["currency"],
-                today,
-                user.base_currency.code,
-                self._db
-            ))
+            expenses_in_period = Decimal(
+                calc_amount(
+                    total_expenses or Decimal(0),
+                    self._accounts_info[account_id]["currency"],
+                    today,
+                    user.base_currency.code,
+                    self._db,
+                )
+            )
             if period not in expenses_sum:
                 expenses_sum.setdefault(period, expenses_in_period)
             else:
@@ -96,21 +97,21 @@ class CashFlowReportGenerator:
                 net_flow[period] += net_flow_in_period
 
         cash_flow = {
-            'total_income': income_sum,
-            'total_expenses': expenses_sum,
-            'net_flow': net_flow,
-            'currency': user.base_currency.code,
+            "total_income": income_sum,
+            "total_expenses": expenses_sum,
+            "net_flow": net_flow,
+            "currency": user.base_currency.code,
         }
 
         return cash_flow
 
     def set_label(self):
-        if self.period == 'monthly':
-            self.label = 'transactions_month'
-            self.period_str = 'YYYY-MM'
-        elif self.period == 'daily':
-            self.label = 'transactions_day'
-            self.period_str = 'YYYY-MM-DD'
+        if self.period == "monthly":
+            self.label = "transactions_month"
+            self.period_str = "YYYY-MM"
+        elif self.period == "daily":
+            self.label = "transactions_day"
+            self.period_str = "YYYY-MM-DD"
         else:
             raise ValueError(f"Invalid period: {self.period}")
 
@@ -119,23 +120,26 @@ class CashFlowReportGenerator:
 
         query = (
             self._db.query(
-                Account.id.label('account_id'),
+                Account.id.label("account_id"),
                 func.to_char(Transaction.date_time, self.period_str).label(self.label),
                 func.coalesce(
                     func.sum(
                         case((Transaction.is_income == True, Transaction.amount), else_=0)  # noqa
-                    ).filter(Transaction.is_deleted == False, Transaction.is_transfer == False), 0
-                ).label('total_income'),
+                    ).filter(Transaction.is_deleted == False, Transaction.is_transfer == False),
+                    0,
+                ).label("total_income"),
                 func.coalesce(
                     func.sum(
                         case((Transaction.is_income == False, Transaction.amount), else_=0)  # noqa
-                    ).filter(Transaction.is_deleted == False, Transaction.is_transfer == False), 0
-                ).label('total_expenses')
+                    ).filter(Transaction.is_deleted == False, Transaction.is_transfer == False),
+                    0,
+                ).label("total_expenses"),
             )
-            .outerjoin(Transaction,
-                       and_(Account.id == Transaction.account_id, Transaction.account_id.in_(self.account_ids)))
+            .outerjoin(
+                Transaction, and_(Account.id == Transaction.account_id, Transaction.account_id.in_(self.account_ids))
+            )
             .filter(Account.user_id == self.user_id, Account.id.in_(self.account_ids))
-            .group_by(Account.id, func.to_char(Transaction.date_time, self.period_str))
+            .group_by(Account.id, func.to_char(Transaction.date_time, self.period_str), Transaction.date_time)
             .order_by(self.label)
         )
 
@@ -144,9 +148,9 @@ class CashFlowReportGenerator:
             additional_filters.append(Transaction.date_time >= self.start_date)
         else:
             # get start date 12 months ago in case of monthly report and 30 days ago in case of daily report
-            if self.period == 'monthly':
+            if self.period == "monthly":
                 additional_filters.append(Transaction.date_time >= (datetime.now() - timedelta(days=365)))
-            elif self.period == 'daily':
+            elif self.period == "daily":
                 additional_filters.append(Transaction.date_time >= (datetime.now() - timedelta(days=30)))
 
         if self.end_date:
@@ -157,7 +161,6 @@ class CashFlowReportGenerator:
         if additional_filters:
             query = query.filter(*additional_filters)
 
-        query = query.group_by(Transaction.account_id, Account.id, )
         results = query.all()
 
         return results
