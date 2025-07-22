@@ -30,7 +30,7 @@ dependencies = [
     "dnspython >= 2.6.1",
     "docutils >= 0.21.2",
     "email-validator >= 2.2.0",
-    "fastapi==0.116.1",
+    "fastapi >= 0.116.1",
     "fastapi-mail >= 1.4.1",
     "flower >= 2.0.1",
     "google-auth >= 2.37.0",
