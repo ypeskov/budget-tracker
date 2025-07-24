@@ -107,7 +107,7 @@ def get_transactions(user_id: int, db: Session, params: dict | None = None, incl
         transaction.base_currency_amount = calc_amount(
             transaction.amount,
             transaction.account.currency.code,
-            transaction.date_time.date(),
+            transaction.date_time.date(),  # type: ignore
             transaction.user.base_currency.code,
             db,
         )
@@ -139,7 +139,7 @@ def get_transaction_details(transaction_id: int, user_id: int, db: Session) -> T
     transaction.base_currency_amount = calc_amount(
         transaction.amount,
         transaction.account.currency.code,
-        transaction.date_time.date(),
+        transaction.date_time.date(),  # type: ignore
         transaction.user.base_currency.code,
         db,
     )
