@@ -147,3 +147,6 @@ dev = [
 
 [tool.setuptools]
 packages = ["app", "alembic"]
+
+[tool.ruff.format]
+quote-style = "preserve"
