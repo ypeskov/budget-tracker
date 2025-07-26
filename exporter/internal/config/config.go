@@ -8,9 +8,14 @@ import (
 )
 
 type Config struct {
-	Env      string `env:"ENV" envDefault:"dev"`
-	Debug    bool   `env:"DEBUG" debug:"true"`
-	LogLevel string `env:"LOG_LEVEL" envDefault:"info"`
+	Env        string `env:"ENV" envDefault:"dev"`
+	Debug      bool   `env:"DEBUG" debug:"true"`
+	LogLevel   string `env:"LOG_LEVEL" envDefault:"info"`
+	DBUser     string `env:"DB_USER" envDefault:"postgres"`
+	DBPassword string `env:"DB_PASSWORD" envDefault:"123"`
+	DBHost     string `env:"DB_HOST" envDefault:"localhost"`
+	DBName     string `env:"DB_NAME" envDefault:"db-orgfin"`
+	DBPort     string `env:"DB_PORT" envDefault:"5432"`
 }
 
 func New(envFile string) (*Config, error) {
