@@ -10,9 +10,13 @@ type TransactionsService struct {
 }
 
 type Transaction interface {
+	// GetAllForUser gets all transactions for a user.
+	// It returns a slice of transactions and an error if
+	// the transactions cannot be fetched.
 	GetAllForUser(userID int64) ([]models.Transaction, error)
 }
 
+// NewTransactionsService creates a new TransactionsService.
 func NewTransactionsService(transactionsRepository respositories.Transaction) Transaction {
 	return &TransactionsService{transactionsRepository: transactionsRepository}
 }

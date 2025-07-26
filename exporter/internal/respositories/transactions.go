@@ -12,9 +12,11 @@ type TransactionsRepository struct {
 }
 
 type Transaction interface {
+	// GetAllForUser gets all transactions for a user.
 	GetAllForUser(userID int64) ([]models.Transaction, error)
 }
 
+// NewTransactionsRepository creates a new TransactionsRepository.
 func NewTransactionsRepository(db *database.Database) Transaction {
 	return &TransactionsRepository{db: db}
 }

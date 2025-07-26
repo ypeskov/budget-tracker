@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/csv"
-	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
@@ -12,7 +10,6 @@ import (
 	"orgfin.run/exporter/internal/config"
 	"orgfin.run/exporter/internal/database"
 	logger "orgfin.run/exporter/internal/logger"
-	"orgfin.run/exporter/internal/models"
 	"orgfin.run/exporter/internal/respositories"
 	"orgfin.run/exporter/internal/services"
 )
@@ -50,8 +47,12 @@ func main() {
 	slog.Info("App initialized")
 
 	run(db)
+
+	slog.Info("App finished")
 }
 
+// The main function that runs the app.
+// It gets the transactions for the user and exports them to a CSV file.
 func run(db *database.Database) {
 	slog.Info("Running app...")
 
@@ -72,28 +73,5 @@ func run(db *database.Database) {
 	}
 	slog.Info("Transactions fetched", "count", len(transactions))
 
-	slog.Info("Exporting to CSV...")
-	exportToCSV(transactions)
-	slog.Info("CSV exported")
-}
-
-func exportToCSV(transactions []models.Transaction) {
-	csvFile, err := os.Create("transactions.csv")
-	if err != nil {
-		slog.Error("Failed to create csv file", "error", err)
-		return
-	}
-	defer csvFile.Close()
-
-	csvWriter := csv.NewWriter(csvFile)
-
-	csvWriter.Write([]string{"ID", "User ID", "Date Time", "Amount", "Category ID",
-		"Label", "Amount In Base", "Currency", "Base Currency"})
-	for _, transaction := range transactions {
-		csvWriter.Write([]string{transaction.ID, transaction.UserID, transaction.DateTime,
-			fmt.Sprintf("%f", transaction.Amount), fmt.Sprintf("%d", transaction.CategoryID.Int64),
-			transaction.Label.String, fmt.Sprintf("%f", transaction.AmountInBase.Float64),
-			transaction.Currency.String, transaction.BaseCurrency.String})
-	}
-	csvWriter.Flush()
+	services.ExportToCSV(transactions)
 }
