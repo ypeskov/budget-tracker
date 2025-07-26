@@ -12,6 +12,8 @@ import (
 	"orgfin.run/exporter/internal/database"
 	logger "orgfin.run/exporter/internal/logger"
 	"orgfin.run/exporter/internal/models"
+	"orgfin.run/exporter/internal/respositories"
+	"orgfin.run/exporter/internal/services"
 )
 
 var envFile string
@@ -44,17 +46,12 @@ func main() {
 		return
 	}
 
-	transactions := []models.Transaction{}
-	query := `
-	SELECT id, user_id, date_time, amount, category_id, label
-	FROM transactions
-	WHERE user_id = $1
-	ORDER BY date_time DESC
-	LIMIT 10
-	`
-	err = db.Db.Select(&transactions, query, "1")
+	transactionsRepository := respositories.NewTransactionsRepository(db)
+	transactionsService := services.NewTransactionsService(transactionsRepository)
+
+	transactions, err := transactionsService.GetAllForUser(1)
 	if err != nil {
-		slog.Error("Failed to select transactions", "error", err)
+		slog.Error("Failed to get all transactions for user", "error", err)
 		return
 	}
 
