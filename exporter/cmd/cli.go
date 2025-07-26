@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log/slog"
 	"os"
@@ -57,15 +58,28 @@ func main() {
 		return
 	}
 
-	for _, transaction := range transactions {
-		fmt.Printf("Transaction: %s\n", transaction.ID)
-		fmt.Printf("  User ID: %s\n", transaction.UserID)
-		fmt.Printf("  Date Time: %s\n", transaction.DateTime)
-		fmt.Printf("  Amount: %f\n", transaction.Amount)
-		fmt.Printf("  Category ID: %d\n", transaction.CategoryID.Int64)
-		fmt.Printf("  Label: %s\n", transaction.Label.String)
-		fmt.Printf("  Amount In Base: %f\n", transaction.AmountInBase.Float64)
-		fmt.Printf("  Currency: %s\n", transaction.Currency.String)
-		fmt.Println("--------------------------------")
+	// export to csv
+	exportToCSV(transactions)
+
+}
+
+func exportToCSV(transactions []models.Transaction) {
+	csvFile, err := os.Create("transactions.csv")
+	if err != nil {
+		slog.Error("Failed to create csv file", "error", err)
+		return
 	}
+	defer csvFile.Close()
+
+	csvWriter := csv.NewWriter(csvFile)
+
+	csvWriter.Write([]string{"ID", "User ID", "Date Time", "Amount", "Category ID",
+		"Label", "Amount In Base", "Currency", "Base Currency"})
+	for _, transaction := range transactions {
+		csvWriter.Write([]string{transaction.ID, transaction.UserID, transaction.DateTime,
+			fmt.Sprintf("%f", transaction.Amount), fmt.Sprintf("%d", transaction.CategoryID.Int64),
+			transaction.Label.String, fmt.Sprintf("%f", transaction.AmountInBase.Float64),
+			transaction.Currency.String, transaction.BaseCurrency.String})
+	}
+	csvWriter.Flush()
 }
