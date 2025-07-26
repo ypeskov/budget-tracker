@@ -20,6 +20,7 @@ type Config struct {
 
 func New(envFile string) (*Config, error) {
 	slog.Info("Loading .env file", "file", envFile)
+
 	if err := godotenv.Load(envFile); err != nil {
 		slog.Warn("Failed to load .env file", "error", err)
 	}
