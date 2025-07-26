@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -17,12 +18,14 @@ import (
 )
 
 var envFile string
+var userID string
 
 var rootCmd = &cobra.Command{
 	Use: "exporter",
 }
 
 func main() {
+	rootCmd.PersistentFlags().StringVarP(&userID, "uid", "u", "1", "user id")
 	rootCmd.PersistentFlags().StringVarP(&envFile, "env", "e", ".env", "path to .env file")
 
 	if err := rootCmd.Execute(); err != nil {
@@ -38,26 +41,40 @@ func main() {
 
 	logger.Init(cfg.Env)
 
-	slog.Info("Config: ", slog.Any("config", cfg))
-
 	db, err := database.New(cfg)
 	if err != nil {
 		slog.Error("Failed to connect to database", "error", err)
 		return
 	}
 
+	slog.Info("App initialized")
+
+	run(db)
+}
+
+func run(db *database.Database) {
+	slog.Info("Running app...")
+
+	userIDInt, err := strconv.ParseInt(userID, 10, 64)
+	if err != nil {
+		slog.Error("Failed to parse user id", "error", err)
+		return
+	}
+
+	slog.Info("Getting transactions...")
 	transactionsRepository := respositories.NewTransactionsRepository(db)
 	transactionsService := services.NewTransactionsService(transactionsRepository)
 
-	transactions, err := transactionsService.GetAllForUser(1)
+	transactions, err := transactionsService.GetAllForUser(userIDInt)
 	if err != nil {
 		slog.Error("Failed to get all transactions for user", "error", err)
 		return
 	}
+	slog.Info("Transactions fetched", "count", len(transactions))
 
-	// export to csv
+	slog.Info("Exporting to CSV...")
 	exportToCSV(transactions)
-
+	slog.Info("CSV exported")
 }
 
 func exportToCSV(transactions []models.Transaction) {
