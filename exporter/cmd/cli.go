@@ -24,7 +24,7 @@ func main() {
 		return
 	}
 
-	logger.Init(cfg.Env)
+	logger.Init(cfg)
 
 	db, err := database.New(cfg)
 	if err != nil {
@@ -44,7 +44,7 @@ func main() {
 func run(db *database.Database, userID string) {
 	slog.Info("Running app...")
 
-	userIDInt, err := strconv.ParseInt(userID, 10, 64) //nolint:gosec
+	userIDInt, err := strconv.ParseInt(userID, 10, 64)
 	if err != nil {
 		slog.Error("Failed to parse user id", "error", err)
 		return
@@ -61,5 +61,6 @@ func run(db *database.Database, userID string) {
 	}
 	slog.Info("Transactions fetched", "count", len(transactions))
 
-	services.ExportToCSV(transactions)
+	csvExporter := services.NewCSVExporter(transactions)
+	csvExporter.ExportToCSV(transactions)
 }

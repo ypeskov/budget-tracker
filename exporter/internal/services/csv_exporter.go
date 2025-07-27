@@ -10,13 +10,24 @@ import (
 	"orgfin.run/exporter/internal/models"
 )
 
+type CSVExporterInstance struct {
+	transactions []models.Transaction
+}
+
+type CSVExporter interface {
+	ExportToCSV(transactions []models.Transaction)
+}
+
+func NewCSVExporter(transactions []models.Transaction) CSVExporter {
+	return &CSVExporterInstance{transactions: transactions}
+}
+
 // ExportToCSV exports the transactions to a CSV file.
 // It creates a new CSV file with the current date and time in the filename.
 // It writes the transactions to the CSV file.
-func ExportToCSV(transactions []models.Transaction) {
+func (c *CSVExporterInstance) ExportToCSV(transactions []models.Transaction) {
 	fileName := fmt.Sprintf("transactions_%s.csv", time.Now().Format("2006-01-02_15-04-05"))
 	slog.Info("Exporting to CSV...", "file", fileName)
-	slog.Info("Creating CSV file")
 	csvFile, err := os.Create(fileName)
 	if err != nil {
 		slog.Error("Failed to create csv file", "error", err)
@@ -34,6 +45,7 @@ func ExportToCSV(transactions []models.Transaction) {
 			transaction.Label.String, fmt.Sprintf("%f", transaction.AmountInBase.Float64),
 			transaction.Currency.String, transaction.BaseCurrency.String})
 	}
+
 	csvWriter.Flush()
 	slog.Info("CSV file created", "file", fileName)
 }
