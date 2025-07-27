@@ -14,7 +14,7 @@ import (
 
 func main() {
 	userID := flag.String("uid", "1", "user id")
-	envFile := flag.String("env", "env", "path to .env file")
+	envFile := flag.String("env", ".env", "path to .env file")
 
 	flag.Parse()
 
