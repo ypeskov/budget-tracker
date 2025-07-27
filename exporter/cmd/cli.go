@@ -1,11 +1,9 @@
 package main
 
 import (
+	"flag"
 	"log/slog"
-	"os"
 	"strconv"
-
-	"github.com/spf13/cobra"
 
 	"orgfin.run/exporter/internal/config"
 	"orgfin.run/exporter/internal/database"
@@ -14,23 +12,13 @@ import (
 	"orgfin.run/exporter/internal/services"
 )
 
-var envFile string
-var userID string
-
-var rootCmd = &cobra.Command{
-	Use: "exporter",
-}
-
 func main() {
-	rootCmd.PersistentFlags().StringVarP(&userID, "uid", "u", "1", "user id")
-	rootCmd.PersistentFlags().StringVarP(&envFile, "env", "e", ".env", "path to .env file")
+	userID := flag.String("uid", "1", "user id")
+	envFile := flag.String("env", "env", "path to .env file")
 
-	if err := rootCmd.Execute(); err != nil {
-		slog.Error("cli failed", "error", err)
-		os.Exit(1)
-	}
+	flag.Parse()
 
-	cfg, err := config.New(envFile)
+	cfg, err := config.New(*envFile)
 	if err != nil {
 		slog.Error("Failed to load config", "error", err)
 		return
@@ -46,17 +34,17 @@ func main() {
 
 	slog.Info("App initialized")
 
-	run(db)
+	run(db, *userID)
 
 	slog.Info("App finished")
 }
 
 // The main function that runs the app.
 // It gets the transactions for the user and exports them to a CSV file.
-func run(db *database.Database) {
+func run(db *database.Database, userID string) {
 	slog.Info("Running app...")
 
-	userIDInt, err := strconv.ParseInt(userID, 10, 64)
+	userIDInt, err := strconv.ParseInt(userID, 10, 64) //nolint:gosec
 	if err != nil {
 		slog.Error("Failed to parse user id", "error", err)
 		return
