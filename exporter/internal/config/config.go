@@ -9,8 +9,8 @@ import (
 
 type Config struct {
 	Env        string `env:"ENV" envDefault:"dev"`
-	Debug      bool   `env:"DEBUG" debug:"true"`
-	LogLevel   string `env:"LOG_LEVEL" envDefault:"info"`
+	Debug      bool   `env:"DEBUG" debug:"false"`
+	LogLevel   string `env:"LOG_LEVEL" envDefault:"INFO"`
 	DBUser     string `env:"DB_USER" envDefault:"postgres"`
 	DBPassword string `env:"DB_PASSWORD" envDefault:"123"`
 	DBHost     string `env:"DB_HOST" envDefault:"localhost"`
