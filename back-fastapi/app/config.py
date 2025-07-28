@@ -49,4 +49,10 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = "123"
     SECRET_KEY: str = "111111111"
 
+    # OpenAI configuration for expense analysis
+    OPENAI_API_KEY: str = "your-openai-api-key"
+    OPENAI_MODEL: str = "gpt-4o-mini"
+    OPENAI_MAX_TOKENS: int = 1000
+    OPENAI_TEMPERATURE: float = 0.3
+
     model_config = SettingsConfigDict(env_file=(".env", ".env.local", ".env.prod"))
