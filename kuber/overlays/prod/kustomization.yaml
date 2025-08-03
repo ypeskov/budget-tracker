@@ -16,3 +16,6 @@ replacements:
           kind: Ingress
         fieldPaths:
           - spec.rules.0.host
+
+patchesStrategicMerge:
+  - ingress-patch.yaml

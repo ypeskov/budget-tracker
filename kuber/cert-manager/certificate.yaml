@@ -1,0 +1,14 @@
+# kuber/cert-manager/certificate.yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: api-budgeter-cert
+  namespace: default
+spec:
+  secretName: api-budgeter-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: api-budgeter.peskov.biz
+  dnsNames:
+    - api-budgeter.peskov.biz
