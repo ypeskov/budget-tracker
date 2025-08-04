@@ -14,7 +14,7 @@ build_and_tag() {
 
     local build_command="docker build --target prod "
     
-    [[ -z "$platform_option" ]] && platform_option="--platform=linux/amd64"
+    [[ -z "$platform_option" ]] && platform_option="--platform=linux/arm64"
     build_command+="--no-cache $platform_option"
 
     build_command+=" -t ypeskov/api-orgfin:$tag ."
