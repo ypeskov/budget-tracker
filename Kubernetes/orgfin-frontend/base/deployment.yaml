@@ -17,3 +17,6 @@ spec:
           image: ypeskov/frontend-orgfin:latest
           ports:
             - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: orgfin-frontend-env
