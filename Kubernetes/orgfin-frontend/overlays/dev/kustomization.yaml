@@ -1,0 +1,22 @@
+resources:
+  - ../../base
+
+configMapGenerator:
+  - name: orgfin-env
+    literals:
+      - HOSTNAME=orgfin-front.local
+  - name: orgfin-env
+    envs:
+      - _env
+    behavior: merge
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: orgfin-env
+      fieldPath: data.HOSTNAME
+    targets:
+      - select:
+          kind: Ingress
+        fieldPaths:
+          - spec.rules.0.host

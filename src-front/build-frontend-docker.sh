@@ -19,4 +19,4 @@ echo "[+] Building Docker image..."
 
 docker build \
   --build-arg BUILD_ENV_FILE=$BUILD_ENV_FILE \
-  -t ypeskov/orgfin-frontend .
+  -t ypeskov/frontend-orgfin .
