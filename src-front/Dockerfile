@@ -1,12 +1,17 @@
 # Stage 1: Build
 FROM node:20-alpine AS builder
 
+ARG BUILD_ENV_FILE
+
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
+COPY ${BUILD_ENV_FILE:-.env.build} .env
+
 RUN npm run build
 
 # Stage 2: Serve
