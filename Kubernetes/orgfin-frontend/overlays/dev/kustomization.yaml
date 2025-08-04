@@ -7,7 +7,7 @@ configMapGenerator:
       - HOSTNAME=orgfin-front.local
   - name: orgfin-env
     envs:
-      - _env
+      - .env
     behavior: merge
 
 replacements:
