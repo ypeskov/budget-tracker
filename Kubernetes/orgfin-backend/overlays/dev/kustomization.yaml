@@ -16,3 +16,10 @@ replacements:
           kind: Ingress
         fieldPaths:
           - spec.rules.0.host
+
+patches:
+  - target:
+      version: v1
+      kind: Deployment
+      name: orgfin-backend
+    path: command-patch.yaml
