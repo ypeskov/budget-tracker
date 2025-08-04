@@ -1,0 +1,24 @@
+resources:
+  - ../../base
+
+configMapGenerator:
+  - name: orgfin-frontend-env
+    envs:
+      - .env.prod
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: orgfin-frontend-env
+      fieldPath: data.HOSTNAME
+    targets:
+      - select:
+          kind: Ingress
+        fieldPaths:
+          - spec.rules.0.host
+
+patches:
+  - path: ingress-patch.yaml
+    target:
+      kind: Ingress
+      name: orgfin-frontend

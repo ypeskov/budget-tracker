@@ -13,7 +13,10 @@ build_and_tag() {
     done
 
     local build_command="docker build --target prod "
-    build_command+="--no-cache --platform=linux/amd64"
+    
+    [[ -z "$platform_option" ]] && platform_option="--platform=linux/arm64"
+    build_command+="--no-cache $platform_option"
+
     build_command+=" -t ypeskov/api-orgfin:$tag ."
 
     eval "$build_command"

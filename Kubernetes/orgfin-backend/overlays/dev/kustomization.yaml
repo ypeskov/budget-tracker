@@ -1,0 +1,25 @@
+resources:
+  - ../../base
+
+configMapGenerator:
+  - name: orgfin-env
+    envs:
+      - .env
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: orgfin-env
+      fieldPath: data.HOSTNAME
+    targets:
+      - select:
+          kind: Ingress
+        fieldPaths:
+          - spec.rules.0.host
+
+patches:
+  - target:
+      version: v1
+      kind: Deployment
+      name: orgfin-backend
+    path: command-patch.yaml
