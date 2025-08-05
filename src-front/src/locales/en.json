@@ -1,6 +1,5 @@
 {
   "message": {
-    "anotherBudgeter": "Another Budgeter",
     "invalidCredentials": "Wrong credentials",
     "enterEmail": "Enter email",
     "enterPassword": "Enter password",
@@ -13,8 +12,9 @@
     "noAccount": "No account?",
     "registerInvite": "Sign up now and start managing your finances in one convenient app! Just click the button below to create your account.",
     "error": "Error!",
-    "message.success": "ТУТ БУДЕТ УСПЕХ",
-    "message.checkEmailForVerification": "ТУТ БУДЕТ ПРО ЧЕК ИМЕЙЛ",
+    "unexpectedError": "Unexpected error",
+    "success": "ТУТ БУДЕТ УСПЕХ",
+    "checkEmailForVerification": "ТУТ БУДЕТ ПРО ЧЕК ИМЕЙЛ",
     "welcome": "Welcome",
     "update": "Update",
     "newAccount": "New account",

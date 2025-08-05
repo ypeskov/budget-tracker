@@ -1,6 +1,5 @@
 {
   "message": {
-    "anotherBudgeter": "Ще один Бюджетер",
     "invalidCredentials": "Невірний пароль або електронна пошта.",
     "enterEmail": "Електронна пошта",
     "enterPassword": "Пароль",
@@ -13,8 +12,9 @@
     "noAccount": "Немає облікового запису?",
     "registerInvite": "Зареєструйтесь зараз і почніть керувати своїми фінансами в одному зручному застосунку! Просто натисніть кнопку нижче, щоб створити обліковий запис.",
     "error": "Помилка!",
-    "message.success": "ТУТ БУДЕТ УСПЕХ",
-    "message.checkEmailForVerification": "ТУТ БУДЕТ ПРО ЧЕК ИМЕЙЛ",
+    "unexpectedError": "Unexpected error",
+    "success": "ТУТ БУДЕТ УСПЕХ",
+    "checkEmailForVerification": "ТУТ БУДЕТ ПРО ЧЕК ИМЕЙЛ",
     "welcome": "Ласкаво, просимо",
     "update": "Оновити",
     "newAccount": "Новий рахунок",

@@ -1,132 +1,126 @@
 <script setup>
-import { computed, ref } from 'vue';
-
-import { Services } from '../../services/servicesConfig';
-import ModalWindow from '../utils/ModalWindow.vue';
+import { reactive, toRefs, ref } from 'vue';
+import { useI18n }  from 'vue-i18n';
+import { Services } from '@/services/servicesConfig';
+import ModalWindow  from '@/components/utils/ModalWindow.vue';
 
 const props = defineProps({
-  closeModal: Function,
-  category: Object,
-  categories: Object,
+  closeModal  : Function,
+  category    : Object,
+  categories  : Array
 });
+const emit = defineEmits(['categoryUpdated']);
+const { t } = useI18n();
 
-const emits = defineEmits(['changeCategoryType', 'categoryUpdated']);
-
-const isIncome = ref(props.category.isIncome);
-const name = ref(props.category.name);
-const parentId = ref(props.category.parentId);
-const isDeleted = ref(props.category.isDeleted);
-
-const showDeleteModal = ref(false);
-
-const categoryOptions = computed(() => {
-  return Object.values(props.categories).flat().map(cat => ({
-    id: cat.id,
-    name: cat.name,
-  }));
+const state = reactive({
+  id        : props.category.id,
+  name      : props.category.name || '',
+  isIncome  : props.category.isIncome || false,
+  isDeleted : props.category.isDeleted || false,
+  parentId  : props.category.parentId || ''
 });
+const askDelete = ref(false);
 
-const updateIsIncome = (newValue) => {
-  isIncome.value = newValue;
-  emits('changeCategoryType', { isIncome: newValue });
-};
+const categoryOptions = props.categories.map(c => ({ id: c.id, name: c.name }));
 
-const saveCategory = async () => {
-  const category = {
-    name: name.value,
-    isIncome: isIncome.value || false,
-    isDeleted: isDeleted.value || false,
-  };
-
-  if (props.category.id) {
-    category.id = props.category.id;
-  }
-  if (parentId.value) {
-    category.parentId = parentId.value;
-  }
-  if (category.id) {
-    await Services.categoriesService.updateCategory(category);
-  } else {
-    await Services.categoriesService.createCategory(category);
-  }
-  emits('categoryUpdated');
-  props.closeModal();
-};
-
-function promptDeleteCategory() {
-  showDeleteModal.value = true;
+async function save() {
+  const dto = { ...toRefs(state), name: state.name, isIncome: state.isIncome,
+                isDeleted: state.isDeleted, parentId: state.parentId || null };
+  state.id ? await Services.categoriesService.updateCategory(dto)
+           : await Services.categoriesService.createCategory(dto);
+  emit('categoryUpdated'); props.closeModal();
 }
 
-async function confirmDeleteCategory() {
-  await Services.categoriesService.deleteCategory(props.category.id);
-  emits('categoryUpdated');
-  props.closeModal();
-  showDeleteModal.value = false;
+function promptDelete() { askDelete.value = true; }
+
+async function reallyDelete() {
+  await Services.categoriesService.deleteCategory(state.id);
+  emit('categoryUpdated'); props.closeModal();
 }
-
-
 </script>
 
 <template>
-  <ModalWindow :close-modal="closeModal">
+  <ModalWindow :close-modal="props.closeModal">
     <template #header>
-      <h2>{{ $t('message.category') }}</h2>
+      <h2>{{ t('message.category') }}</h2>
     </template>
 
     <template #main>
-      <div class="row mb-3">
-        <div class="col">
-          <label for="categoryName">{{ $t('message.name') }}</label>
-          <input type="text" id="categoryName" class="form-control" v-model="name">
-        </div>
-        <div v-if="category.children.length === 0" class="col">
-          <label for="categoryParent">{{ $t('message.group') }}</label>
-          <select id="categoryParent" class="form-control" v-model="parentId">
-            <option value="">{{ $t('message.none') }}</option>
-            <option v-for="cat in categoryOptions" :key="cat.id" :value="cat.id">
-              {{ cat.name }}
+      <div class="form-grid">
+        <label>
+          {{ t('message.name') }}
+          <input v-model="state.name" type="text" class="form-input" />
+        </label>
+
+        <label v-if="!props.category.children?.length">
+          {{ t('message.group') }}
+          <select v-model="state.parentId" class="select-input">
+            <option value="">{{ t('message.none') }}</option>
+            <option v-for="opt in categoryOptions" :key="opt.id" :value="opt.id">
+              {{ opt.name }}
             </option>
           </select>
-        </div>
+        </label>
+
+        <label class="chk">
+          <input type="checkbox" v-model="state.isIncome" />
+          {{ t('message.isIncome') }}
+        </label>
+
+        <label class="chk">
+          <input type="checkbox" v-model="state.isDeleted" />
+          {{ t('message.isDeleted') }}
+        </label>
       </div>
 
-      <div class="row mb-3">
-        <div class="col">
-          <label>
-            <input type="checkbox"
-                   v-model="isIncome"
-                   @change="updateIsIncome($event.target.checked)">{{ $t('message.isIncome') }}
-          </label>
-        </div>
-        <div class="col">
-          <label><input type="checkbox" v-model="isDeleted"> {{ $t('message.isDeleted') }}</label>
-        </div>
-      </div>
+      <div class="btn-row">
+        <button class="btn primary"  @click="save">
+          {{ t('buttons.save') }}
+        </button>
 
-      <div class="row">
-        <button class="btn btn-primary" @click="saveCategory">{{ $t('buttons.save') }}</button>
-        <button class="btn btn-danger" @click="promptDeleteCategory">{{ $t('buttons.delete') }}</button>
+        <button v-if="state.id" class="btn outline danger" @click="promptDelete">
+          {{ t('buttons.delete') }}
+        </button>
       </div>
     </template>
   </ModalWindow>
 
-  <ModalWindow :close-modal="() => showDeleteModal = false" v-if="showDeleteModal">
+  <ModalWindow v-if="askDelete" class="confirm-modal" :close-modal="() => (askDelete = false)">
     <template #header>
-      <h2>{{ $t('message.deleteCategory') }}?</h2>
+      <h2>{{ t('message.deleteCategory') }}?</h2>
     </template>
-
     <template #main>
-      <p>{{ $t('message.areYouSureWantDeleteCategory') }}?</p>
-      <div class="row gap-2 justify-content-center">
-        <button class="btn btn-danger col-auto" @click="confirmDeleteCategory">{{ $t('buttons.delete') }}</button>
+      <p>{{ t('message.areYouSureWantDeleteCategory') }}</p>
+      <div class="btn-row">
+        <button class="btn outline" @click="askDelete = false">
+          {{ t('buttons.cancel') }}
+        </button>
+        <button class="btn danger"  @click="reallyDelete">
+          {{ t('buttons.delete') }}
+        </button>
       </div>
     </template>
   </ModalWindow>
-
 </template>
 
 <style scoped>
-.btn-primary, .btn-danger {
-  margin-top: 10px;
+.form-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  margin-bottom: 24px;
 }
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.chk { display: flex; align-items: center; gap: 8px; }
+
+.btn-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.btn.danger      { color: #dc3545; border-color: #dc3545; }
+.btn.danger:hover{ background: #dc3545; color: #fff; }
 </style>

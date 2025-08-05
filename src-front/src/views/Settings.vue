@@ -1,89 +1,54 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, shallowRef } from 'vue';
 
-import UserProfile from '@/components/settings/UserProfile.vue';
-import CategoriesManager from '@/components/settings/CategoriesManager.vue';
+import UserProfile          from '@/components/settings/UserProfile.vue';
+import CategoriesManager    from '@/components/settings/CategoriesManager.vue';
 import TransactionTemplates from '@/components/templates/TransactionTemplates.vue';
 
-const showProfileModal = ref(false);
-const showCategoriesModal = ref(false);
-const showTemplatesModal = ref(false);
+const sections = [
+  { id: 'profile',    labelKey: 'buttons.profile',    icon: 'fa-user-circle',   comp: UserProfile },
+  { id: 'templates',  labelKey: 'buttons.templates',  icon: 'fa-copy',          comp: TransactionTemplates },
+  { id: 'categories', labelKey: 'buttons.categories', icon: 'fa-layer-group',   comp: CategoriesManager }
+];
 
-const openProfileModal = () => {
-  showProfileModal.value = true;
-};
+const activeId    = ref('profile');
+const ActiveComp  = shallowRef(sections[0].comp);
 
-const closeProfileModal = () => {
-  showProfileModal.value = false;
-};
-
-const openCategoriesModal = () => {
-  showCategoriesModal.value = true;
-};
-
-const closeCategoriesModal = () => {
-  showCategoriesModal.value = false;
-};
-
-const openTemplatesModal = () => {
-  showTemplatesModal.value = true;
-};
-
-const closeTemplatesModal = () => {
-  showTemplatesModal.value = false;
-};
+function changeSection(id) {
+  if (id === activeId.value) return;
+  const found = sections.find(s => s.id === id);
+  if (found) {
+    activeId.value = id;
+    ActiveComp.value = found.comp;
+  }
+}
 </script>
 
 <template>
-  <main>
-    <div class="container">
-      <div class="row">
-        <div class="col-12">
-          <h1>{{ $t('message.settings') }}</h1>
-        </div>
-      </div>
+  <main class="settings-page">
+    <div class="container split">
 
-      <div class="row">
-        <div class="col-12 profile-section">
-          <button @click="openProfileModal" class="btn btn-primary w-100">{{ $t('buttons.profile') }}</button>
-        </div>
-        <teleport to="body">
-          <UserProfile v-if="showProfileModal" :close-modal="closeProfileModal" />
-        </teleport>
-      </div>
+      <aside class="sidebar">
+        <h2 class="title">{{ $t('message.settings') }}</h2>
 
-      <div class="row">
-        <div class="col-12 profile-section">
-          <button @click="openTemplatesModal" class="btn btn-primary w-100">{{ $t('buttons.templates') }}</button>
-        </div>
-        <teleport to="body">
-          <TransactionTemplates v-if="showTemplatesModal" :close-modal="closeTemplatesModal" />
-        </teleport>
-      </div>
+        <nav class="side-nav">
+          <button
+            v-for="s in sections"
+            :key="s.id"
+            class="btn side-btn"
+            :class="{ active: s.id === activeId }"
+            @click="changeSection(s.id)"
+          >
+            <i :class="['fa-solid', s.icon]"></i>
+            <span>{{ $t(s.labelKey) }}</span>
+          </button>
+        </nav>
+      </aside>
 
-      <div class="row">
-        <div class="col-12 profile-section">
-          <button @click="openCategoriesModal" class="btn btn-primary w-100">{{ $t('buttons.categories') }}</button>
-        </div>
-        <teleport to="body">
-          <CategoriesManager v-if="showCategoriesModal" :close-modal="closeCategoriesModal" />
-        </teleport>
-      </div>
+      <section class="settings-content panel">
+        <component :is="ActiveComp" />
+      </section>
+
     </div>
   </main>
 </template>
-
-<style scoped>
-.container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-}
-
-.row {
-  margin-top: 20px;
-  margin-left: 0;
-  width: 100%;
-}
-</style>
