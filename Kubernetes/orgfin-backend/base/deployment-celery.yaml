@@ -12,6 +12,8 @@ spec:
       labels:
         app: orgfin-celery-label
     spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: orgfin-celery
           image: ypeskov/api-orgfin:1.6.8
