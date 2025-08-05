@@ -1,42 +1,17 @@
-from icecream import ic
-from sqlalchemy import MetaData
-from sqlalchemy.orm import Session
+from pathlib import Path
+import sys
+from sqlalchemy import text
 
-from app.database import get_db
-from app.logger_config import logger
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.append(str(BASE_DIR))
 
+from app.database import engine  # noqa
+from app.logger_config import logger  # noqa
 
-def clean_db(db: Session | None = None):
-    logger.info('Cleaning database')
+logger.info("🧹 Cleaning DB...")
+with engine.connect() as conn:
+    conn.execute(text("DROP SCHEMA public CASCADE"))
+    conn.execute(text("CREATE SCHEMA public"))
+    conn.commit()
 
-    if db is None:
-        logger.info("Trying to get DB session")
-        db = next(get_db())
-        logger.info("DB session acquired")
-
-    meta = MetaData()
-    logger.info("Reflecting database metadata")
-    try:
-        meta.reflect(bind=db.get_bind())
-        logger.info(f"Metadata reflected: {list(meta.tables.keys())}")
-    except Exception as e:
-        logger.error(f"Error reflecting metadata: {e}")
-
-    for table in reversed(meta.sorted_tables):
-        logger.info('Dropping table [%s]', table)
-        try:
-            table.drop(db.get_bind(), checkfirst=True)
-            logger.info(f'Table [{table}] dropped')
-        except Exception as e:
-            ic(e)
-            logger.error('Error dropping table [%s]', table)
-    try:
-        db.commit()
-        logger.info('Transaction committed')
-    except Exception as e:
-        ic(e)
-        logger.error(f'Error committing transaction {e}')
-
-
-if __name__ == '__main__':  # pragma: no cover
-    clean_db()
+logger.info("✅ DB fully wiped and public schema recreated")

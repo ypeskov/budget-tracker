@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orgfin-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orgfin-backend-label
+  template:
+    metadata:
+      labels:
+        app: orgfin-backend-label
+    spec:
+      containers:
+        - name: orgfin-backend
+          image: ypeskov/api-orgfin:1.6.9
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: orgfin-env

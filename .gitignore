@@ -3,6 +3,7 @@
 .env.local
 .env.dev
 .env.prod
+*.csv
 
 
 .idea/
@@ -19,4 +20,4 @@ dbdata/
 **/venv/
 .coverage
 
-celerybeat-schedule
+celerybeat-schedule*
