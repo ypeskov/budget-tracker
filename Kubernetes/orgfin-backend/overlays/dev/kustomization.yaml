@@ -23,3 +23,7 @@ patches:
       kind: Deployment
       name: orgfin-backend
     path: command-patch.yaml
+  - target:
+      kind: Deployment
+      name: orgfin-celery
+    path: command-celery-patch.yaml
