@@ -17,5 +17,9 @@ replacements:
         fieldPaths:
           - spec.rules.0.host
 
-patchesStrategicMerge:
-  - ingress-patch.yaml
+patches:
+  - target:
+      version: v1
+      kind: Ingress
+      name: orgfin-ingress
+    path: ingress-patch.yaml
