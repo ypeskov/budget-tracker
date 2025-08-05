@@ -5,142 +5,82 @@ import { useI18n } from 'vue-i18n';
 
 import { useUserStore } from '@/stores/user';
 import { UserService }   from '@/services/users';
-import { TransactionsService } from '@/services/transactions';
 
 const router = useRouter();
 const route  = useRoute();
 const { locale, t } = useI18n();
 
-const userStore = useUserStore();
+const userStore   = useUserStore();
 const userService = new UserService(userStore);
-const transactionsService = new TransactionsService(userStore);
 
 const publicPages = ['login', 'register', 'home'];
-const hideHeader = computed(() => publicPages.includes(route.name));
+const hideHeader  = computed(() => publicPages.includes(route.name));
 
-onMounted(() => {
-  if (userStore.isLoggedIn) userStore.startTimer();
-});
-onBeforeUnmount(() => {
-  userStore.stopTimer();
-});
-
-onBeforeMount(async () => {
-  let isLoggedIn, accessToken, localStorageUser;
+onBeforeMount(() => {
   try {
-    localStorageUser = JSON.parse(localStorage.getItem('user'));
-    isLoggedIn       = JSON.parse(localStorage.getItem('isLoggedIn'));
-    accessToken      = localStorage.getItem('accessToken');
-  } catch {
-    await userService.logOutUser();
-  }
-  if (isLoggedIn) {
-    locale.value = localStorageUser.settings.language;
-    userService.setUser(localStorageUser, isLoggedIn, accessToken);
-  }
+    const usr = JSON.parse(localStorage.getItem('user'));
+    const ok  = JSON.parse(localStorage.getItem('isLoggedIn'));
+    const tok = localStorage.getItem('accessToken');
+    if (ok) {
+      locale.value = usr.settings.language;
+      userService.setUser(usr, ok, tok);
+    }
+  } catch { userService.logOutUser(); }
 });
+
+onMounted      (() => { if (userStore.isLoggedIn) userStore.startTimer(); });
+onBeforeUnmount(() =>   userStore.stopTimer());
 
 const goToSettings = () => router.push({ name: 'settings' });
 </script>
 
 <template>
-  <div v-if="!hideHeader" class="container">
-    <div class="row">
-      <div class="col header-row">
-        <div>{{ t('message.anotherBudgeter') }}</div>
-        <div>{{ userStore.timeLeft }}</div>
-        <div
-          v-if="userStore.isLoggedIn"
-          class="settings-icon"
-          @click="goToSettings"
-        >
-          <img
-            src="/images/icons/settings-icon.svg"
-            :title="t('message.settings')"
-            :alt="t('message.settings')"
-          />
-        </div>
+  <header v-if="!hideHeader" class="navbar">
+    <div class="container nav-inner">
+
+      <nav class="nav-left">
+        <template v-if="!userStore.isLoggedIn">
+          <RouterLink :to="{ name: 'home'     }" class="btn icon" :title="t('menu.home')">
+            <i class="fa-solid fa-house"></i>
+          </RouterLink>
+          <RouterLink :to="{ name: 'login'    }" class="btn icon" :title="t('menu.login')">
+            <i class="fa-solid fa-right-to-bracket"></i>
+          </RouterLink>
+          <RouterLink :to="{ name: 'register' }" class="btn icon" :title="t('menu.register')">
+            <i class="fa-solid fa-user-plus"></i>
+          </RouterLink>
+        </template>
+
+        <template v-else>
+          <RouterLink :to="{ name: 'accounts'     }" class="btn icon" :title="t('menu.accounts')">
+            <i class="fa-solid fa-wallet"></i>
+          </RouterLink>
+          <RouterLink :to="{ name: 'transactions' }" class="btn icon" :title="t('menu.transactions')">
+            <i class="fa-solid fa-right-left"></i>
+          </RouterLink>
+          <RouterLink :to="{ name: 'reports'      }" class="btn icon" :title="t('menu.reports')">
+            <i class="fa-solid fa-chart-pie"></i>
+          </RouterLink>
+          <RouterLink :to="{ name: 'budgets'      }" class="btn icon" :title="t('menu.budgets')">
+            <i class="fa-solid fa-list-check"></i>
+          </RouterLink>
+          <RouterLink :to="{ name: 'logout'       }" class="btn icon" :title="t('menu.logout')">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </RouterLink>
+        </template>
+      </nav>
+
+      <div class="nav-right" v-if="userStore.isLoggedIn">
+        <span class="time">{{ userStore.timeLeft }}</span>
+
+        <button class="btn icon outline"
+                @click="goToSettings"
+                :title="t('message.settings')">
+          <i class="fa-solid fa-gear"></i>
+        </button>
       </div>
     </div>
-
-    <header>
-      <div class="row nav-row">
-        <div class="col">
-          <nav>
-            <span v-if="!userStore.isLoggedIn">
-              <RouterLink :to="{ name: 'home' }">
-                <img
-                  src="/images/icons/home-icon.svg"
-                  class="main-menu-icon"
-                  :title="t('menu.home')"
-                  :alt="t('menu.home')"
-                />
-              </RouterLink>
-              <RouterLink :to="{ name: 'login' }">
-                <img
-                  src="/images/icons/enter-icon.svg"
-                  class="main-menu-icon"
-                  :title="t('menu.login')"
-                  :alt="t('menu.login')"
-                />
-              </RouterLink>
-              <RouterLink :to="{ name: 'register' }">
-                <img
-                  src="/images/icons/register-icon.svg"
-                  class="main-menu-icon"
-                  :title="t('menu.register')"
-                  :alt="t('menu.register')"
-                />
-              </RouterLink>
-            </span>
-
-            <template v-else>
-              <RouterLink :to="{ name: 'accounts' }">
-                <img
-                  src="/images/icons/accounts-icon.svg"
-                  class="main-menu-icon"
-                  :title="t('menu.accounts')"
-                  :alt="t('menu.accounts')"
-                />
-              </RouterLink>
-              <RouterLink :to="{ name: 'transactions' }">
-                <img
-                  src="/images/icons/transactions-icon.svg"
-                  class="main-menu-icon"
-                  :title="t('menu.transactions')"
-                  :alt="t('menu.transactions')"
-                />
-              </RouterLink>
-              <RouterLink :to="{ name: 'reports' }">
-                <img
-                  src="/images/icons/reports-icon.svg"
-                  class="main-menu-icon"
-                  :title="t('menu.reports')"
-                  :alt="t('menu.reports')"
-                />
-              </RouterLink>
-              <RouterLink :to="{ name: 'budgets' }">
-                <img
-                  src="/images/icons/budgets-icon.svg"
-                  class="main-menu-icon"
-                  :title="t('menu.budgets')"
-                  :alt="t('menu.budgets')"
-                />
-              </RouterLink>
-              <RouterLink :to="{ name: 'logout' }">
-                <img
-                  src="/images/icons/exit-icon.svg"
-                  class="main-menu-icon"
-                  :title="t('menu.logout')"
-                  :alt="t('menu.logout')"
-                />
-              </RouterLink>
-            </template>
-          </nav>
-        </div>
-      </div>
-    </header>
-  </div>
+  </header>
 
   <RouterView />
 </template>

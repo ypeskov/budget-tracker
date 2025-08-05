@@ -1,57 +1,76 @@
 <script setup>
 import { onBeforeMount, reactive } from 'vue';
+import { useRouter } from 'vue-router';
+import { useI18n }   from 'vue-i18n';
 
-import { Services } from '@/services/servicesConfig';
-import ModalWindow from '@/components/utils/ModalWindow.vue';
+import { Services }      from '@/services/servicesConfig';
+import { processError }  from '@/errors/errorHandlers';
 
-const props = defineProps({
-  closeCurrencyModal: Function,
-});
+const router = useRouter();
+const { t }  = useI18n();
 
-let selectedCurrency = reactive({});
-const currencies = reactive([]);
+const currencies       = reactive([]);
+const selectedCurrency = reactive({});
 
 onBeforeMount(async () => {
-  const baseCurrency = await Services.settingsService.getBaseCurrency();
-  Object.assign(selectedCurrency, baseCurrency);
-  const allCurrencies = await Services.currenciesService.getAllCurrencies();
-  currencies.length = 0;
-  currencies.push(...allCurrencies);
+  try {
+    Object.assign(selectedCurrency,
+      await Services.settingsService.getBaseCurrency());
+
+    currencies.length = 0;
+    currencies.push(...await Services.currenciesService.getAllCurrencies());
+  } catch (e) { await processError(e, router); }
 });
 
-const handleCurrencyChange = (event) => {
-  const newCurrencyCode = event.target.value;
-  const currency = currencies.find(c => c.code === newCurrencyCode);
-  if (currency) {
-    Object.assign(selectedCurrency, currency);
-  }
-}
-
-const applyAndClose = async () => {
+const apply = async () => {
   await Services.settingsService.setBaseCurrency(selectedCurrency);
-  props.closeCurrencyModal();
-}
+};
 </script>
 
 <template>
-  <ModalWindow :close-modal="props.closeCurrencyModal" modal-id="language-selector">
-    <template #header>
-      <div class="row">
-        <h2>{{ $t('message.selectBaseCurrency') }}</h2>
-      </div>
-    </template>
-    <template #main>
-      <div>{{ $t('message.currentCurency') }}: {{ selectedCurrency.code }}</div>
-      <select class="form-select mb-3" v-model="selectedCurrency.code" @change="handleCurrencyChange">
-        <option v-for="currency in currencies"
-                :value="currency.code"
-                :key="currency.id">{{ currency.code }} ({{ currency.name }})</option>
-      </select>
-      <button class="btn btn-primary" @click="applyAndClose">{{ $t('buttons.apply') }}</button>
-    </template>
-  </ModalWindow>
+  <div class="section-card">
+    <h3>{{ t('message.selectBaseCurrency') }}</h3>
+
+    <div class="current">
+      {{ t('message.currentCurency') }}: <strong>{{ selectedCurrency.code }}</strong>
+    </div>
+
+    <select
+      class="form-select"
+      v-model="selectedCurrency.code"
+      @change="
+        () => {
+          const c = currencies.find(cu => cu.code === selectedCurrency.code);
+          if (c) Object.assign(selectedCurrency, c);
+        }
+      "
+    >
+      <option
+        v-for="c in currencies"
+        :key="c.id"
+        :value="c.code"
+      >
+        {{ c.code }} ({{ c.name }})
+      </option>
+    </select>
+
+    <button class="btn primary" @click="apply">
+      {{ t('buttons.apply') }}
+    </button>
+  </div>
 </template>
 
 <style scoped>
-
+.section-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.current { font-size: 14px; color: #555; }
+.form-select {
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
 </style>

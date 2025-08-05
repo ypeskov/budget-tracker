@@ -33,30 +33,39 @@ const features = [
 <template>
   <div class="home-page">
     <header class="nav">
-      <div class="logo">Orgfin.run</div>
-      <nav>
-        <RouterLink
-          v-if="!userStore.user.id"
-          :to="{ name: 'login' }"
-          class="btn primary"
-        >
-          {{ t('menu.login') }}
-        </RouterLink>
-        <RouterLink
-          v-if="!userStore.user.id"
-          :to="{ name: 'register' }"
-          class="btn outline"
-        >
-          {{ t('menu.register') }}
-        </RouterLink>
-        <RouterLink
-          v-else
-          :to="{ name: 'accounts' }"
-          class="btn primary"
-        >
-          {{ t('menu.dashboard') }}
-        </RouterLink>
-      </nav>
+      <div class="container">
+        <div class="nav-left">
+          <RouterLink :to="{ name: 'home' }" class="logo">
+            Orgfin.run
+          </RouterLink>
+        </div>
+
+        <div class="nav-right">
+          <RouterLink
+            v-if="!userStore.user.id"
+            :to="{ name: 'login' }"
+            class="btn primary"
+          >
+            {{ t('menu.login') }}
+          </RouterLink>
+
+          <RouterLink
+            v-if="!userStore.user.id"
+            :to="{ name: 'register' }"
+            class="btn outline"
+          >
+            {{ t('menu.register') }}
+          </RouterLink>
+
+          <RouterLink
+            v-else
+            :to="{ name: 'accounts' }"
+            class="btn primary"
+          >
+            {{ t('menu.dashboard') }}
+          </RouterLink>
+        </div>
+      </div>
     </header>
 
     <section class="hero">
@@ -67,19 +76,26 @@ const features = [
           :to="{ name: userStore.user.id ? 'accounts' : 'login' }"
           class="btn primary cta"
         >
-          {{ userStore.user.id ? t('menu.goToDashboard') : t('menu.getStartedFree') }}
+          {{
+            userStore.user.id
+              ? t('menu.goToDashboard')
+              : t('menu.getStartedFree')
+          }}
         </RouterLink>
       </div>
       <div class="hero-img">
-        <img src="/images/dashboard.png" alt="Finance dashboard illustration" />
+        <img
+          src="/images/dashboard.png"
+          alt="Finance dashboard illustration"
+        />
       </div>
     </section>
 
     <section class="features">
       <div
-        class="feature-card"
         v-for="(feature, index) in features"
         :key="index"
+        class="feature-card"
       >
         <div class="icon"><i :class="feature.icon"></i></div>
         <h3>{{ t(feature.titleKey) }}</h3>
@@ -87,6 +103,8 @@ const features = [
       </div>
     </section>
 
-    <footer class="footer">© {{ new Date().getFullYear() }} Orgfin.run</footer>
+    <footer class="footer">
+      © {{ new Date().getFullYear() }} Orgfin.run
+    </footer>
   </div>
 </template>
