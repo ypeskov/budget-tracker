@@ -1,0 +1,9 @@
+- op: replace
+  path: /spec/template/spec/containers/0/command
+  value:
+    - celery
+    - -A
+    - app.celery
+    - beat
+    - -l
+    - info

@@ -30,3 +30,10 @@ patches:
       kind: Deployment
       name: orgfin-celery
     path: command-celery-patch.yaml
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: orgfin-beat
+    path: command-beat-patch.yaml
