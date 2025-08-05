@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: orgfin-celery
-          image: ypeskov/api-orgfin:1.6.8
+          image: ypeskov/api-orgfin:dev
           envFrom:
             - configMapRef:
                 name: orgfin-env

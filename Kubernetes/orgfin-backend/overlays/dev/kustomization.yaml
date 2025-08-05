@@ -22,8 +22,35 @@ patches:
       version: v1
       kind: Deployment
       name: orgfin-backend
-    path: command-patch.yaml
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/command
+        value:
+          - gunicorn
+          - app.main:app
+          - -k
+          - uvicorn.workers.UvicornWorker
+          - --bind
+          - 0.0.0.0:8000
+          - --access-logfile
+          - "-"
+
   - target:
+      group: apps
+      version: v1
       kind: Deployment
       name: orgfin-celery
     path: command-celery-patch.yaml
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: orgfin-backend
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: ypeskov/api-orgfin:dev

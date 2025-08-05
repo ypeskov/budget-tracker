@@ -28,13 +28,15 @@ def daily_update_exchange_rates(task):
         raise task.retry(exc=e)
 
     now = datetime.now()
-    send_email.delay(subject='Exchange rates updated',
-                     recipients=settings.ADMINS_NOTIFICATION_EMAILS,
-                     template_name='exchange_rates_updated.html',
-                     template_body={
-                         'updated_at': now,
-                         'env_name': settings.ENVIRONMENT,
-                     })
+    send_email.delay(
+        subject='Exchange rates updated',
+        recipients=settings.ADMINS_NOTIFICATION_EMAILS,
+        template_name='exchange_rates_updated.html',
+        template_body={
+            'updated_at': now,
+            'env_name': settings.ENVIRONMENT,
+        },
+    )
 
     return f"Exchange rates updated at {now}"
 
@@ -49,23 +51,26 @@ def make_db_backup(task):
     environment = settings.ENVIRONMENT
 
     try:
-        filename = backup_postgres_db(env_name=environment,
-                                       host=settings.DB_HOST,
-                                       port=settings.DB_PORT,
-                                       dbname=settings.DB_NAME,
-                                       user=settings.DB_USER,
-                                       password=settings.DB_PASSWORD,
-                                       backup_dir=backup_dir)
+        filename = backup_postgres_db(
+            env_name=environment,
+            host=settings.DB_HOST,
+            port=settings.DB_PORT,
+            dbname=settings.DB_NAME,
+            user=settings.DB_USER,
+            password=settings.DB_PASSWORD,
+            backup_dir=backup_dir,
+        )
 
-        send_email.delay(subject='Database backup created',
-                         recipients=settings.ADMINS_NOTIFICATION_EMAILS,
-                         template_name='backup_created.html',
-                         template_body={
-                             'env_name': settings.ENVIRONMENT,
-                             'db_name': settings.DB_NAME,
-                         },
-                         filename=filename
-                         )
+        send_email.delay(
+            subject='Database backup created',
+            recipients=settings.ADMINS_NOTIFICATION_EMAILS,
+            template_name='backup_created.html',
+            template_body={
+                'env_name': settings.ENVIRONMENT,
+                'db_name': settings.DB_NAME,
+            },
+            filename=filename,
+        )
 
         return {'message': 'Backup of the database is successfully created'}
     except BackupPostgresDbError as e:
@@ -77,20 +82,22 @@ def make_db_backup(task):
 
 
 @celery_app.task(bind=True, max_retries=10, default_retry_delay=600)
-def send_email(task,
-               subject: str,
-               recipients: list[str],
-               template_name: str,
-               template_body: dict,
-               filename: str | None = None):
+def send_email(
+    task, subject: str, recipients: list[str], template_name: str, template_body: dict, filename: str | None = None
+):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+
     try:
-        loop.run_until_complete(send_html_email(subject=subject,
-                                                recipients=recipients,
-                                                template_name=template_name,
-                                                template_body=template_body,
-                                                filename=filename))
+        loop.run_until_complete(
+            send_html_email(
+                subject=subject,
+                recipients=recipients,
+                template_name=template_name,
+                template_body=template_body,
+                filename=filename,
+            )
+        )
 
         return True
     except Exception as e:
@@ -107,14 +114,16 @@ def send_activation_email(task, user_id: int):
     activation_token = db.query(ActivationToken).filter(ActivationToken.user_id == user_id).one()
 
     try:
-        send_email.delay(subject='Activate your account',
-                         recipients=[user.email],
-                         template_name='activation_email.html',
-                         template_body={
-                             'url': f'{settings.FRONTEND_URL}/activate',
-                             'first_name': user.first_name,
-                             'activation_token': activation_token.token,
-                         })
+        send_email.delay(
+            subject='Activate your account',
+            recipients=[user.email],
+            template_name='activation_email.html',
+            template_body={
+                'url': f'{settings.FRONTEND_URL}/activate',
+                'first_name': user.first_name,
+                'activation_token': activation_token.token,
+            },
+        )
 
         return True
     except Exception as e:
