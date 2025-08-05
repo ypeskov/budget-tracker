@@ -1,68 +1,59 @@
 <script setup>
 import { ref } from 'vue';
 
-import LanguageSelector from './LanguageSelector.vue';
-import BaseCurrencyManager from './BaseCurrencyManager.vue';
-import ModalWindow from '../utils/ModalWindow.vue';
+import LanguageSelector     from './LanguageSelector.vue';
+import BaseCurrencyManager  from './BaseCurrencyManager.vue';
 
-defineProps({
-  closeModal: Function,
-  showProfileModal: Boolean,
-});
-
-const showLanguageModal = ref(false);
-const showCurrencyModal = ref(false);
-
-const closeLanguageModal = () => {
-  showLanguageModal.value = false;
-};
-
-const closeCurrencyModal = () => {
-  showCurrencyModal.value = false;
-};
-
-const openLanguageModal = () => {
-  showLanguageModal.value = true;
-};
-
-const openCurrencyModal = () => {
-  showCurrencyModal.value = true;
-};
+const tab = ref('lang');   // 'lang' | 'curr'
 </script>
 
 <template>
-  <ModalWindow :close-modal="closeModal">
-    <template #header>
-      <div class="row">
-        <h2>{{ $t('message.profile') }}</h2>
-      </div>
-    </template>
+  <div class="profile-wrapper">
 
-    <template #main>
-      <div class="row">
-        <div class="col-12 lang-section">
-          <button @click="openLanguageModal" class="btn btn-primary w-100 mb-2">{{ $t('buttons.language') }}</button>
-        </div>
+    <!-- ── локальное меню профиля ── -->
+    <nav class="profile-tabs">
+      <button class="btn outline"
+              :class="{ active: tab === 'lang' }"
+              @click="tab = 'lang'">
+        <i class="fa-solid fa-language"></i>
+        {{ $t('buttons.language') }}
+      </button>
 
-        <div class="col-12 currency-section">
-          <button @click="openCurrencyModal" class="btn btn-primary w-100">{{ $t('buttons.baseCurrency') }}</button>
-        </div>
-      </div>
-    </template>
-  </ModalWindow>
-  <teleport to="body" v-if="showLanguageModal">
-    <LanguageSelector :close-language-modal="closeLanguageModal" :close-modal="closeLanguageModal" />
-  </teleport>
+      <button class="btn outline"
+              :class="{ active: tab === 'curr' }"
+              @click="tab = 'curr'">
+        <i class="fa-solid fa-money-bill-wave"></i>
+        {{ $t('buttons.baseCurrency') }}
+      </button>
+    </nav>
 
-  <teleport to="body" v-if="showCurrencyModal">
-    <BaseCurrencyManager :close-currency-modal="closeCurrencyModal" />
-  </teleport>
-
-
+    <!-- ── активная секция ── -->
+    <div class="profile-body">
+      <LanguageSelector    v-if="tab === 'lang'"  />
+      <BaseCurrencyManager v-else                />
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.language-selector {
-  z-index: 1100;
+.profile-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
+.profile-tabs {
+  display: flex;
+  gap: 16px;
+}
+.profile-tabs .btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.profile-tabs .btn.active,
+.profile-tabs .btn.active:hover {
+  background: #1e90ff;
+  color: #fff;
+}
+.profile-body { width: 100%; }
 </style>

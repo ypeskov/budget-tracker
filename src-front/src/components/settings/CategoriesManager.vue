@@ -1,117 +1,73 @@
 <script setup>
-import { onBeforeMount, reactive, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { Services } from '../../services/servicesConfig';
+import { Services } from '@/services/servicesConfig';
 import CategoryEditor from './CategoryEditor.vue';
-import ModalWindow from '../utils/ModalWindow.vue';
-
-defineProps({
-  closeModal: Function,
-});
 
 const { t } = useI18n();
 
-const categories = reactive({});
-const categoriesForEdit = ref([]);
-const showCategoryEditor = ref(false);
-const currentCategory = ref({});
+const cats = reactive({ income: [], expenses: [] });
+const showEditor   = ref(false);
+const editableCat  = ref({});
+const catPool      = ref([]);
 
-onBeforeMount(async () => {
-  reReadCategories();
-});
-
-function reReadCategories() {
-  Services.categoriesService.getGroupedCategories().then(newCategories => {
-    Object.keys(categories).forEach(key => delete categories[key]);
-    Object.assign(categories, newCategories);
-    categories.income.sort((a, b) => a.name.toUpperCase().localeCompare(b.name));
-    categories.expenses.sort((a, b) => a.name.toUpperCase().localeCompare(b.name));
-  });
+async function loadCats() {
+  const grouped = await Services.categoriesService.getGroupedCategories();
+  cats.income   = [...grouped.income].sort((a,b)=>a.name.localeCompare(b.name));
+  cats.expenses = [...grouped.expenses].sort((a,b)=>a.name.localeCompare(b.name));
 }
+onMounted(loadCats);
 
-const closeCategoryEditor = () => {
-  showCategoryEditor.value = false;
-};
-
-const openCategoryEditor = (category) => {
-  currentCategory.value = category;
-  if (currentCategory.value.isIncome) {
-    categoriesForEdit.value = categories.income;
-  } else {
-    categoriesForEdit.value = categories.expenses;
-  }
-
-  showCategoryEditor.value = true;
-};
-
-const showCategoryType = function(type) {
-  return type === 'income' ? t('message.income') : t('message.expense');
-};
-
-const updateCategoryType = ({ isIncome }) => {
-  if (isIncome) {
-    categoriesForEdit.value = categories.income;
-  } else {
-    categoriesForEdit.value = categories.expenses;
-  }
-};
-
-const categoryUpdated = async () => {
-  reReadCategories();
-};
-
-const addNewCategory = () => {
-  openCategoryEditor({
-    children: [],
-  });
-};
+function openEditor(cat = { children: [] }) {
+  editableCat.value = cat;
+  catPool.value = cat.isIncome ? cats.income : cats.expenses;
+  showEditor.value = true;
+}
+function closeEditor()  { showEditor.value = false; }
+async function updated() { await loadCats(); }
 </script>
 
 <template>
-  <ModalWindow :close-modal="closeModal">
-    <template #header>
-      <div class="row">
-        <h2>{{ t('message.categories') }}</h2>
-      </div>
-    </template>
+  <div class="section-card cat-card">
 
-    <template #main>
-      <h2>{{ $t('message.categories') }}</h2>
-      <button class="btn btn-primary mb-3" @click="addNewCategory">{{ $t('buttons.addNewCategory') }}</button>
-      <div class="container">
-        <div class="row mb-3" v-for="(categoriesList, type) in categories" :key="type">
-          <div class="col-12">
-            <h3 class="py-2">{{ showCategoryType(type) }}</h3>
-            <ul class="list-group">
-              <li v-for="category in categoriesList" :key="category.id" class="list-group-item py-2">
-                <a @click="openCategoryEditor(category)" class="btn btn-info">{{ category.name }}</a>
+    <div class="cat-header">
+      <h3>{{ t('message.categories') }}</h3>
+      <button class="btn primary" @click="openEditor()">
+        <i class="fa-solid fa-plus"></i>
+        {{ t('buttons.addNewCategory') }}
+      </button>
+    </div>
 
-                <ul class="list-unstyled ms-4">
-                  <li v-for="subCategory in category.children" :key="subCategory.id" class="py-1">
-                    <a class="btn btn-secondary btn-sm"
-                       @click="openCategoryEditor(subCategory)">{{ subCategory.name }}</a>
-                  </li>
-                </ul>
+    <div class="cat-groups">
+      <div v-for="type in ['income','expenses']" :key="type" class="cat-group">
+        <h4>{{ type === 'income' ? t('message.income') : t('message.expense') }}</h4>
+
+        <ul class="cat-list">
+          <li v-for="c in cats[type]" :key="c.id" class="cat-item">
+            <button class="btn cat-btn" @click="openEditor(c)">
+              {{ c.name }}
+            </button>
+
+            <ul v-if="c.children.length" class="cat-sub">
+              <li v-for="sc in c.children" :key="sc.id">
+                <button class="btn cat-btn sub" @click="openEditor(sc)">
+                  {{ sc.name }}
+                </button>
               </li>
             </ul>
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
-    </template>
-  </ModalWindow>
-  <teleport to="body">
-    <CategoryEditor v-if="showCategoryEditor"
-                    @change-category-type="updateCategoryType"
-                    @category-updated="categoryUpdated"
-                    :category="currentCategory"
-                    :categories="categoriesForEdit"
-                    :close-modal="closeCategoryEditor" />
-  </teleport>
-</template>
+    </div>
+  </div>
 
-<style scoped>
-.list-group-item {
-  padding: 0.5rem 1.25rem;
-}
-</style>
+  <CategoryEditor
+    v-if="showEditor"
+    :category="editableCat"
+    :categories="catPool"
+    @category-updated="updated"
+    @change-category-type="() => {}"
+    :close-modal="closeEditor"
+  />
+</template>

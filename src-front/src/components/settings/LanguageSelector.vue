@@ -1,72 +1,69 @@
 <script setup>
 import { onBeforeMount, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
+import { useRouter }  from 'vue-router';
+import { useI18n }    from 'vue-i18n';
 
-import { Services } from '../../services/servicesConfig';
-import { processError } from '../../errors/errorHandlers';
-import ModalWindow from '../utils/ModalWindow.vue';
+import { Services }   from '@/services/servicesConfig';
+import { processError } from '@/errors/errorHandlers';
 
-const props = defineProps({
-  closeLanguageModal: Function,
-});
+const router   = useRouter();
+const { locale, t } = useI18n();
 
-const router = useRouter();
-const languages = reactive([]);
-const { locale } = useI18n();
-const selectedLanguage = ref('');
+const languages         = reactive([]);
+const selectedLanguageId = ref('');
 
 onBeforeMount(async () => {
-  languages.length = 0;
   try {
+    languages.length = 0;
     languages.push(...await Services.settingsService.getLanguages());
-    selectedLanguage.value = languages.find((language) => language.code === locale.value)?.id;
-  } catch (error) {
-    await processError(error, router);
+    selectedLanguageId.value =
+      languages.find(l => l.code === locale.value)?.id || '';
+  } catch (e) {
+    await processError(e, router);
   }
 });
 
-const handleLanguageChange = () => {
-  // console.log(languages.find((language) => language.id === selectedLanguage.value).name);
-};
-
-const applyAndClose = async () => {
-  locale.value = languages.find((language) => language.id === selectedLanguage.value)?.code;
-  Services.userService.userStore.settings.language = locale.value;
+const apply = async () => {
+  const lang = languages.find(l => l.id === selectedLanguageId.value);
+  if (!lang) return;
+  locale.value = lang.code;
+  Services.userService.userStore.settings.language = lang.code;
   try {
     await Services.settingsService.saveUserSettings();
-  } catch (error) {
-    await processError(error, router);
-  }
-
-  props.closeLanguageModal();
+  } catch (e) { await processError(e, router); }
 };
-
 </script>
 
 <template>
-  <ModalWindow :close-modal="props.cl" modal-id="language-selector">
-    <template #header>
-      <div class="row">
-        <h2>{{ $t('message.select_language') }}</h2>
-      </div>
-    </template>
-    <template #main>
-      <select class="form-select mb-3" v-model="selectedLanguage" @change="handleLanguageChange">
-        <option v-for="language in languages" :value="language.id" :key="language.id">{{ language.name }}</option>
-      </select>
-      <button class="btn btn-primary" @click="applyAndClose">{{ $t('buttons.apply') }}</button>
-    </template>
-  </ModalWindow>
+  <div class="section-card">
+    <h3>{{ t('message.select_language') }}</h3>
+
+    <select v-model="selectedLanguageId" class="form-select">
+      <option
+        v-for="l in languages"
+        :key="l.id"
+        :value="l.id"
+      >
+        {{ l.name }}
+      </option>
+    </select>
+
+    <button class="btn primary" @click="apply">
+      {{ t('buttons.apply') }}
+    </button>
+  </div>
 </template>
 
-
 <style scoped>
-.btn-primary, .btn-secondary {
-  margin-top: 10px;
+.section-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
-
-.language-selector {
-  z-index: 1100;
+.form-select {
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
 }
 </style>

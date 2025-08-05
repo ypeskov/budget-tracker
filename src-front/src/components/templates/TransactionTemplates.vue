@@ -1,97 +1,78 @@
 <script setup>
-  import ModalWindow from '@/components/utils/ModalWindow.vue';
-  import { useUserStore } from '@/stores/user';
-  import { ref, onBeforeMount, watch, onMounted } from 'vue';
-  import { Services } from '@/services/servicesConfig';
-  import 'bootstrap-icons/font/bootstrap-icons.css';
+import { ref, onBeforeMount, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { Services } from '@/services/servicesConfig';
+import { useUserStore } from '@/stores/user';
 
-  const userStore = useUserStore();
+const userStore = useUserStore();
+const { t }     = useI18n();
 
-  const props = defineProps({
-    closeModal: Function,
-  });
+const selectedTemplates = ref([]);
+const filtered          = ref([]);
+const query             = ref('');
 
-  const selectedTemplates = ref([]);
-  const filteredTemplates = ref([]);
-  const searchQuery = ref('');
-  const searchInput = ref(null);
+onBeforeMount(async () => {
+  const data = await Services.transactionsService.getUserTemplates();
+  userStore.transactionTemplates.splice(0, userStore.transactionTemplates.length, ...data);
+  filtered.value = userStore.transactionTemplates;
+});
 
-  onBeforeMount(async () => {
-    const templates = await Services.transactionsService.getUserTemplates();
-    userStore.transactionTemplates.splice(0, userStore.transactionTemplates.length, ...templates);
-    filteredTemplates.value = userStore.transactionTemplates;
-  });
+watch(query, v => {
+  filtered.value = userStore.transactionTemplates.filter(t =>
+    t.label.toLowerCase().includes(v.toLowerCase())
+  );
+});
 
-  onMounted(() => {
-    searchInput.value.focus();
-  });
-
-  const handleTemplateSelection = (templateId) => {
-    if (selectedTemplates.value.includes(templateId)) {
-      selectedTemplates.value = selectedTemplates.value.filter(id => id !== templateId);
-    } else {
-      selectedTemplates.value.push(templateId);
-    }
-  };
-
-  const deleteTemplates = async () => {
-    await Services.transactionsService.deleteUserTemplates(selectedTemplates.value);
-    const updatedTemplates = await Services.transactionsService.getUserTemplates();
-    userStore.transactionTemplates = updatedTemplates;
-
-    props.closeModal();
-  };
-
-  watch(searchQuery, (newVal) => {
-    filteredTemplates.value = userStore.transactionTemplates.filter(template =>
-      template.label.toLowerCase().includes(newVal.toLowerCase())
-    );
-  });
-
+async function remove() {
+  await Services.transactionsService.deleteUserTemplates(selectedTemplates.value);
+  const upd = await Services.transactionsService.getUserTemplates();
+  userStore.transactionTemplates = upd;
+  selectedTemplates.value = [];
+  query.value = '';
+}
 </script>
 
 <template>
-  <div>
-    <ModalWindow :close-modal="closeModal">
-      <template #header>
-        <div class="row">
-          <div class="col-12">
-            <h2>{{ $t('message.templates') }}</h2>
-          </div>
-        </div>
-      </template>
+  <div class="section-card templates-wrapper">
+    <h3>{{ t('message.templates') }}</h3>
 
-      <template #main>
-        <div class="row">
-          <div class="col-12 mb-3 position-relative">
-            <input type="text"
-                   class="form-control"
-                   v-model="searchQuery"
-                   :placeholder="$t('message.searchTemplates')"
-                   ref="searchInput">
-            <i v-if="searchQuery"
-               class="bi bi-x-circle-fill position-absolute"
-               style="right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"
-               @click="searchQuery = ''; searchInput.focus()"></i>
-          </div>
-          
-          <div class="col-12">
-            <div v-for="template in filteredTemplates" :key="template.id"
-                 class="list-item d-flex align-items-center gap-2">
-              <input class="form-check-input"
-                     type="checkbox"
-                     :value="template.id"
-                     :id="'template-' + template.id"
-                     @change="handleTemplateSelection(template.id)">
-              <label class="form-check-label"
-                     :for="'template-' + template.id">{{ template.label }}
-                <b>({{ template.category?.name }})</b></label>
-            </div>
-          </div>
+    <input
+      v-model="query"
+      class="form-control search"
+      :placeholder="t('message.searchTemplates')"
+    />
 
-          <button class="btn btn-primary mt-4" @click="deleteTemplates">{{ $t('buttons.delete') }}</button>
-        </div>
-      </template>
-    </ModalWindow>
+    <div class="tmpl-list">
+      <label
+        v-for="tpl in filtered"
+        :key="tpl.id"
+        class="tmpl-item"
+      >
+        <input
+          type="checkbox"
+          :value="tpl.id"
+          v-model="selectedTemplates"
+        />
+        <span>{{ tpl.label }} <b>({{ tpl.category?.name }})</b></span>
+      </label>
+    </div>
+
+    <button
+      class="btn primary"
+      :disabled="!selectedTemplates.length"
+      @click="remove"
+    >
+      {{ t('buttons.delete') }}
+    </button>
   </div>
 </template>
+
+<style scoped>
+.search { margin: 0 0 16px; }
+.tmpl-list {
+  display: flex; flex-direction: column;
+  gap: 10px; max-height: 300px; overflow-y: auto;
+  margin-bottom: 16px;
+}
+.tmpl-item { display: flex; align-items: center; gap: 8px; }
+</style>

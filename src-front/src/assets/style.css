@@ -1,19 +1,19 @@
-/* --------------------------------------------------
-   Global / Shared styles
--------------------------------------------------- */
+/* ========================================================================== */
+/*  Global / Shared styles                                                    */
+/* ========================================================================== */
 * {
   box-sizing: border-box;
 }
 html,
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
-    Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Helvetica, Arial, sans-serif;
   background: #f0f8ff;
   color: #000;
 }
 
-/* Utility buttons reused across pages */
+/* ---------- Buttons ---------- */
 .btn {
   display: inline-block;
   padding: 8px 24px;
@@ -47,9 +47,111 @@ body {
   font-size: 16px;
 }
 
-/* --------------------------------------------------
-   Login Page styles (original)
--------------------------------------------------- */
+/* ========================================================================== */
+/*  NAVBAR – единый для всех страниц                                          */
+/* ========================================================================== */
+:root {
+  --nav-h-desktop: 80px;   /* высота шапки на десктопах */
+  --nav-h-mobile : 68px;   /* высота шапки на телефонах */
+}
+
+/* --- оболочка --- */
+.navbar,                 /* используется в приложении (AppShell)  */
+.nav {                   /* старая шапка «Home»                    */
+  height: var(--nav-h-desktop);
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  z-index: 1;
+  margin: 0;
+  padding: 0;            /* убираем прежние 20/40 px отступы */
+}
+
+/* --- внутренний контейнер-выровнитель --- */
+.nav-inner,                         /* двухъярусная шапка */
+.nav > .container {                 /* шапка главной страницы */
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+/* --- группы элементов --- */
+.nav-left,
+.nav-right,
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* логотип-иконка */
+.logo {
+  font-size: 25px;
+  font-weight: 700;
+  color: #1e90ff;
+  text-decoration: none;
+}
+.logo i { font-size: 22px; }
+
+/* таймер */
+.time {
+  font-size: 18px;
+  color: #6c757d;
+  margin-right: 4px;
+}
+
+/* кнопки-иконки */
+.btn.icon {
+  padding: 8px 18px;
+  border: none;
+  background: transparent;
+  color: #1e90ff;
+  transition: background 0.15s;
+}
+.btn.icon i { font-size: 20px; }
+.btn.icon:hover {
+  background: rgba(30, 144, 255, 0.12);
+  border-radius: 4px;
+}
+
+/* outline-вариант (шестерёнка) */
+.btn.icon.outline {
+  border: 1px solid #1e90ff;
+  border-radius: 4px;
+}
+.btn.icon.outline:hover {
+  background: #1e90ff;
+  color: #fff;
+}
+
+/* активный роут */
+.router-link-active i {
+  color: #007eeb;
+}
+
+/* дополнительный отступ между кнопками, если нужно */
+.nav .btn + .btn {
+  margin-left: 12px;
+}
+
+/* --- адаптив --- */
+@media (max-width: 576px) {
+  .navbar,
+  .nav { height: var(--nav-h-mobile); }
+  .btn.icon { padding: 6px 12px; }
+  .nav-left { gap: 8px; }
+  .nav > .container { padding-inline: 16px; }
+}
+
+/* ========================================================================== */
+/*  Login Page                                                                */
+/* ========================================================================== */
 .login-page {
   position: relative;
   height: 100dvh;
@@ -59,7 +161,6 @@ body {
   background: #f0f8ff;
   overflow: hidden;
 }
-
 .login-page .box {
   width: 700px;
   display: flex;
@@ -67,7 +168,6 @@ body {
   border-radius: 4px;
   overflow: hidden;
 }
-
 .login-page .left {
   flex: 1 1 55%;
   padding: 40px 50px;
@@ -85,7 +185,6 @@ body {
   margin-bottom: 24px;
   font-size: 14px;
 }
-
 .login-page .field {
   display: flex;
   margin-bottom: 16px;
@@ -107,7 +206,6 @@ body {
   border-radius: 0 4px 4px 0;
   font-size: 14px;
 }
-
 .login-page button {
   background: #1e90ff;
   color: #fff;
@@ -121,11 +219,7 @@ body {
 .login-page button:hover {
   background: #007eeb;
 }
-
-.oauth-container {
-  margin-top: 20px;
-}
-
+.oauth-container { margin-top: 20px; }
 .login-page .alert {
   margin-top: 20px;
   background: #f8d7da;
@@ -134,7 +228,6 @@ body {
   border-radius: 4px;
   font-size: 14px;
 }
-
 .login-page .right {
   flex: 1 1 45%;
   background: #00bfff;
@@ -169,66 +262,30 @@ body {
 .login-page .right .register-link:hover {
   background: #007eeb;
 }
-
 @media (max-width: 768px) {
-  .login-page {
-    background: none;
-  }
-
+  .login-page { background: none; }
   .login-page .box {
     flex-direction: column;
     width: 100%;
     height: 100%;
   }
-
-  .login-page .left {
-    flex: 1 1 auto;
-    padding: 30px 25px;
-  }
-
-  .login-page .right {
-    flex: 0 0 120px;
-    padding: 20px 25px;
-  }
-
-  .login-page .right p {
-    display: none;
-  }
-
-  .login-page .right h2 {
-    font-size: 20px;
-    margin-bottom: 12px;
-  }
+  .login-page .left { flex: 1 1 auto; padding: 30px 25px; }
+  .login-page .right { flex: 0 0 120px; padding: 20px 25px; }
+  .login-page .right p { display: none; }
+  .login-page .right h2 { font-size: 20px; margin-bottom: 12px; }
 }
 
-/* --------------------------------------------------
-   Home Page styles
--------------------------------------------------- */
+/* ========================================================================== */
+/*  Home Page                                                                 */
+/* ========================================================================== */
 .home-page {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
 }
-
-/* ---- Navigation ---- */
-.nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px;
-  background: #fff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-  z-index: 1;
-}
-.logo {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1e90ff;
-}
-.nav .btn + .btn {
-  margin-left: 12px;
-}
+/* — Navigation (уже унифицирован через .nav) — */
+.nav .btn + .btn { margin-left: 12px; }
 
 /* ---- Hero ---- */
 .hero {
@@ -239,9 +296,7 @@ body {
   gap: 60px;
   padding: 60px 40px;
 }
-.hero-content {
-  max-width: 480px;
-}
+.hero-content { max-width: 480px; }
 .hero h1 {
   font-size: 42px;
   font-weight: 700;
@@ -309,50 +364,286 @@ body {
     text-align: center;
     gap: 40px;
   }
-  .hero-content {
-    max-width: 100%;
-  }
+  .hero-content { max-width: 100%; }
 }
 @media (max-width: 576px) {
-  .nav {
-    padding: 15px 20px;
-  }
-  .logo {
-    font-size: 20px;
-  }
-  .hero {
-    padding: 40px 20px;
-  }
-  .hero h1 {
-    font-size: 32px;
-  }
-  .btn {
-    padding: 8px 20px;
-  }
+  .hero        { padding: 40px 20px; }
+  .hero h1     { font-size: 32px; }
+  .btn         { padding: 8px 20px; }
 }
 
-
-
-
-
-nav a {
-  margin: 0 0.2rem;
+/* ========================================================================== */
+/*  Accounts Page                                                             */
+/* ========================================================================== */
+.accounts-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-bg-main);
 }
-nav img:hover {
-  cursor: pointer;
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 24px;
 }
-.nav-row {
-  margin-bottom: 0.5rem;
+.accounts-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-block: 24px;
 }
-.header-row {
+.accounts-toolbar .actions {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+}
+.btn.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--c-accent);
+  border: 1px solid var(--c-accent);
+  transition: background 0.2s;
+}
+.btn.toggle:hover,
+.btn.toggle.checked {
+  background: var(--c-accent);
+  color: #fff;
+}
+.btn.icon {
+  padding: 6px 12px;
+}
+.btn.icon img {
+  width: 20px;
+  height: 20px;
+}
+.panel {
+  padding: 20px;
+  background: var(--c-bg-card);
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+}
+@media (max-width: 576px) {
+  .accounts-toolbar { flex-direction: column; align-items: stretch; }
+  .accounts-toolbar .actions { margin-left: 0; }
+}
+
+/* ========================================================================== */
+/*  App-header (двухъярусная версия, где нужна)                               */
+/* ========================================================================== */
+.app-header {
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  margin-bottom: 32px;
+}
+.app-header .bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+.main-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 0 18px;
+}
+@media (max-width: 576px) {
+  .main-menu { justify-content: space-between; }
+}
+
+/* ========================================================================== */
+/*  Utilities / Transitions                                                   */
+/* ========================================================================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* --------------------------------------------------
+   Settings Page (split-layout)
+-------------------------------------------------- */
+.settings-page {
+  min-height: 100dvh;
+  padding-block: 40px 60px;
+  display: flex;
+  flex-direction: column;
+}
+
+.split {
+  display: flex;
+  gap: 32px;
+}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .title {
+  margin: 0 0 24px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.side-btn {
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid #ced4da;
+  color: #1e90ff;
+  transition: background 0.15s, color 0.15s;
+}
+.side-btn i { font-size: 18px; }
+
+.side-btn:hover {
+  background: rgba(30,144,255,0.1);
+}
+
+.side-btn.active,
+.side-btn.active:hover {
+  background: #1e90ff;
+  color: #fff;
+  border-color: #1e90ff;
+}
+
+/* ---------- CONTENT ---------- */
+.settings-content {
+  flex: 1 1 auto;
+  background: var(--c-bg-card, #fff);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  padding: 28px 24px;
+  overflow: auto;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 768px) {
+  .split {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .sidebar { flex: 0 0 auto; }
+  .settings-content { padding: 20px 18px; }
+}
+
+/* --------------------------------------------------
+   Settings → section-card (Profile, Language, Currency)
+-------------------------------------------------- */
+.section-card {
+  background: var(--c-bg-card, #fff);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.05);
+}
+.section-card h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.section-card .btn {
+  align-self: flex-start;
+}
+
+.side-btn {
+  display: flex;              /* ➊ делаем flex-контейнером */
+  align-items: center;
+  gap: 8px;                   /* ➋ читаемый отступ между <i> и текстом */
+}
+
+/* --------------------------------------------------
+   Cat-UI (список категорий)
+-------------------------------------------------- */
+.cat-card { overflow: auto; }
+
+.cat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 24px;
 }
-.settings-icon img {
-  transition: transform 0.2s ease;
+
+.cat-groups { display: flex; flex-direction: column; gap: 32px; }
+
+.cat-group h4 {
+  margin: 0 0 12px;
+  font-size: 17px;
+  color: #007eeb;
 }
-.settings-icon img:hover {
-  transform: scale(1.1);
-  cursor: pointer;
+
+.cat-list    { list-style: none; margin: 0; padding: 0; }
+.cat-item    { margin-bottom: 8px; }
+.cat-btn {
+  padding: 6px 16px;
+  background: #eaf4ff;
+  color: #1e90ff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background .15s;
+}
+.cat-btn:hover { background: #d6eaff; }
+
+.cat-sub  { list-style: none; margin: 6px 0 0 16px; padding: 0; }
+.cat-btn.sub {
+  font-size: 13px;
+  background: #f5f9ff;
+}
+
+/* единый класс для всех выпадашек */
+.select-input {
+  width: 100%;
+  padding: 10px 32px 10px 12px;         /* 32px =  icon (12) + безопасный отступ (20) */
+  font-size: 14px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: #fff;
+
+  /* убираем «родную» стрелку */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+
+  /* аккуратная svg-стрелка цвета #6c757d (та же, что плейсхолдеры) */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='%236c757d' d='M5 7l5 5 5-5'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-size: 12px 12px;
+  background-position: right 12px center;  /* ← ближе к тексту */
+}
+select::-ms-expand { display: none; }      /* Edge/IE */
+
+.confirm-modal .modal-container,
+.confirm-modal .modal-window {     /* второй селектор — на случай другой разметки */
+  max-width: 380px;               /* компактнее обычного редактора */
 }
