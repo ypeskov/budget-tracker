@@ -12,6 +12,8 @@ spec:
       labels:
         app: orgfin-backend-label
     spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: orgfin-backend
           image: ypeskov/api-orgfin:1.6.8
