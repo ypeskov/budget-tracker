@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orgfin-celery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orgfin-celery-label
+  template:
+    metadata:
+      labels:
+        app: orgfin-celery-label
+    spec:
+      containers:
+        - name: orgfin-celery
+          image: ypeskov/api-orgfin:1.6.8
+          envFrom:
+            - configMapRef:
+                name: orgfin-env

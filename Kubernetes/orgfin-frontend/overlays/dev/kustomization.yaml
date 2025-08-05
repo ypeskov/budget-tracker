@@ -2,10 +2,10 @@ resources:
   - ../../base
 
 configMapGenerator:
-  - name: orgfin-env
+  - name: orgfin-frontend-env
     literals:
       - HOSTNAME=orgfin-front.local
-  - name: orgfin-env
+  - name: orgfin-frontend-env
     envs:
       - .env
     behavior: merge
@@ -13,7 +13,7 @@ configMapGenerator:
 replacements:
   - source:
       kind: ConfigMap
-      name: orgfin-env
+      name: orgfin-frontend-env
       fieldPath: data.HOSTNAME
     targets:
       - select:
