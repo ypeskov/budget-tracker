@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: orgfin-frontend
-          image: ypeskov/frontend-orgfin:1.0.3
+          image: ypeskov/frontend-orgfin:1.0.4
           ports:
             - containerPort: 80
           envFrom:
