@@ -42,15 +42,15 @@ patches:
       name: orgfin-celery
     path: command-celery-patch.yaml
 
-  - target:
-      group: apps
-      version: v1
-      kind: Deployment
-      name: orgfin-backend
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/imagePullPolicy
-        value: Never
-      - op: replace
-        path: /spec/template/spec/containers/0/image
-        value: ypeskov/api-orgfin:dev
+  # - target:
+  #     group: apps
+  #     version: v1
+  #     kind: Deployment
+  #     name: orgfin-backend
+  #   patch: |-
+  #     - op: add
+  #       path: /spec/template/spec/containers/0/imagePullPolicy
+  #       value: Never
+  #     - op: replace
+  #       path: /spec/template/spec/containers/0/image
+  #       value: ypeskov/api-orgfin:dev

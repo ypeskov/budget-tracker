@@ -8,4 +8,5 @@ spec:
   tls:
     - hosts:
         - api-budgeter.peskov.biz
+        - orgfin-api.peskov.info
       secretName: api-budgeter-tls
