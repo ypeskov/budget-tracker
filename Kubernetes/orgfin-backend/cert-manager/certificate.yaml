@@ -13,5 +13,6 @@ spec:
   dnsNames:
     - api-budgeter.peskov.biz
     - orgfin-api.peskov.info
+    - api.orgfin.run
   privateKey:
     rotationPolicy: Always
