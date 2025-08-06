@@ -16,6 +16,7 @@ replacements:
           kind: Ingress
         fieldPaths:
           - spec.rules.0.host
+          - spec.tls.0.hosts.0    
 
 patches:
   - path: ingress-patch.yaml

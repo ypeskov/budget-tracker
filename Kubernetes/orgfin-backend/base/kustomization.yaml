@@ -1,5 +1,5 @@
 resources:
-  - deployment.yaml
+  - deployment-api.yaml
   - deployment-celery.yaml
   - deployment-beat.yaml
   - service.yaml

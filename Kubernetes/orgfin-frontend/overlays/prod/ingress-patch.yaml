@@ -8,4 +8,5 @@ spec:
   tls:
     - hosts:
         - orgfin-front.peskov.biz
+        - orgfin.run
       secretName: orgfin-tls

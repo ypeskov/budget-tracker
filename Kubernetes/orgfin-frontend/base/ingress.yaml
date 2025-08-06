@@ -15,3 +15,13 @@ spec:
                 name: orgfin-frontend
                 port:
                   number: 80
+    - host: orgfin.run
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: orgfin-frontend
+                port:
+                  number: 80
