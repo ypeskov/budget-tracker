@@ -60,6 +60,12 @@ watch(currentDate, async (newVal) => {
 <template>
   <main>
     <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1>{{ $t('message.balanceReport') }}</h1>
+        </div>
+      </div>
+
       <div class="row mb-3 nowrap-row">
         <div class="col-12 col-md-6">
           <div class="form-group">
