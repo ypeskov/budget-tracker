@@ -124,7 +124,7 @@ async function changeHideEmptyCategories() {
   <main>
     <div class="container">
       <div class="row">
-        <div class="col"><h1>{{ $t('buttons.expensesReport') }}</h1></div>
+        <div class="col"><h1>{{ $t('message.expensesReport') }}</h1></div>
       </div>
 
       <div class="row">
