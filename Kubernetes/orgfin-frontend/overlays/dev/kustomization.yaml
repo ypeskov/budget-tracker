@@ -33,4 +33,4 @@ patches:
         value: Never
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: ypeskov/frontend-orgfin:1.0.1
+        value: ypeskov/frontend-orgfin:1.0.2
