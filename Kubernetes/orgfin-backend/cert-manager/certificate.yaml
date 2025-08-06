@@ -12,5 +12,6 @@ spec:
   commonName: api-budgeter.peskov.biz
   dnsNames:
     - api-budgeter.peskov.biz
+    - orgfin-api.peskov.info
   privateKey:
     rotationPolicy: Always
