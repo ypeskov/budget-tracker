@@ -1,14 +1,11 @@
 from requests import request
-from icecream import ic
 
-from app.services.exchange_services.exceptions import ErrorFetchingData
-from app.logger_config import logger
-from app.models.ExchangeRateHistory import ExchangeRateHistory
-from app.services.exchange_services.AbstractCurrencyService import AbstractCurrencyService
 from app.config import Settings
+from app.logger_config import logger
+from app.services.exchange_services.AbstractCurrencyService import AbstractCurrencyService
+from app.services.exchange_services.exceptions import ErrorFetchingData
 
 s = Settings()
-ic.configureOutput(includeContext=True)
 
 API_URL = s.CURRENCYBEACON_API_URL
 API_KEY = s.CURRENCYBEACON_API_KEY
@@ -38,5 +35,5 @@ class CurrencyBeaconService(AbstractCurrencyService):
             'rates': rates_data['rates'],
             'actual_date': rates_data['date'],
             'base_currency_code': rates_data['base'],
-            'service_name': SERVICE_NAME
+            'service_name': SERVICE_NAME,
         }
