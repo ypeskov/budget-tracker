@@ -1,11 +1,10 @@
-from requests import request
 from icecream import ic
+from requests import request
 
-from app.services.exchange_services.exceptions import ErrorFetchingData
-from app.logger_config import logger
-from app.models.ExchangeRateHistory import ExchangeRateHistory
-from app.services.exchange_services.AbstractCurrencyService import AbstractCurrencyService
 from app.config import Settings
+from app.logger_config import logger
+from app.services.exchange_services.AbstractCurrencyService import AbstractCurrencyService
+from app.services.exchange_services.exceptions import ErrorFetchingData
 
 s = Settings()
 ic.configureOutput(includeContext=True)
@@ -26,7 +25,9 @@ class CurrencyBeaconService(AbstractCurrencyService):
     def make_request(self, method: str, **kwargs) -> dict:
         params = '&'.join([f'{key}={value}' for key, value in kwargs.items()])
         url = f'{self.api_url}/{self.api_version}/{method}?api_key={self.api_key}&{params}'
+        ic(url)
         response = request('GET', url)
+        ic(response.json())
         if response.status_code != 200:
             logger.error(f'Error while fetching data: {response.text}, status code: {response.status_code}')
             raise ErrorFetchingData('Error while fetching data')
@@ -38,5 +39,5 @@ class CurrencyBeaconService(AbstractCurrencyService):
             'rates': rates_data['rates'],
             'actual_date': rates_data['date'],
             'base_currency_code': rates_data['base'],
-            'service_name': SERVICE_NAME
+            'service_name': SERVICE_NAME,
         }

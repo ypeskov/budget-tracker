@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: orgfin-backend
-          image: ypeskov/api-orgfin:1.6.14
+          image: ypeskov/api-orgfin:1.6.15
           ports:
             - containerPort: 8000
           envFrom:

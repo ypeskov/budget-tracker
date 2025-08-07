@@ -1,6 +1,7 @@
 """
 AbstractCurrencyService.py - Abstract class for currency services.
 """
+
 from abc import ABC, abstractmethod
 
 
@@ -11,5 +12,5 @@ class AbstractCurrencyService(ABC):
         self.rates = None
 
     @abstractmethod
-    def get_currency_rates(self, date: str) -> dict:
+    def get_currency_rates(self, when: str) -> dict:
         pass
