@@ -28,7 +28,7 @@ def daily_update_exchange_rates(task):
         raise task.retry(exc=e)
 
     now = datetime.now()
-    send_email.delay(
+    send_email.delay(  # type: ignore
         subject='Exchange rates updated',
         recipients=settings.ADMINS_NOTIFICATION_EMAILS,
         template_name='exchange_rates_updated.html',
@@ -61,7 +61,7 @@ def make_db_backup(task):
             backup_dir=backup_dir,
         )
 
-        send_email.delay(
+        send_email.delay(  # type: ignore
             subject='Database backup created',
             recipients=settings.ADMINS_NOTIFICATION_EMAILS,
             template_name='backup_created.html',
@@ -114,7 +114,7 @@ def send_activation_email(task, user_id: int):
     activation_token = db.query(ActivationToken).filter(ActivationToken.user_id == user_id).one()
 
     try:
-        send_email.delay(
+        send_email.delay(  # type: ignore
             subject='Activate your account',
             recipients=[user.email],
             template_name='activation_email.html',
