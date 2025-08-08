@@ -23,10 +23,7 @@ settings = Settings()
 
 GOOGLE_CLIENT_ID = settings.GOOGLE_CLIENT_ID
 
-router = APIRouter(
-    tags=['Auth'],
-    prefix='/auth'
-)
+router = APIRouter(tags=['Auth'], prefix='/auth')
 
 
 @router.post("/register/", response_model=UserResponse)
@@ -36,9 +33,9 @@ def register_user(user_request: UserRegistration, db: Session = Depends(get_db))
 
 
 @router.post("/login/", response_model=Token)
-def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)):
+def login_user(user_login: UserLoginSchema, db: Session = Depends(get_db)) -> Token:
     try:
-        token: str = get_jwt_token(user_login, db)
+        token: Token = get_jwt_token(user_login, db)
 
         return token
     except UserNotActivated as e:

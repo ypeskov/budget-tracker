@@ -5,12 +5,9 @@ from fastapi import Request
 from fastapi.responses import Response
 from icecream import ic
 
-from app.database import get_db
 from app.services.auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 
 ic.configureOutput(includeContext=True)
-
-db = next(get_db())
 
 async def update_token(request: Request, call_next):
     response = await call_next(request)
@@ -18,8 +15,8 @@ async def update_token(request: Request, call_next):
     if not hasattr(request.state, "user"):
         return response
 
-
-    if response.headers.get("content-type") == "application/json":
+    content_type = response.headers.get("content-type", "")
+    if content_type.lower().startswith("application/json"):
         response_body = b""
         async for chunk in response.body_iterator:
             response_body += chunk
