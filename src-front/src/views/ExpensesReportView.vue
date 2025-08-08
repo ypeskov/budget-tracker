@@ -10,15 +10,15 @@ import { useUserStore } from '@/stores/user';
 const router = useRouter();
 const userStore = useUserStore();
 
-const startDate = ref(DateTime.now().startOf('month').toISODate()); // 'YYYY-MM-DD'
-const endDate = ref(DateTime.now().toISODate()); // 'YYYY-MM-DD'
+const startDate = ref(DateTime.now().startOf('month').toISODate());
+const endDate = ref(DateTime.now().toISODate());
 const hideEmptyCategories = ref(true);
 let expensesReportData = reactive([]);
 
 let groupSum = 0;
 let currentParentId = null;
 
-const pieDiagram = ref(''); // 'http://localhost:8000/reports/diagram/pie/2024-07-01/2024-07-31'
+const pieDiagram = ref('');
 const aggregatedCategories = ref([]);
 const aggregatedSum = ref(0);
 
@@ -37,7 +37,6 @@ function isNewGroup(category) {
 }
 
 function isStart(category) {
-  // check if the category is the first in the expensesReportData
   if (expensesReportData[0].id === category.id) {
     return true;
   }
@@ -121,115 +120,165 @@ async function changeHideEmptyCategories() {
 </script>
 
 <template>
-  <main>
-    <div class="container">
-      <div class="row">
-        <div class="col"><h1>{{ $t('message.expensesReport') }}</h1></div>
-      </div>
+  <div class="section-card">
+    <h2>{{ $t('message.expensesReport') }}</h2>
 
-      <div class="row">
-        <div class="col">
-          <div class="date-section">
-            <div>
-              <label for="transaction-date">{{ $t('message.startDate') }}</label>
-              <input id="transaction-date"
-                     type="date"
-                     class="form-control"
-                     v-model="startDate"
-                     @change="changeDate" />
-            </div>
-            <div>
-              <label for="transaction-date">{{ $t('message.endDate') }}</label>
-              <input id="transaction-date"
-                     type="date"
-                     class="form-control"
-                     v-model="endDate"
-                     @change="changeDate" />
-            </div>
-          </div>
-          <div class="filter-section">
-            <div class="hide-empty-categories form-check form-switch mb-3">
-              <input class="form-check-input"
-                     type="checkbox"
-                     id="hide-empty-categories"
-                     v-model="hideEmptyCategories"
-                     @change="changeHideEmptyCategories" />
-              <label class="form-check-label" for="hide-empty-categories">{{ $t('message.hideEmptyCategories')
-                }}</label>
-            </div>
+    <div
+      style="
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-top: 16px;
+        align-items: end;
+      "
+    >
+      <label>
+        {{ $t('message.startDate') }}
+        <input
+          type="date"
+          class="form-control"
+          v-model="startDate"
+          @change="changeDate"
+        />
+      </label>
 
-            <div class="larger-first"></div>
-          </div>
+      <label>
+        {{ $t('message.endDate') }}
+        <input
+          type="date"
+          class="form-control"
+          v-model="endDate"
+          @change="changeDate"
+        />
+      </label>
 
-          <div class="diagram-container" v-if="aggregatedSum > 0">
-            <div class="diagram-img-container">
-              <div v-if="pieDiagram">
-                <img :src="pieDiagram.image" alt="No Diagram" class="img-fluid" />
-              </div>
-              <div v-else>
-                <span class="text-muted">{{ $t('message.loadingDiagram') }}</span>
-              </div>
-            </div>
-            <div class="data-container">
-              <ul class="list-group">
-                <li v-for="category in aggregatedCategories"
-                    :key="category.id"
-                    class="list-group-item d-flex justify-content-between align-items-center">
-                  <span>{{ category.label }}</span>
-                  <span>{{ $n(category.amount, 'decimal') }}, {{ userStore.baseCurrency }}</span>
-                </li>
-                <li class="list-group-item expenses-total d-flex justify-content-between align-items-center">
-                  <span>{{ $t('message.totalExpenses')}}</span>
-                  <span>{{ $n(aggregatedSum, 'decimal') }} {{ userStore.baseCurrency }}</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="report-section">
-            <div v-if="Object.keys(expensesReportData).length > 0">
-
-              <div v-for="(category) in expensesReportData" :key="category.id" class="category-item-container">
-                <div v-if="isNewGroup(category) && !isStart(category)" class="prev-sum">
-                  {{ $n(getCurrentGroupSum(), 'decimal') }}&nbsp;{{ userStore.baseCurrency }}
-                  {{ resetGroupSum() }}
-                  {{ addGroupSum(category) }}
-                </div>
-                <div v-else>{{ addGroupSum(category) }}</div>
-
-                <RouterLink class="row-category-expenses" :to="{
-                  name: 'transactions',
-                  query: {
-                    categories: category.id,
-                    startDate: startDate,
-                    endDate: endDate
-                  }
-                }">
-                  <div class="data-transaction-container">
-                    <div>
-                      <span class="category-name">{{ category.name }}</span>
-                    </div>
-
-                    <div class="category-expense-amount">
-                      <div class="category-expenses">{{ $n(parseFloat(category.totalExpenses), 'decimal') }}</div>
-                      <div class="expenses-currency">{{ category.currencyCode ?? userStore.baseCurrency }}</div>
-                    </div>
-
-                  </div>
-                </RouterLink>
-              </div>
-              <div class="prev-sum">{{ $n(getCurrentGroupSum(), 'decimal') }}&nbsp;{{ userStore.baseCurrency }}</div>
-            </div>
-            <div v-else>
-              <span>{{ $t('message.noData') }}</span>
-            </div>
-          </div>
-
-        </div>
-
+      <div class="hide-empty-categories form-check form-switch mb-3">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="hide-empty-categories"
+          v-model="hideEmptyCategories"
+          @change="changeHideEmptyCategories"
+        />
+        <label class="form-check-label" for="hide-empty-categories">
+          {{ $t('message.hideEmptyCategories') }}
+        </label>
       </div>
     </div>
-  </main>
+
+    <div
+      v-if="aggregatedSum > 0"
+      style="
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        align-items: center;
+        margin-top: 16px;
+      "
+    >
+      <div class="diagram-img-container">
+        <div v-if="pieDiagram">
+          <img :src="pieDiagram.image" alt="No Diagram" class="img-fluid" />
+        </div>
+        <div v-else>
+          <span class="text-muted">{{ $t('message.loadingDiagram') }}</span>
+        </div>
+      </div>
+
+      <div class="data-container" style="align-self:center">
+        <ul class="list-group">
+          <li
+            v-for="category in aggregatedCategories"
+            :key="category.id"
+            class="list-group-item d-flex justify-content-between align-items-center"
+            style="gap:12px"
+          >
+            <span>{{ category.label }}</span>
+
+            <span style="display:inline-flex;align-items:center;gap:10px">
+              <span
+                style="
+                  display:inline-block;min-width:44px;padding:2px 8px;
+                  border-radius:999px;font-size:12px;text-align:center;
+                  background:rgba(30,144,255,.12);color:#1e90ff;
+                "
+              >
+                {{ ((category.amount * 100) / aggregatedSum).toFixed(1) }}%
+              </span>
+              <span>
+                {{ $n(category.amount, 'decimal') }} {{ userStore.baseCurrency }}
+              </span>
+            </span>
+          </li>
+
+          <li class="list-group-item expenses-total d-flex justify-content-between align-items-center">
+            <span>{{ $t('message.totalExpenses') }}</span>
+            <span>{{ $n(aggregatedSum, 'decimal') }} {{ userStore.baseCurrency }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div v-else class="text-muted" style="margin-top:16px">
+      {{ $t('message.noData') }}
+    </div>
+  </div>
+
+  <div class="section-card" style="margin-top:16px">
+    <div class="report-section">
+      <div v-if="Object.keys(expensesReportData).length > 0">
+        <div
+          v-for="(category) in expensesReportData"
+          :key="category.id"
+          class="category-item-container"
+        >
+          <div v-if="isNewGroup(category) && !isStart(category)" class="prev-sum">
+            {{ $n(getCurrentGroupSum(), 'decimal') }}&nbsp;{{ userStore.baseCurrency }}
+            {{ resetGroupSum() }}
+            {{ addGroupSum(category) }}
+          </div>
+          <div v-else>
+            {{ addGroupSum(category) }}
+          </div>
+
+          <RouterLink
+            class="row-category-expenses"
+            :to="{
+              name: 'transactions',
+              query: {
+                categories: category.id,
+                startDate: startDate,
+                endDate: endDate
+              }
+            }"
+          >
+            <div class="data-transaction-container">
+              <div>
+                <span class="category-name">{{ category.name }}</span>
+              </div>
+
+              <div class="category-expense-amount">
+                <div class="category-expenses">
+                  {{ $n(parseFloat(category.totalExpenses), 'decimal') }}
+                </div>
+                <div class="expenses-currency">
+                  {{ category.currencyCode ?? userStore.baseCurrency }}
+                </div>
+              </div>
+            </div>
+          </RouterLink>
+        </div>
+
+        <div class="prev-sum">
+          {{ $n(getCurrentGroupSum(), 'decimal') }}&nbsp;{{ userStore.baseCurrency }}
+        </div>
+      </div>
+
+      <div v-else>
+        <span>{{ $t('message.noData') }}</span>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">

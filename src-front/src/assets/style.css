@@ -482,12 +482,25 @@ body {
 /* --------------------------------------------------
    Settings Page (split-layout)
 -------------------------------------------------- */
-.settings-page {
-  min-height: 100dvh;
-  padding-block: 40px 60px;
-  display: flex;
-  flex-direction: column;
+.settings-page,
+.reports-page {
+  /* вместо 60px нижнего паддинга – 24px, да и то
+     только если контента реально много */
+  min-height: calc(100dvh - var(--nav-h-desktop));
+  padding-block: 40px 24px;         /* сверху 40, снизу 24 */
+
+  /* чтобы и на мобилках не появлялось */
 }
+@media (max-width: 576px) {
+  .settings-page,
+  .reports-page {
+    min-height: calc(100dvh - var(--nav-h-mobile));
+    padding-block: 24px 16px;       /* компактнее на телефоне */
+  }
+}
+
+/* если у карточки был внешний margin-bottom (32px) — уберём у последней */
+.section-card:last-child { margin-bottom: 0; }
 
 .split {
   display: flex;

@@ -42,60 +42,124 @@ async function reallyDelete() {
 <template>
   <ModalWindow :close-modal="props.closeModal">
     <template #header>
-      <h2>{{ t('message.category') }}</h2>
+      <div class="ed-header">
+        <div class="title">
+          <i
+            :class="[
+              'fa-solid',
+              state.isIncome ? 'fa-circle-up income' : 'fa-circle-down expense'
+            ]"
+          />
+          <h2>{{ t('message.category') }}</h2>
+          <span class="pill" :class="state.isIncome ? 'income' : 'expense'">
+            {{ state.isIncome ? t('message.income') : t('message.expense') }}
+          </span>
+          <span v-if="state.id" class="muted">#{{ state.id }}</span>
+        </div>
+
+        <button class="btn outline" @click="props.closeModal">
+          {{ t('buttons.cancel') }}
+        </button>
+      </div>
     </template>
 
     <template #main>
-      <div class="form-grid">
-        <label>
-          {{ t('message.name') }}
-          <input v-model="state.name" type="text" class="form-input" />
-        </label>
+      <div class="ed-grid">
+        <div class="col main">
+          <label class="field">
+            <span class="label">{{ t('message.name') }}</span>
+            <input v-model="state.name" type="text" class="form-input" placeholder="…" />
+          </label>
 
-        <label v-if="!props.category.children?.length">
-          {{ t('message.group') }}
-          <select v-model="state.parentId" class="select-input">
-            <option value="">{{ t('message.none') }}</option>
-            <option v-for="opt in categoryOptions" :key="opt.id" :value="opt.id">
-              {{ opt.name }}
-            </option>
-          </select>
-        </label>
+          <div class="field">
+            <span class="label">{{ t('message.type') }}</span>
+            <div class="segmented">
+              <button
+                type="button"
+                class="btn outline"
+                :class="{ active: state.isIncome }"
+                @click="state.isIncome = true"
+              >
+                <i class="fa-solid fa-circle-up"></i>
+                {{ t('message.income') }}
+              </button>
+              <button
+                type="button"
+                class="btn outline"
+                :class="{ active: !state.isIncome }"
+                @click="state.isIncome = false"
+              >
+                <i class="fa-solid fa-circle-down"></i>
+                {{ t('message.expense') }}
+              </button>
+            </div>
+          </div>
 
-        <label class="chk">
-          <input type="checkbox" v-model="state.isIncome" />
-          {{ t('message.isIncome') }}
-        </label>
+          <label v-if="!props.category.children?.length" class="field">
+            <span class="label">{{ t('message.group') }}</span>
+            <select v-model="state.parentId" class="select-input">
+              <option value="">{{ t('message.none') }}</option>
+              <option v-for="opt in categoryOptions" :key="opt.id" :value="opt.id">
+                {{ opt.name }}
+              </option>
+            </select>
+          </label>
 
-        <label class="chk">
-          <input type="checkbox" v-model="state.isDeleted" />
-          {{ t('message.isDeleted') }}
-        </label>
+          <label class="field switch">
+            <input type="checkbox" v-model="state.isDeleted" />
+            <span>{{ t('message.isDeleted') }}</span>
+          </label>
+        </div>
+
+        <div class="col side">
+          <div class="hint-card">
+            <p class="hint-title">{{ t('message.tips') ?? 'Tips' }}</p>
+            <ul>
+              <li v-if="props.category.children?.length">
+                {{ t('message.hasSubcategories') ?? 'This group has subcategories; parent cannot be changed.' }}
+              </li>
+              <li>
+                {{ t('message.youCanReassign') ?? 'You can switch Income/Expense at any time.' }}
+              </li>
+              <li>
+                {{ t('message.archiveHint') ?? 'Archiving hides the category from pickers but keeps history.' }}
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
-      <div class="btn-row">
-        <button class="btn primary"  @click="save">
+      <div class="actions">
+        <button class="btn primary" @click="save">
           {{ t('buttons.save') }}
         </button>
 
-        <button v-if="state.id" class="btn outline danger" @click="promptDelete">
+        <button
+          v-if="state.id"
+          class="btn outline danger"
+          @click="promptDelete"
+        >
           {{ t('buttons.delete') }}
         </button>
       </div>
     </template>
   </ModalWindow>
 
-  <ModalWindow v-if="askDelete" class="confirm-modal" :close-modal="() => (askDelete = false)">
+  <ModalWindow
+    v-if="askDelete"
+    class="confirm-modal"
+    :close-modal="() => (askDelete = false)"
+  >
     <template #header>
-      <h2>{{ t('message.deleteCategory') }}?</h2>
+      <h3>{{ t('message.deleteCategory') }}?</h3>
     </template>
     <template #main>
       <p>{{ t('message.areYouSureWantDeleteCategory') }}</p>
-      <div class="btn-row">
+      <div class="actions center">
         <button class="btn outline" @click="askDelete = false">
           {{ t('buttons.cancel') }}
         </button>
-        <button class="btn danger"  @click="reallyDelete">
+        <button class="btn danger" @click="reallyDelete">
           {{ t('buttons.delete') }}
         </button>
       </div>
@@ -123,4 +187,87 @@ async function reallyDelete() {
 .btn-row { display: flex; gap: 16px; flex-wrap: wrap; }
 .btn.danger      { color: #dc3545; border-color: #dc3545; }
 .btn.danger:hover{ background: #dc3545; color: #fff; }
+.ed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.ed-header .title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ed-header i.income { color: #22c55e; }
+.ed-header i.expense { color: #ef4444; }
+.pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.pill.income  { background: rgba(34,197,94,.15);  color: #16a34a; }
+.pill.expense { background: rgba(239,68,68,.15); color: #dc2626; }
+.muted { color: #6c757d; font-size: 12px; }
+
+.ed-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(260px, 1fr) minmax(220px, .8fr);
+  margin-top: 8px;
+}
+.col.side { align-self: start; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 13px; color: #6c757d; }
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.segmented { display: flex; gap: 8px; flex-wrap: wrap; }
+.segmented .btn.outline.active {
+  background: #1e90ff;
+  color: #fff;
+  border-color: #1e90ff;
+}
+
+.switch { flex-direction: row; align-items: center; gap: 8px; }
+
+.hint-card {
+  background: #f7fbff;
+  border: 1px solid #e5f0ff;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 13px;
+  color: #445;
+}
+.hint-title { margin: 0 0 6px; font-weight: 600; font-size: 14px; }
+.hint-card ul { margin: 0; padding-left: 18px; }
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.actions.center { justify-content: center; }
+.btn.danger       { color: #dc3545; border-color: #dc3545; }
+.btn.danger:hover { background: #dc3545; color: #fff; }
+
+:deep(.confirm-modal .modal-window) {
+  width: 360px;
+  max-width: 90vw;
+}
+
+@media (max-width: 576px) {
+  .ed-grid { grid-template-columns: 1fr; }
+  .ed-header .title { gap: 8px; }
+}
 </style>

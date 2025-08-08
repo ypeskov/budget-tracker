@@ -1,23 +1,19 @@
-<!-- src/views/ReportsView.vue -->
 <script setup>
 import { shallowRef } from 'vue';
 import { useI18n }    from 'vue-i18n';
 
-/* ── отчёты (соседние файлы) ───────────────────────────── */
 import CashFlowReport  from './CashFlowReportView.vue';
 import BalanceReport   from './BalanceReportView.vue';
 import ExpensesReport  from './ExpensesReportView.vue';
 
 const { t } = useI18n();
 
-/* список вкладок */
 const tabs = [
   { id: 'cash',  icon: 'fa-rotate-right',   key: 'buttons.cashFlowReport', comp: CashFlowReport },
   { id: 'bal',   icon: 'fa-scale-balanced', key: 'buttons.balanceReport',  comp: BalanceReport  },
   { id: 'exp',   icon: 'fa-chart-pie',      key: 'buttons.expensesReport', comp: ExpensesReport }
 ];
 
-/* первая вкладка открыта сразу */
 const activeId   = shallowRef(tabs[0].id);
 const ActiveComp = shallowRef(tabs[0].comp);
 
@@ -32,10 +28,9 @@ function changeTab(id) {
 </script>
 
 <template>
-  <main class="settings-page">             <!-- та же обёртка, что и у Settings -->
+  <main class="settings-page">
     <div class="container split">
 
-      <!-- ▸ боковое меню --------------------------------------------------- -->
       <aside class="sidebar">
         <h2 class="title">{{ t('menu.reports') }}</h2>
 
@@ -53,7 +48,6 @@ function changeTab(id) {
         </nav>
       </aside>
 
-      <!-- ▸ контент -------------------------------------------------------- -->
       <section class="settings-content panel">
         <component :is="ActiveComp" />
       </section>
@@ -63,7 +57,6 @@ function changeTab(id) {
 </template>
 
 <style scoped>
-/* боковые кнопки — чтобы иконка не прилипала к тексту */
 .side-btn {
   display: flex;
   align-items: center;
