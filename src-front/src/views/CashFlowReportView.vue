@@ -46,7 +46,7 @@ const chartOptions = reactive({
 });
 
 const startDate = ref('');
-const endDate = ref(DateTime.now().toISODate()); // 'YYYY-MM-DD'
+const endDate = ref(DateTime.now().toISODate());
 const period = ref('monthly');
 
 onBeforeMount(async () => {
@@ -85,7 +85,6 @@ async function getReportData() {
 }
 
 function clearChartData() {
-  // cashFlowReport = reactive({});
   chartData.labels = [];
   chartData.datasets[0].data = [];
   chartData.datasets[1].data = [];
@@ -108,107 +107,130 @@ async function changePeriod($event) {
 </script>
 
 <template>
-  <main>
-    <div class="container">
-      <div class="row">
-        <div class="col">
-          <h1>{{ $t('message.cashFlowReport') }}</h1>
-        </div>
+  <div class="section-card">
+    <h2>{{ $t('message.cashFlowReport') }}</h2>
+
+    <div style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:16px">
+      <label>
+        {{ $t('message.startDate') }}
+        <input
+          type="date"
+          v-model="startDate"
+          @change="changeDate"
+          class="form-control"
+        />
+      </label>
+
+      <label>
+        {{ $t('message.endDate') }}
+        <input
+          type="date"
+          v-model="endDate"
+          @change="changeDate"
+          class="form-control"
+        />
+      </label>
+
+      <label>
+        {{ $t('message.period') }}
+        <select
+          :value="period"
+          @change="changePeriod"
+          class="select-input"
+        >
+          <option value="monthly">{{ $t('message.monthly') }}</option>
+          <option value="daily">{{ $t('message.daily') }}</option>
+        </select>
+      </label>
+    </div>
+
+    <div style="height:340px;margin-top:20px">
+      <Bar v-if="loaded" :data="chartData" :options="chartOptions" />
+    </div>
+  </div>
+
+  <div class="section-card" style="margin-top:16px">
+    <div class="table-header-grid">
+      <div class="left">{{ $t('message.period') }}</div>
+      <div class="right">{{ $t('message.totalIncome') }}</div>
+      <div class="right">{{ $t('message.totalExpenses') }}</div>
+      <div class="right">{{ $t('message.netFlow') }}</div>
+    </div>
+
+    <div
+      v-for="(item, index) in cashFlowReport.netFlow"
+      :key="index"
+      class="table-row-grid"
+    >
+      <div class="cell">
+        <span class="th">{{ $t('message.period') }}</span>
+        <span class="val">{{ index }}</span>
       </div>
-
-      <div class="row">
-        <div class="col">
-          <div class="form-group">
-            <label for="transaction-date">{{ $t('message.startDate') }}</label>
-            <input id="transaction-date"
-                   type="date"
-                   class="form-control"
-                   v-model="startDate"
-                   @change="changeDate" />
-          </div>
-        </div>
-
-        <div class="col">
-          <div class="form-group">
-            <label for="transaction-date">{{ $t('message.endDate') }}</label>
-            <input id="transaction-date"
-                   type="date"
-                   class="form-control"
-                   v-model="endDate"
-                   @change="changeDate" />
-          </div>
-        </div>
+      <div class="cell right">
+        <span class="th">{{ $t('message.totalIncome') }}</span>
+        <span class="val">
+          {{ $n(cashFlowReport.totalIncome[index], 'decimal') }} {{ cashFlowReport.currency }}
+        </span>
       </div>
-
-      <div class="row">
-        <div class="col">
-          <label>{{ $t('message.period') }}</label>
-          <select class="form-select bottom-space" @change="changePeriod" :value="period">
-            <option value="monthly">{{ $t('message.monthly') }}</option>
-            <option value="daily">{{ $t('message.daily') }}</option>
-          </select>
-        </div>
+      <div class="cell right">
+        <span class="th">{{ $t('message.totalExpenses') }}</span>
+        <span class="val">
+          {{ $n(cashFlowReport.totalExpenses[index], 'decimal') }} {{ cashFlowReport.currency }}
+        </span>
       </div>
-
-      <div class="row">
-        <div class="col">
-          <Bar v-if="loaded" :data="chartData" :options="chartOptions" />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col">
-          <div class="period-item">
-            <div class="period-cell table-header">{{ $t('message.period') }}</div>
-            <div class="income-cell table-header">{{ $t('message.totalIncome') }}</div>
-            <div class="expense-cell table-header">{{ $t('message.totalExpenses') }}</div>
-            <div class="net-flow-cell table-header">{{ $t('message.netFlow') }}</div>
-          </div>
-          <div class="period-item" v-for="(item, index) in cashFlowReport.netFlow" :key="index">
-            <div class="period-cell">{{ index }}</div>
-            <div class="income-cell">
-              {{ $n(cashFlowReport.totalIncome[index], 'decimal') }} {{ cashFlowReport.currency}}
-            </div>
-            <div class="expense-cell">
-              {{ $n(cashFlowReport.totalExpenses[index], 'decimal') }} {{ cashFlowReport.currency}}
-            </div>
-            <div class="net-flow-cell">
-              {{ $n(cashFlowReport.netFlow[index], 'decimal') }} {{ cashFlowReport.currency}}
-            </div>
-          </div>
-        </div>
+      <div class="cell right">
+        <span class="th">{{ $t('message.netFlow') }}</span>
+        <span class="val">
+          {{ $n(cashFlowReport.netFlow[index], 'decimal') }} {{ cashFlowReport.currency }}
+        </span>
       </div>
     </div>
-  </main>
+  </div>
 </template>
 
 <style scoped>
-.row {
-  margin: 1rem 1rem;
+.table-header-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  font-weight: 600;
+  border-bottom: 2px solid #000;
+  padding: 8px 0;
+  margin-bottom: 6px;
 }
-.period-item {
-  display: flex;
-  justify-content: space-between;
-  margin: 0.5rem 0;
-}
+.table-header-grid .left  { text-align: left; }
+.table-header-grid .right { text-align: right; }
 
-.period-item:hover {
-  background-color: #f0f0f0;
+.table-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  align-items: center;
+  padding: 8px 0;
+  transition: background .15s;
 }
+.table-row-grid:hover { background: #f0f0f0; }
 
-.period-cell, .name-cell {
-  text-align: left;
-  width: 15%;
-}
+.cell { display: flex; align-items: center; gap: 8px; }
+.cell.right { justify-content: flex-end; }
 
-.income-cell, .expense-cell, .net-flow-cell {
-  text-align: right;
-  width: 15%;
-}
+.th { display: none; color: #6c757d; }
 
-.table-header {
-  text-align: center;
-  font-weight: bold;
-  border-bottom: 2px solid black;
+@media (max-width: 576px) {
+  .table-header-grid { display: none; }
+
+  .table-row-grid {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+    padding: 10px 0;
+  }
+
+  .cell {
+    justify-content: space-between;
+  }
+  .cell.right {
+    justify-content: space-between;
+  }
+
+  .th  { display: inline; font-weight: 600; }
+  .val { text-align: right; }
 }
 </style>

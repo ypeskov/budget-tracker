@@ -56,51 +56,66 @@ watch(currentDate, async (newVal) => {
 
 </script>
 
-
 <template>
-  <main>
-    <div class="container">
-      <div class="row">
-        <div class="col">
-          <h1>{{ $t('message.balanceReport') }}</h1>
-        </div>
+  <div class="section-card">
+    <h2>{{ $t('message.balanceReport') }}</h2>
+
+    <div
+      style="
+        display:grid;
+        gap:16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+        margin-top:16px;
+      "
+    >
+      <label>
+        {{ $t('message.prevDate') }}
+        <input
+          id="prev-balance-date"
+          type="date"
+          class="form-control"
+          v-model="prevDate"
+        />
+      </label>
+
+      <label>
+        {{ $t('message.currentDate') }}
+        <input
+          id="current-balance-date"
+          type="date"
+          class="form-control"
+          v-model="currentDate"
+        />
+      </label>
+    </div>
+  </div>
+
+  <div class="section-card" style="margin-top:16px">
+    <div
+      style="
+        display:grid;
+        gap:16px;
+        grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+        align-items:start;
+      "
+    >
+      <div>
+        <BalancesList
+          :balance-data="prevBalanceData"
+          :base-currency-code="currentBalanceData[0]?.baseCurrencyCode || '---'"
+          :total-balance="totalPrevBalance"
+        />
       </div>
 
-      <div class="row mb-3 nowrap-row">
-        <div class="col-12 col-md-6">
-          <div class="form-group">
-            <label for="prev-balance-date">{{ $t('message.prevDate') }}</label>
-            <input id="prev-balance-date"
-                   type="date"
-                   class="form-control"
-                   v-model="prevDate" />
-          </div>
-        </div>
-        <div class="col-12 col-md-6">
-          <div class="form-group">
-            <label for="current-balance-date">{{ $t('message.currentDate') }}</label>
-            <input id="current-balance-date"
-                   type="date"
-                   class="form-control"
-                   v-model="currentDate" />
-          </div>
-        </div>
-      </div>
-
-      <div class="row nowrap-row">
-        <div class="col-12 col-md-6 mb-3 mb-md-0">
-          <BalancesList :balance-data="prevBalanceData"
-                        :base-currency-code="currentBalanceData[0]?.baseCurrencyCode || '---'"
-                        :total-balance="totalPrevBalance"/>
-        </div>
-        <div class="col-12 col-md-6">
-          <BalancesList :balance-data="currentBalanceData"
-                        :base-currency-code="currentBalanceData[0]?.baseCurrencyCode || '---'"
-                        :total-balance="totalCurrentBalance" />
-        </div>
+      <div>
+        <BalancesList
+          :balance-data="currentBalanceData"
+          :base-currency-code="currentBalanceData[0]?.baseCurrencyCode || '---'"
+          :total-balance="totalCurrentBalance"
+        />
       </div>
     </div>
-  </main>
+  </div>
 </template>
 
 <style scoped>
