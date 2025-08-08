@@ -55,4 +55,7 @@ class Settings(BaseSettings):
     OPENAI_MAX_TOKENS: int = 1000
     OPENAI_TEMPERATURE: float = 0.3
 
-    model_config = SettingsConfigDict(env_file=(".env", ".env.local", ".env.prod"))
+    model_config = SettingsConfigDict(env_file=(".env", ".env.prod"))
+
+
+settings = Settings()
