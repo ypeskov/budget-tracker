@@ -3,9 +3,7 @@ from typing import Annotated
 import jwt
 from fastapi import Header, Request, HTTPException, status
 
-from app.config import Settings
-
-settings = Settings()
+from app.config import settings
 
 if settings.ENVIRONMENT != "production":
     from icecream import ic  # type: ignore
@@ -22,10 +20,6 @@ async def check_token(request: Request, auth_token: Annotated[str, Header()]) ->
         request.state.user = payload
         return payload
     except jwt.DecodeError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     except jwt.ExpiredSignatureError:  # pragma: no cover
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")

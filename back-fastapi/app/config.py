@@ -1,8 +1,9 @@
 from pydantic_settings import SettingsConfigDict, BaseSettings
+from pydantic import field_validator, ValidationInfo
 
 
 class Settings(BaseSettings):
-    ENVIRONMENT: str = "production"
+    ENVIRONMENT: str = "prod"
     FRONTEND_URL: str = "https://orgfin.run"
 
     DB_USER: str = "username"
@@ -47,7 +48,8 @@ class Settings(BaseSettings):
     LOGIN_SESSION_EXPIRATION_MINUTES: int = 30
 
     GOOGLE_CLIENT_ID: str = "123"
-    SECRET_KEY: str = "111111111"
+    # Secret key is required (no insecure default)
+    SECRET_KEY: str = ""
 
     # OpenAI configuration for expense analysis
     OPENAI_API_KEY: str = "your-openai-api-key"
@@ -56,6 +58,24 @@ class Settings(BaseSettings):
     OPENAI_TEMPERATURE: float = 0.3
 
     model_config = SettingsConfigDict(env_file=(".env", ".env.prod"))
+
+    @field_validator("SECRET_KEY")
+    @classmethod
+    def validate_secret_key(cls, value: str, info: ValidationInfo) -> str:
+        """Ensure SECRET_KEY is present and sufficiently strong.
+
+        In production (ENVIRONMENT in {"prod", "production"}) require length >= 32,
+        otherwise allow shorter keys but at least 8 characters.
+        """
+        if not value or not isinstance(value, str) or value.strip() == "":
+            raise ValueError("SECRET_KEY must be provided via environment")
+        environment = str((info.data or {}).get("ENVIRONMENT", "")).lower()
+        min_len = 16 if environment in {"prod", "production"} else 8
+        if len(value) < min_len:
+            raise ValueError(
+                f"SECRET_KEY is too short (got {len(value)}), minimum is {min_len} characters for {environment or 'non-production'}"
+            )
+        return value
 
 
 settings = Settings()

@@ -5,10 +5,9 @@ from .errors import UnknownSettingsKeyError, MissingSettingsKeyError, IncorrectS
 ic.configureOutput(includeContext=True)
 
 
-def validate_settings(template_json, input_json):
-
+def validate_settings(template_json, input_json) -> None:
     if not isinstance(template_json, dict) or not isinstance(input_json, dict):
-        return False
+        raise IncorrectSettingsTypeError("template_json or input_json is not a dict")
 
     for key in input_json.keys():
         if key not in template_json:
@@ -22,7 +21,5 @@ def validate_settings(template_json, input_json):
         if isinstance(value, dict):
             validate_settings(template_json[key], value)
         else:
-            if type(value) != type(template_json[key]):
+            if not isinstance(value, type(template_json[key])):
                 raise IncorrectSettingsTypeError(key)
-
-    return True
