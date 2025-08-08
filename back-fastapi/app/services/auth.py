@@ -50,7 +50,7 @@ def copy_categories(default_category: DefaultCategory, user_id: int, db: Session
 
 
 def copy_all_categories(user_id: int, db: Session):
-    root_categories = db.query(DefaultCategory).filter(DefaultCategory.parent_id == None).all()
+    root_categories = db.query(DefaultCategory).filter(DefaultCategory.parent_id == None).all()  # noqa: E711
     for root_category in root_categories:
         copy_categories(root_category, user_id, db, None)
 

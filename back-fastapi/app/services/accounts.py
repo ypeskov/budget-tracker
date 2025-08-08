@@ -12,7 +12,14 @@ from app.models.Currency import Currency
 from app.models.User import User
 from app.schemas.account_schema import CreateAccountSchema, UpdateAccountSchema
 from app.services.CurrencyProcessor import calc_amount
-from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied
+from app.services.errors import (
+    InvalidUser,
+    InvalidCurrency,
+    InvalidAccountType,
+    InvalidAccount,
+    AccessDenied,
+    NotFoundError,
+)
 
 ic.configureOutput(includeContext=True)
 
@@ -35,9 +42,9 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
         account_dto.opening_date = datetime.now(UTC)
 
     if hasattr(account_dto, 'id'):
-        account = (db.execute(select(Account)
-                              .where(Account.id == account_dto.id, Account.user_id == user_id))
-                   .scalar_one_or_none())
+        account = db.execute(
+            select(Account).where(Account.id == account_dto.id, Account.user_id == user_id)
+        ).scalar_one_or_none()
         if account is None:
             raise InvalidAccount()
         if account:
@@ -54,16 +61,18 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
             account.name = account_dto.name
             account.comment = account_dto.comment
     else:
-        account = Account(user=existing_user,
-                          account_type=account_type,
-                          currency=currency,
-                          initial_balance=account_dto.initial_balance,
-                          balance=account_dto.balance,
-                          credit_limit=account_dto.credit_limit,
-                          opening_date=account_dto.opening_date,
-                          is_hidden=account_dto.is_hidden,
-                          name=account_dto.name,
-                          comment=account_dto.comment)
+        account = Account(
+            user=existing_user,
+            account_type=account_type,
+            currency=currency,
+            initial_balance=account_dto.initial_balance,
+            balance=account_dto.balance,
+            credit_limit=account_dto.credit_limit,
+            opening_date=account_dto.opening_date,
+            is_hidden=account_dto.is_hidden,
+            name=account_dto.name,
+            comment=account_dto.comment,
+        )
     db.add(account)
     db.commit()
     db.refresh(account)
@@ -71,12 +80,14 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
     return account
 
 
-def get_user_accounts(user_id: int,
-                      db: Session,
-                      include_deleted: bool = False,
-                      include_hidden: bool = False,
-                      include_archived: bool = False,
-                      archived_only: bool = False) -> list[Account]:
+def get_user_accounts(
+    user_id: int,
+    db: Session,
+    include_deleted: bool = False,
+    include_hidden: bool = False,
+    include_archived: bool = False,
+    archived_only: bool = False,
+) -> list[Account]:
     query = db.query(Account).filter_by(user_id=user_id).order_by(asc(Account.name))
 
     if archived_only:
@@ -89,14 +100,10 @@ def get_user_accounts(user_id: int,
         if not include_hidden:
             query = query.filter(Account.is_hidden == False)
 
-    accounts: list[Account] = query.all() # type: ignore
+    accounts: list[Account] = query.all()  # type: ignore
     for account in accounts:
         account.balance_in_base_currency = calc_amount(
-            account.balance,
-            account.currency.code,
-            datetime.now(UTC).date(),
-            account.user.base_currency.code,
-            db
+            account.balance, account.currency.code, datetime.now(UTC).date(), account.user.base_currency.code, db
         )
 
     return accounts
@@ -106,9 +113,9 @@ def get_account_details(account_id: int, user_id: int, db: Session) -> Account:
     try:
         account: Account = db.query(Account).filter_by(id=account_id).one()
     except NoResultFound:
-        raise InvalidAccount()
+        raise NotFoundError("Account not found")
     if account.user_id != user_id:
-        raise AccessDenied()
+        raise AccessDenied("Access denied")
     return account
 
 
