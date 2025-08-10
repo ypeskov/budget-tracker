@@ -14,17 +14,16 @@ class ResponseCategorySchema(CreateCategorySchema):
     id: int
     user_id: int
     name: str
-    parent_id: int | None
+    parent_id: int | None = None
     is_income: bool
     created_at: datetime
     updated_at: datetime
     children: list["ResponseCategorySchema"] | None = []
-    model_config = ConfigDict(from_attributes=True,
-                              populate_by_name=True,
-                              alias_generator=to_camel)
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
-ResponseCategorySchema.update_forward_refs()
+ResponseCategorySchema.model_rebuild()
 
 
 class GroupedCategorySchema(BaseModel):

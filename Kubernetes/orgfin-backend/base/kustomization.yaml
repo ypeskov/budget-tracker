@@ -1,8 +1,0 @@
-resources:
-  - deployment-api.yaml
-  - deployment-celery.yaml
-  - deployment-beat.yaml
-  - service.yaml
-  - ingress.yaml
-  - deployment-redis.yaml
-  - service-redis.yaml
