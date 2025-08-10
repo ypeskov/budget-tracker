@@ -28,25 +28,15 @@ build_and_tag() {
     echo "$tag" > version.txt
 }
 
-update_kubernetes_deployment() {
-    local tag=$1
-
-    # edit kubernetes deployment files
-    sed -i "" "s|ypeskov/api-orgfin:[^[:space:]]*|ypeskov/api-orgfin:${tag}|g" ../Kubernetes/orgfin-backend/base/deployment-api.yaml
-    sed -i "" "s|ypeskov/api-orgfin:[^[:space:]]*|ypeskov/api-orgfin:${tag}|g" ../Kubernetes/orgfin-backend/base/deployment-celery.yaml
-    sed -i "" "s|ypeskov/api-orgfin:[^[:space:]]*|ypeskov/api-orgfin:${tag}|g" ../Kubernetes/orgfin-backend/base/deployment-beat.yaml
-}
-
 if [[ $# -eq 0 ]]; then
     tag=$(get_tag)
     build_and_tag $tag
 elif [[ $1 == "push" ]]; then
     tag=$(get_tag "${@:2}")
     build_and_tag $tag
-    update_kubernetes_deployment $tag
     docker push ypeskov/api-orgfin:$tag
 
-    echo "$tag" > ../version.txt
+    echo "$tag" > version.txt
 else
     echo "Usage:"
     echo "$0                                           # Build and tag :latest"
