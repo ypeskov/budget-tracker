@@ -45,11 +45,10 @@ class NonTransferTypeTransaction:
         return self
 
     def correct_prev_balance(self):
-        prev_account = self._db.query(Account).filter_by(id=self._prev_transaction_state.account_id).one()
         if self._prev_transaction_state.is_income:
-            prev_account.balance -= self._prev_transaction_state.amount
+            self._transaction.account.balance -= self._prev_transaction_state.amount
         else:
-            prev_account.balance += self._prev_transaction_state.amount
+            self._transaction.account.balance += self._prev_transaction_state.amount
 
 
 def is_category_valid(category: UserCategory, is_income: bool) -> bool:
