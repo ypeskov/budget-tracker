@@ -1,6 +1,5 @@
 <script setup>
-
-import { onBeforeMount, reactive, ref } from 'vue';
+import { onBeforeMount, reactive, ref, computed } from 'vue';
 import { DateTime } from 'luxon';
 import { RouterLink, useRouter } from 'vue-router';
 import { processError } from '@/errors/errorHandlers';
@@ -15,51 +14,29 @@ const endDate = ref(DateTime.now().toISODate());
 const hideEmptyCategories = ref(true);
 let expensesReportData = reactive([]);
 
-let groupSum = 0;
-let currentParentId = null;
-
 const pieDiagram = ref('');
 const aggregatedCategories = ref([]);
 const aggregatedSum = ref(0);
 
-function isNewGroup(category) {
-  if (category.parentId === null) {
-    currentParentId = category.id;
-    return true;
+const grouped = computed(() => {
+  const res = [];
+  let lastParent = null;
+  let group = null;
+  for (const c of expensesReportData) {
+    const parent = c.parentId === null ? c.id : c.parentId;
+    if (parent !== lastParent) {
+      lastParent = parent;
+      group = { parentId: parent, items: [], sum: 0 };
+      res.push(group);
+    }
+    group.items.push(c);
+    group.sum += parseFloat(c.totalExpenses);
   }
-
-  if (currentParentId !== category.parentId) {
-    currentParentId = category.parentId;
-    return true;
-  }
-
-  return false;
-}
-
-function isStart(category) {
-  if (expensesReportData[0].id === category.id) {
-    return true;
-  }
-
-  return false;
-}
-
-function addGroupSum(category) {
-  groupSum += parseFloat(category.totalExpenses);
-}
-
-function getCurrentGroupSum() {
-  return groupSum;
-}
-
-function resetGroupSum() {
-  groupSum = 0;
-}
+  return res;
+});
 
 async function getReportData() {
-  const filters = {
-    categories: [],
-  };
+  const filters = { categories: [] };
   if (startDate.value !== '') {
     filters.startDate = startDate.value;
   }
@@ -67,12 +44,9 @@ async function getReportData() {
     filters.endDate = endDate.value;
   }
   filters.hideEmptyCategories = hideEmptyCategories.value;
-
   const tmpData = await Services.reportsService.getReport('expenses-by-categories', filters);
-
   expensesReportData.splice(0);
   expensesReportData.push(...tmpData);
-  groupSum = 0;
 }
 
 async function getDiagramData() {
@@ -97,7 +71,6 @@ onBeforeMount(async () => {
 async function fetchPieDiagram() {
   const start = startDate.value;
   const end = endDate.value;
-
   try {
     pieDiagram.value = await Services.reportsService.getDiagram('pie', start, end);
   } catch (e) {
@@ -116,7 +89,6 @@ async function changeDate() {
 async function changeHideEmptyCategories() {
   await getReportData();
 }
-
 </script>
 
 <template>
@@ -226,51 +198,40 @@ async function changeHideEmptyCategories() {
 
   <div class="section-card" style="margin-top:16px">
     <div class="report-section">
-      <div v-if="Object.keys(expensesReportData).length > 0">
-        <div
-          v-for="(category) in expensesReportData"
-          :key="category.id"
-          class="category-item-container"
-        >
-          <div v-if="isNewGroup(category) && !isStart(category)" class="prev-sum">
-            {{ $n(getCurrentGroupSum(), 'decimal') }}&nbsp;{{ userStore.baseCurrency }}
-            {{ resetGroupSum() }}
-            {{ addGroupSum(category) }}
-          </div>
-          <div v-else>
-            {{ addGroupSum(category) }}
-          </div>
-
-          <RouterLink
-            class="row-category-expenses"
-            :to="{
-              name: 'transactions',
-              query: {
-                categories: category.id,
-                startDate: startDate,
-                endDate: endDate
-              }
-            }"
-          >
-            <div class="data-transaction-container">
-              <div>
-                <span class="category-name">{{ category.name }}</span>
-              </div>
-
-              <div class="category-expense-amount">
-                <div class="category-expenses">
-                  {{ $n(parseFloat(category.totalExpenses), 'decimal') }}
+      <div v-if="grouped.length">
+        <div v-for="g in grouped" :key="g.parentId">
+          <div v-for="category in g.items" :key="category.id" class="category-item-container">
+            <RouterLink
+              class="row-category-expenses"
+              :to="{
+                name: 'transactions',
+                query: {
+                  categories: category.id,
+                  startDate: startDate,
+                  endDate: endDate
+                }
+              }"
+            >
+              <div class="data-transaction-container">
+                <div>
+                  <span class="category-name">{{ category.name }}</span>
                 </div>
-                <div class="expenses-currency">
-                  {{ category.currencyCode ?? userStore.baseCurrency }}
+
+                <div class="category-expense-amount">
+                  <div class="category-expenses">
+                    {{ $n(parseFloat(category.totalExpenses), 'decimal') }}
+                  </div>
+                  <div class="expenses-currency">
+                    {{ category.currencyCode ?? userStore.baseCurrency }}
+                  </div>
                 </div>
               </div>
-            </div>
-          </RouterLink>
-        </div>
+            </RouterLink>
+          </div>
 
-        <div class="prev-sum">
-          {{ $n(getCurrentGroupSum(), 'decimal') }}&nbsp;{{ userStore.baseCurrency }}
+          <div class="prev-sum">
+            {{ $n(g.sum, 'decimal') }}&nbsp;{{ userStore.baseCurrency }}
+          </div>
         </div>
       </div>
 
@@ -351,7 +312,6 @@ async function changeHideEmptyCategories() {
 .category-expense-amount {
   display: flex;
   justify-content: space-between;
-
 }
 
 .category-expense-amount > div {

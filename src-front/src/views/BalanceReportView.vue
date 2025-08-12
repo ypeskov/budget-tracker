@@ -91,15 +91,8 @@ watch(currentDate, async (newVal) => {
   </div>
 
   <div class="section-card" style="margin-top:16px">
-    <div
-      style="
-        display:grid;
-        gap:16px;
-        grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
-        align-items:start;
-      "
-    >
-      <div>
+    <div class="balances-grid">
+      <div class="balance-panel">
         <BalancesList
           :balance-data="prevBalanceData"
           :base-currency-code="currentBalanceData[0]?.baseCurrencyCode || '---'"
@@ -107,7 +100,7 @@ watch(currentDate, async (newVal) => {
         />
       </div>
 
-      <div>
+      <div class="balance-panel">
         <BalancesList
           :balance-data="currentBalanceData"
           :base-currency-code="currentBalanceData[0]?.baseCurrencyCode || '---'"
@@ -128,5 +121,25 @@ watch(currentDate, async (newVal) => {
 .col-12.col-md-6 {
   flex: 0 0 auto;
   width: 50%;
+}
+
+/* сетка с более «узким» минимумом, чтобы не толкало карточку */
+.balances-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  align-items: start;
+}
+
+/* ключевой фикс переполнения */
+.balance-panel {
+  min-width: 0;                /* разрешаем сжиматься внутри grid */
+  overflow-x: auto;            /* если внутри таблица шире — скроллится панель, а не страница */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* на совсем узких — в одну колонку наверняка */
+@media (max-width: 576px) {
+  .balances-grid { grid-template-columns: 1fr; }
 }
 </style>
