@@ -32,14 +32,8 @@ build_and_tag() {
     echo "$tag" > version.txt
 }
 
-update_kubernetes_deployment() {
-    local tag=$1
-    sed -i "" "s|ypeskov/frontend-orgfin:[^[:space:]]*|ypeskov/frontend-orgfin:${tag}|g" ../Kubernetes/orgfin-frontend/base/deployment.yaml
-}
-
 echo "[+] Building Docker image with tag: $IMAGE_TAG"
 build_and_tag $IMAGE_TAG
-update_kubernetes_deployment $IMAGE_TAG
 
 echo "[+] Image built successfully"
 echo "[+] Tag: ypeskov/frontend-orgfin:$IMAGE_TAG"
