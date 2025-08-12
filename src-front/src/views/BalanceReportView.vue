@@ -123,7 +123,6 @@ watch(currentDate, async (newVal) => {
   width: 50%;
 }
 
-/* сетка с более «узким» минимумом, чтобы не толкало карточку */
 .balances-grid {
   display: grid;
   gap: 16px;
@@ -131,14 +130,12 @@ watch(currentDate, async (newVal) => {
   align-items: start;
 }
 
-/* ключевой фикс переполнения */
 .balance-panel {
-  min-width: 0;                /* разрешаем сжиматься внутри grid */
-  overflow-x: auto;            /* если внутри таблица шире — скроллится панель, а не страница */
+  min-width: 0;
+  overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* на совсем узких — в одну колонку наверняка */
 @media (max-width: 576px) {
   .balances-grid { grid-template-columns: 1fr; }
 }
