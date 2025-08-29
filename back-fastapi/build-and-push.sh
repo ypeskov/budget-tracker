@@ -21,7 +21,7 @@ build_and_tag() {
     local build_command="docker build --target prod "
     
     build_command+="--no-cache $platform_option"
-    build_command+=" -t ypeskov/api-orgfin:$tag ."
+    build_command+=" -t ypeskov/orgfin-api-python:$tag ."
     echo "$build_command"
 
     eval "$build_command"
@@ -34,7 +34,7 @@ if [[ $# -eq 0 ]]; then
 elif [[ $1 == "push" ]]; then
     tag=$(get_tag "${@:2}")
     build_and_tag $tag
-    docker push ypeskov/api-orgfin:$tag
+    docker push ypeskov/orgfin-api-python:$tag
 
     echo "$tag" > version.txt
 else
