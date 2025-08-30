@@ -12,7 +12,7 @@ from app.tests.data.auth_data import test_users
 from app.main import app
 from app.tests.conftest import db, truly_invalid_account_id, truly_invalid_account_type_id
 from app.services.accounts import create_account, get_account_details
-from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, AccessDenied, InvalidAccount
+from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, AccessDenied, InvalidAccount, NotFoundError
 from app.schemas.account_schema import CreateAccountSchema
 
 client = TestClient(app)
@@ -64,7 +64,7 @@ def test_access_denied_to_other_user_account(token):
 
 
 def test_get_invalid_account_details():
-    with pytest.raises(InvalidAccount):
+    with pytest.raises(NotFoundError):
         get_account_details(truly_invalid_account_id, main_test_user_id, db)
 
 

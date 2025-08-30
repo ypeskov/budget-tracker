@@ -91,7 +91,7 @@ def get_user_templates(request: Request, db: Session = Depends(get_db)):
 @router.delete("/templates", response_model=list[ResponseTransactionTemplateSchema])
 def delete_user_templates(
     request: Request,
-    ids: str = Query(..., description="Comma-separated list of template IDs", example="1,2,3"),
+    ids: str = Query(..., description="Comma-separated list of template IDs", examples=["1,2,3"]),
     db: Session = Depends(get_db),
 ):
     """Delete all templates for a user"""
@@ -115,7 +115,7 @@ def delete_user_templates(
 
 
 @router.delete("/templates/validate", response_model=list[int])
-def validate_template_ids(ids: str = Query(..., description="Comma-separated list of template IDs", example="1,2,3")):
+def validate_template_ids(ids: str = Query(..., description="Comma-separated list of template IDs", examples=["1,2,3"])):
     """Validate template IDs format and return parsed list"""
     try:
         template_ids_schema = TemplateIdsSchema(ids=ids)

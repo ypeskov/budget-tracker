@@ -99,10 +99,10 @@ def token():
     db.commit()
     token = get_jwt_token_service(UserLoginSchema.model_validate(main_test_user), db)
 
-    yield token['access_token']
+    yield token.access_token
 
-    db.query(UserSettings).delete()
-    db.query(User).delete()
+    db.query(UserSettings).filter(UserSettings.user_id == user.id).delete()
+    db.query(User).filter(User.id == user.id).delete()
     db.commit()
 
 
@@ -236,3 +236,9 @@ def create_user():
         return u
 
     return _create_user
+
+
+@pytest.fixture(scope="function")
+def auth_headers(token):
+    """Create authentication headers using the token fixture"""
+    return {'auth-token': token}

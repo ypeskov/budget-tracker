@@ -55,7 +55,7 @@ class CreateTransactionSchema(BaseModel):
     date_time: datetime | None = None
     is_transfer: bool
     is_income: bool
-    is_template: bool
+    is_template: bool = False
     model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
@@ -87,9 +87,8 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     ) = None
     category: ResponseCategorySchema | None = None
     linked_transaction_id: int | None = None
-    is_template: bool | None = None
 
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel, exclude={'is_template'})
 
 
 class ResponseTransactionTemplateSchema(BaseModel):
