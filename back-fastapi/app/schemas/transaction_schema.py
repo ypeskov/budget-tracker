@@ -34,6 +34,7 @@ class TemplateIdsSchema(BaseModel):
 
 
 class CreateTransactionSchema(BaseModel):
+    id: int | None = None
     # user_id: int | None = None
     account_id: int
     target_account_id: int | None = None
