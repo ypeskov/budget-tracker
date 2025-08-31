@@ -8,6 +8,7 @@ const emit = defineEmits(['update:label']);
 
 const userStore = useUserStore();
 const label = ref(props.transaction.label || '');
+const inputEl = ref(null);
 const suggestions = ref([]);
 const insideClick = ref(false);
 const activeIndex = ref(-1);
@@ -72,6 +73,8 @@ function blurHandler() {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
+
+  inputEl.value?.focus()
 });
 
 onBeforeUnmount(() => {
@@ -88,6 +91,7 @@ onBeforeUnmount(() => {
            id="label"
            :value="label"
            autocomplete="off"
+           ref="inputEl"
            @focus="filterSuggestions"
            @blur="blurHandler" />
 

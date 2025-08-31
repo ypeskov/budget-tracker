@@ -28,7 +28,7 @@
   let categories = reactive([]);
   const showDeleteConfirmation = ref(false);
   const showSubmittedOverlay = ref(false);
-
+  const amountInput = ref(null);
   const amountComponent = ref(null);
 
   let transaction = reactive({
