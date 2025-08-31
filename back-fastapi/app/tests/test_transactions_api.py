@@ -180,12 +180,12 @@ def test_update_transaction(token, one_account, create_user):
     assert updated_account['balance'] == updated_balance + transaction_data['amount'] + amount_initial
 
     with pytest.raises(InvalidTransaction) as ex:
-        updated_transaction['id'] = 999_999_999_999
+        updated_transaction['id'] = 999_999_999
         update_transaction_service(UpdateTransactionSchema(**updated_transaction), main_test_user_id, db)
 
     with pytest.raises(InvalidAccount):
         updated_transaction['id'] = transaction['id']
-        updated_transaction['accountId'] = 999_999_999_999
+        updated_transaction['accountId'] = 999_999_999
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, main_test_user_id, db)
 
@@ -200,12 +200,12 @@ def test_update_transaction(token, one_account, create_user):
     with pytest.raises(InvalidTransaction):
         updated_transaction['id'] = transaction['id']
         updated_transaction['isTransfer'] = True
-        updated_transaction['targetAccountId'] = 999_999_999_999
+        updated_transaction['targetAccountId'] = 999_999_999
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
         update_transaction_service(transaction_schema_update, main_test_user_id, db)
 
     with pytest.raises(InvalidCategory) as ex:
-        updated_transaction['categoryId'] = 999999999999
+        updated_transaction['categoryId'] = 999_999_999
         updated_transaction['isTransfer'] = False
         updated_transaction['targetAccountId'] = None
         transaction_schema_update = UpdateTransactionSchema(**updated_transaction)
@@ -271,7 +271,7 @@ def test_update_transaction_forbidden_category(one_account, create_user, create_
     email = 'email@email.com'
     password = 'qqq_111_'
     second_user: User = create_user(email, password)
-    second_user_token: str = get_jwt_token_service(UserLoginSchema(email=email, password=password), db)['access_token']
+    second_user_token: str = get_jwt_token_service(UserLoginSchema(email=email, password=password), db).access_token
     second_user_categories: dict = client.get(f'{categories_path_prefix}/',
                                               headers={'auth-token': second_user_token}).json()
 
@@ -685,7 +685,7 @@ def test_get_transaction_details(token, create_transaction, one_account):
     assert transaction_from_service.category_id == transaction.category_id
 
     with pytest.raises(HTTPException) as ex:
-        get_transaction_details(99999999999, main_test_user_id, db)
+        get_transaction_details(999_999_999, main_test_user_id, db)
     assert ex.value.status_code == status.HTTP_404_NOT_FOUND
     assert ex.value.detail == 'Transaction not found'
 

@@ -26,6 +26,8 @@ router = APIRouter(
 
 def get_expense_analyzer(request: Request, db: Session = Depends(get_db)) -> ExpenseAnalyzer:
     settings = Settings()
+    if not hasattr(request.state, 'user'):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
     user_id = request.state.user['id']
     return ExpenseAnalyzer(settings, db, user_id)
 
@@ -55,7 +57,7 @@ async def analyze_spending_trends(
     except Exception as e:
         logger.error(f"Error analyzing spending trends: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Произошла ошибка при анализе трендов расходов"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error analyzing spending trends"
         )
 
 
@@ -87,7 +89,7 @@ async def get_budget_recommendations(
         logger.error(f"Error generating budget recommendations: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Произошла ошибка при составлении рекомендаций по бюджету",
+            detail="Error generating budget recommendations",
         )
 
 
@@ -120,7 +122,7 @@ async def analyze_expense_categorization(
         logger.error(f"Error analyzing expense categorization: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Произошла ошибка при анализе категоризации расходов",
+            detail="Error analyzing expense categorization",
         )
 
 
@@ -152,7 +154,7 @@ async def get_financial_insights(
         logger.error(f"Error generating financial insights: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Произошла ошибка при генерации финансовых инсайтов",
+            detail="Error generating financial insights",
         )
 
 
@@ -178,5 +180,5 @@ async def get_monthly_summary(
     except Exception as e:
         logger.error(f"Error generating monthly summary: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Произошла ошибка при создании месячного резюме"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error generating monthly summary"
         )

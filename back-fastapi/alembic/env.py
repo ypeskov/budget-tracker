@@ -31,12 +31,10 @@ from app.models import (
 
 target_metadata = [Base.metadata]
 
-env = os.environ.get("ENV")
+# env = os.environ.get("ENV")
 
-if env == "prod":
-    load_dotenv("../Kubernetes/orgfin-backend/overlays/prod/.env.prod")
-else:
-    load_dotenv("../Kubernetes/orgfin-backend/overlays/dev/.env")
+load_dotenv(".env")
+
 DB_USER = os.environ.get("DB_USER")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
 DB_HOST = os.environ.get("DB_HOST")
