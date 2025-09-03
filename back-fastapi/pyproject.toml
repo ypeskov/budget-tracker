@@ -80,4 +80,5 @@ google-auth = ["google", "google.auth", "google.oauth2"]
 
 [tool.ruff.lint]
 select = ["I", "E", "W"]
+fixable = ["E3", "I"]
 ignore = ["E501"]
