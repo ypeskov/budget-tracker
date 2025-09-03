@@ -24,7 +24,6 @@ class AnalysisResponseSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
-
 class ErrorResponseSchema(BaseModel):
     error: str = Field(..., description="Error message")
     status: str = Field(default="error", description="Response status")

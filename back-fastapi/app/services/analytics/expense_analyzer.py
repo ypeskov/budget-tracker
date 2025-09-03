@@ -45,13 +45,13 @@ class ExpenseAnalyzer:
             transactions = self.data_processor.get_transactions_data(start_date, end_date, 75)
 
             if not transactions:
-                return "Недостаточно данных для анализа категоризации расходов."
+                return "Not enough transactions to analyze expense categorization."
 
             # Focus on transactions with labels for better categorization analysis
             labeled_transactions = [tx for tx in transactions if tx['label']]
 
             if not labeled_transactions:
-                return "Недостаточно транзакций с описаниями для анализа категоризации."
+                return "Not enough labeled transactions to analyze expense categorization."
 
             formatted_data = self.data_processor.format_for_analysis(labeled_transactions)
 
@@ -62,4 +62,4 @@ class ExpenseAnalyzer:
 
         except Exception as e:
             logger.error(f"Error in expense categorization analysis: {str(e)}")
-            return "Произошла ошибка при анализе категоризации расходов."
+            return "Some error occurred during expense categorization analysis."

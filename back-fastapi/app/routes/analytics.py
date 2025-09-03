@@ -56,7 +56,7 @@ async def analyze_spending_trends(
         )
 
 
-@router.post('/expense-categorization/', response_model=AnalysisResponseSchema)
+@router.post('/expense-categorization', response_model=AnalysisResponseSchema)
 async def analyze_expense_categorization(
         request: Request,
         input_data: ExpenseCategorizationRequestSchema,
@@ -76,7 +76,7 @@ async def analyze_expense_categorization(
         if analysis is None:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Сервис анализа категоризации временно недоступен",
+                detail="Service temporarily unavailable",
             )
 
         return AnalysisResponseSchema(analysis=analysis)
