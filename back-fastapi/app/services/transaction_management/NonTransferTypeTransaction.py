@@ -1,3 +1,5 @@
+from typing import cast
+
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from icecream import ic
@@ -21,7 +23,8 @@ class NonTransferTypeTransaction:
     def process(self) -> 'NonTransferTypeTransaction':
         if not self._transaction.is_transfer:
             try:
-                category = self._db.query(UserCategory).filter_by(id=self._transaction.category_id).one()
+                category: UserCategory = cast(UserCategory,
+                                              self._db.query(UserCategory).filter_by(id=self._transaction.category_id).one())
                 if not is_category_valid(category, self._transaction.is_income):
                     raise InvalidCategory()
             except NoResultFound:

@@ -1,4 +1,3 @@
-from typing import Optional
 from openai import AsyncOpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
@@ -15,9 +14,9 @@ class OpenAIClient:
     async def chat_completion(
         self,
         messages: list[ChatCompletionMessageParam],
-        max_tokens: Optional[int] = None,
-        temperature: Optional[float] = None,
-    ) -> Optional[str]:
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> str | None:
         try:
             response: ChatCompletion = await self.client.chat.completions.create(
                 model=self.settings.OPENAI_MODEL,
@@ -40,13 +39,22 @@ class OpenAIClient:
 
         return None
 
-    async def analyze_expenses(self, prompt: str, data: str, max_tokens: Optional[int] = None) -> Optional[str]:
-        messages: list[ChatCompletionMessageParam] = [
+    async def analyze_expenses(self, prompt: str, data: str, max_tokens: int | None = None) -> str | None:
+        messages: list[ChatCompletionMessageParam] | list[dict[str, str]] = [
             {
                 "role": "system",
-                "content": "You are a financial advisor analyzing expense data. Provide clear, actionable insights in Russian language.",
+                "content": ("You are a financial advisor analyzing expense data.\n"
+                            "Provide clear, actionable insights in Russian language.\n"
+                            "Use bullet points and summaries where appropriate.\n"
+                            "make response in HTML format. without <!DOCTYPE html>\n"
+                            "only root <div></div> and its content.\n"),
             },
-            {"role": "user", "content": f"{prompt}\n\nДанные о расходах:\n{data}"},
+            {"role": "user", "content": f"{prompt}\n\nExpenses data:\n{data}"},
         ]
 
-        return await self.chat_completion(messages, max_tokens)
+        ai_response = await self.chat_completion(messages, max_tokens)
+        ai_response = ai_response.strip()
+        ai_response = ai_response.replace("\n", " ")
+        ai_response = ai_response.strip("````html").strip("```").strip()
+
+        return ai_response

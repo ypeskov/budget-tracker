@@ -2,9 +2,8 @@ import os
 
 from loguru import logger
 
-from app.config import Settings
+from app.config import settings
 
-settings = Settings()
 
 logger.add("logs/debug.log", level="DEBUG", rotation="1 week", compression="zip")
 logger.add("logs/info.log", level="INFO", rotation="1 week", compression="zip")
