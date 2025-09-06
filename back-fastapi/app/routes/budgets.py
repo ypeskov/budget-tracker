@@ -1,13 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from icecream import ic
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
-from app.schemas.budgets_schema import NewBudgetInputSchema, BudgetSchema, EditBudgetInputSchema
-from app.services.budgets import (create_new_budget, get_user_budgets, update_budget, delete_budget,
-                                  archive_budget)
+from app.schemas.budgets_schema import (
+    BudgetSchema,
+    EditBudgetInputSchema,
+    NewBudgetInputSchema,
+)
+from app.services.budgets import (
+    archive_budget,
+    create_new_budget,
+    delete_budget,
+    get_user_budgets,
+    update_budget,
+)
 from app.services.errors import NotFoundError
 from app.tasks.tasks import run_daily_budgets_processing
 
@@ -100,7 +109,7 @@ def daily_processing(request: Request):
     user_id = request.state.user['id']
     if user_id != 1:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Forbidden')
-    
+
     logger.info("Daily processing")
     run_daily_budgets_processing.delay()
     return {"message": "Daily processing initiated"}

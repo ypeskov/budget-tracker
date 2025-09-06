@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 import pendulum
@@ -9,9 +9,9 @@ from app.logger_config import logger
 from app.models.Budget import Budget, PeriodEnum
 from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
-from app.schemas.budgets_schema import NewBudgetInputSchema, EditBudgetInputSchema
+from app.schemas.budgets_schema import EditBudgetInputSchema, NewBudgetInputSchema
 from app.services.CurrencyProcessor import calc_amount
-from app.services.errors import NotFoundError, InvalidPeriod
+from app.services.errors import InvalidPeriod, NotFoundError
 
 ic.configureOutput(includeContext=True)
 
@@ -228,9 +228,9 @@ def put_outdated_budgets_to_archive(db: Session):
     logger.info(f"Putting outdated budgets to archive at {now} UTC time")
 
     try:
-        outdated_budgets: list[Budget] = (
+        outdated_budgets: list[Budget] = ( # type: ignore
             db.query(Budget)
-            .filter(Budget.end_date < now, Budget.is_archived.is_(False))
+            .filter(Budget.end_date < now, Budget.is_archived.is_(False), Budget.is_deleted.is_(False))
             .all()
         )
     except Exception as e:
