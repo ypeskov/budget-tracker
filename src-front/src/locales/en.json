@@ -52,6 +52,8 @@
     "cashFlowReport": "Cash flow report",
     "balanceReport": "Balance report",
     "expensesReport": "Expenses report",
+    "expenseCategorizationReport": "Expense categorization report",
+    "spendingTrendsReport": "Spending trends report",
     "startDate": "Start date",
     "endDate": "End date",
     "period": "Period",
@@ -88,7 +90,8 @@
     "templates": "Templates",
     "searchTemplates": "Search templates",
     "collectedExpenses": "Collected expenses",
-    "targetBudget": "Target budget"
+    "targetBudget": "Target budget",
+    "loading": "Loading"
   },
   "menu": {
     "home": "Home",
@@ -125,6 +128,8 @@
     "balanceReport": "Balance report",
     "baseCurrency": "Base currency",
     "expensesReport": "Expenses report",
+    "expenseCategorizationReport": "Expense categorization report",
+    "spendingTrendsReport": "Spending trends report",
     "newBudget": "New budget",
     "archive": "Archive",
     "showArchivedBudgets": "Show archived budgets",

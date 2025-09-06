@@ -37,4 +37,14 @@ export class ReportsService {
 
     return await response.json(); // { image: 'data:image/png;base64,...' }
   }
+
+  async getAnalyticsReport(reportType, filters = {}) {
+    const analyticsPrefix = '/analytics';
+    let reportUrl = `${analyticsPrefix}/${reportType}`;
+
+    return await request(reportUrl, {
+      method: 'POST',
+      body: JSON.stringify(filters),
+    }, { userService: this.userService });
+  }
 }

@@ -5,13 +5,17 @@ import { useI18n }    from 'vue-i18n';
 import CashFlowReport  from './CashFlowReportView.vue';
 import BalanceReport   from './BalanceReportView.vue';
 import ExpensesReport  from './ExpensesReportView.vue';
+import ExpenseCategorizationReport from './ExpenseCategorizationReportView.vue';
+import SpendingTrendsReport from './SpendingTrendsReportView.vue';
 
 const { t } = useI18n();
 
 const tabs = [
   { id: 'cash',  icon: 'fa-rotate-right',   key: 'buttons.cashFlowReport', comp: CashFlowReport },
   { id: 'bal',   icon: 'fa-scale-balanced', key: 'buttons.balanceReport',  comp: BalanceReport  },
-  { id: 'exp',   icon: 'fa-chart-pie',      key: 'buttons.expensesReport', comp: ExpensesReport }
+  { id: 'exp',   icon: 'fa-chart-pie',      key: 'buttons.expensesReport', comp: ExpensesReport },
+  { id: 'cat',   icon: 'fa-tags',           key: 'buttons.expenseCategorizationReport', comp: ExpenseCategorizationReport },
+  { id: 'trend', icon: 'fa-chart-line',     key: 'buttons.spendingTrendsReport', comp: SpendingTrendsReport }
 ];
 
 const activeId   = shallowRef(tabs[0].id);

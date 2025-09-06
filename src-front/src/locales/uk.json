@@ -52,6 +52,8 @@
     "cashFlowReport": "Звіт по потоку",
     "balanceReport": "Звіт по балансу",
     "expensesReport": "Звіт по витратам",
+    "expenseCategorizationReport": "Звіт по категоризації витрат",
+    "spendingTrendsReport": "Звіт по трендам витрат",
     "startDate": "Дата початку",
     "endDate": "Дата закінчення",
     "period": "Період",
@@ -88,7 +90,8 @@
     "archiveDate": "Дата архівації",
     "saveAsTemplate": "Зберегти як шаблон",
     "templates": "Шаблони",
-    "searchTemplates": "Пошук шаблонів"
+    "searchTemplates": "Пошук шаблонів",
+    "loading": "Завантаження"
   },
   "menu": {
     "home": "Початок",
@@ -125,6 +128,8 @@
     "balanceReport": "Звіт по балансу",
     "baseCurrency": "Базова валюта",
     "expensesReport": "Звіт по витратам",
+    "expenseCategorizationReport": "Звіт по категоризації витрат",
+    "spendingTrendsReport": "Звіт по трендам витрат",
     "newBudget": "Новий бюджет",
     "archive": "Архівувати",
     "showArchivedBudgets": "Показати архівовані бюджети",
