@@ -10,7 +10,7 @@ from app.models.User import User
 from app.services.reports_generators.CashFlowReportGenerator import CashFlowReportGenerator
 from app.services.reports_generators.BalanceReportGenerator import BalanceReportGenerator
 from app.services.reports_generators.ExpensesReportGenerator import ExpensesReportGenerator
-from app.services.diagrams.builder import build_diagram, prepare_data, combine_small_categories
+from app.services.diagrams.builder import prepare_data, combine_small_categories
 
 ic.configureOutput(includeContext=True)
 
@@ -57,11 +57,29 @@ def get_expenses_by_categories(user_id: int,
 
 
 def get_diagram(expenses: dict, db: Session, user_id: int) -> dict:
-    user: User = db.query(User).get(user_id)
+    """Return Chart.js compatible data for pie chart instead of matplotlib image"""
+    user: User | None = db.query(User).get(user_id)
+    if user is None:
+        return {"labels": [], "data": [], "currency": "USD"}
     base_currency: Currency = user.base_currency
 
-    aggregated_categories = prepare_data(expenses, None)
-    return build_diagram(aggregated_categories, base_currency.code)
+    aggregated_categories = combine_small_categories(prepare_data(expenses, None))
+    aggregated_categories.sort(key=lambda x: x['amount'], reverse=True)
+    
+    total_sum = sum(float(cat['amount']) for cat in aggregated_categories)
+    
+    if total_sum <= 0:
+        return {"labels": [], "data": [], "currency": base_currency.code}
+    
+    # Prepare Chart.js compatible data
+    labels = [cat['label'] for cat in aggregated_categories]
+    data = [float(cat['amount']) for cat in aggregated_categories]
+    
+    return {
+        "labels": labels,
+        "data": data,
+        "currency": base_currency.code
+    }
 
 
 def get_expenses_diagram_data(user_id: int,

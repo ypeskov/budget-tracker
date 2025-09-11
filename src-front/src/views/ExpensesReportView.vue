@@ -2,9 +2,14 @@
 import { onBeforeMount, reactive, ref, computed } from 'vue';
 import { DateTime } from 'luxon';
 import { RouterLink, useRouter } from 'vue-router';
+import { Doughnut } from 'vue-chartjs';
+import { ArcElement, CategoryScale, Chart as ChartJS, Legend, Title, Tooltip } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { processError } from '@/errors/errorHandlers';
 import { Services } from '@/services/servicesConfig';
 import { useUserStore } from '@/stores/user';
+
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, ChartDataLabels);
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -14,9 +19,59 @@ const endDate = ref(DateTime.now().toISODate());
 const hideEmptyCategories = ref(true);
 let expensesReportData = reactive([]);
 
-const pieDiagram = ref('');
+const pieChartData = reactive({
+  labels: [],
+  datasets: [{
+    data: [],
+    backgroundColor: [
+      '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+      '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+    ],
+    borderWidth: 2,
+    borderColor: '#fff'
+  }]
+});
+
+const pieChartOptions = reactive({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'right',
+      labels: {
+        boxWidth: 12,
+        padding: 15
+      }
+    },
+    tooltip: {
+      callbacks: {
+        label: function(context) {
+          const label = context.label || '';
+          const value = context.parsed;
+          const total = context.dataset.data.reduce((a, b) => a + b, 0);
+          const percentage = ((value / total) * 100).toFixed(1);
+          return `${label}: ${percentage}% (${userStore.baseCurrency} ${value.toLocaleString()})`;
+        }
+      }
+    },
+    datalabels: {
+      color: '#fff',
+      font: {
+        weight: 'bold',
+        size: 14
+      },
+      formatter: function(value, context) {
+        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+        const percentage = ((value / total) * 100).toFixed(1);
+        return percentage >= 5 ? `${percentage}%` : ''; // Only show % if slice is >= 5%
+      }
+    }
+  }
+});
+
 const aggregatedCategories = ref([]);
 const aggregatedSum = ref(0);
+const chartLoaded = ref(false);
 
 const grouped = computed(() => {
   const res = [];
@@ -61,8 +116,8 @@ async function getDiagramData() {
 onBeforeMount(async () => {
   try {
     await getReportData();
-    await fetchPieDiagram();
     await getDiagramData();
+    await fetchPieDiagram();
   } catch (e) {
     await processError(e, router);
   }
@@ -72,7 +127,13 @@ async function fetchPieDiagram() {
   const start = startDate.value;
   const end = endDate.value;
   try {
-    pieDiagram.value = await Services.reportsService.getDiagram('pie', start, end);
+    const diagramData = await Services.reportsService.getDiagram('pie', start, end);
+    
+    // Update Chart.js data
+    pieChartData.labels = diagramData.labels;
+    pieChartData.datasets[0].data = diagramData.data;
+    
+    chartLoaded.value = true;
   } catch (e) {
     await processError(e, router);
   }
@@ -80,9 +141,10 @@ async function fetchPieDiagram() {
 
 async function changeDate() {
   if (startDate.value !== '' && endDate.value !== '') {
+    chartLoaded.value = false;
     await getReportData();
-    await fetchPieDiagram();
     await getDiagramData();
+    await fetchPieDiagram();
   }
 }
 
@@ -149,11 +211,14 @@ async function changeHideEmptyCategories() {
       "
     >
       <div class="diagram-img-container">
-        <div v-if="pieDiagram">
-          <img :src="pieDiagram.image" alt="No Diagram" class="img-fluid" />
+        <div v-if="chartLoaded && aggregatedSum > 0" style="height: 300px;">
+          <Doughnut :data="pieChartData" :options="pieChartOptions" />
+        </div>
+        <div v-else-if="!chartLoaded">
+          <span class="text-muted">{{ $t('message.loadingDiagram') }}</span>
         </div>
         <div v-else>
-          <span class="text-muted">{{ $t('message.loadingDiagram') }}</span>
+          <span class="text-muted">{{ $t('message.noData') }}</span>
         </div>
       </div>
 
