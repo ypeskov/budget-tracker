@@ -1,20 +1,6 @@
-import base64
 from decimal import Decimal
-from io import BytesIO
-
-import matplotlib.pyplot as plt
-import matplotlib
-from fastapi.responses import StreamingResponse
-from cachetools import TTLCache, cached
-from icecream import ic
-from matplotlib.figure import Figure
 
 from app.logger_config import logger
-
-ic.configureOutput(includeContext=True)
-cache: TTLCache = TTLCache(maxsize=100, ttl=2)
-
-matplotlib.use('Agg')
 
 
 def prepare_data(categories, category_id=None):
@@ -75,40 +61,4 @@ def combine_small_categories(aggregated_categories, threshold=0.02):
     return aggregated_categories
 
 
-def build_diagram(aggregated_categories, currency_code):
-    aggregated_categories = combine_small_categories(aggregated_categories)
-    aggregated_categories.sort(key=lambda x: x['amount'], reverse=True)
-
-    labels = [f"{cat['label']}"
-              for cat in aggregated_categories]
-    total_sum = sum(cat['amount'] for cat in aggregated_categories)
-
-    if total_sum > 0:
-        sizes = [cat['amount'] / total_sum for cat in aggregated_categories]
-    else:
-        return None
-
-    def autopct(pct):
-        return f'{pct:.1f}%'
-
-    fig = Figure()
-    ax = fig.subplots()
-    ax.pie(sizes,
-           labels=labels,
-           autopct=autopct,
-           shadow=False,
-           pctdistance=0.75,
-           labeldistance=1.1,
-           rotatelabels=False,
-           startangle=0)
-
-    ax.axis('equal')
-
-    buf = BytesIO()
-    fig.savefig(buf, format='png')
-    buf.seek(0)
-
-    plt.close(fig)
-
-    base64_image = base64.b64encode(buf.getvalue()).decode('utf-8')
-    return {"image": f"data:image/png;base64,{base64_image}"}
+# build_diagram function removed - replaced with Chart.js frontend rendering
