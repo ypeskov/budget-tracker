@@ -9,7 +9,7 @@ import { processError } from '@/errors/errorHandlers';
 import { Services } from '@/services/servicesConfig';
 import { useUserStore } from '@/stores/user';
 
-ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, ChartDataLabels);
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -212,7 +212,7 @@ async function changeHideEmptyCategories() {
     >
       <div class="diagram-img-container">
         <div v-if="chartLoaded && aggregatedSum > 0" style="height: 300px;">
-          <Doughnut :data="pieChartData" :options="pieChartOptions" />
+          <Doughnut :data="pieChartData" :options="pieChartOptions" :plugins="[ChartDataLabels]" />
         </div>
         <div v-else-if="!chartLoaded">
           <span class="text-muted">{{ $t('message.loadingDiagram') }}</span>
