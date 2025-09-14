@@ -2,15 +2,11 @@ from typing import cast
 
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
-from icecream import ic
 
 from app.logger_config import logger
-from app.models.Account import Account
-from app.models.UserCategory import UserCategory
 from app.models.Transaction import Transaction
-from app.services.errors import InvalidCategory, AccessDenied
-
-ic.configureOutput(includeContext=True)
+from app.models.UserCategory import UserCategory
+from app.services.errors import AccessDenied, InvalidCategory
 
 
 class NonTransferTypeTransaction:

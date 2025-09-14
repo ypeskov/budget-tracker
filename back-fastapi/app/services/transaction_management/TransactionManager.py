@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from icecream import ic
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.sql import select
 
 from app.logger_config import logger
 from app.models.Account import Account
@@ -51,8 +52,8 @@ class TransactionManager:
 
     def _set_account(self, account_id: int) -> 'TransactionManager':
         try:
-            account = self.db.query(Account).filter_by(id=account_id).one()
-        except NoResultFound as e:
+            account: Account = self.db.execute(select(Account).where(Account.id == account_id)).scalar_one()
+        except NoResultFound:
             logger.error(f'Account {account_id} not found')
             raise InvalidAccount()
 
@@ -65,7 +66,7 @@ class TransactionManager:
         return self
 
     def _set_category(self, category_id) -> 'TransactionManager':
-        category = self.db.query(UserCategory).filter_by(id=category_id).one_or_none()
+        category: UserCategory = self.db.execute(select(UserCategory).filter_by(id=category_id)).scalar_one_or_none()
         if category is None:
             logger.error(f'Category {category_id} not found')
             raise InvalidCategory()
@@ -137,11 +138,11 @@ class TransactionManager:
 
         #  if transaction is transfer, we need to delete linked transaction too
         if self._transaction.is_transfer:
-            indirect_transaction_id = self._transaction.linked_transaction_id
-            indirect_transaction = (self.db.query(Transaction)
-                                    .filter_by(id=indirect_transaction_id)
-                                    .one())
-            prev_indirect_transaction_state = copy.deepcopy(indirect_transaction)
+            indirect_transaction_id: int = self._transaction.linked_transaction_id
+            indirect_transaction: Transaction = (self.db.execute(select(Transaction)
+                                                .filter_by(id=indirect_transaction_id))
+                                                .scalar_one())
+            prev_indirect_transaction_state: Transaction = copy.deepcopy(indirect_transaction)
             indirect_transaction.is_deleted = True
             indirect_transaction_type = NonTransferTypeTransaction(indirect_transaction,
                                                                    prev_indirect_transaction_state,
