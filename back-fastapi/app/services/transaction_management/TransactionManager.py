@@ -9,11 +9,18 @@ from app.logger_config import logger
 from app.models.Account import Account
 from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
-from app.schemas.transaction_schema import UpdateTransactionSchema, CreateTransactionSchema
-from app.services.errors import AccessDenied, InvalidCategory, InvalidAccount
-from app.services.transaction_management.NonTransferTypeTransaction import NonTransferTypeTransaction
-from app.services.transaction_management.TransferTypeTransaction import TransferTypeTransaction
+from app.schemas.transaction_schema import (
+    CreateTransactionSchema,
+    UpdateTransactionSchema,
+)
+from app.services.errors import AccessDenied, InvalidAccount, InvalidCategory
 from app.services.transaction_management.errors import InvalidTransaction
+from app.services.transaction_management.NonTransferTypeTransaction import (
+    NonTransferTypeTransaction,
+)
+from app.services.transaction_management.TransferTypeTransaction import (
+    TransferTypeTransaction,
+)
 from app.tasks.tasks import run_user_budgets_update
 
 ic.configureOutput(includeContext=True)
@@ -169,11 +176,10 @@ class TransactionManager:
 def update_transactions_new_balances(account_id: int, db: Session) -> bool:
     """ Update all transactions new_balance field for given account_id """
     transactions = (db.query(Transaction)
-                    .filter(Transaction.is_deleted == False)
+                    .filter(Transaction.is_deleted == False)  # noqa: E712
                     .filter(Transaction.account_id == account_id)
                     .order_by(Transaction.date_time.asc())
                     .all())
-
     for idx, transaction in enumerate(transactions):
         if transaction.is_income:
             if idx == 0:
