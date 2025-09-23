@@ -4,6 +4,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
 from app.logger_config import logger
+from app.models.Account import Account
 from app.models.Transaction import Transaction
 from app.models.UserCategory import UserCategory
 from app.services.errors import AccessDenied, InvalidCategory
@@ -44,10 +45,23 @@ class NonTransferTypeTransaction:
         return self
 
     def correct_prev_balance(self):
-        if self._prev_transaction_state.is_income:
-            self._transaction.account.balance -= self._prev_transaction_state.amount
+        # Check if the account has changed
+        if self._prev_transaction_state.account_id != self._transaction.account_id:
+            # Account changed - need to fetch the previous account from DB to update its balance
+            prev_account = self._db.query(Account).filter_by(id=self._prev_transaction_state.account_id).one()
+
+            if self._prev_transaction_state.is_income:
+                prev_account.balance -= self._prev_transaction_state.amount
+            else:
+                prev_account.balance += self._prev_transaction_state.amount
+
+            self._db.add(prev_account)
         else:
-            self._transaction.account.balance += self._prev_transaction_state.amount
+            # Same account - adjust current account's balance
+            if self._prev_transaction_state.is_income:
+                self._transaction.account.balance -= self._prev_transaction_state.amount
+            else:
+                self._transaction.account.balance += self._prev_transaction_state.amount
 
 
 def is_category_valid(category: UserCategory, is_income: bool) -> bool:
