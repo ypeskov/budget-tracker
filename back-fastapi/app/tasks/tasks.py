@@ -70,7 +70,7 @@ def make_db_backup(task):
         gdrive_upload_success = False
         if settings.GDRIVE_OAUTH_TOKEN:
             # Check if rclone is installed
-            if not gdrive_backup.check_rclone_installed():
+            if not GoogleDriveBackup.check_rclone_installed():
                 logger.warning("rclone not installed, skipping Google Drive upload")
             else:
                 full_path = backup_dir / filename
