@@ -1,5 +1,5 @@
-from pydantic_settings import SettingsConfigDict, BaseSettings
-from pydantic import field_validator, ValidationInfo
+from pydantic import ValidationInfo, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -56,6 +56,10 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o-mini"
     OPENAI_MAX_TOKENS: int = 1000
     OPENAI_TEMPERATURE: float = 0.3
+
+    # Google Drive backup configuration
+    GDRIVE_OAUTH_TOKEN: str = ""  # OAuth2 token from rclone authorize drive
+    GDRIVE_FOLDER_PATH: str = "services/orgfin.run/backups"
 
     model_config = SettingsConfigDict(env_file=(".env", ".env.prod"))
 

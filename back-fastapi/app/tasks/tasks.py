@@ -9,11 +9,15 @@ from app.database import get_db
 from app.logger_config import logger
 from app.models.ActivationToken import ActivationToken
 from app.models.User import User
-from app.services.budgets import put_outdated_budgets_to_archive, update_budget_with_amount
+from app.services.budgets import (
+    put_outdated_budgets_to_archive,
+    update_budget_with_amount,
+)
 from app.services.exchange_rates import update_exchange_rates as update_exchange_rates
 from app.tasks.errors import BackupPostgresDbError
 from app.utils.db.backup import backup_postgres_db
 from app.utils.email import send_html_email
+from app.utils.gdrive_backup import GoogleDriveBackup
 
 settings = Settings()
 
@@ -61,6 +65,23 @@ def make_db_backup(task):
             backup_dir=backup_dir,
         )
 
+        # Upload to Google Drive if configured
+        gdrive_backup = GoogleDriveBackup()
+        gdrive_upload_success = False
+        if settings.GDRIVE_OAUTH_TOKEN:
+            # Check if rclone is installed
+            if not gdrive_backup.check_rclone_installed():
+                logger.warning("rclone not installed, skipping Google Drive upload")
+            else:
+                full_path = backup_dir / filename
+                gdrive_upload_success = gdrive_backup.upload_to_gdrive(str(full_path))
+                if gdrive_upload_success:
+                    logger.info(f"Backup {filename} uploaded to Google Drive successfully")
+                else:
+                    logger.warning(f"Failed to upload backup {filename} to Google Drive")
+        else:
+            logger.info("GDRIVE_OAUTH_TOKEN not set, skipping Google Drive upload")
+
         send_email.delay(  # type: ignore
             subject='Database backup created',
             recipients=settings.ADMINS_NOTIFICATION_EMAILS,
@@ -68,11 +89,15 @@ def make_db_backup(task):
             template_body={
                 'env_name': settings.ENVIRONMENT,
                 'db_name': settings.DB_NAME,
+                'gdrive_uploaded': gdrive_upload_success,
             },
             filename=filename,
         )
 
-        return {'message': 'Backup of the database is successfully created'}
+        return {
+            'message': 'Backup of the database is successfully created',
+            'gdrive_uploaded': gdrive_upload_success
+        }
     except BackupPostgresDbError as e:
         logger.error(e)
         task.retry(exc=e)
