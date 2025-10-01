@@ -13,23 +13,22 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from icecream import ic, install
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import Settings
-from app.routes.auth import router as auth_router
+from app.middleware.token_update import update_token
 from app.routes.accounts import router as accounts_router
-from app.routes.transations import router as transaction_router
+from app.routes.analytics import router as analytics_router
+from app.routes.auth import router as auth_router
+from app.routes.budgets import router as budgets_router
 from app.routes.categories import router as category_router
 from app.routes.currencies import router as currency_router
-from app.routes.user_settings import router as settings_router
 from app.routes.exchange_rates import router as exchange_rates_router
-from app.routes.reports import router as reports_router
 from app.routes.management import router as management_router
-from app.routes.budgets import router as budgets_router
-from app.routes.analytics import router as analytics_router
-from app.middleware.token_update import update_token
-
-from icecream import install, ic
+from app.routes.reports import router as reports_router
+from app.routes.transations import router as transaction_router
+from app.routes.user_settings import router as settings_router
 
 install()
 
