@@ -66,7 +66,7 @@ token = {self.gdrive_oauth_token}
             logger.info(f"Uploading {file_path.name} to Google Drive...")
 
             # Execute rclone
-            result = subprocess.run(
+            result: subprocess.CompletedProcess[str]  = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -96,64 +96,13 @@ token = {self.gdrive_oauth_token}
                 if config_path.exists():
                     config_path.unlink()
                     logger.debug("Temporary rclone config cleaned up")
+                return True
             except Exception as e:
                 logger.error(f"Failed to cleanup temp config: {e}")
+                return False
 
-    def list_backups(self) -> Optional[list]:
-        """List backups in Google Drive folder."""
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.conf', delete=False) as tmp_config:
-            config_path = Path(tmp_config.name)
-
-        try:
-            if not self._setup_rclone_config(config_path):
-                return None
-
-            cmd = [
-                "rclone", "lsjson",
-                f"gdrive:{self.gdrive_folder_path}/",
-                "--config", str(config_path),
-                "--max-depth", "1"
-            ]
-
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
-
-            if result.returncode == 0:
-                import json
-                files = json.loads(result.stdout)
-                backups = []
-
-                for file_info in files:
-                    if not file_info.get("IsDir", False):
-                        file_name = file_info.get("Name", "")
-                        if file_name.endswith((".sql", ".sql.gz", ".sql.zip")):
-                            backups.append({
-                                "name": file_name,
-                                "size": file_info.get("Size", 0),
-                                "modified": file_info.get("ModTime", "")
-                            })
-
-                return sorted(backups, key=lambda x: x["modified"], reverse=True)
-            else:
-                logger.error(f"Failed to list Google Drive backups: {result.stderr}")
-                return None
-
-        except Exception as e:
-            logger.error(f"Failed to list Google Drive backups: {e}")
-            return None
-        finally:
-            try:
-                if config_path.exists():
-                    config_path.unlink()
-            except Exception as e:
-                logger.error(f"Failed to cleanup temp config: {e}")
-
-    def check_rclone_installed(self) -> bool:
+    @staticmethod
+    def check_rclone_installed() -> bool:
         """Check if rclone is installed and accessible."""
         try:
             result = subprocess.run(

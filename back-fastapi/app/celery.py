@@ -47,4 +47,12 @@ celery_app.conf.beat_schedule = {
         "task": "app.tasks.tasks.run_daily_budgets_processing",
         "schedule": crontab(hour=budgets_processing_hour, minute=budgets_processing_minute),
     },
+    "process-due-planned-transactions": {
+        "task": "app.tasks.tasks.process_due_planned_transactions",
+        "schedule": crontab(hour=0, minute=5),  # Daily at 00:05
+    },
+    "delete-old-activation-tokens": {
+        "task": "app.tasks.tasks.delete_old_activation_tokens",
+        "schedule": crontab(hour=2, minute=0),  # Daily at 02:00
+    },
 }

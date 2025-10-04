@@ -164,6 +164,15 @@ const router = createRouter({
       },
       component: () => import('../views/Settings.vue'),
     },
+    {
+      path: '/planning',
+      name: 'planning',
+      meta: {
+        requiresAuth: true,
+        requiresUnAuth: false,
+      },
+      component: () => import('../views/FinancialPlanningView.vue'),
+    },
   ],
 });
 

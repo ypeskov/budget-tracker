@@ -34,7 +34,7 @@ if [[ $# -eq 0 ]]; then
 elif [[ $1 == "push" ]]; then
     tag=$(get_tag "${@:2}")
     build_and_tag $tag
-    docker push ypeskov/orgfin-api-python:$tag
+    docker push ypeskov/orgfin-api-python:"$tag"
 
     echo "$tag" > version.txt
 else
