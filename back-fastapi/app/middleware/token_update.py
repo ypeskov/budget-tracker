@@ -20,6 +20,11 @@ async def update_token(request: Request, call_next):
         response_body = b""
         async for chunk in response.body_iterator:
             response_body += chunk
+
+        # Skip token update if response body is empty (e.g., 204 No Content)
+        if not response_body:
+            return response
+
         response_json = json.loads(response_body.decode("utf-8"))
         modified_response = json.dumps(response_json).encode("utf-8")
 

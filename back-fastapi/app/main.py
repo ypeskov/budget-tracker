@@ -25,7 +25,9 @@ from app.routes.budgets import router as budgets_router
 from app.routes.categories import router as category_router
 from app.routes.currencies import router as currency_router
 from app.routes.exchange_rates import router as exchange_rates_router
+from app.routes.financial_planning import router as financial_planning_router
 from app.routes.management import router as management_router
+from app.routes.planned_transactions import router as planned_transactions_router
 from app.routes.reports import router as reports_router
 from app.routes.transations import router as transaction_router
 from app.routes.user_settings import router as settings_router
@@ -60,6 +62,8 @@ app.include_router(reports_router)
 app.include_router(management_router)
 app.include_router(budgets_router)
 app.include_router(analytics_router)
+app.include_router(planned_transactions_router)
+app.include_router(financial_planning_router)
 
 if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8000)

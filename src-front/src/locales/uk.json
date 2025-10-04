@@ -30,6 +30,8 @@
     "created": "Створено",
     "notes": "Примітки",
     "expense": "Витрата",
+    "edit": "Редагувати",
+    "delete": "Видалити",
     "income": "Дохід",
     "transfer": "Переказ",
     "label": "Мітка",
@@ -103,6 +105,7 @@
     "register": "Реєстрація",
     "reports": "Звіти",
     "budgets": "Бюджети",
+    "planning": "Планування",
     "collectedExpenses": "Накопичені витрати",
     "targetBudget": "Цільовий бюджет",
     "dashboard": "Панель",
@@ -156,5 +159,93 @@
         "desc": "Керуйте фінансами на ходу за допомогою нашого адаптивного мобільного інтерфейсу."
       }
     }
+  },
+  "financialPlanning": {
+    "title": "Фінансове планування",
+    "tabs": {
+      "plannedTransactions": "Заплановані транзакції",
+      "futureBalance": "Майбутній баланс",
+      "projection": "Прогноз балансу"
+    },
+    "createPlanned": "Створити заплановану транзакцію",
+    "noPlannedTransactions": "Заплановані транзакції не знайдено. Створіть першу заплановану транзакцію, щоб почати планувати свої фінанси.",
+    "transactionsCount": "Показано {count} запланованих транзакцій",
+    "recurring": "Повторювана",
+    "execute": "Виконати",
+    "calculateBalance": "Розрахувати майбутній баланс",
+    "targetDate": "Цільова дата",
+    "calculate": "Розрахувати",
+    "projectedBalance": "Прогнозований баланс",
+    "currentBalance": "Поточний баланс",
+    "plannedIncome": "Запланований дохід",
+    "plannedExpenses": "Заплановані витрати",
+    "balanceProjection": "Прогноз балансу в часі",
+    "projectionDescription": "Подивіться, як зміниться ваш баланс з часом на основі запланованих транзакцій.",
+    "comingSoon": "Графік прогнозу балансу скоро з'явиться!",
+    "stats": {
+      "upcoming": "Майбутні",
+      "overdue": "Прострочені",
+      "income": "Загальний дохід",
+      "expenses": "Загальні витрати"
+    },
+    "recurrenceFrequency": {
+      "daily": "Щоденно",
+      "weekly": "Щотижня",
+      "monthly": "Щомісяця",
+      "yearly": "Щороку"
+    },
+    "form": {
+      "plannedDate": "Заплановано на",
+      "isRecurring": "Повторювана",
+      "isActive": "Активна",
+      "frequency": "Частота",
+      "interval": "Повторювати кожні",
+      "endDate": "Дата закінчення",
+      "count": "Кількість повторень"
+    },
+    "editPlanned": "Редагувати заплановану транзакцію",
+    "selectAccount": "Оберіть рахунок",
+    "transactionType": "Тип транзакції",
+    "recurrenceSettings": "Налаштування повторення",
+    "endCondition": "Умова закінчення",
+    "numberOfOccurrences": "Кількість повторень",
+    "everyNDays": "Кожні {n} день/днів",
+    "everyNWeeks": "Кожні {n} тиждень/тижнів",
+    "confirmDelete": "Видалити заплановану транзакцію?",
+    "confirmDeleteMessage": "Ви впевнені, що хочете видалити цю заплановану транзакцію? Цю дію неможливо скасувати.",
+    "everyNMonths": "Кожні {n} місяць/місяців",
+    "everyNYears": "Кожні {n} рік/років",
+    "in30Days": "за 30 днів",
+    "transactions": "транзакцій",
+    "netChange": "Зміна",
+    "overdue": "Прострочені",
+    "today": "Сьогодні",
+    "tomorrow": "Завтра",
+    "thisWeek": "Цього тижня",
+    "later": "Пізніше",
+    "loadingProjection": "Завантаження прогнозу...",
+    "upcomingTransactions": "Майбутні транзакції",
+    "projectionEndDate": "Кінцева дата прогнозу",
+    "projectionPeriod": "Період відображення",
+    "resetSettings": "Скинути до стандартних",
+    "periods": {
+      "daily": "Щоденно",
+      "weekly": "Щотижня",
+      "monthly": "Щомісяця"
+    },
+    "inNDays": "через {n} днів",
+    "inNMonths": "через {n} місяців",
+    "inNYears": "через {n} років"
+  },
+  "common": {
+    "loading": "Завантаження...",
+    "cancel": "Скасувати",
+    "create": "Створити",
+    "update": "Оновити",
+    "noLabel": "Без мітки",
+    "income": "Дохід",
+    "expense": "Витрата",
+    "edit": "Редагувати",
+    "delete": "Видалити"
   }
 }

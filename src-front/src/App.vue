@@ -64,6 +64,9 @@ const goToSettings = () => router.push({ name: 'settings' });
           <RouterLink :to="{ name: 'budgets'      }" class="btn icon" :title="t('menu.budgets')">
             <i class="fa-solid fa-list-check"></i>
           </RouterLink>
+          <RouterLink :to="{ name: 'planning'     }" class="btn icon" :title="t('menu.planning')">
+            <i class="fa-solid fa-calendar-days"></i>
+          </RouterLink>
           <RouterLink :to="{ name: 'logout'       }" class="btn icon" :title="t('menu.logout')">
             <i class="fa-solid fa-right-from-bracket"></i>
           </RouterLink>

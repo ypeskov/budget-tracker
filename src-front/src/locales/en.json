@@ -30,6 +30,8 @@
     "created": "Created",
     "notes": "Notes",
     "expense": "Expense",
+    "edit": "Edit",
+    "delete": "Delete",
     "income": "Income",
     "transfer": "Transfer",
     "label": "Label",
@@ -103,6 +105,7 @@
     "register": "Register",
     "reports": "Reports",
     "budgets": "Budgets",
+    "planning": "Planning",
     "collectedExpenses": "Collected expenses",
     "targetBudget": "Target budget",
     "dashboard": "Dashboard",
@@ -156,5 +159,93 @@
         "desc": "Manage your finances on the go with our responsive mobile interface."
       }
     }
+  },
+  "financialPlanning": {
+    "title": "Financial Planning",
+    "tabs": {
+      "plannedTransactions": "Planned Transactions",
+      "futureBalance": "Future Balance",
+      "projection": "Balance Projection"
+    },
+    "createPlanned": "Create Planned Transaction",
+    "noPlannedTransactions": "No planned transactions found. Create your first planned transaction to start planning your finances.",
+    "transactionsCount": "Showing {count} planned transactions",
+    "recurring": "Recurring",
+    "execute": "Execute",
+    "calculateBalance": "Calculate Future Balance",
+    "targetDate": "Target Date",
+    "calculate": "Calculate",
+    "projectedBalance": "Projected Balance",
+    "currentBalance": "Current Balance",
+    "plannedIncome": "Planned Income",
+    "plannedExpenses": "Planned Expenses",
+    "balanceProjection": "Balance Projection Over Time",
+    "projectionDescription": "View how your balance will change over time based on planned transactions.",
+    "comingSoon": "Balance projection chart coming soon!",
+    "stats": {
+      "upcoming": "Upcoming",
+      "overdue": "Overdue",
+      "income": "Total Income",
+      "expenses": "Total Expenses"
+    },
+    "recurrenceFrequency": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "form": {
+      "plannedDate": "Planned Date",
+      "isRecurring": "Is Recurring",
+      "isActive": "Active",
+      "frequency": "Frequency",
+      "interval": "Repeat Every",
+      "endDate": "End Date",
+      "count": "Number of Occurrences"
+    },
+    "editPlanned": "Edit Planned Transaction",
+    "selectAccount": "Select an account",
+    "transactionType": "Transaction Type",
+    "recurrenceSettings": "Recurrence Settings",
+    "endCondition": "End Condition",
+    "numberOfOccurrences": "Number of occurrences",
+    "everyNDays": "Every {n} day(s)",
+    "everyNWeeks": "Every {n} week(s)",
+    "confirmDelete": "Delete Planned Transaction?",
+    "confirmDeleteMessage": "Are you sure you want to delete this planned transaction? This action cannot be undone.",
+    "everyNMonths": "Every {n} month(s)",
+    "everyNYears": "Every {n} year(s)",
+    "in30Days": "in 30 days",
+    "transactions": "transactions",
+    "netChange": "Net Change",
+    "overdue": "Overdue",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "thisWeek": "This Week",
+    "later": "Later",
+    "loadingProjection": "Loading projection...",
+    "upcomingTransactions": "Upcoming Transactions",
+    "projectionEndDate": "Projection End Date",
+    "projectionPeriod": "Display Period",
+    "resetSettings": "Reset to Default",
+    "periods": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "inNDays": "in {n} days",
+    "inNMonths": "in {n} months",
+    "inNYears": "in {n} years"
+  },
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "create": "Create",
+    "update": "Update",
+    "noLabel": "No label",
+    "income": "Income",
+    "expense": "Expense",
+    "edit": "Edit",
+    "delete": "Delete"
   }
 }

@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## IMPORTANT: Context Loading Instructions
+
+**ALWAYS read the following component-specific documentation files when working with the corresponding parts of the project:**
+
+1. **Backend work** (`back-fastapi/`): Read `back-fastapi/CLAUDE.md` for detailed backend architecture, services, and patterns
+2. **Frontend work** (`src-front/`): Read `src-front/CLAUDE.md` for detailed frontend architecture, components, and patterns
+
+These files contain essential context about implementation details, patterns, and best practices specific to each component.
+
 ## Project Overview
 
 **Budget Tracker** is a self-hosted full-stack budget tracking application that allows users to manage their personal finances privately. The project consists of three main components:
@@ -146,6 +155,8 @@ For detailed backend documentation, see `back-fastapi/CLAUDE.md`
 - **Auth**: `/api/v1/auth/*` - Registration, login, Google OAuth
 - **Accounts**: `/api/v1/accounts/*` - Account management
 - **Transactions**: `/api/v1/transactions/*` - Income, expense, transfer operations
+- **Planned Transactions**: `/api/v1/planned-transactions/*` - Future transaction planning
+- **Financial Planning**: `/api/v1/financial-planning/*` - Future balance calculations and projections
 - **Categories**: `/api/v1/categories/*` - Category management
 - **Budgets**: `/api/v1/budgets/*` - Budget tracking
 - **Reports**: `/api/v1/reports/*` - Financial reports
@@ -175,24 +186,32 @@ For detailed backend documentation, see `back-fastapi/CLAUDE.md`
    - Automatic rollover of unused amounts
    - Budget status tracking
 
-5. **Reports & Analytics**
+5. **Financial Planning**
+   - Planned transactions (one-time and recurring)
+   - Future balance calculations
+   - Balance projections over time
+   - Automatic transaction execution
+   - Recurrence rules (daily, weekly, monthly, yearly)
+
+6. **Reports & Analytics**
    - Balance reports
    - Cash flow analysis
    - Expense categorization
    - Spending trends
    - OpenAI-powered expense insights
 
-6. **Background Tasks** (Celery)
+7. **Background Tasks** (Celery)
    - Daily exchange rate updates (13:00)
    - Daily database backups with Google Drive upload (14:00)
    - Monthly budget processing (00:01)
-   - Token cleanup
+   - Planned transactions processing (00:05)
+   - Token cleanup (02:00)
 
 ## Frontend (Vue.js 3)
 
 ### Architecture
 
-- **State Management**: Pinia stores for auth, accounts, transactions, categories, currencies
+- **State Management**: Pinia stores for auth, accounts, transactions, categories, currencies, planned transactions
 - **Routing**: Vue Router with navigation guards for authentication
 - **API Communication**: Axios-based service layer (`src/services/`)
 - **Internationalization**: Vue i18n (English, Ukrainian)
@@ -207,6 +226,7 @@ For detailed backend documentation, see `back-fastapi/CLAUDE.md`
 - `TransactionsListView.vue` - Transaction list with filters
 - `TransactionNewView.vue` - Create/edit transactions
 - `BudgetsView.vue` - Budget management
+- `FinancialPlanningView.vue` - Planned transactions and future balance projections
 - `ReportsView.vue` - Reports hub
 - `BalanceReportView.vue` - Balance over time
 - `CashFlowReportView.vue` - Income vs expenses
@@ -221,6 +241,7 @@ For detailed backend documentation, see `back-fastapi/CLAUDE.md`
 - `authStore` - Authentication state, JWT token management
 - `accountsStore` - Account data and operations
 - `transactionsStore` - Transaction CRUD operations
+- `plannedTransactionsStore` - Planned transactions and financial planning
 - `categoriesStore` - Category management
 - `currenciesStore` - Currency data and exchange rates
 - `budgetsStore` - Budget tracking
@@ -274,6 +295,7 @@ go run cmd/cli.go [options]
 - `users` - User accounts
 - `accounts` - Financial accounts
 - `transactions` - All financial transactions
+- `planned_transactions` - Planned/future transactions
 - `categories` (default_categories, user_categories) - Transaction categories
 - `currencies` - Supported currencies
 - `exchange_rate_history` - Historical exchange rates
@@ -299,7 +321,12 @@ Configured in `back-fastapi/app/tasks/tasks.py`:
    - Archives outdated budgets
    - Updates budget amounts
 
-4. **delete_old_activation_tokens** - Cleanup expired tokens
+4. **process_due_planned_transactions** - Check and log due planned transactions
+   - Schedule: Daily at 00:05
+   - Finds transactions due today
+   - Logs them (manual execution required)
+
+5. **delete_old_activation_tokens** - Cleanup expired tokens
    - Schedule: Daily at 02:00
 
 ## Deployment
