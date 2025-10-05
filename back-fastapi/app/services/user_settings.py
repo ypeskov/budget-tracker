@@ -26,7 +26,9 @@ def get_languages(db: Session) -> list[Language]:
 
 def generate_initial_settings(user_id: int, db: Session):
     settings = {
-        'language': 'en'
+        'language': 'en',
+        'projectionEndDate': None,
+        'projectionPeriod': None
     }
 
     new_settings = UserSettings(settings=settings, user_id=user_id)

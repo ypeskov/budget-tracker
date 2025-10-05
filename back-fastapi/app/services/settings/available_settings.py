@@ -1,4 +1,6 @@
 existing_settings = {
-    "language": ""
+    "language": "",
+    "projectionEndDate": None,
+    "projectionPeriod": None
 }
 

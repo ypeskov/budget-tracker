@@ -21,5 +21,10 @@ def validate_settings(template_json, input_json) -> None:
         if isinstance(value, dict):
             validate_settings(template_json[key], value)
         else:
-            if not isinstance(value, type(template_json[key])):
+            # Skip type validation if template value is None (optional field)
+            if template_json[key] is not None:
+                if not isinstance(value, type(template_json[key])):
+                    raise IncorrectSettingsTypeError(key)
+            # If template is None but value is provided, accept string or None
+            elif value is not None and not isinstance(value, str):
                 raise IncorrectSettingsTypeError(key)

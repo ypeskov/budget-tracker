@@ -156,6 +156,7 @@ import { useUserStore } from '@/stores/user';
 import { PlannedTransactionsService } from '@/services/plannedTransactions';
 import { AccountService } from '@/services/accounts';
 import { CategoriesService } from '@/services/categories';
+import { SettingsService } from '@/services/settings';
 import BalanceProjectionChart from '@/components/planning/BalanceProjectionChart.vue';
 import StatisticsPanel from '@/components/planning/StatisticsPanel.vue';
 import UpcomingTransactionsList from '@/components/planning/UpcomingTransactionsList.vue';
@@ -170,6 +171,7 @@ const userStore = useUserStore();
 const plannedTxService = new PlannedTransactionsService(userStore, accountStore);
 const accountService = new AccountService(accountStore, userStore);
 const categoriesService = new CategoriesService(categoryStore, userStore);
+const settingsService = new SettingsService(userStore);
 
 const showModal = ref(false);
 const selectedTransaction = ref(null);
@@ -181,14 +183,36 @@ const transactionToDelete = ref(null);
 
 // Projection settings
 const getDefaultEndDate = () => {
+  // Check user settings first
+  const savedDate = userStore.settings?.projectionEndDate;
+  if (savedDate) {
+    // Validate that saved date is in the future
+    const saved = new Date(savedDate);
+    const now = new Date();
+    if (saved > now) {
+      return savedDate;
+    }
+  }
+
+  // Default: 30 days from now
   const date = new Date();
   date.setDate(date.getDate() + 30);
   return date.toISOString().split('T')[0];
 };
 
+const getDefaultPeriod = () => {
+  // Check user settings first
+  const savedPeriod = userStore.settings?.projectionPeriod;
+  if (savedPeriod && ['daily', 'weekly', 'monthly'].includes(savedPeriod)) {
+    return savedPeriod;
+  }
+  // Default: daily
+  return 'daily';
+};
+
 const projectionSettings = ref({
   endDate: getDefaultEndDate(),
-  period: 'daily',
+  period: getDefaultPeriod(),
 });
 
 // Computed properties
@@ -323,7 +347,20 @@ async function loadFutureBalance() {
   }
 }
 
-function onProjectionSettingsChange() {
+async function onProjectionSettingsChange() {
+  // Save settings to user settings
+  try {
+    const updatedSettings = {
+      ...userStore.settings,
+      projectionEndDate: projectionSettings.value.endDate,
+      projectionPeriod: projectionSettings.value.period,
+    };
+    await settingsService.saveUserSettings(updatedSettings);
+    Object.assign(userStore.settings, updatedSettings);
+  } catch (error) {
+    console.error('Failed to save projection settings:', error);
+  }
+
   // Reload data when settings change
   Promise.all([
     loadBalanceProjection(),
@@ -332,12 +369,34 @@ function onProjectionSettingsChange() {
   ]);
 }
 
-function resetProjectionSettings() {
+async function resetProjectionSettings() {
+  // Reset to default (30 days, daily period)
+  const date = new Date();
+  date.setDate(date.getDate() + 30);
   projectionSettings.value = {
-    endDate: getDefaultEndDate(),
+    endDate: date.toISOString().split('T')[0],
     period: 'daily',
   };
-  onProjectionSettingsChange();
+
+  // Save reset values to user settings
+  try {
+    const updatedSettings = {
+      ...userStore.settings,
+      projectionEndDate: projectionSettings.value.endDate,
+      projectionPeriod: projectionSettings.value.period,
+    };
+    await settingsService.saveUserSettings(updatedSettings);
+    Object.assign(userStore.settings, updatedSettings);
+  } catch (error) {
+    console.error('Failed to save projection settings:', error);
+  }
+
+  // Reload data
+  Promise.all([
+    loadBalanceProjection(),
+    loadFutureBalance(),
+    loadUpcomingOccurrences(),
+  ]);
 }
 
 function showCreateModal() {
