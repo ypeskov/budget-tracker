@@ -228,6 +228,8 @@
     "projectionEndDate": "Кінцева дата прогнозу",
     "projectionPeriod": "Період відображення",
     "resetSettings": "Скинути до стандартних",
+    "showInactive": "Показати неактивні",
+    "inactive": "Неактивна",
     "periods": {
       "daily": "Щоденно",
       "weekly": "Щотижня",

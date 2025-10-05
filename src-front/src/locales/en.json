@@ -228,6 +228,8 @@
     "projectionEndDate": "Projection End Date",
     "projectionPeriod": "Display Period",
     "resetSettings": "Reset to Default",
+    "showInactive": "Show inactive",
+    "inactive": "Inactive",
     "periods": {
       "daily": "Daily",
       "weekly": "Weekly",

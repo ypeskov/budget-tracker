@@ -33,7 +33,7 @@
           <div class="card settings-card">
             <div class="card-body">
               <div class="row align-items-end g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <label class="form-label">{{ $t('financialPlanning.projectionEndDate') }}</label>
                   <input
                     type="date"
@@ -42,7 +42,7 @@
                     @change="onProjectionSettingsChange"
                   />
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <label class="form-label">{{ $t('financialPlanning.projectionPeriod') }}</label>
                   <select
                     class="form-select"
@@ -54,7 +54,22 @@
                     <option value="monthly">{{ $t('financialPlanning.periods.monthly') }}</option>
                   </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="showInactiveCheckbox"
+                      v-model="showInactive"
+                      @change="onShowInactiveChange"
+                    />
+                    <label class="form-check-label" for="showInactiveCheckbox">
+                      {{ $t('financialPlanning.showInactive') }}
+                      <span v-if="inactiveCount > 0" class="badge bg-secondary ms-1">{{ inactiveCount }}</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-3">
                   <button class="btn btn-outline-secondary w-100" @click="resetProjectionSettings">
                     <i class="bi bi-arrow-clockwise"></i>
                     {{ $t('financialPlanning.resetSettings') }}
@@ -180,6 +195,7 @@ const balanceProjection = ref(null);
 const futureBalanceData = ref(null);
 const showDeleteConfirm = ref(false);
 const transactionToDelete = ref(null);
+const showInactive = ref(false);
 
 // Projection settings
 const getDefaultEndDate = () => {
@@ -256,6 +272,10 @@ const expenseTransactionsCount = computed(() => {
   return futureBalanceData.value?.expensesCount || 0;
 });
 
+const inactiveCount = computed(() => {
+  return store.plannedTransactions.filter(t => !t.isActive).length;
+});
+
 onMounted(async () => {
   await Promise.all([
     loadAccounts(),
@@ -296,6 +316,7 @@ async function loadPlannedTransactions() {
     store.setLoading(true);
     const transactions = await plannedTxService.getPlannedTransactions({
       isExecuted: false,
+      includeInactive: true, // Load all to count inactive
     });
     store.setPlannedTransactions(transactions);
   } catch (error) {
@@ -310,7 +331,7 @@ async function loadUpcomingOccurrences() {
     const days = Math.ceil((new Date(projectionSettings.value.endDate) - new Date()) / (1000 * 60 * 60 * 24));
     const occurrences = await plannedTxService.getUpcomingOccurrences({
       days: Math.max(days, 30),
-      includeInactive: false,
+      includeInactive: showInactive.value,
     });
     store.setUpcomingOccurrences(occurrences);
   } catch (error) {
@@ -324,7 +345,7 @@ async function loadBalanceProjection() {
       endDate: new Date(projectionSettings.value.endDate).toISOString(),
       period: projectionSettings.value.period,
       accountIds: null,
-      includeInactive: false,
+      includeInactive: showInactive.value,
     });
 
     balanceProjection.value = projection;
@@ -338,13 +359,22 @@ async function loadFutureBalance() {
     const futureBalance = await plannedTxService.calculateFutureBalance({
       targetDate: new Date(projectionSettings.value.endDate).toISOString(),
       accountIds: null,
-      includeInactive: false,
+      includeInactive: showInactive.value,
     });
 
     futureBalanceData.value = futureBalance;
   } catch (error) {
     console.error('Failed to load future balance:', error);
   }
+}
+
+async function onShowInactiveChange() {
+  // Reload all data when checkbox changes
+  Promise.all([
+    loadBalanceProjection(),
+    loadFutureBalance(),
+    loadUpcomingOccurrences(),
+  ]);
 }
 
 async function onProjectionSettingsChange() {

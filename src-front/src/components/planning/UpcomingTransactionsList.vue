@@ -17,7 +17,7 @@
           v-for="transaction in group.transactions"
           :key="`${transaction.plannedTransactionId}-${transaction.occurrenceDate}`"
           class="transaction-card"
-          :class="{ overdue: group.isOverdue }"
+          :class="{ overdue: group.isOverdue, inactive: !transaction.isActive }"
         >
           <div class="transaction-icon" :class="transaction.isIncome ? 'income' : 'expense'">
             <i :class="transaction.isIncome ? 'bi bi-arrow-up-circle' : 'bi bi-arrow-down-circle'"></i>
@@ -26,6 +26,10 @@
           <div class="transaction-info">
             <div class="transaction-header">
               <span class="transaction-label">{{ transaction.label || $t('common.noLabel') }}</span>
+              <span v-if="!transaction.isActive" class="inactive-badge">
+                <i class="bi bi-pause-circle"></i>
+                {{ $t('financialPlanning.inactive') }}
+              </span>
             </div>
             <div class="transaction-details">
               <span class="transaction-date">
@@ -264,6 +268,11 @@ function formatCurrency(amount) {
   background-color: #fff9e6;
 }
 
+.transaction-card.inactive {
+  opacity: 0.5;
+  background-color: #f8f9fa;
+}
+
 .transaction-icon {
   font-size: 1.5rem;
   width: 40px;
@@ -305,6 +314,17 @@ function formatCurrency(amount) {
   font-size: 0.75rem;
   background: #e7f1ff;
   color: #004085;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.inactive-badge {
+  font-size: 0.75rem;
+  background: #e9ecef;
+  color: #6c757d;
   padding: 0.125rem 0.5rem;
   border-radius: 12px;
   display: inline-flex;
