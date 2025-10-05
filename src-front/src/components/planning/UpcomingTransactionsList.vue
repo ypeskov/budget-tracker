@@ -17,7 +17,7 @@
           v-for="transaction in group.transactions"
           :key="`${transaction.plannedTransactionId}-${transaction.occurrenceDate}`"
           class="transaction-card"
-          :class="{ overdue: group.isOverdue, inactive: !transaction.isActive }"
+          :class="{ overdue: group.isOverdue, inactive: transaction.isActive === false }"
         >
           <div class="transaction-icon" :class="transaction.isIncome ? 'income' : 'expense'">
             <i :class="transaction.isIncome ? 'bi bi-arrow-up-circle' : 'bi bi-arrow-down-circle'"></i>
@@ -26,7 +26,7 @@
           <div class="transaction-info">
             <div class="transaction-header">
               <span class="transaction-label">{{ transaction.label || $t('common.noLabel') }}</span>
-              <span v-if="!transaction.isActive" class="inactive-badge">
+              <span v-if="transaction.isActive === false" class="inactive-badge">
                 <i class="bi bi-pause-circle"></i>
                 {{ $t('financialPlanning.inactive') }}
               </span>

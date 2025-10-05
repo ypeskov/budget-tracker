@@ -265,7 +265,8 @@ def generate_occurrences(
                 occurrence_date=planned_date,
                 amount=planned_transaction.amount,
                 is_income=planned_transaction.is_income,
-                label=planned_transaction.label
+                label=planned_transaction.label,
+                is_active=planned_transaction.is_active
             )]
         return []
 
@@ -306,7 +307,8 @@ def generate_occurrences(
                 occurrence_date=current_date,
                 amount=planned_transaction.amount,
                 is_income=planned_transaction.is_income,
-                label=planned_transaction.label
+                label=planned_transaction.label,
+                is_active=planned_transaction.is_active
             ))
             occurrence_count += 1
 
@@ -354,6 +356,7 @@ def get_upcoming_occurrences(
     # Get all non-deleted, non-executed planned transactions
     filters = {
         'is_executed': False,
+        'include_inactive': include_inactive,
     }
 
     if not include_inactive:
@@ -365,9 +368,20 @@ def get_upcoming_occurrences(
 
     # Generate occurrences for each planned transaction
     for pt in planned_transactions:
+        # For non-executed transactions, include past occurrences to show overdue items
+        # Look back up to 365 days to catch overdue transactions
+        lookback_start = datetime.now(timezone.utc) - timedelta(days=365)
+
+        # If planned_date is in the past but within lookback window, start from there
+        # Otherwise start from now
+        if pt.planned_date < datetime.now(timezone.utc) and pt.planned_date > lookback_start:
+            start_date = pt.planned_date
+        else:
+            start_date = datetime.now(timezone.utc)
+
         occurrences = generate_occurrences(
             planned_transaction=pt,
-            start_date=datetime.now(),
+            start_date=start_date,
             end_date=end_date
         )
         all_occurrences.extend(occurrences)

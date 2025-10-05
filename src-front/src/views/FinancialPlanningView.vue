@@ -345,7 +345,7 @@ async function loadBalanceProjection() {
       endDate: new Date(projectionSettings.value.endDate).toISOString(),
       period: projectionSettings.value.period,
       accountIds: null,
-      includeInactive: showInactive.value,
+      includeInactive: false, // Always exclude inactive from projections
     });
 
     balanceProjection.value = projection;
