@@ -310,7 +310,9 @@ def generate_occurrences(
                 label=planned_transaction.label,
                 is_active=planned_transaction.is_active
             ))
-            occurrence_count += 1
+
+        # Always increment occurrence count for recurring transactions
+        occurrence_count += 1
 
         # Calculate next occurrence date
         if frequency == RecurrenceFrequencyEnum.DAILY.value:
@@ -327,10 +329,6 @@ def generate_occurrences(
             current_date += relativedelta(years=interval)
         else:
             break  # Unknown frequency
-
-        # If we're only counting occurrences within range, increment even if outside
-        if current_date < start_date:
-            occurrence_count += 1
 
     return occurrences
 
