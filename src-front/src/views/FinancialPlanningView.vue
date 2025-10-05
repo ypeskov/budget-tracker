@@ -116,7 +116,7 @@
             </div>
             <div class="card-body">
               <UpcomingTransactionsList
-                :transactions="store.upcomingTransactions"
+                :transactions="store.upcomingOccurrences"
                 :currency="futureBalanceData?.baseCurrencyCode || baseCurrency"
                 @edit="editPlanned"
                 @delete="deletePlanned"
@@ -237,6 +237,7 @@ onMounted(async () => {
     loadAccounts(),
     loadCategories(),
     loadPlannedTransactions(),
+    loadUpcomingOccurrences(),
     loadBalanceProjection(),
     loadFutureBalance(),
   ]);
@@ -280,6 +281,19 @@ async function loadPlannedTransactions() {
   }
 }
 
+async function loadUpcomingOccurrences() {
+  try {
+    const days = Math.ceil((new Date(projectionSettings.value.endDate) - new Date()) / (1000 * 60 * 60 * 24));
+    const occurrences = await plannedTxService.getUpcomingOccurrences({
+      days: Math.max(days, 30),
+      includeInactive: false,
+    });
+    store.setUpcomingOccurrences(occurrences);
+  } catch (error) {
+    console.error('Failed to load upcoming occurrences:', error);
+  }
+}
+
 async function loadBalanceProjection() {
   try {
     const projection = await plannedTxService.getBalanceProjection({
@@ -314,6 +328,7 @@ function onProjectionSettingsChange() {
   Promise.all([
     loadBalanceProjection(),
     loadFutureBalance(),
+    loadUpcomingOccurrences(),
   ]);
 }
 
@@ -330,9 +345,14 @@ function showCreateModal() {
   showModal.value = true;
 }
 
-function editPlanned(transaction) {
-  selectedTransaction.value = transaction;
-  showModal.value = true;
+async function editPlanned(plannedTransactionId) {
+  try {
+    const transaction = await plannedTxService.getPlannedTransaction(plannedTransactionId);
+    selectedTransaction.value = transaction;
+    showModal.value = true;
+  } catch (error) {
+    store.setError(error.message || 'Failed to load planned transaction');
+  }
 }
 
 async function handleModalSubmit(data) {
@@ -352,6 +372,7 @@ async function handleModalSubmit(data) {
     await Promise.all([
       loadBalanceProjection(),
       loadFutureBalance(),
+      loadUpcomingOccurrences(),
     ]);
   } catch (error) {
     store.setError(error.message || 'Failed to save planned transaction');
@@ -374,6 +395,7 @@ async function confirmDelete() {
     await Promise.all([
       loadBalanceProjection(),
       loadFutureBalance(),
+      loadUpcomingOccurrences(),
     ]);
   } catch (error) {
     store.setError(error.message || 'Failed to delete planned transaction');

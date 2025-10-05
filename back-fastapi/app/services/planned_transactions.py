@@ -333,3 +333,48 @@ def generate_occurrences(
     return occurrences
 
 
+def get_upcoming_occurrences(
+    user_id: int,
+    end_date: datetime,
+    include_inactive: bool,
+    db: Session
+) -> list[PlannedTransactionOccurrenceSchema]:
+    """
+    Get all upcoming transaction occurrences for a user within the time range.
+
+    Args:
+        user_id: ID of the user
+        end_date: End date for occurrences
+        include_inactive: Include inactive planned transactions
+        db: Database session
+
+    Returns:
+        List of PlannedTransactionOccurrenceSchema sorted by occurrence_date
+    """
+    # Get all non-deleted, non-executed planned transactions
+    filters = {
+        'is_executed': False,
+    }
+
+    if not include_inactive:
+        filters['is_active'] = True
+
+    planned_transactions = get_planned_transactions(user_id, db, filters)
+
+    all_occurrences = []
+
+    # Generate occurrences for each planned transaction
+    for pt in planned_transactions:
+        occurrences = generate_occurrences(
+            planned_transaction=pt,
+            start_date=datetime.now(),
+            end_date=end_date
+        )
+        all_occurrences.extend(occurrences)
+
+    # Sort by occurrence date
+    all_occurrences.sort(key=lambda x: x.occurrence_date)
+
+    return all_occurrences
+
+

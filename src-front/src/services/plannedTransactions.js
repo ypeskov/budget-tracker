@@ -138,6 +138,33 @@ export class PlannedTransactionsService {
 
 
   /**
+   * Get upcoming transaction occurrences
+   * @param {Object} params - Query parameters
+   * @param {number} params.days - Number of days to look ahead (default: 30)
+   * @param {boolean} params.includeInactive - Include inactive planned transactions
+   * @returns {Promise<Array>}
+   */
+  async getUpcomingOccurrences({ days = 30, includeInactive = false } = {}) {
+    let url = '/planned-transactions/upcoming/occurrences';
+    const params = new URLSearchParams();
+
+    if (days !== 30) {
+      params.append('days', days);
+    }
+
+    if (includeInactive) {
+      params.append('include_inactive', true);
+    }
+
+    const queryString = params.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+
+    return await request(url, {}, { userService: this.userService });
+  }
+
+  /**
    * Calculate future balance on a target date
    * @param {Object} params - Calculation parameters
    * @param {string} params.targetDate - Target date (ISO format)

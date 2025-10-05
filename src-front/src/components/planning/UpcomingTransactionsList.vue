@@ -15,7 +15,7 @@
       <div class="transactions-list">
         <div
           v-for="transaction in group.transactions"
-          :key="transaction.id"
+          :key="`${transaction.plannedTransactionId}-${transaction.occurrenceDate}`"
           class="transaction-card"
           :class="{ overdue: group.isOverdue }"
         >
@@ -26,14 +26,11 @@
           <div class="transaction-info">
             <div class="transaction-header">
               <span class="transaction-label">{{ transaction.label || $t('common.noLabel') }}</span>
-              <span v-if="transaction.isRecurring" class="recurring-badge">
-                <i class="bi bi-arrow-repeat"></i> {{ $t('financialPlanning.recurring') }}
-              </span>
             </div>
             <div class="transaction-details">
               <span class="transaction-date">
                 <i class="bi bi-calendar3"></i>
-                {{ formatDate(transaction.plannedDate) }}
+                {{ formatDate(transaction.occurrenceDate) }}
               </span>
             </div>
           </div>
@@ -46,12 +43,12 @@
 
           <div class="transaction-actions">
             <i
-              @click="$emit('edit', transaction)"
+              @click="$emit('edit', transaction.plannedTransactionId)"
               class="fa-solid fa-pen-to-square action-icon edit-icon"
               :title="$t('common.edit')"
             ></i>
             <i
-              @click="$emit('delete', transaction.id)"
+              @click="$emit('delete', transaction.plannedTransactionId)"
               class="fa-solid fa-trash-can action-icon delete-icon"
               :title="$t('common.delete')"
             ></i>
@@ -99,7 +96,7 @@ const groupedTransactions = computed(() => {
   };
 
   props.transactions.forEach((tx) => {
-    const txDate = new Date(tx.plannedDate);
+    const txDate = new Date(tx.occurrenceDate);
     txDate.setHours(0, 0, 0, 0);
 
     if (txDate < today) {
@@ -124,7 +121,7 @@ const groupedTransactions = computed(() => {
       icon: 'bi bi-exclamation-triangle-fill',
       class: 'overdue',
       isOverdue: true,
-      transactions: groups.overdue.sort((a, b) => new Date(a.plannedDate) - new Date(b.plannedDate)),
+      transactions: groups.overdue.sort((a, b) => new Date(a.occurrenceDate) - new Date(b.occurrenceDate)),
     });
   }
 
@@ -157,7 +154,7 @@ const groupedTransactions = computed(() => {
       icon: 'bi bi-calendar-week',
       class: 'this-week',
       isOverdue: false,
-      transactions: groups.thisWeek.sort((a, b) => new Date(a.plannedDate) - new Date(b.plannedDate)),
+      transactions: groups.thisWeek.sort((a, b) => new Date(a.occurrenceDate) - new Date(b.occurrenceDate)),
     });
   }
 
@@ -168,7 +165,7 @@ const groupedTransactions = computed(() => {
       icon: 'bi bi-calendar-range',
       class: 'later',
       isOverdue: false,
-      transactions: groups.later.sort((a, b) => new Date(a.plannedDate) - new Date(b.plannedDate)),
+      transactions: groups.later.sort((a, b) => new Date(a.occurrenceDate) - new Date(b.occurrenceDate)),
     });
   }
 

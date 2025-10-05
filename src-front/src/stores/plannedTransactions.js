@@ -4,6 +4,7 @@ import { ref, computed } from 'vue';
 export const usePlannedTransactionsStore = defineStore('plannedTransactions', () => {
   // State
   const plannedTransactions = ref([]);
+  const upcomingOccurrences = ref([]);
   const loading = ref(false);
   const error = ref(null);
   const futureBalance = ref(null);
@@ -101,8 +102,13 @@ export const usePlannedTransactionsStore = defineStore('plannedTransactions', ()
     balanceProjection.value = data;
   }
 
+  function setUpcomingOccurrences(occurrences) {
+    upcomingOccurrences.value = occurrences;
+  }
+
   function clearPlannedTransactions() {
     plannedTransactions.value = [];
+    upcomingOccurrences.value = [];
     futureBalance.value = null;
     balanceProjection.value = null;
     error.value = null;
@@ -142,6 +148,7 @@ export const usePlannedTransactionsStore = defineStore('plannedTransactions', ()
   return {
     // State
     plannedTransactions,
+    upcomingOccurrences,
     loading,
     error,
     futureBalance,
@@ -170,6 +177,7 @@ export const usePlannedTransactionsStore = defineStore('plannedTransactions', ()
     clearError,
     setFutureBalance,
     setBalanceProjection,
+    setUpcomingOccurrences,
     clearPlannedTransactions,
   };
 });

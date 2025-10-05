@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
@@ -8,6 +9,7 @@ from app.schemas.planned_transaction_schema import (
     CreatePlannedTransactionSchema,
     UpdatePlannedTransactionSchema,
     ResponsePlannedTransactionSchema,
+    PlannedTransactionOccurrenceSchema,
 )
 from app.dependencies.check_token import check_token
 from app.services.errors import AccessDenied, InvalidAccount
@@ -95,6 +97,35 @@ def get_planned_transactions(
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error fetching planned transactions')
+
+
+@router.get('/upcoming/occurrences', response_model=list[PlannedTransactionOccurrenceSchema])
+def get_upcoming_occurrences(
+    request: Request,
+    db: Session = Depends(get_db),
+    days: int = Query(30, description="Number of days to look ahead"),
+    include_inactive: bool = Query(False, description="Include inactive planned transactions"),
+):
+    """
+    Get all upcoming transaction occurrences within the specified time range.
+    Expands recurring transactions into individual occurrences.
+    """
+    try:
+        end_date = datetime.now() + timedelta(days=days)
+
+        occurrences = pt_service.get_upcoming_occurrences(
+            user_id=request.state.user['id'],
+            end_date=end_date,
+            include_inactive=include_inactive,
+            db=db
+        )
+        return occurrences
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail='Error fetching upcoming occurrences'
+        )
 
 
 @router.get('/{planned_transaction_id}', response_model=ResponsePlannedTransactionSchema)
