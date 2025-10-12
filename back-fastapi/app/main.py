@@ -35,13 +35,17 @@ from app.routes.user_settings import router as settings_router
 install()
 
 settings = Settings()
-is_production = (settings.ENVIRONMENT == 'prod')
+is_production = settings.ENVIRONMENT == 'prod'
 
-app = FastAPI(redirect_slashes=True,
-              docs_url=None if is_production else "/docs",
-              redoc_url=None if is_production else "/redoc")
+app = FastAPI(
+    redirect_slashes=True,
+    docs_url=None if is_production else "/docs",
+    redoc_url=None if is_production else "/redoc",
+)
 
-origins = ['*', ]
+origins = [
+    '*',
+]
 app.add_middleware(
     CORSMiddleware,  # type: ignore
     allow_origins=origins,

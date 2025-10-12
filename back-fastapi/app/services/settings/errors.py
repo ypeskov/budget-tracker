@@ -17,4 +17,3 @@ class IncorrectSettingsTypeError(Exception):
         self.key = key
         self.message = f"Incorrect settings type: {key}"
         super().__init__(self.message)
-

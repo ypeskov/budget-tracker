@@ -1,30 +1,47 @@
 import pytest
-
 from fastapi import status
 from fastapi.testclient import TestClient
 from icecream import ic
 
-from app.models.User import User
-from app.models.Account import Account
-from app.tests.conftest import accounts_path_prefix, main_test_user_id, truly_invalid_currency_id, auth_path_prefix
-from app.tests.data.accounts_data import test_accounts_data, test_account_types
-from app.tests.data.auth_data import test_users
 from app.main import app
-from app.tests.conftest import db, truly_invalid_account_id, truly_invalid_account_type_id
-from app.services.accounts import create_account, get_account_details
-from app.services.errors import InvalidUser, InvalidCurrency, InvalidAccountType, AccessDenied, InvalidAccount, NotFoundError
+from app.models.Account import Account
+from app.models.User import User
 from app.schemas.account_schema import CreateAccountSchema
+from app.services.accounts import create_account, get_account_details
+from app.services.errors import (
+    AccessDenied,
+    InvalidAccount,
+    InvalidAccountType,
+    InvalidCurrency,
+    InvalidUser,
+    NotFoundError,
+)
+from app.tests.conftest import (
+    accounts_path_prefix,
+    auth_path_prefix,
+    db,
+    main_test_user_id,
+    truly_invalid_account_id,
+    truly_invalid_account_type_id,
+    truly_invalid_currency_id,
+)
+from app.tests.data.accounts_data import test_account_types, test_accounts_data
+from app.tests.data.auth_data import test_users
 
 client = TestClient(app)
 
 
 def test_invalid_token_add_account():
-    response = client.post(f'{accounts_path_prefix}/', json={}, headers={'auth-token': 'Invalid token'})
+    response = client.post(
+        f'{accounts_path_prefix}/', json={}, headers={'auth-token': 'Invalid token'}
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_wrong_account_details(token):
-    response = client.post(f'{accounts_path_prefix}/', json={}, headers={'auth-token': token})
+    response = client.post(
+        f'{accounts_path_prefix}/', json={}, headers={'auth-token': token}
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -52,7 +69,10 @@ def test_access_denied_to_other_user_account(token):
     del other_account_details['id']
 
     other_user_account = create_account(
-        CreateAccountSchema.model_validate(other_account_details), other_user.json()['id'], db)
+        CreateAccountSchema.model_validate(other_account_details),
+        other_user.json()['id'],
+        db,
+    )
     assert other_user_account is not None
 
     with pytest.raises(AccessDenied):
@@ -70,7 +90,9 @@ def test_get_invalid_account_details():
 
 @pytest.mark.parametrize("test_account", test_accounts_data)
 def test_add_get_account(test_account, token):
-    response_account = client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token})
+    response_account = client.post(
+        f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token}
+    )
     assert response_account.status_code == status.HTTP_200_OK
 
     account_details = response_account.json()
@@ -82,7 +104,9 @@ def test_add_get_account(test_account, token):
     assert 'openingDate' in account_details
     assert account_details['openingDate'] is not None
 
-    response = client.get(f'{accounts_path_prefix}/{account_details["id"]}', headers={'auth-token': token})
+    response = client.get(
+        f'{accounts_path_prefix}/{account_details["id"]}', headers={'auth-token': token}
+    )
     assert response.status_code == status.HTTP_200_OK
     account_details = response.json()
     assert 'id' in account_details
@@ -99,7 +123,9 @@ def test_add_get_account(test_account, token):
 
 
 def test_get_accounts_list(token, create_accounts):
-    response = client.get(f'{accounts_path_prefix}/?includeHidden=false', headers={'auth-token': token})
+    response = client.get(
+        f'{accounts_path_prefix}/?includeHidden=false', headers={'auth-token': token}
+    )
     assert response.status_code == status.HTTP_200_OK
     accounts_list = response.json()
 
@@ -116,16 +142,30 @@ def test_get_accounts_list(token, create_accounts):
     assert accounts_list[0]['openingDate'] is not None
 
     # check last account details in response
-    assert accounts_list[number_of_accounts - 1]['name'] == test_accounts_data[number_of_accounts - 1]['name']
-    assert accounts_list[number_of_accounts - 1]['currencyId'] == test_accounts_data[number_of_accounts - 1]['currencyId']
-    assert accounts_list[number_of_accounts - 1]['accountTypeId'] == test_accounts_data[number_of_accounts - 1]['accountTypeId']
-    assert accounts_list[number_of_accounts - 1]['balance'] == test_accounts_data[number_of_accounts - 1]['balance']
+    assert (
+        accounts_list[number_of_accounts - 1]['name']
+        == test_accounts_data[number_of_accounts - 1]['name']
+    )
+    assert (
+        accounts_list[number_of_accounts - 1]['currencyId']
+        == test_accounts_data[number_of_accounts - 1]['currencyId']
+    )
+    assert (
+        accounts_list[number_of_accounts - 1]['accountTypeId']
+        == test_accounts_data[number_of_accounts - 1]['accountTypeId']
+    )
+    assert (
+        accounts_list[number_of_accounts - 1]['balance']
+        == test_accounts_data[number_of_accounts - 1]['balance']
+    )
     assert 'openingDate' in accounts_list[number_of_accounts - 1]
     assert accounts_list[number_of_accounts - 1]['openingDate'] is not None
 
 
 def test_all_account_types_exist(token):
-    response = client.get(f'{accounts_path_prefix}/types/', headers={'auth-token': token})
+    response = client.get(
+        f'{accounts_path_prefix}/types/', headers={'auth-token': token}
+    )
     assert response.status_code == status.HTTP_200_OK
     account_types = response.json()
 
@@ -147,7 +187,11 @@ def test_update_account(token, one_account):
     account['comment'] = 'Updated comment'
     account['openingDate'] = '2023-12-28T23:00:00Z'
 
-    response = client.put(f'{accounts_path_prefix}/{account["id"]}', json=account, headers={'auth-token': token})
+    response = client.put(
+        f'{accounts_path_prefix}/{account["id"]}',
+        json=account,
+        headers={'auth-token': token},
+    )
     assert response.status_code == status.HTTP_200_OK
 
     updated_account = response.json()
@@ -171,6 +215,9 @@ def test_update_invalid_account(token, one_account):
     account['comment'] = 'Updated comment'
     account['openingDate'] = '2023-12-28T23:00:00Z'
 
-    response = client.put(f'{accounts_path_prefix}/{truly_invalid_account_id}', json=account,
-                          headers={'auth-token': token})
+    response = client.put(
+        f'{accounts_path_prefix}/{truly_invalid_account_id}',
+        json=account,
+        headers={'auth-token': token},
+    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST

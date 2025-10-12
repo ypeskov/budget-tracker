@@ -1,42 +1,46 @@
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from icecream import ic
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from icecream import ic
 from app.dependencies.check_token import check_token
 from app.logger_config import logger
 from app.models.Account import Account
 from app.schemas.account_schema import (
+    AccountArchiveStatusSchema,
     AccountResponseSchema,
     CreateAccountSchema,
     UpdateAccountSchema,
-    AccountArchiveStatusSchema,
 )
 from app.schemas.account_type_schema import AccountTypeResponseSchema
 from app.services.accounts import (
     create_account,
-    get_user_accounts,
+    delete_account,
     get_account_details,
     get_account_types,
-    delete_account,
+    get_user_accounts,
     set_archive_status,
 )
 from app.services.errors import (
-    InvalidUser,
-    InvalidCurrency,
-    InvalidAccountType,
-    InvalidAccount,
     AccessDenied,
+    InvalidAccount,
+    InvalidAccountType,
+    InvalidCurrency,
+    InvalidUser,
     NotFoundError,
 )
 
 ic.configureOutput(includeContext=True)
 
-router = APIRouter(tags=['Accounts'], prefix='/accounts', dependencies=[Depends(check_token)])
+router = APIRouter(
+    tags=['Accounts'], prefix='/accounts', dependencies=[Depends(check_token)]
+)
 
 
 @router.post("/", response_model=AccountResponseSchema | None)
-def add_account(account_dto: CreateAccountSchema, request: Request, db: Session = Depends(get_db)):
+def add_account(
+    account_dto: CreateAccountSchema, request: Request, db: Session = Depends(get_db)
+):
     try:
         return create_account(account_dto, request.state.user['id'], db)
     except (InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount) as e:
@@ -68,7 +72,11 @@ def get_accounts(
 
 
 @router.put('/set-archive-status')
-def archive_status(request: Request, account_archive_status: AccountArchiveStatusSchema, db: Session = Depends(get_db)):
+def archive_status(
+    request: Request,
+    account_archive_status: AccountArchiveStatusSchema,
+    db: Session = Depends(get_db),
+):
     account_id = account_archive_status.account_id
     is_archived = account_archive_status.is_archived
     user_id = request.state.user['id']
@@ -105,11 +113,22 @@ def get_account_info(account_id: int, request: Request, db: Session = Depends(ge
 
 
 @router.put('/{account_id}', response_model=AccountResponseSchema)
-def update_account(account_id: int, account_dto: UpdateAccountSchema, request: Request, db: Session = Depends(get_db)):
+def update_account(
+    account_id: int,
+    account_dto: UpdateAccountSchema,
+    request: Request,
+    db: Session = Depends(get_db),
+):
     account_dto.id = account_id
     try:
         acc = create_account(account_dto, request.state.user['id'], db)
-    except (InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied) as e:
+    except (
+        InvalidUser,
+        InvalidCurrency,
+        InvalidAccountType,
+        InvalidAccount,
+        AccessDenied,
+    ) as e:
         logger.exception(f'Error updating account: {e}')
         raise HTTPException(status_code=400, detail=str(e))
     return acc

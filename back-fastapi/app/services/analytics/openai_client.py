@@ -39,15 +39,19 @@ class OpenAIClient:
 
         return None
 
-    async def analyze_expenses(self, prompt: str, data: str, max_tokens: int | None = None) -> str | None:
+    async def analyze_expenses(
+        self, prompt: str, data: str, max_tokens: int | None = None
+    ) -> str | None:
         messages: list[ChatCompletionMessageParam] | list[dict[str, str]] = [
             {
                 "role": "system",
-                "content": ("You are a financial advisor analyzing expense data.\n"
-                            "Provide clear, actionable insights in Russian language.\n"
-                            "Use bullet points and summaries where appropriate.\n"
-                            "make response in HTML format. without <!DOCTYPE html>\n"
-                            "only root <div></div> and its content.\n"),
+                "content": (
+                    "You are a financial advisor analyzing expense data.\n"
+                    "Provide clear, actionable insights in Russian language.\n"
+                    "Use bullet points and summaries where appropriate.\n"
+                    "make response in HTML format. without <!DOCTYPE html>\n"
+                    "only root <div></div> and its content.\n"
+                ),
             },
             {"role": "user", "content": f"{prompt}\n\nExpenses data:\n{data}"},
         ]

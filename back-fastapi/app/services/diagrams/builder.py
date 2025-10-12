@@ -4,7 +4,7 @@ from app.logger_config import logger
 
 
 def prepare_data(categories, category_id=None):
-    """ @category_id - id of the parent category, if None - all top level categories will be used """
+    """@category_id - id of the parent category, if None - all top level categories will be used"""
     if category_id is None:
         logger.info("Preparing data for diagram, for all categories")
     else:
@@ -14,7 +14,11 @@ def prepare_data(categories, category_id=None):
         subcategories = []
         for cat in categories:
             if cat['parent_id'] == cat_id or cat['id'] == cat_id:
-                cat['name'] = cat['name'].split('>>')[1].strip() if '>>' in cat['name'] else cat['name']
+                cat['name'] = (
+                    cat['name'].split('>>')[1].strip()
+                    if '>>' in cat['name']
+                    else cat['name']
+                )
                 subcategories.append(cat)
 
         return subcategories
@@ -24,17 +28,19 @@ def prepare_data(categories, category_id=None):
     for parent_cat in parent_categories:
         subcategories = find_subcategories(parent_cat['id'])
         total_expenses = sum(cat['total_expenses'] for cat in subcategories)
-        results.append({
-            'category_id': parent_cat['id'],
-            'label': parent_cat['name'],
-            'amount': total_expenses,
-        })
+        results.append(
+            {
+                'category_id': parent_cat['id'],
+                'label': parent_cat['name'],
+                'amount': total_expenses,
+            }
+        )
 
     return results
 
 
 def combine_small_categories(aggregated_categories, threshold=0.02):
-    """ Combines small categories into one category """
+    """Combines small categories into one category"""
     total_sum = sum(cat['amount'] for cat in aggregated_categories)
 
     new_other_category = {

@@ -1,13 +1,12 @@
 import pytest
-from fastapi import status, HTTPException
+from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
+from icecream import ic
 
+from app.main import app
 from app.models.User import User
 from app.tests.conftest import auth_path_prefix, db
-from app.main import app
 from app.tests.data.auth_data import test_users
-
-from icecream import ic
 
 ic.configureOutput(includeContext=True)
 
@@ -31,14 +30,21 @@ def test_create_user(test_user):
 
 @pytest.mark.parametrize("test_user", test_users)
 def test_login_user(test_user, create_user):
-    create_user(test_user['email'], test_user['password'], test_user['firstName'], test_user['lastName'])
+    create_user(
+        test_user['email'],
+        test_user['password'],
+        test_user['firstName'],
+        test_user['lastName'],
+    )
     response = client.post(f'{auth_path_prefix}/login/', json=test_user)
     assert response.status_code == 200
     login_info = response.json()
     assert "accessToken" in login_info
     assert login_info["tokenType"] == "bearer"
 
-    response = client.get("/auth/profile", headers={'auth-token': login_info["accessToken"]})
+    response = client.get(
+        "/auth/profile", headers={'auth-token': login_info["accessToken"]}
+    )
     assert response.status_code == 200
 
     profile = response.json()

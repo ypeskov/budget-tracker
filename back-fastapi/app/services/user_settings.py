@@ -1,14 +1,14 @@
 from datetime import datetime
-from sqlalchemy.orm import Session, joinedload
 
 from icecream import ic
+from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
-from app.models.Language import Language
-from app.models.UserSettings import UserSettings
-from app.models.User import User
 from app.models.Currency import Currency
+from app.models.Language import Language
 from app.models.PlannedTransaction import PlannedTransaction
+from app.models.User import User
+from app.models.UserSettings import UserSettings
 from app.services.CurrencyProcessor import calc_amount
 
 ic.configureOutput(includeContext=True)
@@ -25,11 +25,7 @@ def get_languages(db: Session) -> list[Language]:
 
 
 def generate_initial_settings(user_id: int, db: Session):
-    settings = {
-        'language': 'en',
-        'projectionEndDate': None,
-        'projectionPeriod': None
-    }
+    settings = {'language': 'en', 'projectionEndDate': None, 'projectionPeriod': None}
 
     new_settings = UserSettings(settings=settings, user_id=user_id)
     db.add(new_settings)
@@ -40,7 +36,9 @@ def generate_initial_settings(user_id: int, db: Session):
 
 def get_user_settings(user_id: int, db: Session) -> UserSettings:
     try:
-        user_settings: UserSettings = db.query(UserSettings).filter(UserSettings.user_id == user_id).one()
+        user_settings: UserSettings = (
+            db.query(UserSettings).filter(UserSettings.user_id == user_id).one()
+        )
     except Exception as e:
         logger.exception(e)
         raise e
@@ -50,7 +48,9 @@ def get_user_settings(user_id: int, db: Session) -> UserSettings:
 
 def save_user_settings(user_id: int, settings: dict, db: Session) -> UserSettings:
     try:
-        user_settings: UserSettings = db.query(UserSettings).filter(UserSettings.user_id == user_id).one()
+        user_settings: UserSettings = (
+            db.query(UserSettings).filter(UserSettings.user_id == user_id).one()
+        )
         user_settings.settings = settings
         db.commit()
         db.refresh(user_settings)
@@ -62,7 +62,12 @@ def save_user_settings(user_id: int, settings: dict, db: Session) -> UserSetting
 
 
 def get_base_currency(user_id: int, db: Session):
-    currency = db.query(Currency).join(User, User.base_currency_id == Currency.id).filter(User.id == user_id).one()
+    currency = (
+        db.query(Currency)
+        .join(User, User.base_currency_id == Currency.id)
+        .filter(User.id == user_id)
+        .one()
+    )
 
     return currency
 
@@ -80,13 +85,20 @@ def update_base_currency(user_id: int, currency_id: int, db: Session) -> Currenc
         Currency: The new base currency
     """
     new_currency = db.query(Currency).filter(Currency.id == currency_id).one()
-    user = db.query(User).options(joinedload(User.base_currency)).filter(User.id == user_id).one()
+    user = (
+        db.query(User)
+        .options(joinedload(User.base_currency))
+        .filter(User.id == user_id)
+        .one()
+    )
 
     old_currency = user.base_currency
 
     # If currency is changing, convert all planned transactions
     if old_currency and old_currency.id != currency_id:
-        logger.info(f"Converting planned transactions from {old_currency.code} to {new_currency.code} for user {user_id}")
+        logger.info(
+            f"Converting planned transactions from {old_currency.code} to {new_currency.code} for user {user_id}"
+        )
 
         # Get all non-deleted, non-executed planned transactions
         planned_transactions = (
@@ -108,13 +120,15 @@ def update_base_currency(user_id: int, currency_id: int, db: Session) -> Currenc
                 pt.currency.code,
                 datetime.now().date(),
                 new_currency.code,
-                db
+                db,
             )
 
             pt.amount = converted_amount
             pt.currency_id = currency_id
 
-        logger.info(f"Converted {len(planned_transactions)} planned transactions to {new_currency.code}")
+        logger.info(
+            f"Converted {len(planned_transactions)} planned transactions to {new_currency.code}"
+        )
 
     # Update user's base currency
     user.base_currency_id = currency_id
@@ -122,4 +136,3 @@ def update_base_currency(user_id: int, currency_id: int, db: Session) -> Currenc
     db.refresh(user)
 
     return new_currency
-

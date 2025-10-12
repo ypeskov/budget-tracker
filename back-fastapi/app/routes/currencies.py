@@ -7,9 +7,7 @@ from app.schemas.currency_schema import CurrencyResponseSchema
 from app.services.currencies import get_user_currencies
 
 router = APIRouter(
-    tags=['Currencies'],
-    prefix='/currencies',
-    dependencies=[Depends(check_token)]
+    tags=['Currencies'], prefix='/currencies', dependencies=[Depends(check_token)]
 )
 
 

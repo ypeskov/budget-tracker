@@ -1,6 +1,6 @@
-from .generate_users import generate_test_users
 from .generate_accounts import generate_test_accounts
 from .generate_transactions import generate_test_transactions
+from .generate_users import generate_test_users
 
 
 def generate_all_data():

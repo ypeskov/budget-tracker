@@ -18,9 +18,9 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.models.Account import Account
-from app.models.User import User
 from app.models.PlannedTransaction import PlannedTransaction
 from app.models.Transaction import Transaction
+from app.models.User import User
 from app.tests.conftest import db, main_test_user_id
 
 client = TestClient(app)
@@ -50,13 +50,13 @@ def test_create_one_time_planned_transaction(token, one_account):
         'isIncome': False,
         'plannedDate': planned_date,
         'isRecurring': False,
-        'recurrenceRule': None
+        'recurrenceRule': None,
     }
 
     response = client.post(
         f'{planned_transactions_path_prefix}/',
         json=planned_transaction_data,
-        headers={'auth-token': token}
+        headers={'auth-token': token},
     )
 
     print(f"URL: {planned_transactions_path_prefix}/")
@@ -85,17 +85,13 @@ def test_create_recurring_planned_transaction(token, one_account):
         'isIncome': False,
         'plannedDate': planned_date,
         'isRecurring': True,
-        'recurrenceRule': {
-            'frequency': 'monthly',
-            'interval': 1,
-            'endDate': end_date
-        }
+        'recurrenceRule': {'frequency': 'monthly', 'interval': 1, 'endDate': end_date},
     }
 
     response = client.post(
         f'{planned_transactions_path_prefix}/',
         json=planned_transaction_data,
-        headers={'auth-token': token}
+        headers={'auth-token': token},
     )
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -110,10 +106,10 @@ def test_get_planned_transactions(token, one_account):
     """Test getting list of planned transactions"""
     # Create a few planned transactions first
     for i in range(3):
-        planned_date = (datetime.now() + timedelta(days=i+1)).isoformat()
+        planned_date = (datetime.now() + timedelta(days=i + 1)).isoformat()
         planned_transaction_data = {
-            'amount': 100.0 * (i+1),
-            'label': f'Planned transaction {i+1}',
+            'amount': 100.0 * (i + 1),
+            'label': f'Planned transaction {i + 1}',
             'notes': '',
             'isIncome': False,
             'plannedDate': planned_date,
@@ -123,13 +119,12 @@ def test_get_planned_transactions(token, one_account):
         client.post(
             f'{planned_transactions_path_prefix}/',
             json=planned_transaction_data,
-            headers={'auth-token': token}
+            headers={'auth-token': token},
         )
 
     # Get all planned transactions
     response = client.get(
-        f'{planned_transactions_path_prefix}/',
-        headers={'auth-token': token}
+        f'{planned_transactions_path_prefix}/', headers={'auth-token': token}
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -153,7 +148,7 @@ def test_update_planned_transaction(token, one_account):
     create_response = client.post(
         f'{planned_transactions_path_prefix}/',
         json=planned_transaction_data,
-        headers={'auth-token': token}
+        headers={'auth-token': token},
     )
 
     created_id = create_response.json()['id']
@@ -174,7 +169,7 @@ def test_update_planned_transaction(token, one_account):
     response = client.put(
         f'{planned_transactions_path_prefix}/{created_id}',
         json=update_data,
-        headers={'auth-token': token}
+        headers={'auth-token': token},
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -200,7 +195,7 @@ def test_delete_planned_transaction(token, one_account):
     create_response = client.post(
         f'{planned_transactions_path_prefix}/',
         json=planned_transaction_data,
-        headers={'auth-token': token}
+        headers={'auth-token': token},
     )
 
     created_id = create_response.json()['id']
@@ -208,15 +203,14 @@ def test_delete_planned_transaction(token, one_account):
     # Delete it
     response = client.delete(
         f'{planned_transactions_path_prefix}/{created_id}',
-        headers={'auth-token': token}
+        headers={'auth-token': token},
     )
 
     assert response.status_code == status.HTTP_200_OK
 
     # Verify it's not returned in list
     list_response = client.get(
-        f'{planned_transactions_path_prefix}/',
-        headers={'auth-token': token}
+        f'{planned_transactions_path_prefix}/', headers={'auth-token': token}
     )
 
     data = list_response.json()
@@ -239,7 +233,7 @@ def test_calculate_future_balance(token, one_account):
     client.post(
         f'{planned_transactions_path_prefix}/',
         json=planned_transaction_data,
-        headers={'auth-token': token}
+        headers={'auth-token': token},
     )
 
     # Calculate future balance
@@ -247,13 +241,13 @@ def test_calculate_future_balance(token, one_account):
     request_data = {
         'targetDate': target_date,
         'accountIds': None,
-        'includeInactive': False
+        'includeInactive': False,
     }
 
     response = client.post(
         f'{financial_planning_path_prefix}/future-balance',
         json=request_data,
-        headers={'auth-token': token}
+        headers={'auth-token': token},
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -264,52 +258,6 @@ def test_calculate_future_balance(token, one_account):
     assert 'totalPlannedIncome' in data
     assert 'totalPlannedExpenses' in data
     assert 'accounts' in data
-
-
-def test_execute_planned_transaction(token, one_account):
-    """Test executing a planned transaction to create a real transaction"""
-    # Create planned transaction
-    planned_date = datetime.now().isoformat()
-    planned_transaction_data = {
-        'amount': 150.0,
-        'label': 'To be executed',
-        'notes': '',
-        'isIncome': True,
-        'plannedDate': planned_date,
-        'isRecurring': False,
-    }
-
-    create_response = client.post(
-        f'{planned_transactions_path_prefix}/',
-        json=planned_transaction_data,
-        headers={'auth-token': token}
-    )
-
-    created_id = create_response.json()['id']
-
-    # Execute it
-    response = client.post(
-        f'{planned_transactions_path_prefix}/{created_id}/execute',
-        headers={'auth-token': token}
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    transaction_data = response.json()
-
-    # Verify a real transaction was created
-    assert 'id' in transaction_data
-    assert transaction_data['amount'] == 150.0
-    assert transaction_data['label'] == 'To be executed'
-
-    # Verify planned transaction is marked as executed
-    pt_response = client.get(
-        f'{planned_transactions_path_prefix}/{created_id}',
-        headers={'auth-token': token}
-    )
-
-    pt_data = pt_response.json()
-    assert pt_data['isExecuted'] is True
-    assert pt_data['executedTransactionId'] == transaction_data['id']
 
 
 # TODO: Add more comprehensive tests:

@@ -2,7 +2,9 @@ from requests import request
 
 from app.config import Settings
 from app.logger_config import logger
-from app.services.exchange_services.AbstractCurrencyService import AbstractCurrencyService
+from app.services.exchange_services.AbstractCurrencyService import (
+    AbstractCurrencyService,
+)
 from app.services.exchange_services.exceptions import ErrorFetchingData
 
 s = Settings()
@@ -25,7 +27,9 @@ class CurrencyBeaconService(AbstractCurrencyService):
         url = f'{self.api_url}/{self.api_version}/{method}?api_key={self.api_key}&{params}'
         response = request('GET', url)
         if response.status_code != 200:
-            logger.error(f'Error while fetching data: {response.text}, status code: {response.status_code}')
+            logger.error(
+                f'Error while fetching data: {response.text}, status code: {response.status_code}'
+            )
             raise ErrorFetchingData('Error while fetching data')
         return response.json()
 

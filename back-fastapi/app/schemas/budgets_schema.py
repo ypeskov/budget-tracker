@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Annotated
 
-from pydantic import ConfigDict, BaseModel, PlainSerializer
+from pydantic import BaseModel, ConfigDict, PlainSerializer
 from pydantic.alias_generators import to_camel
 
 from app.models.Budget import PeriodEnum
@@ -19,9 +19,9 @@ class NewBudgetInputSchema(BaseModel):
     categories: list[int]
     comment: str | None = None
 
-    model_config = ConfigDict(from_attributes=True,
-                              populate_by_name=True,
-                              alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
 
 
 class EditBudgetInputSchema(NewBudgetInputSchema):
@@ -38,12 +38,14 @@ class BudgetSchema(BaseModel):
     id: int
     name: str
     currency_id: int
-    target_amount: Annotated[Decimal, PlainSerializer(
-        lambda x: float(x), return_type=float, when_used='json'
-    )]
-    collected_amount: Annotated[Decimal, PlainSerializer(
-        lambda x: float(x), return_type=float, when_used='json'
-    )]
+    target_amount: Annotated[
+        Decimal,
+        PlainSerializer(lambda x: float(x), return_type=float, when_used='json'),
+    ]
+    collected_amount: Annotated[
+        Decimal,
+        PlainSerializer(lambda x: float(x), return_type=float, when_used='json'),
+    ]
     period: PeriodEnum
     repeat: bool
     start_date: datetime
@@ -53,7 +55,9 @@ class BudgetSchema(BaseModel):
     comment: str | None = None
     currency: CurrencySchema
 
-    model_config = ConfigDict(from_attributes=True,
-                              populate_by_name=True,
-                              arbitrary_types_allowed=True,
-                              alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+        alias_generator=to_camel,
+    )

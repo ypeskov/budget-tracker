@@ -1,9 +1,9 @@
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 
 from fastapi import HTTPException, status
 from icecream import ic
-from sqlalchemy import or_, and_, delete as sa_delete
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
+from sqlalchemy import delete as sa_delete
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, joinedload
 
@@ -12,31 +12,37 @@ from app.models.Account import Account
 from app.models.Transaction import Transaction
 from app.models.TransactionTemplate import TransactionTemplate
 from app.schemas.transaction_schema import (
-    UpdateTransactionSchema,
     CreateTransactionSchema,
+    UpdateTransactionSchema,
 )
-from app.services.errors import AccessDenied
-from app.services.transaction_management.TransactionManager import TransactionManager
-from app.services.transaction_management.errors import InvalidTransaction
 from app.services.CurrencyProcessor import calc_amount
+from app.services.errors import AccessDenied
+from app.services.transaction_management.errors import InvalidTransaction
+from app.services.transaction_management.TransactionManager import TransactionManager
 
 ic.configureOutput(includeContext=True)
 
 
-def create_transaction(transaction_details: CreateTransactionSchema, user_id: int, db: Session) -> Transaction:
+def create_transaction(
+    transaction_details: CreateTransactionSchema, user_id: int, db: Session
+) -> Transaction:
     """Create a new transaction for a user
     :param transaction_details: CreateTransactionSchema
     :param user_id: int
     :param db: SqlAlchemy Session
     :return: Transaction
     """
-    transaction_manager: TransactionManager = TransactionManager(transaction_details, user_id, db)
+    transaction_manager: TransactionManager = TransactionManager(
+        transaction_details, user_id, db
+    )
     transaction: Transaction = transaction_manager.process().get_transaction()
 
     return transaction
 
 
-def get_transactions(user_id: int, db: Session, params: dict | None = None, include_deleted=False) -> list[Transaction]:
+def get_transactions(
+    user_id: int, db: Session, params: dict | None = None, include_deleted=False
+) -> list[Transaction]:
     if params is None:
         params = dict()
 
@@ -116,7 +122,9 @@ def get_transactions(user_id: int, db: Session, params: dict | None = None, incl
     return transactions
 
 
-def get_transaction_details(transaction_id: int, user_id: int, db: Session) -> Transaction:
+def get_transaction_details(
+    transaction_id: int, user_id: int, db: Session
+) -> Transaction:
     try:
         transaction: Transaction = (
             db.query(Transaction)  # type: ignore
@@ -133,7 +141,9 @@ def get_transaction_details(transaction_id: int, user_id: int, db: Session) -> T
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Transaction not found")
 
     if user_id != transaction.user_id:
-        logger.error(f"User {user_id} tried to get not own transaction {transaction_id}")
+        logger.error(
+            f"User {user_id} tried to get not own transaction {transaction_id}"
+        )
         raise HTTPException(status.HTTP_403_FORBIDDEN)
 
     transaction.base_currency_amount = calc_amount(
@@ -152,21 +162,27 @@ def update(transaction_details: UpdateTransactionSchema, user_id: int, db: Sessi
     """
     This function updates transaction. It is used in PUT method of /transactions/{transaction_id} endpoint
     """
-    transaction_manager: TransactionManager = TransactionManager(transaction_details, user_id, db)
+    transaction_manager: TransactionManager = TransactionManager(
+        transaction_details, user_id, db
+    )
     transaction: Transaction = transaction_manager.process().get_transaction()
 
     return transaction
 
 
 def delete(transaction_id: int, user_id: int, db: Session) -> Transaction:
-    transaction = db.execute(select(Transaction).filter_by(id=transaction_id)).scalar_one_or_none()
+    transaction = db.execute(
+        select(Transaction).filter_by(id=transaction_id)
+    ).scalar_one_or_none()
 
     if transaction is None:
         logger.error(f"Transaction {transaction_id} not found")
         raise InvalidTransaction("Transaction not found")
 
     if user_id != transaction.user_id:
-        logger.error(f"User {user_id} tried to delete not own transaction {transaction_id}")
+        logger.error(
+            f"User {user_id} tried to delete not own transaction {transaction_id}"
+        )
         raise AccessDenied()
 
     transaction.is_deleted = True
@@ -178,7 +194,9 @@ def delete(transaction_id: int, user_id: int, db: Session) -> Transaction:
     return processed_transaction
 
 
-def create_template(transaction_details: CreateTransactionSchema, user_id: int, db: Session) -> bool:
+def create_template(
+    transaction_details: CreateTransactionSchema, user_id: int, db: Session
+) -> bool:
     """
     This function creates a template for a transaction
     :param transaction_details: CreateTransactionSchema
@@ -230,7 +248,9 @@ def delete_templates(user_id: int, db: Session, ids: list[int]) -> int:
     """
     logger.debug(f"Deleting templates for user {user_id} with ids {ids}")
 
-    stmt = sa_delete(TransactionTemplate).where(TransactionTemplate.user_id == user_id, TransactionTemplate.id.in_(ids))
+    stmt = sa_delete(TransactionTemplate).where(
+        TransactionTemplate.user_id == user_id, TransactionTemplate.id.in_(ids)
+    )
 
     result = db.execute(stmt)
     db.commit()

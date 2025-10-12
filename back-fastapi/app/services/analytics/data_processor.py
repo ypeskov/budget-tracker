@@ -21,7 +21,7 @@ class ExpenseDataProcessor:
         self,
         start_date: date,
         end_date: date,
-        limit: int = 100 # -1 for all
+        limit: int = 100,  # -1 for all
     ) -> List[Dict[str, Any]]:
         user: User = cast(User, self.db.get(User, self.user_id))
         try:
@@ -29,15 +29,19 @@ class ExpenseDataProcessor:
                 select(
                     Transaction,
                     UserCategory.name.label('category_name'),
-                    Account.name.label('account_name')
+                    Account.name.label('account_name'),
                 )
-                .join(UserCategory, Transaction.category_id == UserCategory.id, isouter=True)
+                .join(
+                    UserCategory,
+                    Transaction.category_id == UserCategory.id,
+                    isouter=True,
+                )
                 .join(Account, Transaction.account_id == Account.id)
                 .where(
                     Transaction.user_id == self.user_id,
                     Transaction.date_time >= start_date,
                     Transaction.date_time <= end_date,
-                    ~Transaction.is_transfer  # Exclude transfers
+                    ~Transaction.is_transfer,  # Exclude transfers
                 )
                 .order_by(Transaction.date_time.desc())
             )
@@ -50,20 +54,26 @@ class ExpenseDataProcessor:
             transactions_data = []
             for result in results:
                 transaction = result.Transaction
-                transactions_data.append({
-                    'id': transaction.id,
-                    'amount': float(calc_amount(transaction.amount,
-                                                transaction.account.currency.code,
-                                                transaction.date_time.date(),
-                                                user.base_currency.code,
-                                                self.db)),
-                    'currency': user.base_currency.code,
-                    'date': transaction.date_time.strftime('%Y-%m-%d'),
-                    'label': transaction.label or '',
-                    'category': result.category_name or 'No Category',
-                    'account': transaction.account.name or '',
-                    'is_income': transaction.is_income
-                })
+                transactions_data.append(
+                    {
+                        'id': transaction.id,
+                        'amount': float(
+                            calc_amount(
+                                transaction.amount,
+                                transaction.account.currency.code,
+                                transaction.date_time.date(),
+                                user.base_currency.code,
+                                self.db,
+                            )
+                        ),
+                        'currency': user.base_currency.code,
+                        'date': transaction.date_time.strftime('%Y-%m-%d'),
+                        'label': transaction.label or '',
+                        'category': result.category_name or 'No Category',
+                        'account': transaction.account.name or '',
+                        'is_income': transaction.is_income,
+                    }
+                )
 
             logger.info(f"Retrieved {len(transactions_data)} transactions for analysis")
             return transactions_data
@@ -105,24 +115,24 @@ class ExpenseDataProcessor:
 
         return summary
 
-    def get_category_summary(
-        self,
-        start_date: date,
-        end_date: date
-    ) -> Dict[str, Any]:
+    def get_category_summary(self, start_date: date, end_date: date) -> Dict[str, Any]:
         try:
             query = (
                 select(
                     UserCategory.name,
                     Transaction.amount.label('amount'),
-                    Transaction.is_income
+                    Transaction.is_income,
                 )
-                .join(UserCategory, Transaction.category_id == UserCategory.id, isouter=True)
+                .join(
+                    UserCategory,
+                    Transaction.category_id == UserCategory.id,
+                    isouter=True,
+                )
                 .where(
                     Transaction.user_id == self.user_id,
                     Transaction.date_time >= start_date,
                     Transaction.date_time <= end_date,
-                    ~Transaction.is_transfer
+                    ~Transaction.is_transfer,
                 )
             )
 

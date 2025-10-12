@@ -1,4 +1,4 @@
-from datetime import timedelta, date
+from datetime import date, timedelta
 
 from icecream import ic
 from sqlalchemy import select
@@ -16,12 +16,14 @@ ic.configureOutput(includeContext=True)
 
 
 class ExpensesReportGenerator:
-    def __init__(self,
-                 user_id,
-                 db: Session,
-                 start_date: date,
-                 end_date: date,
-                 hide_empty_categories: bool = False):
+    def __init__(
+        self,
+        user_id,
+        db: Session,
+        start_date: date,
+        end_date: date,
+        hide_empty_categories: bool = False,
+    ):
         self._db = db
         self.user_id = user_id
         self.start_date = start_date
@@ -64,16 +66,20 @@ class ExpensesReportGenerator:
 
         for row in result:
             # Calculate amount in base currency
-            transaction_amount = calc_amount(row.amount, row.currency, self.start_date, base_currency.code, self._db)
+            transaction_amount = calc_amount(
+                row.amount, row.currency, self.start_date, base_currency.code, self._db
+            )
             user_categories[row.category_id]['total_expenses'] += transaction_amount
             user_categories[row.category_id]['currency_code'] = base_currency.code
 
         self._user_categories_with_expenses = list(user_categories.values())
 
         if self.hide_empty_categories:
-            self._user_categories_with_expenses = [category for category
-                                                   in self._user_categories_with_expenses
-                                                   if category['total_expenses'] > 0]
+            self._user_categories_with_expenses = [
+                category
+                for category in self._user_categories_with_expenses
+                if category['total_expenses'] > 0
+            ]
 
         return self
 
@@ -81,7 +87,7 @@ class ExpensesReportGenerator:
         return self._user_categories_with_expenses
 
     def _get_flat_user_categories(self):
-        """ Get all user categories in a flat structure ordered by name and children go right after their parent """
+        """Get all user categories in a flat structure ordered by name and children go right after their parent"""
         parent_alias = aliased(UserCategory)
 
         query = (
@@ -96,7 +102,7 @@ class ExpensesReportGenerator:
                 UserCategory.user_id == self.user_id,
                 UserCategory.is_deleted == False,
                 UserCategory.is_income == False,
-                )
+            )
             .order_by(UserCategory.name)
         )
 
@@ -109,17 +115,19 @@ class ExpensesReportGenerator:
                 structured_categories[category.category_id] = {
                     'id': category.category_id,
                     'name': category.category_name,
-                    'children': []
+                    'children': [],
                 }
 
         for category in categories:
             if category.parent_category_id is not None:
-                structured_categories[category.parent_category_id]['children'].append({
-                    'id': category.category_id,
-                    'name': category.category_name,
-                    'parent_id': category.parent_category_id,
-                    'parent_name': category.parent_category_name,
-                })
+                structured_categories[category.parent_category_id]['children'].append(
+                    {
+                        'id': category.category_id,
+                        'name': category.category_name,
+                        'parent_id': category.parent_category_id,
+                        'parent_name': category.parent_category_name,
+                    }
+                )
 
         flat_categories = {}
 

@@ -1,7 +1,6 @@
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 from loguru import logger
 
@@ -22,7 +21,9 @@ class GoogleDriveBackup:
     def _setup_rclone_config(self, config_path: Path) -> bool:
         """Create temporary rclone config with OAuth token."""
         if not self.gdrive_oauth_token:
-            logger.warning("GDRIVE_OAUTH_TOKEN not configured, skipping Google Drive backup")
+            logger.warning(
+                "GDRIVE_OAUTH_TOKEN not configured, skipping Google Drive backup"
+            )
             return False
 
         try:
@@ -42,7 +43,9 @@ token = {self.gdrive_oauth_token}
         """Upload backup file to Google Drive using rclone."""
 
         # Create temporary config file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.conf', delete=False) as tmp_config:
+        with tempfile.NamedTemporaryFile(
+            mode='w', suffix='.conf', delete=False
+        ) as tmp_config:
             config_path = Path(tmp_config.name)
 
         try:
@@ -56,21 +59,23 @@ token = {self.gdrive_oauth_token}
 
             # Build rclone command
             cmd = [
-                "rclone", "copy",
+                "rclone",
+                "copy",
                 str(file_path),
                 f"gdrive:{self.gdrive_folder_path}/",
-                "--config", str(config_path),
-                "-v"
+                "--config",
+                str(config_path),
+                "-v",
             ]
 
             logger.info(f"Uploading {file_path.name} to Google Drive...")
 
             # Execute rclone
-            result: subprocess.CompletedProcess[str]  = subprocess.run(
+            result: subprocess.CompletedProcess[str] = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=300  # 5 minutes timeout
+                timeout=300,  # 5 minutes timeout
             )
 
             if result.returncode == 0:
@@ -106,10 +111,7 @@ token = {self.gdrive_oauth_token}
         """Check if rclone is installed and accessible."""
         try:
             result = subprocess.run(
-                ["rclone", "version"],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["rclone", "version"], capture_output=True, text=True, timeout=5
             )
             if result.returncode == 0:
                 logger.debug(f"rclone is installed: {result.stdout.split()[2]}")

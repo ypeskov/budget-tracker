@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
-from dateutil.relativedelta import relativedelta
 
-from sqlalchemy import select, and_
-from sqlalchemy.orm import Session, joinedload
+from dateutil.relativedelta import relativedelta
+from sqlalchemy import and_, select
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
 from app.models.PlannedTransaction import PlannedTransaction
@@ -11,17 +11,15 @@ from app.models.Transaction import Transaction
 from app.models.User import User
 from app.schemas.planned_transaction_schema import (
     CreatePlannedTransactionSchema,
-    UpdatePlannedTransactionSchema,
     PlannedTransactionOccurrenceSchema,
     RecurrenceFrequencyEnum,
+    UpdatePlannedTransactionSchema,
 )
 from app.services.errors import AccessDenied
 
 
 def create_planned_transaction(
-    transaction_dto: CreatePlannedTransactionSchema,
-    user_id: int,
-    db: Session
+    transaction_dto: CreatePlannedTransactionSchema, user_id: int, db: Session
 ) -> PlannedTransaction:
     """
     Create a new planned transaction.
@@ -50,22 +48,24 @@ def create_planned_transaction(
         is_income=transaction_dto.is_income,
         planned_date=transaction_dto.planned_date,
         is_recurring=transaction_dto.is_recurring,
-        recurrence_rule=transaction_dto.recurrence_rule.model_dump(mode='json') if transaction_dto.recurrence_rule else None,
+        recurrence_rule=transaction_dto.recurrence_rule.model_dump(mode='json')
+        if transaction_dto.recurrence_rule
+        else None,
     )
 
     db.add(planned_transaction)
     db.commit()
     db.refresh(planned_transaction)
 
-    logger.info(f"Created planned transaction {planned_transaction.id} for user {user_id}")
+    logger.info(
+        f"Created planned transaction {planned_transaction.id} for user {user_id}"
+    )
 
     return planned_transaction
 
 
 def get_planned_transactions(
-    user_id: int,
-    db: Session,
-    filters: dict | None = None
+    user_id: int, db: Session, filters: dict | None = None
 ) -> list[PlannedTransaction]:
     """
     Get planned transactions for a user with optional filters.
@@ -89,13 +89,12 @@ def get_planned_transactions(
         .options(joinedload(PlannedTransaction.currency))
         .filter(
             PlannedTransaction.user_id == user_id,
-            PlannedTransaction.is_deleted == False  # noqa: E712
+            PlannedTransaction.is_deleted == False,  # noqa: E712
         )
         .order_by(PlannedTransaction.planned_date.asc())
     )
 
     if filters:
-
         if 'from_date' in filters:
             stmt = stmt.filter(PlannedTransaction.planned_date >= filters['from_date'])
 
@@ -103,7 +102,9 @@ def get_planned_transactions(
             stmt = stmt.filter(PlannedTransaction.planned_date <= filters['to_date'])
 
         if 'is_recurring' in filters:
-            stmt = stmt.filter(PlannedTransaction.is_recurring == filters['is_recurring'])
+            stmt = stmt.filter(
+                PlannedTransaction.is_recurring == filters['is_recurring']
+            )
 
         if 'is_executed' in filters:
             stmt = stmt.filter(PlannedTransaction.is_executed == filters['is_executed'])
@@ -119,9 +120,7 @@ def get_planned_transactions(
 
 
 def get_planned_transaction_by_id(
-    planned_transaction_id: int,
-    user_id: int,
-    db: Session
+    planned_transaction_id: int, user_id: int, db: Session
 ) -> PlannedTransaction:
     """
     Get a specific planned transaction by ID.
@@ -143,7 +142,7 @@ def get_planned_transaction_by_id(
         .options(joinedload(PlannedTransaction.currency))
         .filter(
             PlannedTransaction.id == planned_transaction_id,
-            PlannedTransaction.is_deleted == False  # noqa: E712
+            PlannedTransaction.is_deleted == False,  # noqa: E712
         )
     )
 
@@ -154,7 +153,9 @@ def get_planned_transaction_by_id(
         raise NoResultFound(f"Planned transaction {planned_transaction_id} not found")
 
     if planned_transaction.user_id != user_id:
-        raise AccessDenied(f"Access denied to planned transaction {planned_transaction_id}")
+        raise AccessDenied(
+            f"Access denied to planned transaction {planned_transaction_id}"
+        )
 
     return planned_transaction
 
@@ -163,7 +164,7 @@ def update_planned_transaction(
     planned_transaction_id: int,
     transaction_dto: UpdatePlannedTransactionSchema,
     user_id: int,
-    db: Session
+    db: Session,
 ) -> PlannedTransaction:
     """
     Update a planned transaction.
@@ -181,7 +182,9 @@ def update_planned_transaction(
         AccessDenied: If transaction doesn't belong to user
         NoResultFound: If transaction not found
     """
-    planned_transaction = get_planned_transaction_by_id(planned_transaction_id, user_id, db)
+    planned_transaction = get_planned_transaction_by_id(
+        planned_transaction_id, user_id, db
+    )
 
     # Update fields
     planned_transaction.amount = transaction_dto.amount
@@ -190,7 +193,11 @@ def update_planned_transaction(
     planned_transaction.is_income = transaction_dto.is_income
     planned_transaction.planned_date = transaction_dto.planned_date
     planned_transaction.is_recurring = transaction_dto.is_recurring
-    planned_transaction.recurrence_rule = transaction_dto.recurrence_rule.model_dump(mode='json') if transaction_dto.recurrence_rule else None
+    planned_transaction.recurrence_rule = (
+        transaction_dto.recurrence_rule.model_dump(mode='json')
+        if transaction_dto.recurrence_rule
+        else None
+    )
 
     if transaction_dto.is_active is not None:
         planned_transaction.is_active = transaction_dto.is_active
@@ -198,15 +205,15 @@ def update_planned_transaction(
     db.commit()
     db.refresh(planned_transaction)
 
-    logger.info(f"Updated planned transaction {planned_transaction_id} for user {user_id}")
+    logger.info(
+        f"Updated planned transaction {planned_transaction_id} for user {user_id}"
+    )
 
     return planned_transaction
 
 
 def delete_planned_transaction(
-    planned_transaction_id: int,
-    user_id: int,
-    db: Session
+    planned_transaction_id: int, user_id: int, db: Session
 ) -> None:
     """
     Soft delete a planned transaction.
@@ -220,20 +227,22 @@ def delete_planned_transaction(
         AccessDenied: If transaction doesn't belong to user
         NoResultFound: If transaction not found
     """
-    planned_transaction = get_planned_transaction_by_id(planned_transaction_id, user_id, db)
+    planned_transaction = get_planned_transaction_by_id(
+        planned_transaction_id, user_id, db
+    )
 
     planned_transaction.is_deleted = True
     planned_transaction.is_active = False
 
     db.commit()
 
-    logger.info(f"Deleted planned transaction {planned_transaction_id} for user {user_id}")
+    logger.info(
+        f"Deleted planned transaction {planned_transaction_id} for user {user_id}"
+    )
 
 
 def generate_occurrences(
-    planned_transaction: PlannedTransaction,
-    start_date: datetime,
-    end_date: datetime
+    planned_transaction: PlannedTransaction, start_date: datetime, end_date: datetime
 ) -> list[PlannedTransactionOccurrenceSchema]:
     """
     Generate occurrences of a recurring planned transaction within a date range.
@@ -260,14 +269,16 @@ def generate_occurrences(
     if not planned_transaction.is_recurring or not planned_transaction.recurrence_rule:
         # For non-recurring transactions, return single occurrence if within range
         if start_date <= planned_date <= end_date:
-            return [PlannedTransactionOccurrenceSchema(
-                planned_transaction_id=planned_transaction.id,
-                occurrence_date=planned_date,
-                amount=planned_transaction.amount,
-                is_income=planned_transaction.is_income,
-                label=planned_transaction.label,
-                is_active=planned_transaction.is_active
-            )]
+            return [
+                PlannedTransactionOccurrenceSchema(
+                    planned_transaction_id=planned_transaction.id,
+                    occurrence_date=planned_date,
+                    amount=planned_transaction.amount,
+                    is_income=planned_transaction.is_income,
+                    label=planned_transaction.label,
+                    is_active=planned_transaction.is_active,
+                )
+            ]
         return []
 
     rule = planned_transaction.recurrence_rule
@@ -276,7 +287,9 @@ def generate_occurrences(
     rule_end_date = None
     if rule.get('end_date'):
         if isinstance(rule['end_date'], str):
-            rule_end_date = datetime.fromisoformat(rule['end_date'].replace('Z', '+00:00'))
+            rule_end_date = datetime.fromisoformat(
+                rule['end_date'].replace('Z', '+00:00')
+            )
         else:
             rule_end_date = rule['end_date']
         # Ensure rule_end_date is timezone-aware
@@ -302,14 +315,16 @@ def generate_occurrences(
 
         # Add occurrence if within range
         if start_date <= current_date <= end_date:
-            occurrences.append(PlannedTransactionOccurrenceSchema(
-                planned_transaction_id=planned_transaction.id,
-                occurrence_date=current_date,
-                amount=planned_transaction.amount,
-                is_income=planned_transaction.is_income,
-                label=planned_transaction.label,
-                is_active=planned_transaction.is_active
-            ))
+            occurrences.append(
+                PlannedTransactionOccurrenceSchema(
+                    planned_transaction_id=planned_transaction.id,
+                    occurrence_date=current_date,
+                    amount=planned_transaction.amount,
+                    is_income=planned_transaction.is_income,
+                    label=planned_transaction.label,
+                    is_active=planned_transaction.is_active,
+                )
+            )
 
         # Always increment occurrence count for recurring transactions
         occurrence_count += 1
@@ -334,10 +349,7 @@ def generate_occurrences(
 
 
 def get_upcoming_occurrences(
-    user_id: int,
-    end_date: datetime,
-    include_inactive: bool,
-    db: Session
+    user_id: int, end_date: datetime, include_inactive: bool, db: Session
 ) -> list[PlannedTransactionOccurrenceSchema]:
     """
     Get all upcoming transaction occurrences for a user within the time range.
@@ -372,15 +384,16 @@ def get_upcoming_occurrences(
 
         # If planned_date is in the past but within lookback window, start from there
         # Otherwise start from now
-        if pt.planned_date < datetime.now(timezone.utc) and pt.planned_date > lookback_start:
+        if (
+            pt.planned_date < datetime.now(timezone.utc)
+            and pt.planned_date > lookback_start
+        ):
             start_date = pt.planned_date
         else:
             start_date = datetime.now(timezone.utc)
 
         occurrences = generate_occurrences(
-            planned_transaction=pt,
-            start_date=start_date,
-            end_date=end_date
+            planned_transaction=pt, start_date=start_date, end_date=end_date
         )
         all_occurrences.extend(occurrences)
 
@@ -388,5 +401,3 @@ def get_upcoming_occurrences(
     all_occurrences.sort(key=lambda x: x.occurrence_date)
 
     return all_occurrences
-
-

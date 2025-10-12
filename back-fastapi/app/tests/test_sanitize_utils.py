@@ -1,10 +1,15 @@
-import pytest
-from fastapi import status, HTTPException
-
-from app.utils.sanitize_transaction_filters import prepare_filters, to_int, to_bool, to_int_list, to_str_list
-
 import icecream
+import pytest
+from fastapi import HTTPException, status
 from icecream import ic
+
+from app.utils.sanitize_transaction_filters import (
+    prepare_filters,
+    to_bool,
+    to_int,
+    to_int_list,
+    to_str_list,
+)
 
 icecream.install()
 

@@ -27,8 +27,6 @@ def load_default_categories(db: Session | None = None):
         DefaultCategory(id=13, name='Service', parent_id=3),
         DefaultCategory(id=14, name='Taxi', parent_id=4),
         DefaultCategory(id=15, name='Meat', parent_id=2),
-
-
         DefaultCategory(id=16, name='Salary', parent_id=None, is_income=True),
         DefaultCategory(id=17, name='Deposit', parent_id=None, is_income=True),
         DefaultCategory(id=18, name='Present', parent_id=None, is_income=True),
@@ -40,7 +38,9 @@ def load_default_categories(db: Session | None = None):
     try:
         db.bulk_save_objects(default_values)
         db.commit()
-        print(f'Default categories are loaded in the table [{DefaultCategory.__tablename__}]')
+        print(
+            f'Default categories are loaded in the table [{DefaultCategory.__tablename__}]'
+        )
     except Exception as e:  # pragma: no cover
         ic(e.args)
 

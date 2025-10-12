@@ -1,6 +1,6 @@
+from collections import defaultdict
 from datetime import datetime, timedelta
 from decimal import Decimal
-from collections import defaultdict
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
@@ -10,21 +10,19 @@ from app.models.Account import Account
 from app.models.PlannedTransaction import PlannedTransaction
 from app.models.User import User
 from app.schemas.planned_transaction_schema import (
-    FutureBalanceRequestSchema,
-    FutureBalanceResponseSchema,
     AccountBalanceProjectionSchema,
+    BalanceProjectionPointSchema,
     BalanceProjectionRequestSchema,
     BalanceProjectionResponseSchema,
-    BalanceProjectionPointSchema,
+    FutureBalanceRequestSchema,
+    FutureBalanceResponseSchema,
 )
-from app.services.planned_transactions import generate_occurrences
 from app.services.CurrencyProcessor import calc_amount
+from app.services.planned_transactions import generate_occurrences
 
 
 def calculate_future_balance(
-    request: FutureBalanceRequestSchema,
-    user_id: int,
-    db: Session
+    request: FutureBalanceRequestSchema, user_id: int, db: Session
 ) -> FutureBalanceResponseSchema:
     """
     Calculate projected balance on a future date considering planned transactions.
@@ -38,7 +36,12 @@ def calculate_future_balance(
         FutureBalanceResponseSchema with projected balances
     """
     # Get user's base currency
-    user = db.query(User).options(joinedload(User.base_currency)).filter(User.id == user_id).first()
+    user = (
+        db.query(User)
+        .options(joinedload(User.base_currency))
+        .filter(User.id == user_id)
+        .first()
+    )
     if not user or not user.base_currency:
         raise ValueError("User base currency not set")
 
@@ -50,7 +53,7 @@ def calculate_future_balance(
         .options(joinedload(Account.currency))
         .filter(
             Account.user_id == user_id,
-            Account.is_deleted == False  # noqa: E712
+            Account.is_deleted == False,  # noqa: E712
         )
     )
 
@@ -73,7 +76,7 @@ def calculate_future_balance(
             PlannedTransaction.user_id == user_id,
             PlannedTransaction.is_deleted == False,  # noqa: E712
             PlannedTransaction.is_executed == False,  # noqa: E712
-            PlannedTransaction.planned_date <= request.target_date
+            PlannedTransaction.planned_date <= request.target_date,
         )
     )
 
@@ -104,7 +107,7 @@ def calculate_future_balance(
             account.currency.code,
             datetime.now().date(),
             base_currency_code,
-            db
+            db,
         )
         total_current_balance += current_balance_base
 
@@ -115,20 +118,24 @@ def calculate_future_balance(
         projected_balance_base = calc_amount(
             projected_balance_account_currency,
             account.currency.code,
-            request.target_date.date() if hasattr(request.target_date, 'date') else request.target_date,
+            request.target_date.date()
+            if hasattr(request.target_date, 'date')
+            else request.target_date,
             base_currency_code,
-            db
+            db,
         )
 
-        account_projections.append(AccountBalanceProjectionSchema(
-            account_id=account.id,
-            account_name=account.name,
-            currency_code=account.currency.code,
-            current_balance=account.balance,
-            projected_balance=projected_balance_account_currency,
-            total_planned_income=Decimal(0),
-            total_planned_expenses=Decimal(0),
-        ))
+        account_projections.append(
+            AccountBalanceProjectionSchema(
+                account_id=account.id,
+                account_name=account.name,
+                currency_code=account.currency.code,
+                current_balance=account.balance,
+                projected_balance=projected_balance_account_currency,
+                total_planned_income=Decimal(0),
+                total_planned_expenses=Decimal(0),
+            )
+        )
 
     # Calculate planned income and expenses from ALL planned transactions (not linked to specific accounts)
     for planned_tx in planned_transactions:
@@ -136,7 +143,7 @@ def calculate_future_balance(
         occurrences = generate_occurrences(
             planned_transaction=planned_tx,
             start_date=datetime.now(),
-            end_date=request.target_date
+            end_date=request.target_date,
         )
 
         for occurrence in occurrences:
@@ -144,9 +151,11 @@ def calculate_future_balance(
             amount_in_base_currency = calc_amount(
                 occurrence.amount,
                 planned_tx.currency.code,
-                occurrence.occurrence_date.date() if hasattr(occurrence.occurrence_date, 'date') else occurrence.occurrence_date,
+                occurrence.occurrence_date.date()
+                if hasattr(occurrence.occurrence_date, 'date')
+                else occurrence.occurrence_date,
                 base_currency_code,
-                db
+                db,
             )
 
             if occurrence.is_income:
@@ -157,7 +166,9 @@ def calculate_future_balance(
                 total_expenses_count += 1
 
     # Calculate total projected balance
-    total_projected_balance = total_current_balance + total_planned_income - total_planned_expenses
+    total_projected_balance = (
+        total_current_balance + total_planned_income - total_planned_expenses
+    )
 
     return FutureBalanceResponseSchema(
         target_date=request.target_date,
@@ -168,14 +179,12 @@ def calculate_future_balance(
         total_planned_expenses=total_planned_expenses,
         income_count=total_income_count,
         expenses_count=total_expenses_count,
-        accounts=account_projections
+        accounts=account_projections,
     )
 
 
 def get_balance_projection(
-    request: BalanceProjectionRequestSchema,
-    user_id: int,
-    db: Session
+    request: BalanceProjectionRequestSchema, user_id: int, db: Session
 ) -> BalanceProjectionResponseSchema:
     """
     Generate balance projection over a time period.
@@ -189,7 +198,12 @@ def get_balance_projection(
         BalanceProjectionResponseSchema with projection points
     """
     # Get user's base currency
-    user = db.query(User).options(joinedload(User.base_currency)).filter(User.id == user_id).first()
+    user = (
+        db.query(User)
+        .options(joinedload(User.base_currency))
+        .filter(User.id == user_id)
+        .first()
+    )
     if not user or not user.base_currency:
         raise ValueError("User base currency not set")
 
@@ -201,7 +215,7 @@ def get_balance_projection(
         .options(joinedload(Account.currency))
         .filter(
             Account.user_id == user_id,
-            Account.is_deleted == False  # noqa: E712
+            Account.is_deleted == False,  # noqa: E712
         )
     )
 
@@ -255,7 +269,7 @@ def get_balance_projection(
             account.currency.code,
             current_date.date() if hasattr(current_date, 'date') else current_date,
             base_currency_code,
-            db
+            db,
         )
         for account in accounts
     )
@@ -272,7 +286,7 @@ def get_balance_projection(
             occurrences = generate_occurrences(
                 planned_transaction=planned_tx,
                 start_date=current_date,
-                end_date=period_end
+                end_date=period_end,
             )
 
             for occurrence in occurrences:
@@ -280,9 +294,11 @@ def get_balance_projection(
                 amount_in_base_currency = calc_amount(
                     occurrence.amount,
                     planned_tx.currency.code,
-                    occurrence.occurrence_date.date() if hasattr(occurrence.occurrence_date, 'date') else occurrence.occurrence_date,
+                    occurrence.occurrence_date.date()
+                    if hasattr(occurrence.occurrence_date, 'date')
+                    else occurrence.occurrence_date,
                     base_currency_code,
-                    db
+                    db,
                 )
 
                 if occurrence.is_income:
@@ -292,12 +308,14 @@ def get_balance_projection(
                     period_expenses += amount_in_base_currency
                     running_balance -= amount_in_base_currency
 
-        projection_points.append(BalanceProjectionPointSchema(
-            date=current_date,
-            balance=running_balance,
-            income=period_income,
-            expenses=period_expenses
-        ))
+        projection_points.append(
+            BalanceProjectionPointSchema(
+                date=current_date,
+                balance=running_balance,
+                income=period_income,
+                expenses=period_expenses,
+            )
+        )
 
         current_date = period_end
         if current_date == request.end_date:
@@ -308,5 +326,5 @@ def get_balance_projection(
         end_date=request.end_date,
         period=request.period,
         base_currency_code=base_currency_code,
-        projection_points=projection_points
+        projection_points=projection_points,
     )

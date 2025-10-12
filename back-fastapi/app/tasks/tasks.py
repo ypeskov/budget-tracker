@@ -77,9 +77,13 @@ def make_db_backup(task):
                 full_path = backup_dir / filename
                 gdrive_upload_success = gdrive_backup.upload_to_gdrive(str(full_path))
                 if gdrive_upload_success:
-                    logger.info(f"Backup {filename} uploaded to Google Drive successfully")
+                    logger.info(
+                        f"Backup {filename} uploaded to Google Drive successfully"
+                    )
                 else:
-                    logger.warning(f"Failed to upload backup {filename} to Google Drive")
+                    logger.warning(
+                        f"Failed to upload backup {filename} to Google Drive"
+                    )
         else:
             logger.info("GDRIVE_OAUTH_TOKEN not set, skipping Google Drive upload")
 
@@ -97,7 +101,7 @@ def make_db_backup(task):
 
         return {
             'message': 'Backup of the database is successfully created',
-            'gdrive_uploaded': gdrive_upload_success
+            'gdrive_uploaded': gdrive_upload_success,
         }
     except BackupPostgresDbError as e:
         logger.error(e)
@@ -109,7 +113,12 @@ def make_db_backup(task):
 
 @celery_app.task(bind=True, max_retries=10, default_retry_delay=600)
 def send_email(
-    task, subject: str, recipients: list[str], template_name: str, template_body: dict, filename: str | None = None
+    task,
+    subject: str,
+    recipients: list[str],
+    template_name: str,
+    template_body: dict,
+    filename: str | None = None,
 ):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -137,7 +146,9 @@ def send_email(
 def send_activation_email(task, user_id: int):
     db = next(get_db())
     user = db.query(User).filter(User.id == user_id).one()
-    activation_token = db.query(ActivationToken).filter(ActivationToken.user_id == user_id).one()
+    activation_token = (
+        db.query(ActivationToken).filter(ActivationToken.user_id == user_id).one()
+    )
 
     try:
         send_email.delay(  # type: ignore
@@ -193,9 +204,11 @@ def delete_old_activation_tokens(task):
     db = next(get_db())
     try:
         yesterday = datetime.now() - timedelta(days=1)
-        deleted_count = db.query(ActivationToken).filter(
-            ActivationToken.created_at < yesterday
-        ).delete()
+        deleted_count = (
+            db.query(ActivationToken)
+            .filter(ActivationToken.created_at < yesterday)
+            .delete()
+        )
         db.commit()
         logger.info(f'Deleted {deleted_count} old activation tokens')
         return f'Deleted {deleted_count} tokens'
@@ -224,13 +237,17 @@ def process_due_planned_transactions(task):
         tomorrow = today + timedelta(days=1)
 
         # Find planned transactions due today that haven't been executed
-        due_transactions = db.query(PlannedTransaction).filter(
-            PlannedTransaction.planned_date >= today,
-            PlannedTransaction.planned_date < tomorrow,
-            PlannedTransaction.is_executed == False,  # noqa: E712
-            PlannedTransaction.is_active == True,  # noqa: E712
-            PlannedTransaction.is_deleted == False  # noqa: E712
-        ).all()
+        due_transactions = (
+            db.query(PlannedTransaction)
+            .filter(
+                PlannedTransaction.planned_date >= today,
+                PlannedTransaction.planned_date < tomorrow,
+                PlannedTransaction.is_executed == False,  # noqa: E712
+                PlannedTransaction.is_active == True,  # noqa: E712
+                PlannedTransaction.is_deleted == False,  # noqa: E712
+            )
+            .all()
+        )
 
         logger.info(f'Found {len(due_transactions)} planned transactions due today')
 

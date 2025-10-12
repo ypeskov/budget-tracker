@@ -1,5 +1,4 @@
-from datetime import UTC
-from datetime import datetime
+from datetime import UTC, datetime
 
 from icecream import ic
 from sqlalchemy import asc, select
@@ -13,28 +12,34 @@ from app.models.User import User
 from app.schemas.account_schema import CreateAccountSchema, UpdateAccountSchema
 from app.services.CurrencyProcessor import calc_amount
 from app.services.errors import (
-    InvalidUser,
-    InvalidCurrency,
-    InvalidAccountType,
-    InvalidAccount,
     AccessDenied,
+    InvalidAccount,
+    InvalidAccountType,
+    InvalidCurrency,
+    InvalidUser,
     NotFoundError,
 )
 
 ic.configureOutput(includeContext=True)
 
 
-def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_id: int, db: Session) -> Account:
+def create_account(
+    account_dto: CreateAccountSchema | UpdateAccountSchema, user_id: int, db: Session
+) -> Account:
     """Create new account for user with user_id"""
     existing_user = db.query(User).filter(User.id == user_id).first()  # type: ignore
     if not existing_user:
         raise InvalidUser()
 
-    currency = db.execute(select(Currency).where(Currency.id == account_dto.currency_id)).scalar_one_or_none()
+    currency = db.execute(
+        select(Currency).where(Currency.id == account_dto.currency_id)
+    ).scalar_one_or_none()
     if not currency:
         raise InvalidCurrency()
 
-    account_type = db.query(AccountType).filter_by(id=account_dto.account_type_id).first()
+    account_type = (
+        db.query(AccountType).filter_by(id=account_dto.account_type_id).first()
+    )
     if not account_type:
         raise InvalidAccountType()
 
@@ -43,7 +48,9 @@ def create_account(account_dto: CreateAccountSchema | UpdateAccountSchema, user_
 
     if hasattr(account_dto, 'id'):
         account = db.execute(
-            select(Account).where(Account.id == account_dto.id, Account.user_id == user_id)
+            select(Account).where(
+                Account.id == account_dto.id, Account.user_id == user_id
+            )
         ).scalar_one_or_none()
         if account is None:
             raise InvalidAccount()
@@ -103,7 +110,11 @@ def get_user_accounts(
     accounts: list[Account] = query.all()  # type: ignore
     for account in accounts:
         account.balance_in_base_currency = calc_amount(
-            account.balance, account.currency.code, datetime.now(UTC).date(), account.user.base_currency.code, db
+            account.balance,
+            account.currency.code,
+            datetime.now(UTC).date(),
+            account.user.base_currency.code,
+            db,
         )
 
     return accounts
@@ -130,7 +141,9 @@ def delete_account(account_id: int, user_id: int, db: Session) -> Account:
     return account
 
 
-def set_archive_status(account_id: int, is_archived: bool, user_id: int, db: Session) -> bool:
+def set_archive_status(
+    account_id: int, is_archived: bool, user_id: int, db: Session
+) -> bool:
     account = get_account_details(account_id, user_id, db)
     account.is_archived = is_archived
     account.archived_at = datetime.now(UTC)

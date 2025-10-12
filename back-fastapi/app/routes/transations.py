@@ -1,36 +1,37 @@
-from fastapi import APIRouter, Depends, Query, Request, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from icecream import ic
 from sqlalchemy.orm import Session
 
-from icecream import ic
-
-from app.logger_config import logger
 from app.database import get_db
+from app.dependencies.check_token import check_token
+from app.logger_config import logger
+from app.models.TransactionTemplate import TransactionTemplate
 from app.schemas.transaction_schema import (
     CreateTransactionSchema,
     ResponseTransactionSchema,
     ResponseTransactionTemplateSchema,
-    UpdateTransactionSchema,
     TemplateIdsSchema,
+    UpdateTransactionSchema,
 )
-from app.dependencies.check_token import check_token
-from app.services.errors import AccessDenied, InvalidCategory, InvalidAccount
+from app.services.errors import AccessDenied, InvalidAccount, InvalidCategory
+from app.services.transaction_management.errors import InvalidTransaction
 from app.services.transactions import (
     create_template,
     create_transaction,
-    get_templates,
-    get_transactions,
-    get_transaction_details,
-    update,
     delete,
     delete_templates,
+    get_templates,
+    get_transaction_details,
+    get_transactions,
+    update,
 )
-from app.services.transaction_management.errors import InvalidTransaction
 from app.utils.sanitize_transaction_filters import prepare_filters
-from app.models.TransactionTemplate import TransactionTemplate
 
 ic.configureOutput(includeContext=True)
 
-router = APIRouter(tags=["Transactions"], prefix="/transactions", dependencies=[Depends(check_token)])
+router = APIRouter(
+    tags=["Transactions"], prefix="/transactions", dependencies=[Depends(check_token)]
+)
 
 
 @router.post("/", response_model=ResponseTransactionSchema | None)
@@ -48,13 +49,19 @@ def add_user_transaction(
         return transaction
     except AccessDenied:
         logger.error("Access denied")
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+        )
     except InvalidCategory:
         logger.error(f"Invalid category: {transaction_dto}")
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid category")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid category"
+        )
     except InvalidAccount:
         logger.error(f"Invalid account: {transaction_dto}")
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account"
+        )
     except Exception as e:  # pragma: no cover
         logger.exception(e)
         raise HTTPException(
@@ -91,7 +98,9 @@ def get_user_templates(request: Request, db: Session = Depends(get_db)):
 @router.delete("/templates", response_model=list[ResponseTransactionTemplateSchema])
 def delete_user_templates(
     request: Request,
-    ids: str = Query(..., description="Comma-separated list of template IDs", examples=["1,2,3"]),
+    ids: str = Query(
+        ..., description="Comma-separated list of template IDs", examples=["1,2,3"]
+    ),
     db: Session = Depends(get_db),
 ):
     """Delete all templates for a user"""
@@ -115,7 +124,11 @@ def delete_user_templates(
 
 
 @router.delete("/templates/validate", response_model=list[int])
-def validate_template_ids(ids: str = Query(..., description="Comma-separated list of template IDs", examples=["1,2,3"])):
+def validate_template_ids(
+    ids: str = Query(
+        ..., description="Comma-separated list of template IDs", examples=["1,2,3"]
+    ),
+):
     """Validate template IDs format and return parsed list"""
     try:
         template_ids_schema = TemplateIdsSchema(ids=ids)
@@ -125,7 +138,9 @@ def validate_template_ids(ids: str = Query(..., description="Comma-separated lis
 
 
 @router.get("/{transaction_id}", response_model=ResponseTransactionSchema)
-def get_transaction(transaction_id: int, request: Request, db: Session = Depends(get_db)) -> ResponseTransactionSchema:
+def get_transaction(
+    transaction_id: int, request: Request, db: Session = Depends(get_db)
+) -> ResponseTransactionSchema:
     """Get transaction details"""
     return get_transaction_details(transaction_id, request.state.user["id"], db)
 
@@ -146,18 +161,28 @@ def update_transaction(
         return transaction
     except InvalidTransaction as e:
         logger.error(f"Error updating transaction: {e.detail}")
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail
+        )
     except AccessDenied:
         logger.error("Error updating transaction: Access denied")
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+        )
     except InvalidCategory:
         logger.error(f"Invalid category: {transaction_details}")
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid category")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid category"
+        )
     except HTTPException as e:
         logger.error(f"Error updating transaction: {e.detail}")
         if e.status_code == status.HTTP_404_NOT_FOUND:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail)
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found"
+            )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.detail
+        )
     except Exception as e:
         logger.exception(e)
         raise HTTPException(
@@ -176,10 +201,14 @@ def delete_transaction(
         return ResponseTransactionSchema.model_validate(transaction)
     except InvalidTransaction as e:
         logger.error(f"Error deleting transaction: {e.detail}")
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail
+        )
     except AccessDenied:
         logger.error("Error deleting transaction: Access denied")
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+        )
     except Exception as e:
         logger.exception(e)
         raise HTTPException(
