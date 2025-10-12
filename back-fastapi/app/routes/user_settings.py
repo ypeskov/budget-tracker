@@ -72,19 +72,19 @@ async def store_settings(
     except UnknownSettingsKeyError as e:
         logger.exception(e)
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f'Unknown settings key: {e.key}',
         )
     except MissingSettingsKeyError as e:
         logger.exception(e)
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f'Missing settings key: {e.key}',
         )
     except IncorrectSettingsTypeError as e:
         logger.exception(e)
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f'Incorrect settings type: {e.key}',
         )
     except Exception as e:
@@ -117,15 +117,15 @@ async def set_base_currency(
         currency_id = input_data.currency_id
         if currency_id is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail='currencyId is required',
             )
         return update_base_currency(request.state.user['id'], currency_id, db)
     except HTTPException as e:
         logger.exception(e)
-        if e.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
+        if e.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail='currencyId is required',
             )
     except Exception as e:

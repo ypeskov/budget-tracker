@@ -70,7 +70,7 @@ def create_users(user_request: UserRegistration, db: Session, is_oauth: bool = F
 
     if existing_user:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="User with this email already exists",
         )
 

@@ -594,7 +594,7 @@ def test_create_transaction_expense_route_invalid_account(token, one_account):
             json=transaction_data,
             headers={'auth-token': token},
         )
-        assert transaction_response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert transaction_response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     # clean up created transactions
     db.query(Transaction).filter(Transaction.account_id == 999999999).delete()
@@ -623,7 +623,7 @@ def test_create_transaction_expense_route_invalid_category(token, one_account):
             headers={'auth-token': token},
         )
         logger.info(transaction_response.json())
-        assert transaction_response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert transaction_response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     # clean up created transactions
     db.query(Transaction).filter(Transaction.category_id == 999999999).delete()

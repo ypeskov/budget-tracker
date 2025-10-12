@@ -61,7 +61,7 @@ def test_create_existing_user(token):
     existing_user['password'] = 'new_password'
 
     response = client.post(f'{auth_path_prefix}/register/', json=existing_user)
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response.json() == {'detail': 'User with this email already exists'}
 
 

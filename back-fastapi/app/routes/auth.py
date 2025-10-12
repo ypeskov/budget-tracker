@@ -142,7 +142,7 @@ async def oauth(JWT: OAuthToken, db: Session = Depends(get_db)):
             )
     else:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No email provided"
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="No email provided"
         )
 
     return token

@@ -55,12 +55,12 @@ def add_user_transaction(
     except InvalidCategory:
         logger.error(f"Invalid category: {transaction_dto}")
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid category"
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid category"
         )
     except InvalidAccount:
         logger.error(f"Invalid account: {transaction_dto}")
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid account"
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid account"
         )
     except Exception as e:  # pragma: no cover
         logger.exception(e)
@@ -162,7 +162,7 @@ def update_transaction(
     except InvalidTransaction as e:
         logger.error(f"Error updating transaction: {e.detail}")
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=e.detail
         )
     except AccessDenied:
         logger.error("Error updating transaction: Access denied")
@@ -172,7 +172,7 @@ def update_transaction(
     except InvalidCategory:
         logger.error(f"Invalid category: {transaction_details}")
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid category"
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid category"
         )
     except HTTPException as e:
         logger.error(f"Error updating transaction: {e.detail}")
@@ -202,7 +202,7 @@ def delete_transaction(
     except InvalidTransaction as e:
         logger.error(f"Error deleting transaction: {e.detail}")
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.detail
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=e.detail
         )
     except AccessDenied:
         logger.error("Error deleting transaction: Access denied")

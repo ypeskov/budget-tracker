@@ -31,7 +31,7 @@ def test_incorrect_prepare_filter():
     params = dict(item.split('=') for item in param_str.split('&'))
     with pytest.raises(HTTPException) as ex:
         prepare_filters(params)
-    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ex.value.detail == 'Incorrect filter: abc'
 
 
@@ -40,7 +40,7 @@ def test_incorrect_values_filter():
     params = dict(item.split('=') for item in param_str.split('&'))
     with pytest.raises(HTTPException) as ex:
         prepare_filters(params)
-    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ex.value.detail == 'Incorrect value [abc] for filter [page]'
 
     incorrect_val = 'a,b,g'
@@ -48,7 +48,7 @@ def test_incorrect_values_filter():
     params = dict(item.split('=') for item in param_str.split('&'))
     with pytest.raises(HTTPException) as ex:
         prepare_filters(params)
-    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert params['currencies'] is None
 
 

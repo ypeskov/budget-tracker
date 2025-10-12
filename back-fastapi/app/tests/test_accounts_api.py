@@ -42,7 +42,7 @@ def test_wrong_account_details(token):
     response = client.post(
         f'{accounts_path_prefix}/', json={}, headers={'auth-token': token}
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_wrong_user_request(fake_account):
