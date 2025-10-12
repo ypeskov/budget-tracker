@@ -100,10 +100,11 @@ def token():
 
     yield token.access_token
 
+    # Delete related objects explicitly to avoid cascade delete warnings
+    db.query(Account).filter(Account.user_id == user.id).delete()
     db.query(UserSettings).filter(UserSettings.user_id == user.id).delete()
     db.query(User).filter(User.id == user.id).delete()
     db.commit()
-    db.expire_all()
 
 
 @pytest.fixture(scope="function")

@@ -61,7 +61,7 @@ class ExpensesReportGenerator:
 
         result = self._db.execute(query).all()
 
-        user: User = self._db.query(User).get(self.user_id)  # type: ignore
+        user: User = self._db.get(User, self.user_id)  # type: ignore
         base_currency: Currency = user.base_currency
 
         for row in result:

@@ -70,7 +70,7 @@ def get_expenses_by_categories(
 
 def get_diagram(expenses: dict, db: Session, user_id: int) -> dict:
     """Return Chart.js compatible data for pie chart instead of matplotlib image"""
-    user: User | None = db.query(User).get(user_id)
+    user: User | None = db.get(User, user_id)
     if user is None:
         return {"labels": [], "data": [], "currency": "USD"}
     base_currency: Currency = user.base_currency
