@@ -228,9 +228,13 @@ def put_outdated_budgets_to_archive(db: Session):
     logger.info(f"Putting outdated budgets to archive at {now} UTC time")
 
     try:
-        outdated_budgets: list[Budget] = ( # type: ignore
+        outdated_budgets: list[Budget] = (  # type: ignore
             db.query(Budget)
-            .filter(Budget.end_date < now, Budget.is_archived.is_(False), Budget.is_deleted.is_(False))
+            .filter(
+                Budget.end_date < now,
+                Budget.is_archived.is_(False),
+                Budget.is_deleted.is_(False),
+            )
             .all()
         )
     except Exception as e:

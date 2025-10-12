@@ -1,6 +1,5 @@
-from sqlalchemy.orm import Session
-
 from icecream import ic
+from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.logger_config import logger
@@ -21,14 +20,12 @@ def load_languages(db: Session | None = None):
     try:
         db.bulk_save_objects(default_values)
         db.commit()
-        logger.info(f'Default languages are loaded in the table [{Language.__tablename__}]')
+        logger.info(
+            f'Default languages are loaded in the table [{Language.__tablename__}]'
+        )
     except Exception as e:  # pragma: no cover
         logger.exception(e.args)
 
 
 if __name__ == '__main__':  # pragma: no cover
     load_languages()
-
-
-
-

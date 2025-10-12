@@ -1,12 +1,13 @@
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
 from typing import Annotated
 
-from app.schemas.account_schema import AccountResponseSchema
-from app.schemas.user_schema import UserResponse
-from app.schemas.category_schema import ResponseCategorySchema
-from pydantic import ConfigDict, BaseModel, PlainSerializer, field_validator
+from pydantic import BaseModel, ConfigDict, PlainSerializer, field_validator
 from pydantic.alias_generators import to_camel
+
+from app.schemas.account_schema import AccountResponseSchema
+from app.schemas.category_schema import ResponseCategorySchema
+from app.schemas.user_schema import UserResponse
 
 
 class TemplateIdsSchema(BaseModel):
@@ -56,13 +57,17 @@ class CreateTransactionSchema(BaseModel):
     is_transfer: bool
     is_income: bool
     is_template: bool = False
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
 
 
 class UpdateTransactionSchema(CreateTransactionSchema):
     id: int
     # user_id: int
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
 
 
 class ResponseTransactionSchema(CreateTransactionSchema):
@@ -88,7 +93,12 @@ class ResponseTransactionSchema(CreateTransactionSchema):
     category: ResponseCategorySchema | None = None
     linked_transaction_id: int | None = None
 
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel, exclude={'is_template'})
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+        exclude={'is_template'},
+    )
 
 
 class ResponseTransactionTemplateSchema(BaseModel):
@@ -97,4 +107,6 @@ class ResponseTransactionTemplateSchema(BaseModel):
     label: str
     category: ResponseCategorySchema
 
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )

@@ -18,20 +18,25 @@ class ExpenseAnalyzer:
         self.openai_client = OpenAIClient(settings)
         self.data_processor = ExpenseDataProcessor(db, user_id)
 
-    async def analyze_spending_trends(self,
-                                      start_date: date,
-                                      end_date: date,
-                                      limit: int = 50 # -1 for all
-                                      ) -> Optional[str]:
+    async def analyze_spending_trends(
+        self,
+        start_date: date,
+        end_date: date,
+        limit: int = 50,  # -1 for all
+    ) -> Optional[str]:
         try:
-            transactions = self.data_processor.get_transactions_data(start_date, end_date, limit)
+            transactions = self.data_processor.get_transactions_data(
+                start_date, end_date, limit
+            )
 
             if not transactions:
                 return "Not enough data to analyze spending trends."
 
             formatted_data = self.data_processor.format_for_analysis(transactions)
 
-            analysis = await self.openai_client.analyze_expenses(prompts.SPENDING_TRENDS_PROMPT, formatted_data)
+            analysis = await self.openai_client.analyze_expenses(
+                prompts.SPENDING_TRENDS_PROMPT, formatted_data
+            )
 
             logger.info(f"Spending trends analysis completed for user {self.user_id}")
             return analysis
@@ -40,9 +45,13 @@ class ExpenseAnalyzer:
             logger.error(f"Error in spending trends analysis: {str(e)}")
             return "Error analyzing spending trends."
 
-    async def analyze_expense_categorization(self, start_date: date, end_date: date) -> Optional[str]:
+    async def analyze_expense_categorization(
+        self, start_date: date, end_date: date
+    ) -> Optional[str]:
         try:
-            transactions = self.data_processor.get_transactions_data(start_date, end_date, 75)
+            transactions = self.data_processor.get_transactions_data(
+                start_date, end_date, 75
+            )
 
             if not transactions:
                 return "Not enough transactions to analyze expense categorization."
@@ -51,13 +60,21 @@ class ExpenseAnalyzer:
             labeled_transactions = [tx for tx in transactions if tx['label']]
 
             if not labeled_transactions:
-                return "Not enough labeled transactions to analyze expense categorization."
+                return (
+                    "Not enough labeled transactions to analyze expense categorization."
+                )
 
-            formatted_data = self.data_processor.format_for_analysis(labeled_transactions)
+            formatted_data = self.data_processor.format_for_analysis(
+                labeled_transactions
+            )
 
-            analysis = await self.openai_client.analyze_expenses(prompts.EXPENSE_CATEGORIZATION_PROMPT, formatted_data)
+            analysis = await self.openai_client.analyze_expenses(
+                prompts.EXPENSE_CATEGORIZATION_PROMPT, formatted_data
+            )
 
-            logger.info(f"Expense categorization analysis completed for user {self.user_id}")
+            logger.info(
+                f"Expense categorization analysis completed for user {self.user_id}"
+            )
             return analysis
 
         except Exception as e:

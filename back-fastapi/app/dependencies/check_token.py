@@ -1,7 +1,7 @@
 from typing import Annotated
 
 import jwt
-from fastapi import Header, Request, HTTPException, status
+from fastapi import Header, HTTPException, Request, status
 
 from app.config import settings
 
@@ -20,6 +20,10 @@ async def check_token(request: Request, auth_token: Annotated[str, Header()]) ->
         request.state.user = payload
         return payload
     except jwt.DecodeError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
     except jwt.ExpiredSignatureError:  # pragma: no cover
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired"
+        )

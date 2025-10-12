@@ -1,8 +1,8 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Annotated
 
-from pydantic import ConfigDict, BaseModel, PlainSerializer
+from pydantic import BaseModel, ConfigDict, PlainSerializer
 from pydantic.alias_generators import to_camel
 
 
@@ -11,9 +11,9 @@ class CashFlowReportInputSchema(BaseModel):
     end_date: datetime | None = None
     period: str
 
-    model_config = ConfigDict(from_attributes=True,
-                              populate_by_name=True,
-                              alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
 
 
 class ExpensesReportInputSchema(BaseModel):
@@ -22,9 +22,9 @@ class ExpensesReportInputSchema(BaseModel):
     categories: list[int] = []
     hide_empty_categories: bool = False
 
-    model_config = ConfigDict(from_attributes=True,
-                              populate_by_name=True,
-                              alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
 
 
 class ExpensesReportOutputItemSchema(BaseModel):
@@ -32,15 +32,16 @@ class ExpensesReportOutputItemSchema(BaseModel):
     name: str
     parent_id: int | None = None
     parent_name: str | None = None
-    total_expenses: Annotated[Decimal, PlainSerializer(
-        lambda x: float(x), return_type=float, when_used='json'
-    )]
+    total_expenses: Annotated[
+        Decimal,
+        PlainSerializer(lambda x: float(x), return_type=float, when_used='json'),
+    ]
     currency_code: str | None = None
     is_parent: bool = False
 
-    model_config = ConfigDict(from_attributes=True,
-                              populate_by_name=True,
-                              alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
 
 
 class CashFlowReportOutputSchema(BaseModel):
@@ -49,18 +50,18 @@ class CashFlowReportOutputSchema(BaseModel):
     total_expenses: dict[str, float]
     net_flow: dict[str, float]
 
-    model_config = ConfigDict(from_attributes=True,
-                              populate_by_name=True,
-                              alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
 
 
 class BalanceReportInputSchema(BaseModel):
     account_ids: list[int]
     balance_date: date
 
-    model_config = ConfigDict(from_attributes=True,
-                              populate_by_name=True,
-                              alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )
 
 
 class BalanceReportOutputSchema(BaseModel):
@@ -72,6 +73,6 @@ class BalanceReportOutputSchema(BaseModel):
     base_currency_code: str
     report_date: date
 
-    model_config = ConfigDict(from_attributes=True,
-                              populate_by_name=True,
-                              alias_generator=to_camel)
+    model_config = ConfigDict(
+        from_attributes=True, populate_by_name=True, alias_generator=to_camel
+    )

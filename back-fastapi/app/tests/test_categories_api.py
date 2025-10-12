@@ -1,11 +1,10 @@
-from fastapi.testclient import TestClient
-
-from app.tests.conftest import categories_path_prefix
-from app.main import app
-
-
 import icecream
+from fastapi.testclient import TestClient
 from icecream import ic
+
+from app.main import app
+from app.tests.conftest import categories_path_prefix
+
 icecream.install()
 
 client = TestClient(app)

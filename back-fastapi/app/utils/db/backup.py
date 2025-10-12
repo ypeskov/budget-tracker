@@ -10,14 +10,16 @@ from app.logger_config import logger
 ic.configureOutput(includeContext=True)
 
 
-def backup_postgres_db(env_name: str,
-                       host: str,
-                       port: int,
-                       dbname: str,
-                       user: str,
-                       password: str,
-                       backup_dir: Path) -> str:
-    """ Create a backup of a PostgreSQL database """
+def backup_postgres_db(
+    env_name: str,
+    host: str,
+    port: int,
+    dbname: str,
+    user: str,
+    password: str,
+    backup_dir: Path,
+) -> str:
+    """Create a backup of a PostgreSQL database"""
     if not os.path.exists(backup_dir):
         os.makedirs(backup_dir)
 
@@ -27,24 +29,32 @@ def backup_postgres_db(env_name: str,
 
     command = [
         "pg_dump",
-        "-h", host,
-        "-p", str(port),
-        "-U", user,
-        "-d", dbname,
-        "-F", "p",
-        "-f", backup_file
+        "-h",
+        host,
+        "-p",
+        str(port),
+        "-U",
+        user,
+        "-d",
+        dbname,
+        "-F",
+        "p",
+        "-f",
+        backup_file,
     ]
 
     environment = os.environ.copy()
     environment["PGPASSWORD"] = password
 
     try:
-        subprocess.run(command,
-                       env=environment,
-                       check=True,
-                       stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE,
-                       text=True)
+        subprocess.run(
+            command,
+            env=environment,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
         logger.info(f"Backup of DB [{dbname}] is successfully created: {backup_file}")
 
         return backup_file

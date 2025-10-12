@@ -1,10 +1,15 @@
-import pytest
-from fastapi import status, HTTPException
-
-from app.utils.sanitize_transaction_filters import prepare_filters, to_int, to_bool, to_int_list, to_str_list
-
 import icecream
+import pytest
+from fastapi import HTTPException, status
 from icecream import ic
+
+from app.utils.sanitize_transaction_filters import (
+    prepare_filters,
+    to_bool,
+    to_int,
+    to_int_list,
+    to_str_list,
+)
 
 icecream.install()
 
@@ -26,7 +31,7 @@ def test_incorrect_prepare_filter():
     params = dict(item.split('=') for item in param_str.split('&'))
     with pytest.raises(HTTPException) as ex:
         prepare_filters(params)
-    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ex.value.detail == 'Incorrect filter: abc'
 
 
@@ -35,7 +40,7 @@ def test_incorrect_values_filter():
     params = dict(item.split('=') for item in param_str.split('&'))
     with pytest.raises(HTTPException) as ex:
         prepare_filters(params)
-    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ex.value.detail == 'Incorrect value [abc] for filter [page]'
 
     incorrect_val = 'a,b,g'
@@ -43,7 +48,7 @@ def test_incorrect_values_filter():
     params = dict(item.split('=') for item in param_str.split('&'))
     with pytest.raises(HTTPException) as ex:
         prepare_filters(params)
-    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert ex.value.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert params['currencies'] is None
 
 

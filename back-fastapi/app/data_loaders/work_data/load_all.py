@@ -1,9 +1,9 @@
-from sqlalchemy.orm import Session
 from icecream import ic
+from sqlalchemy.orm import Session
 
+from .account_type_data_loader import load_default_account_types
 from .category_data_loader import load_default_categories
 from .currency_data_loader import load_default_currencies
-from .account_type_data_loader import load_default_account_types
 from .languages_loader import load_languages
 
 ic.configureOutput(prefix='----> ', includeContext=True)

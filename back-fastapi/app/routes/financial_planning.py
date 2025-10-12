@@ -1,17 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
-from app.logger_config import logger
 from app.database import get_db
+from app.dependencies.check_token import check_token
+from app.logger_config import logger
 from app.schemas.planned_transaction_schema import (
-    FutureBalanceRequestSchema,
-    FutureBalanceResponseSchema,
     BalanceProjectionRequestSchema,
     BalanceProjectionResponseSchema,
+    FutureBalanceRequestSchema,
+    FutureBalanceResponseSchema,
 )
-from app.dependencies.check_token import check_token
 from app.services import financial_planning as fp_service
-
 
 router = APIRouter(
     tags=['Financial Planning'],
@@ -33,9 +32,7 @@ def calculate_future_balance(
     """
     try:
         result = fp_service.calculate_future_balance(
-            balance_request,
-            request.state.user['id'],
-            db
+            balance_request, request.state.user['id'], db
         )
         return result
     except ValueError as e:
@@ -45,7 +42,7 @@ def calculate_future_balance(
         logger.exception(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail='Error calculating future balance'
+            detail='Error calculating future balance',
         )
 
 
@@ -63,9 +60,7 @@ def get_balance_projection(
     """
     try:
         result = fp_service.get_balance_projection(
-            projection_request,
-            request.state.user['id'],
-            db
+            projection_request, request.state.user['id'], db
         )
         return result
     except ValueError as e:
@@ -75,5 +70,5 @@ def get_balance_projection(
         logger.exception(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail='Error generating balance projection'
+            detail='Error generating balance projection',
         )

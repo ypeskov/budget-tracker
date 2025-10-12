@@ -4,35 +4,32 @@ from app.models.UserSettings import UserSettings
 
 os.environ['TEST_MODE'] = 'True'
 
-from decimal import Decimal
 from collections.abc import Callable
+from decimal import Decimal
 
 import pytest
 from fastapi.testclient import TestClient
 from icecream import ic
 
-from app.main import app
-from app.database import get_db
 from app.config import Settings
-from app.tests.db_test_cfg import override_get_db
 from app.data_loaders.work_data.load_all import load_all_data
-
-from app.schemas.account_schema import CreateAccountSchema
-from app.schemas.user_schema import UserRegistration, UserLoginSchema
-
-from app.models.User import User
+from app.database import get_db
+from app.main import app
+from app.models.Account import Account
+from app.models.AccountType import AccountType
 from app.models.Currency import Currency
 from app.models.DefaultCategory import DefaultCategory
 from app.models.Transaction import Transaction
+from app.models.User import User
 from app.models.UserCategory import UserCategory
-from app.models.AccountType import AccountType
-from app.models.Account import Account
-
+from app.schemas.account_schema import CreateAccountSchema
+from app.schemas.user_schema import UserLoginSchema, UserRegistration
 from app.services.accounts import create_account as create_account_service
-from app.services.auth import create_users as create_users_service, get_jwt_token as get_jwt_token_service
-
-from app.tests.data.auth_data import main_test_user
+from app.services.auth import create_users as create_users_service
+from app.services.auth import get_jwt_token as get_jwt_token_service
 from app.tests.data.accounts_data import test_accounts_data
+from app.tests.data.auth_data import main_test_user
+from app.tests.db_test_cfg import override_get_db
 
 ic.configureOutput(includeContext=True)
 
@@ -93,14 +90,18 @@ def setup_db():
 
 @pytest.fixture(scope="function")
 def token():
-    """ Create a user for test purposes and return his access token """
-    user: User = create_users_service(UserRegistration.model_validate(main_test_user), db)
+    """Create a user for test purposes and return his access token"""
+    user: User = create_users_service(
+        UserRegistration.model_validate(main_test_user), db
+    )
     user.is_active = True
     db.commit()
     token = get_jwt_token_service(UserLoginSchema.model_validate(main_test_user), db)
 
     yield token.access_token
 
+    # Delete related objects explicitly to avoid cascade delete warnings
+    db.query(Account).filter(Account.user_id == user.id).delete()
     db.query(UserSettings).filter(UserSettings.user_id == user.id).delete()
     db.query(User).filter(User.id == user.id).delete()
     db.commit()
@@ -138,23 +139,27 @@ def one_account(token):
 
 @pytest.fixture(scope="function")
 def fake_account() -> CreateAccountSchema:
-    return CreateAccountSchema.model_validate({
-        'name': 'Fake account',
-        'user_id': main_test_user_id,
-        'currency_id': 1,
-        'account_type_id': 1,
-        'initial_balance': 0,
-        'balance': 0,
-        'opening_date': None,
-        'is_hidden': False,
-        'comment': ""
-    })
+    return CreateAccountSchema.model_validate(
+        {
+            'name': 'Fake account',
+            'user_id': main_test_user_id,
+            'currency_id': 1,
+            'account_type_id': 1,
+            'initial_balance': 0,
+            'balance': 0,
+            'opening_date': None,
+            'is_hidden': False,
+            'comment': "",
+        }
+    )
 
 
 @pytest.fixture(scope="function")
 def create_accounts(token):
     accounts = [
-        create_account_service(CreateAccountSchema.model_validate(test_acc), main_test_user_id, db)
+        create_account_service(
+            CreateAccountSchema.model_validate(test_acc), main_test_user_id, db
+        )
         for test_acc in test_accounts_data
     ]
     yield accounts
@@ -165,7 +170,9 @@ def create_accounts(token):
 
 @pytest.fixture(scope="function")
 def create_transaction(token) -> Callable[[dict], Transaction]:
-    categories_response = client.get(f'{categories_path_prefix}/', headers={'auth-token': token})
+    categories_response = client.get(
+        f'{categories_path_prefix}/', headers={'auth-token': token}
+    )
     categories = categories_response.json()
 
     expense_category = None
@@ -186,7 +193,7 @@ def create_transaction(token) -> Callable[[dict], Transaction]:
             'targetAccountId': transaction_details['targetAccountId'],
             'isIncome': False,
             'isTransfer': False,
-            'notes': 'Test transaction'
+            'notes': 'Test transaction',
         }
         transaction_data = {**transaction_data, **transaction_details}
 
@@ -195,20 +202,25 @@ def create_transaction(token) -> Callable[[dict], Transaction]:
         else:
             transaction_data['categoryId'] = expense_category['id']
 
-        transaction_response = client.post(f'{transactions_path_prefix}/', json=transaction_data,
-                                           headers={'auth-token': token})
+        transaction_response = client.post(
+            f'{transactions_path_prefix}/',
+            json=transaction_data,
+            headers={'auth-token': token},
+        )
 
         assert transaction_response.status_code == 200
         transaction_props = transaction_response.json()
-        transaction = Transaction(id=transaction_props['id'],
-                                  user_id=transaction_props['userId'],
-                                  account_id=transaction_props['accountId'],
-                                  category_id=transaction_props['categoryId'],
-                                  amount=Decimal(transaction_props['amount']),
-                                  date_time=transaction_props['dateTime'],
-                                  is_income=transaction_props['isIncome'],
-                                  is_transfer=transaction_props['isTransfer'],
-                                  notes=transaction_props['notes'])
+        transaction = Transaction(
+            id=transaction_props['id'],
+            user_id=transaction_props['userId'],
+            account_id=transaction_props['accountId'],
+            category_id=transaction_props['categoryId'],
+            amount=Decimal(transaction_props['amount']),
+            date_time=transaction_props['dateTime'],
+            is_income=transaction_props['isIncome'],
+            is_transfer=transaction_props['isTransfer'],
+            notes=transaction_props['notes'],
+        )
         if transaction_props['targetAmount'] is not None:
             transaction.target_amount = Decimal(transaction_props['targetAmount'])
         return transaction

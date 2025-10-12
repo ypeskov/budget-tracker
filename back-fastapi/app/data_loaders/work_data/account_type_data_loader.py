@@ -22,7 +22,9 @@ def load_default_account_types(db: Session | None = None):
     try:
         db.bulk_save_objects(default_values)
         db.commit()
-        print(f'Default account types are loaded in the table [{AccountType.__tablename__}]')
+        print(
+            f'Default account types are loaded in the table [{AccountType.__tablename__}]'
+        )
     except Exception as e:  # pragma: no cover
         ic(e)
 

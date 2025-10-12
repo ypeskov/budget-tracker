@@ -1,6 +1,10 @@
 from icecream import ic
 
-from .errors import UnknownSettingsKeyError, MissingSettingsKeyError, IncorrectSettingsTypeError
+from .errors import (
+    IncorrectSettingsTypeError,
+    MissingSettingsKeyError,
+    UnknownSettingsKeyError,
+)
 
 ic.configureOutput(includeContext=True)
 

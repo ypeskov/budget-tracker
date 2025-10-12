@@ -37,7 +37,9 @@ budgets_processing_minute = settings.DAILY_BUDGETS_PROCESSING_MINUTE
 celery_app.conf.beat_schedule = {
     "update-exchange-rates-daily": {
         "task": "app.tasks.tasks.daily_update_exchange_rates",
-        "schedule": crontab(hour=update_exchange_rates_hour, minute=update_exchange_rates_minute),
+        "schedule": crontab(
+            hour=update_exchange_rates_hour, minute=update_exchange_rates_minute
+        ),
     },
     "create-db-backup": {
         "task": "app.tasks.tasks.make_db_backup",
@@ -45,7 +47,9 @@ celery_app.conf.beat_schedule = {
     },
     "put-outdated-budgets-to-archive": {
         "task": "app.tasks.tasks.run_daily_budgets_processing",
-        "schedule": crontab(hour=budgets_processing_hour, minute=budgets_processing_minute),
+        "schedule": crontab(
+            hour=budgets_processing_hour, minute=budgets_processing_minute
+        ),
     },
     "process-due-planned-transactions": {
         "task": "app.tasks.tasks.process_due_planned_transactions",

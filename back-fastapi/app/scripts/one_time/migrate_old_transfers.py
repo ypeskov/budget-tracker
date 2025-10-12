@@ -13,12 +13,14 @@ db = next(get_db())  # pragma: no cover
 
 
 def main():
-    transactions: list[Transaction] = (db.query(Transaction)
-                                       .filter(Transaction.is_transfer == True)
-                                       .filter(Transaction.linked_transaction_id.is_(None))
-                                       .options(joinedload(Transaction.account))
-                                       .order_by(Transaction.id)
-                                       .all())
+    transactions: list[Transaction] = (
+        db.query(Transaction)
+        .filter(Transaction.is_transfer == True)
+        .filter(Transaction.linked_transaction_id.is_(None))
+        .options(joinedload(Transaction.account))
+        .order_by(Transaction.id)
+        .all()
+    )
     for transaction in transactions:
         target_account = db.get(Account, transaction.target_account_id)
         # ic(target_account)
