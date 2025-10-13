@@ -17,9 +17,7 @@ class TestAnalyticsAPI:
             yield analyzer_instance
 
     def test_spending_trends_success(self, mock_analyzer, auth_headers):
-        mock_analyzer.analyze_spending_trends.return_value = (
-            "Анализ трендов расходов: ваши основные расходы..."
-        )
+        mock_analyzer.analyze_spending_trends.return_value = "Анализ трендов расходов: ваши основные расходы..."
 
         response = client.post(
             "/analytics/spending-trends/",
@@ -82,9 +80,7 @@ class TestAnalyticsAPI:
         assert response.status_code == 401
 
     def test_exception_handling(self, mock_analyzer, auth_headers):
-        mock_analyzer.analyze_spending_trends.side_effect = Exception(
-            "OpenAI API Error"
-        )
+        mock_analyzer.analyze_spending_trends.side_effect = Exception("OpenAI API Error")
 
         response = client.post(
             "/analytics/spending-trends/",

@@ -19,16 +19,10 @@ class DefaultCategory(Base):
     )
     is_income: Mapped[bool] = mapped_column(default=False, server_default='f')
 
-    parent: Mapped['DefaultCategory'] = relationship(
-        backref='children', remote_side='DefaultCategory.id'
-    )
+    parent: Mapped['DefaultCategory'] = relationship(backref='children', remote_side='DefaultCategory.id')
 
-    is_deleted: Mapped[bool] = mapped_column(
-        default=False, nullable=False, server_default='f'
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )

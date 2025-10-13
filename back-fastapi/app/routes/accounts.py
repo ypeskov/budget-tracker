@@ -32,15 +32,11 @@ from app.services.errors import (
 
 ic.configureOutput(includeContext=True)
 
-router = APIRouter(
-    tags=['Accounts'], prefix='/accounts', dependencies=[Depends(check_token)]
-)
+router = APIRouter(tags=['Accounts'], prefix='/accounts', dependencies=[Depends(check_token)])
 
 
 @router.post("/", response_model=AccountResponseSchema | None)
-def add_account(
-    account_dto: CreateAccountSchema, request: Request, db: Session = Depends(get_db)
-):
+def add_account(account_dto: CreateAccountSchema, request: Request, db: Session = Depends(get_db)):
     try:
         return create_account(account_dto, request.state.user['id'], db)
     except (InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount) as e:

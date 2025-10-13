@@ -21,9 +21,7 @@ class GoogleDriveBackup:
     def _setup_rclone_config(self, config_path: Path) -> bool:
         """Create temporary rclone config with OAuth token."""
         if not self.gdrive_oauth_token:
-            logger.warning(
-                "GDRIVE_OAUTH_TOKEN not configured, skipping Google Drive backup"
-            )
+            logger.warning("GDRIVE_OAUTH_TOKEN not configured, skipping Google Drive backup")
             return False
 
         try:
@@ -43,9 +41,7 @@ token = {self.gdrive_oauth_token}
         """Upload backup file to Google Drive using rclone."""
 
         # Create temporary config file
-        with tempfile.NamedTemporaryFile(
-            mode='w', suffix='.conf', delete=False
-        ) as tmp_config:
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.conf', delete=False) as tmp_config:
             config_path = Path(tmp_config.name)
 
         try:
@@ -110,9 +106,7 @@ token = {self.gdrive_oauth_token}
     def check_rclone_installed() -> bool:
         """Check if rclone is installed and accessible."""
         try:
-            result = subprocess.run(
-                ["rclone", "version"], capture_output=True, text=True, timeout=5
-            )
+            result = subprocess.run(["rclone", "version"], capture_output=True, text=True, timeout=5)
             if result.returncode == 0:
                 logger.debug(f"rclone is installed: {result.stdout.split()[2]}")
                 return True

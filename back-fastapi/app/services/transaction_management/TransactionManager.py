@@ -37,12 +37,8 @@ class TransactionManager:
         self.user_id = user_id
         self.db = db
         self.transaction_details = transaction_details
-        self._transaction: Transaction = (
-            Transaction()
-        )  # main entity for current transaction
-        self.prev_transaction_state = (
-            Transaction()
-        )  # remember state of transaction before update
+        self._transaction: Transaction = Transaction()  # main entity for current transaction
+        self.prev_transaction_state = Transaction()  # remember state of transaction before update
         self.is_update = True if transaction_details.id is not None else False
 
         self._prepare_transaction()
@@ -57,17 +53,13 @@ class TransactionManager:
 
     def _set_account(self, account_id: int) -> 'TransactionManager':
         try:
-            account: Account = self.db.execute(
-                select(Account).where(Account.id == account_id)
-            ).scalar_one()
+            account: Account = self.db.execute(select(Account).where(Account.id == account_id)).scalar_one()
         except NoResultFound:
             logger.error(f'Account {account_id} not found')
             raise InvalidAccount()
 
         if account.user_id != self.user_id:
-            logger.error(
-                f'User {self.user_id} tried to create transaction with not own account {account_id}'
-            )
+            logger.error(f'User {self.user_id} tried to create transaction with not own account {account_id}')
             raise AccessDenied()
         self._transaction.account_id = account.id
         self._transaction.account = account
@@ -75,16 +67,12 @@ class TransactionManager:
         return self
 
     def _set_category(self, category_id) -> 'TransactionManager':
-        category: UserCategory = self.db.execute(
-            select(UserCategory).filter_by(id=category_id)
-        ).scalar_one_or_none()
+        category: UserCategory = self.db.execute(select(UserCategory).filter_by(id=category_id)).scalar_one_or_none()
         if category is None:
             logger.error(f'Category {category_id} not found')
             raise InvalidCategory()
         if category.user_id != self.user_id:
-            logger.error(
-                f'User {self.user_id} tried to create transaction with not own category {category_id}'
-            )
+            logger.error(f'User {self.user_id} tried to create transaction with not own category {category_id}')
             raise AccessDenied()
         self._transaction.category_id = category.id
         self._transaction.category = category
@@ -95,9 +83,7 @@ class TransactionManager:
         if self.transaction_details.id is not None:
             self._transaction = (
                 self.db.query(Transaction)  # type: ignore
-                .options(
-                    joinedload(Transaction.account), joinedload(Transaction.category)
-                )
+                .options(joinedload(Transaction.account), joinedload(Transaction.category))
                 .filter_by(id=self.transaction_details.id)
                 .one_or_none()
             )
@@ -105,9 +91,7 @@ class TransactionManager:
 
             if self._transaction is None:
                 logger.error(f'Transaction {self.transaction_details.id} not found')
-                raise InvalidTransaction(
-                    detail=f'Transaction {self.transaction_details.id} not found'
-                )
+                raise InvalidTransaction(detail=f'Transaction {self.transaction_details.id} not found')
 
             if self.user_id != self._transaction.user_id:
                 logger.error(
@@ -146,16 +130,12 @@ class TransactionManager:
 
         update_transactions_new_balances(self._transaction.account_id, self.db)
         if self._transaction.is_transfer:
-            update_transactions_new_balances(
-                self.transaction_details.target_account_id, self.db
-            )  # type: ignore
+            update_transactions_new_balances(self.transaction_details.target_account_id, self.db)  # type: ignore
 
         return self
 
     def delete_transaction(self) -> 'TransactionManager':
-        direct_transaction_type = NonTransferTypeTransaction(
-            self._transaction, self.prev_transaction_state, self.db
-        )
+        direct_transaction_type = NonTransferTypeTransaction(self._transaction, self.prev_transaction_state, self.db)
         direct_transaction_type.correct_prev_balance()
 
         #  if transaction is transfer, we need to delete linked transaction too
@@ -164,9 +144,7 @@ class TransactionManager:
             indirect_transaction: Transaction = self.db.execute(
                 select(Transaction).filter_by(id=indirect_transaction_id)
             ).scalar_one()
-            prev_indirect_transaction_state: Transaction = copy.deepcopy(
-                indirect_transaction
-            )
+            prev_indirect_transaction_state: Transaction = copy.deepcopy(indirect_transaction)
             indirect_transaction.is_deleted = True
             indirect_transaction_type = NonTransferTypeTransaction(
                 indirect_transaction, prev_indirect_transaction_state, self.db
@@ -214,22 +192,14 @@ def update_transactions_new_balances(account_id: int, db: Session) -> bool:
     for idx, transaction in enumerate(transactions):
         if transaction.is_income:
             if idx == 0:
-                transaction.new_balance = (
-                    transaction.account.initial_balance + transaction.amount
-                )
+                transaction.new_balance = transaction.account.initial_balance + transaction.amount
             else:
-                transaction.new_balance = (
-                    transactions[idx - 1].new_balance + transaction.amount
-                )
+                transaction.new_balance = transactions[idx - 1].new_balance + transaction.amount
         else:
             if idx == 0:
-                transaction.new_balance = (
-                    transaction.account.initial_balance - transaction.amount
-                )
+                transaction.new_balance = transaction.account.initial_balance - transaction.amount
             else:
-                transaction.new_balance = (
-                    transactions[idx - 1].new_balance - transaction.amount
-                )
+                transaction.new_balance = transactions[idx - 1].new_balance - transaction.amount
 
         db.add(transaction)
     db.commit()

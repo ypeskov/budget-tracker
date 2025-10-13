@@ -25,9 +25,7 @@ from app.services.user_settings import (
 
 ic.configureOutput(includeContext=True)
 
-router = APIRouter(
-    tags=['Settings'], prefix='/settings', dependencies=[Depends(check_token)]
-)
+router = APIRouter(tags=['Settings'], prefix='/settings', dependencies=[Depends(check_token)])
 
 
 @router.get('/languages/', response_model=list[LanguageSchema])
@@ -59,15 +57,11 @@ def get_settings(request: Request, db: Session = Depends(get_db)):
 
 
 @router.post('/')
-async def store_settings(
-    request: Request, new_settings: UserSettingsSchema, db: Session = Depends(get_db)
-):
+async def store_settings(request: Request, new_settings: UserSettingsSchema, db: Session = Depends(get_db)):
     """Create user settings"""
     try:
         validate_settings(existing_settings, new_settings.model_dump())
-        saved_settings = save_user_settings(
-            request.state.user['id'], new_settings.model_dump(), db
-        )
+        saved_settings = save_user_settings(request.state.user['id'], new_settings.model_dump(), db)
         return saved_settings
     except UnknownSettingsKeyError as e:
         logger.exception(e)
@@ -109,9 +103,7 @@ async def base_currency(request: Request, db: Session = Depends(get_db)):
 
 
 @router.put('/base-currency/', response_model=CurrencyResponseSchema)
-async def set_base_currency(
-    request: Request, input_data: BaseCurrencyInputSchema, db: Session = Depends(get_db)
-):
+async def set_base_currency(request: Request, input_data: BaseCurrencyInputSchema, db: Session = Depends(get_db)):
     """Set user base currency"""
     try:
         currency_id = input_data.currency_id

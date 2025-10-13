@@ -11,9 +11,7 @@ from app.schemas.category_schema import (
 ic.configureOutput(includeContext=True)
 
 
-def get_user_categories(
-    user_id: int, db: Session, include_deleted: bool = False
-) -> list[UserCategory]:
+def get_user_categories(user_id: int, db: Session, include_deleted: bool = False) -> list[UserCategory]:
     query = db.query(UserCategory).filter_by(user_id=user_id)
 
     if not include_deleted:
@@ -21,9 +19,7 @@ def get_user_categories(
 
     categories = query.order_by(UserCategory.is_income, UserCategory.name).all()
 
-    def add_children(
-        category: UserCategory, result_list: list, parent_name: str | None = None
-    ):
+    def add_children(category: UserCategory, result_list: list, parent_name: str | None = None):
         if parent_name:
             category_display_name = f"{parent_name} >> {category.name}"
         else:
@@ -46,15 +42,11 @@ def get_user_categories(
     return result
 
 
-def grouped_user_categories(
-    user_id: int, db: Session, include_deleted: bool = False
-) -> GroupedCategorySchema:
+def grouped_user_categories(user_id: int, db: Session, include_deleted: bool = False) -> GroupedCategorySchema:
     query = db.query(UserCategory).filter(UserCategory.user_id == user_id)
 
     if not include_deleted:
-        query = query.filter(UserCategory.is_deleted == False).order_by(
-            UserCategory.name
-        )
+        query = query.filter(UserCategory.is_deleted == False).order_by(UserCategory.name)
 
     raw_categories: list[UserCategory] = query.all()
 
@@ -93,16 +85,12 @@ def grouped_user_categories(
     return GroupedCategorySchema(**grouped_categories)
 
 
-def create_or_update_category(
-    user_id: int, db: Session, category_data: CategoryCreateUpdateSchema
-) -> UserCategory:
+def create_or_update_category(user_id: int, db: Session, category_data: CategoryCreateUpdateSchema) -> UserCategory:
     if category_data.id:
         try:
             category: UserCategory = (
                 db.query(UserCategory)
-                .filter(
-                    UserCategory.id == category_data.id, UserCategory.user_id == user_id
-                )
+                .filter(UserCategory.id == category_data.id, UserCategory.user_id == user_id)
                 .one()
             )
             for key, value in category_data.dict().items():
@@ -125,9 +113,7 @@ def create_or_update_category(
 def delete_category(user_id: int, category_id: int, db: Session) -> UserCategory:
     try:
         category: UserCategory = (
-            db.query(UserCategory)
-            .filter(UserCategory.id == category_id, UserCategory.user_id == user_id)
-            .one()
+            db.query(UserCategory).filter(UserCategory.id == category_id, UserCategory.user_id == user_id).one()
         )
         category.is_deleted = True
         db.commit()

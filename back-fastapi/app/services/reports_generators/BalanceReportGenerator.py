@@ -33,10 +33,7 @@ class BalanceReportGenerator:
         self.raw_results = None
 
         self.user_base_currency = (
-            db.query(Currency)
-            .join(User, User.base_currency_id == Currency.id)
-            .filter(User.id == user_id)
-            .one()
+            db.query(Currency).join(User, User.base_currency_id == Currency.id).filter(User.id == user_id).one()
         )
 
     def prepare_raw_data(self) -> 'BalanceReportGenerator':
@@ -74,8 +71,7 @@ class BalanceReportGenerator:
             .distinct(Transaction.account_id, Account.name, Currency.code)
             .join(
                 subquery,
-                (Transaction.account_id == subquery.c.account_id)
-                & (Transaction.date_time == subquery.c.max_date_time),
+                (Transaction.account_id == subquery.c.account_id) & (Transaction.date_time == subquery.c.max_date_time),
             )
             .join(Account, Account.id == Transaction.account_id)
             .join(Currency, Account.currency_id == Currency.id)

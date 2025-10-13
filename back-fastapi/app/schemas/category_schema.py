@@ -20,9 +20,7 @@ class ResponseCategorySchema(CreateCategorySchema):
     updated_at: datetime
     children: list["ResponseCategorySchema"] | None = []
 
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
 ResponseCategorySchema.model_rebuild()

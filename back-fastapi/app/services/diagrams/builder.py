@@ -14,11 +14,7 @@ def prepare_data(categories, category_id=None):
         subcategories = []
         for cat in categories:
             if cat['parent_id'] == cat_id or cat['id'] == cat_id:
-                cat['name'] = (
-                    cat['name'].split('>>')[1].strip()
-                    if '>>' in cat['name']
-                    else cat['name']
-                )
+                cat['name'] = cat['name'].split('>>')[1].strip() if '>>' in cat['name'] else cat['name']
                 subcategories.append(cat)
 
         return subcategories

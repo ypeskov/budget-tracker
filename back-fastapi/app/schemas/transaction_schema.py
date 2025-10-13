@@ -57,17 +57,13 @@ class CreateTransactionSchema(BaseModel):
     is_transfer: bool
     is_income: bool
     is_template: bool = False
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
 class UpdateTransactionSchema(CreateTransactionSchema):
     id: int
     # user_id: int
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
 class ResponseTransactionSchema(CreateTransactionSchema):
@@ -107,6 +103,4 @@ class ResponseTransactionTemplateSchema(BaseModel):
     label: str
     category: ResponseCategorySchema
 
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)

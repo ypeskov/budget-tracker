@@ -10,6 +10,4 @@ class ExchangeRateSchema(BaseModel):
     actual_date: date
     base_currency_code: str
 
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)

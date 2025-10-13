@@ -29,9 +29,7 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 def create_planned_transaction(
-    request: Request,
-    planned_transaction_dto: CreatePlannedTransactionSchema,
-    db: Session = Depends(get_db),
+    request: Request, planned_transaction_dto: CreatePlannedTransactionSchema, db: Session = Depends(get_db)
 ):
     """
     Create a new planned transaction (one-time or recurring).
@@ -93,9 +91,7 @@ def get_planned_transactions(
         if include_inactive:
             filters['include_inactive'] = include_inactive
 
-        planned_transactions = pt_service.get_planned_transactions(
-            request.state.user['id'], db, filters
-        )
+        planned_transactions = pt_service.get_planned_transactions(request.state.user['id'], db, filters)
         return planned_transactions
     except Exception as e:
         logger.exception(e)
@@ -105,16 +101,12 @@ def get_planned_transactions(
         )
 
 
-@router.get(
-    '/upcoming/occurrences', response_model=list[PlannedTransactionOccurrenceSchema]
-)
+@router.get('/upcoming/occurrences', response_model=list[PlannedTransactionOccurrenceSchema])
 def get_upcoming_occurrences(
     request: Request,
     db: Session = Depends(get_db),
     days: int = Query(30, description="Number of days to look ahead"),
-    include_inactive: bool = Query(
-        False, description="Include inactive planned transactions"
-    ),
+    include_inactive: bool = Query(False, description="Include inactive planned transactions"),
 ):
     """
     Get all upcoming transaction occurrences within the specified time range.
@@ -138,9 +130,7 @@ def get_upcoming_occurrences(
         )
 
 
-@router.get(
-    '/{planned_transaction_id}', response_model=ResponsePlannedTransactionSchema
-)
+@router.get('/{planned_transaction_id}', response_model=ResponsePlannedTransactionSchema)
 def get_planned_transaction(
     planned_transaction_id: int,
     request: Request,
@@ -161,9 +151,7 @@ def get_planned_transaction(
         )
     except AccessDenied as e:
         logger.error(f"Access denied: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail='Access denied'
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Access denied')
     except Exception as e:
         logger.exception(e)
         raise HTTPException(
@@ -172,9 +160,7 @@ def get_planned_transaction(
         )
 
 
-@router.put(
-    '/{planned_transaction_id}', response_model=ResponsePlannedTransactionSchema
-)
+@router.put('/{planned_transaction_id}', response_model=ResponsePlannedTransactionSchema)
 def update_planned_transaction(
     planned_transaction_id: int,
     request: Request,
@@ -199,9 +185,7 @@ def update_planned_transaction(
         )
     except AccessDenied as e:
         logger.error(f"Access denied: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail='Access denied'
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Access denied')
     except Exception as e:
         logger.exception(e)
         raise HTTPException(
@@ -220,9 +204,7 @@ def delete_planned_transaction(
     Delete (soft delete) a planned transaction.
     """
     try:
-        pt_service.delete_planned_transaction(
-            planned_transaction_id, request.state.user['id'], db
-        )
+        pt_service.delete_planned_transaction(planned_transaction_id, request.state.user['id'], db)
         return {'deleted': True}
     except NoResultFound:
         raise HTTPException(
@@ -231,9 +213,7 @@ def delete_planned_transaction(
         )
     except AccessDenied as e:
         logger.error(f"Access denied: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail='Access denied'
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Access denied')
     except Exception as e:
         logger.exception(e)
         raise HTTPException(

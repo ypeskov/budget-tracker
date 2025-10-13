@@ -19,9 +19,7 @@ class NewBudgetInputSchema(BaseModel):
     categories: list[int]
     comment: str | None = None
 
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
 class EditBudgetInputSchema(NewBudgetInputSchema):

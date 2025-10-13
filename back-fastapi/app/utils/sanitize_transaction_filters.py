@@ -48,9 +48,7 @@ filter_functions = {
 def prepare_filters(params: dict) -> None:
     for key, val in params.items():
         if key not in transaction_filters:
-            raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_CONTENT, f'Incorrect filter: {key}'
-            )
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f'Incorrect filter: {key}')
         if key in filter_functions:
             params[key] = filter_functions[key](val)
             if params[key] is None:

@@ -66,9 +66,7 @@ class ExpensesReportGenerator:
 
         for row in result:
             # Calculate amount in base currency
-            transaction_amount = calc_amount(
-                row.amount, row.currency, self.start_date, base_currency.code, self._db
-            )
+            transaction_amount = calc_amount(row.amount, row.currency, self.start_date, base_currency.code, self._db)
             user_categories[row.category_id]['total_expenses'] += transaction_amount
             user_categories[row.category_id]['currency_code'] = base_currency.code
 
@@ -76,9 +74,7 @@ class ExpensesReportGenerator:
 
         if self.hide_empty_categories:
             self._user_categories_with_expenses = [
-                category
-                for category in self._user_categories_with_expenses
-                if category['total_expenses'] > 0
+                category for category in self._user_categories_with_expenses if category['total_expenses'] > 0
             ]
 
         return self

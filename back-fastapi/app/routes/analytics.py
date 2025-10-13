@@ -19,13 +19,9 @@ router = APIRouter(
 )
 
 
-def get_expense_analyzer(
-    request: Request, db: Session = Depends(get_db)
-) -> ExpenseAnalyzer:
+def get_expense_analyzer(request: Request, db: Session = Depends(get_db)) -> ExpenseAnalyzer:
     if not hasattr(request.state, 'user'):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
     user_id = request.state.user['id']
     return ExpenseAnalyzer(settings, db, user_id)
 
@@ -45,9 +41,7 @@ async def analyze_spending_trends(
     )
 
     try:
-        analysis = await analyzer.analyze_spending_trends(
-            input_data.start_date, input_data.end_date, input_data.limit
-        )
+        analysis = await analyzer.analyze_spending_trends(input_data.start_date, input_data.end_date, input_data.limit)
 
         if analysis is None:
             raise HTTPException(
@@ -80,9 +74,7 @@ async def analyze_expense_categorization(
     )
 
     try:
-        analysis = await analyzer.analyze_expense_categorization(
-            input_data.start_date, input_data.end_date
-        )
+        analysis = await analyzer.analyze_expense_categorization(input_data.start_date, input_data.end_date)
 
         if analysis is None:
             raise HTTPException(

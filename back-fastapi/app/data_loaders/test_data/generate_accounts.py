@@ -39,9 +39,7 @@ def generate_test_accounts():
                     comment='',
                 )
                 acc = create_account(acc_data0, user.id, db)
-                print(
-                    f'{acc.name} {acc.currency.code}-{acc.account_type.type_name} was created'
-                )
+                print(f'{acc.name} {acc.currency.code}-{acc.account_type.type_name} was created')
                 account_id += 1
                 acc_data1 = CreateAccountSchema(
                     # id=account_id,
@@ -55,9 +53,7 @@ def generate_test_accounts():
                     comment='',
                 )
                 acc = create_account(acc_data1, user.id, db)
-                print(
-                    f'{acc.name} {acc.currency.code}-{acc.account_type.type_name} was created'
-                )
+                print(f'{acc.name} {acc.currency.code}-{acc.account_type.type_name} was created')
                 account_id += 1
             print(f'-------- accounts for user {user.id} generated --------')
 

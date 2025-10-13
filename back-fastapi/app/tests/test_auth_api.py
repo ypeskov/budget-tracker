@@ -42,9 +42,7 @@ def test_login_user(test_user, create_user):
     assert "accessToken" in login_info
     assert login_info["tokenType"] == "bearer"
 
-    response = client.get(
-        "/auth/profile", headers={'auth-token': login_info["accessToken"]}
-    )
+    response = client.get("/auth/profile", headers={'auth-token': login_info["accessToken"]})
     assert response.status_code == 200
 
     profile = response.json()

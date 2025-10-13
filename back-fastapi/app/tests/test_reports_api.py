@@ -18,17 +18,13 @@ class TestReportsAPI:
             "period": "MONTHLY",
         }
 
-        response = client.post(
-            "/reports/cashflow/", json=report_data, headers=auth_headers
-        )
+        response = client.post("/reports/cashflow/", json=report_data, headers=auth_headers)
         assert response.status_code == 422
 
     def test_balance_report_success(self, token, auth_headers, one_account):
         report_data = {"accountIds": [one_account["id"]], "balanceDate": "2024-01-31"}
 
-        response = client.post(
-            "/reports/balance/", json=report_data, headers=auth_headers
-        )
+        response = client.post("/reports/balance/", json=report_data, headers=auth_headers)
 
         assert response.status_code == 200
         result = response.json()
@@ -37,9 +33,7 @@ class TestReportsAPI:
     def test_balance_report_non_hidden_success(self, token, auth_headers, one_account):
         report_data = {"accountIds": [one_account["id"]], "balanceDate": "2024-01-31"}
 
-        response = client.post(
-            "/reports/balance/non-hidden/", json=report_data, headers=auth_headers
-        )
+        response = client.post("/reports/balance/non-hidden/", json=report_data, headers=auth_headers)
 
         assert response.status_code == 200
         result = response.json()
@@ -52,9 +46,7 @@ class TestReportsAPI:
             "hideEmptyCategories": True,
         }
 
-        response = client.post(
-            "/reports/expenses-data/", json=report_data, headers=auth_headers
-        )
+        response = client.post("/reports/expenses-data/", json=report_data, headers=auth_headers)
 
         assert response.status_code == 200
         result = response.json()

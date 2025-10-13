@@ -6,9 +6,7 @@ from app.dependencies.check_token import check_token
 from app.schemas.currency_schema import CurrencyResponseSchema
 from app.services.currencies import get_user_currencies
 
-router = APIRouter(
-    tags=['Currencies'], prefix='/currencies', dependencies=[Depends(check_token)]
-)
+router = APIRouter(tags=['Currencies'], prefix='/currencies', dependencies=[Depends(check_token)])
 
 
 @router.get('/', response_model=list[CurrencyResponseSchema] | None)

@@ -52,9 +52,7 @@ class TestUserSettingsAPI:
     def test_set_base_currency_success(self, auth_headers):
         currency_data = {"currencyId": 1}
 
-        response = client.put(
-            "/settings/base-currency/", json=currency_data, headers=auth_headers
-        )
+        response = client.put("/settings/base-currency/", json=currency_data, headers=auth_headers)
 
         assert response.status_code == 200
         currency = response.json()
@@ -63,15 +61,11 @@ class TestUserSettingsAPI:
     def test_set_base_currency_invalid_id(self, auth_headers):
         currency_data = {"currencyId": 999999}
 
-        response = client.put(
-            "/settings/base-currency/", json=currency_data, headers=auth_headers
-        )
+        response = client.put("/settings/base-currency/", json=currency_data, headers=auth_headers)
         assert response.status_code in [422, 500]
 
     def test_set_base_currency_missing_id(self, auth_headers):
         currency_data = {}
 
-        response = client.put(
-            "/settings/base-currency/", json=currency_data, headers=auth_headers
-        )
+        response = client.put("/settings/base-currency/", json=currency_data, headers=auth_headers)
         assert response.status_code == 422
