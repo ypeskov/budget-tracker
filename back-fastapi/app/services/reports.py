@@ -38,16 +38,10 @@ def get_cash_flows(
     return cash_flow_generator.get_data()
 
 
-def get_balance_report(
-    user_id: int, db: Session, account_ids: list[int], balance_date: date | None
-) -> list[dict]:
+def get_balance_report(user_id: int, db: Session, account_ids: list[int], balance_date: date | None) -> list[dict]:
     """Get balance for accounts on a given date"""
-    balance_report_generator = BalanceReportGenerator(
-        user_id, account_ids, db, balance_date
-    )
-    balance_data: list[dict] = (
-        balance_report_generator.prepare_raw_data().get_balances()
-    )
+    balance_report_generator = BalanceReportGenerator(user_id, account_ids, db, balance_date)
+    balance_data: list[dict] = balance_report_generator.prepare_raw_data().get_balances()
 
     return balance_data
 
@@ -60,9 +54,7 @@ def get_expenses_by_categories(
     hide_empty_categories: bool = False,
 ) -> dict:
     """Get all expenses within a given time period"""
-    expenses_report_generator = ExpensesReportGenerator(
-        user_id, db, start_date, end_date, hide_empty_categories
-    )
+    expenses_report_generator = ExpensesReportGenerator(user_id, db, start_date, end_date, hide_empty_categories)
     expenses = expenses_report_generator.prepare_data().get_expenses()
 
     return expenses
@@ -97,9 +89,7 @@ def get_expenses_diagram_data(
     end_date: date,
     hide_empty_categories: bool = False,
 ) -> dict:
-    expenses = get_expenses_by_categories(
-        user_id, db, start_date, end_date, hide_empty_categories
-    )
+    expenses = get_expenses_by_categories(user_id, db, start_date, end_date, hide_empty_categories)
 
     diagram_data = combine_small_categories(prepare_data(expenses, None))
     diagram_data.sort(key=lambda x: x['amount'], reverse=True)

@@ -47,10 +47,7 @@ class CashFlowReportGenerator:
         )
         self.account_ids = [account.id for account in accounts]
 
-        self._accounts_info = {
-            account.id: {"name": account.name, "currency": account.currency}
-            for account in accounts
-        }
+        self._accounts_info = {account.id: {"name": account.name, "currency": account.currency} for account in accounts}
 
     def get_cash_flows(self):
         prepared_results = self.prepare_data()
@@ -126,9 +123,7 @@ class CashFlowReportGenerator:
                 func.to_char(Transaction.date_time, self.period_str).label(self.label),
                 func.coalesce(
                     func.sum(
-                        case(
-                            (Transaction.is_income == True, Transaction.amount), else_=0
-                        )  # noqa
+                        case((Transaction.is_income == True, Transaction.amount), else_=0)  # noqa
                     ).filter(
                         Transaction.is_deleted == False,
                         Transaction.is_transfer == False,
@@ -170,22 +165,14 @@ class CashFlowReportGenerator:
         else:
             # get start date 12 months ago in case of monthly report and 30 days ago in case of daily report
             if self.period == "monthly":
-                additional_filters.append(
-                    Transaction.date_time >= (datetime.now() - timedelta(days=365))
-                )
+                additional_filters.append(Transaction.date_time >= (datetime.now() - timedelta(days=365)))
             elif self.period == "daily":
-                additional_filters.append(
-                    Transaction.date_time >= (datetime.now() - timedelta(days=30))
-                )
+                additional_filters.append(Transaction.date_time >= (datetime.now() - timedelta(days=30)))
 
         if self.end_date:
-            additional_filters.append(
-                Transaction.date_time <= (self.end_date + timedelta(days=1))
-            )
+            additional_filters.append(Transaction.date_time <= (self.end_date + timedelta(days=1)))
         else:
-            additional_filters.append(
-                Transaction.date_time <= (datetime.now() + timedelta(days=1))
-            )
+            additional_filters.append(Transaction.date_time <= (datetime.now() + timedelta(days=1)))
 
         if additional_filters:
             query = query.filter(*additional_filters)

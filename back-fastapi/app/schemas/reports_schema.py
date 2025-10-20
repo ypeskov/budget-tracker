@@ -11,9 +11,7 @@ class CashFlowReportInputSchema(BaseModel):
     end_date: datetime | None = None
     period: str
 
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
 class ExpensesReportInputSchema(BaseModel):
@@ -22,9 +20,7 @@ class ExpensesReportInputSchema(BaseModel):
     categories: list[int] = []
     hide_empty_categories: bool = False
 
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
 class ExpensesReportOutputItemSchema(BaseModel):
@@ -39,9 +35,7 @@ class ExpensesReportOutputItemSchema(BaseModel):
     currency_code: str | None = None
     is_parent: bool = False
 
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
 class CashFlowReportOutputSchema(BaseModel):
@@ -50,18 +44,14 @@ class CashFlowReportOutputSchema(BaseModel):
     total_expenses: dict[str, float]
     net_flow: dict[str, float]
 
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
 class BalanceReportInputSchema(BaseModel):
     account_ids: list[int]
     balance_date: date
 
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
 class BalanceReportOutputSchema(BaseModel):
@@ -73,6 +63,4 @@ class BalanceReportOutputSchema(BaseModel):
     base_currency_code: str
     report_date: date
 
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)

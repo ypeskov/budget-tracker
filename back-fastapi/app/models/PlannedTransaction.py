@@ -31,23 +31,15 @@ class PlannedTransaction(Base):
     __tablename__ = 'planned_transactions'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey('users.id', ondelete='CASCADE'), index=True
-    )
-    currency_id: Mapped[int] = mapped_column(
-        ForeignKey('currencies.id', ondelete='CASCADE'), nullable=False
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
+    currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'), nullable=False)
     amount: Mapped[Decimal] = mapped_column(default=Decimal(0), nullable=False)
-    label: Mapped[str] = mapped_column(
-        String(LABEL_MAX_LENGTH), index=True, nullable=True, default=''
-    )
+    label: Mapped[str] = mapped_column(String(LABEL_MAX_LENGTH), index=True, nullable=True, default='')
     notes: Mapped[str] = mapped_column(Text, nullable=True)
     is_income: Mapped[bool] = mapped_column(default=False)
 
     # Planning-specific fields
-    planned_date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), index=True, nullable=False
-    )
+    planned_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True, nullable=False)
 
     # Recurrence configuration
     is_recurring: Mapped[bool] = mapped_column(default=False, nullable=False)
@@ -63,28 +55,18 @@ class PlannedTransaction(Base):
     # }
 
     # Execution tracking
-    is_executed: Mapped[bool] = mapped_column(
-        default=False, nullable=False, server_default='f'
-    )
+    is_executed: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
     executed_transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey('transactions.id', ondelete='SET NULL'), index=True, nullable=True
     )
-    execution_date: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    execution_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Status flags
-    is_active: Mapped[bool] = mapped_column(
-        default=True, nullable=False, server_default='t'
-    )
-    is_deleted: Mapped[bool] = mapped_column(
-        default=False, nullable=False, server_default='f'
-    )
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False, server_default='t')
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
 
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

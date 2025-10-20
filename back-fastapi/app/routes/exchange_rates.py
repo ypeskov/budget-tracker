@@ -35,15 +35,11 @@ def get_rates(db: Session = Depends(get_db)):
         )
 
 
-@router.get(
-    '/update/', status_code=status.HTTP_200_OK, response_model=ExchangeRateSchema
-)
+@router.get('/update/', status_code=status.HTTP_200_OK, response_model=ExchangeRateSchema)
 def update_rates(db: Session = Depends(get_db)):
     """Update exchange rates just for today"""
     try:
-        exchange_rates: ExchangeRateHistory = update_exchange_rates(
-            db, when=date.today()
-        )
+        exchange_rates: ExchangeRateHistory = update_exchange_rates(db, when=date.today())
         return exchange_rates
     except ErrorFetchingData as e:
         logger.exception(e)
@@ -64,9 +60,7 @@ def update_rates(db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     response_model=ExchangeRateSchema,
 )
-def update_rates_from_to(
-    start_date: date, end_date: date, db: Session = Depends(get_db)
-):
+def update_rates_from_to(start_date: date, end_date: date, db: Session = Depends(get_db)):
     """Update exchange rates from start_date to end_date"""
     logger.info(f'Updating exchange rates from {start_date} to {end_date}')
     # raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED,
@@ -75,9 +69,7 @@ def update_rates_from_to(
         updated_rates = []
         current_date = start_date
         for _ in range((end_date - start_date).days + 1):
-            exchange_rates: ExchangeRateHistory = update_exchange_rates(
-                db, when=current_date
-            )
+            exchange_rates: ExchangeRateHistory = update_exchange_rates(db, when=current_date)
             updated_rates.append(exchange_rates)
             current_date += timedelta(days=1)
         return updated_rates[-1] if updated_rates else None

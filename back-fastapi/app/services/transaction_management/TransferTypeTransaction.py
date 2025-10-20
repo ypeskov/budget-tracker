@@ -49,25 +49,17 @@ class TransferTypeTransaction:
                 .one_or_none()
             )
             if target_transaction is None:
-                logger.error(
-                    f'Transfer target transaction not found for transaction {self._transaction.id}'
-                )
+                logger.error(f'Transfer target transaction not found for transaction {self._transaction.id}')
                 raise InvalidTransaction("Transfer target transaction not found")
             self._prev_transaction_state = copy.deepcopy(target_transaction)
         target_transaction.account_id = transaction_details.target_account_id  # type: ignore
-        target_transaction.account = (
-            self._db.query(Account)
-            .filter_by(id=transaction_details.target_account_id)
-            .one()
-        )
+        target_transaction.account = self._db.query(Account).filter_by(id=transaction_details.target_account_id).one()
         target_transaction.amount = transaction_details.target_amount  # type: ignore
         target_transaction.label = transaction_details.label
         target_transaction.linked_transaction_id = self._transaction.id
         target_transaction.is_income = not self._transaction.is_income
         target_transaction.currency_id = target_transaction.account.currency_id
-        target_transaction.currency = (
-            self._db.query(Currency).filter_by(id=target_transaction.currency_id).one()
-        )
+        target_transaction.currency = self._db.query(Currency).filter_by(id=target_transaction.currency_id).one()
 
         target_account_transaction = NonTransferTypeTransaction(
             target_transaction, self._prev_transaction_state, self._db, self._is_update

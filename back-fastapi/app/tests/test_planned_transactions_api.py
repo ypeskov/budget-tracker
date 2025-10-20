@@ -123,9 +123,7 @@ def test_get_planned_transactions(token, one_account):
         )
 
     # Get all planned transactions
-    response = client.get(
-        f'{planned_transactions_path_prefix}/', headers={'auth-token': token}
-    )
+    response = client.get(f'{planned_transactions_path_prefix}/', headers={'auth-token': token})
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -209,9 +207,7 @@ def test_delete_planned_transaction(token, one_account):
     assert response.status_code == status.HTTP_200_OK
 
     # Verify it's not returned in list
-    list_response = client.get(
-        f'{planned_transactions_path_prefix}/', headers={'auth-token': token}
-    )
+    list_response = client.get(f'{planned_transactions_path_prefix}/', headers={'auth-token': token})
 
     data = list_response.json()
     assert created_id not in [pt['id'] for pt in data]

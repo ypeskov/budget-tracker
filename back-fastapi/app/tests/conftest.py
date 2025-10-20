@@ -91,9 +91,7 @@ def setup_db():
 @pytest.fixture(scope="function")
 def token():
     """Create a user for test purposes and return his access token"""
-    user: User = create_users_service(
-        UserRegistration.model_validate(main_test_user), db
-    )
+    user: User = create_users_service(UserRegistration.model_validate(main_test_user), db)
     user.is_active = True
     db.commit()
     token = get_jwt_token_service(UserLoginSchema.model_validate(main_test_user), db)
@@ -157,9 +155,7 @@ def fake_account() -> CreateAccountSchema:
 @pytest.fixture(scope="function")
 def create_accounts(token):
     accounts = [
-        create_account_service(
-            CreateAccountSchema.model_validate(test_acc), main_test_user_id, db
-        )
+        create_account_service(CreateAccountSchema.model_validate(test_acc), main_test_user_id, db)
         for test_acc in test_accounts_data
     ]
     yield accounts
@@ -170,9 +166,7 @@ def create_accounts(token):
 
 @pytest.fixture(scope="function")
 def create_transaction(token) -> Callable[[dict], Transaction]:
-    categories_response = client.get(
-        f'{categories_path_prefix}/', headers={'auth-token': token}
-    )
+    categories_response = client.get(f'{categories_path_prefix}/', headers={'auth-token': token})
     categories = categories_response.json()
 
     expense_category = None

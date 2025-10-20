@@ -17,22 +17,16 @@ from app.services.categories import (
     grouped_user_categories,
 )
 
-router = APIRouter(
-    tags=['Categories'], prefix='/categories', dependencies=[Depends(check_token)]
-)
+router = APIRouter(tags=['Categories'], prefix='/categories', dependencies=[Depends(check_token)])
 
 
 @router.get('/', response_model=list[ResponseCategorySchema])
-def get_categories(
-    request: Request, db: Session = Depends(get_db)
-) -> list[UserCategory]:
+def get_categories(request: Request, db: Session = Depends(get_db)) -> list[UserCategory]:
     return get_user_categories(request.state.user['id'], db)
 
 
 @router.get('/grouped/', response_model=GroupedCategorySchema)
-def get_grouped_categories(
-    request: Request, db: Session = Depends(get_db)
-) -> GroupedCategorySchema:
+def get_grouped_categories(request: Request, db: Session = Depends(get_db)) -> GroupedCategorySchema:
     user_id = request.state.user['id']
     return grouped_user_categories(user_id, db)
 
@@ -65,21 +59,15 @@ def create_category(
 ) -> ResponseCategorySchema:
     user_id = request.state.user['id']
     try:
-        new_category = create_or_update_category(
-            user_id=user_id, db=db, category_data=category_data
-        )
+        new_category = create_or_update_category(user_id=user_id, db=db, category_data=category_data)
         return new_category
     except Exception as e:
         logger.error(f"Error creating category: {e}")
         raise HTTPException(status_code=400, detail=f"Error creating category: {e}")
 
 
-@router.delete(
-    '/{category_id}/', status_code=200, response_model=ResponseCategorySchema
-)
-def delete_category_endpoint(
-    category_id: int, request: Request, db: Session = Depends(get_db)
-) -> UserCategory:
+@router.delete('/{category_id}/', status_code=200, response_model=ResponseCategorySchema)
+def delete_category_endpoint(category_id: int, request: Request, db: Session = Depends(get_db)) -> UserCategory:
     user_id = request.state.user['id']
     try:
         return delete_category(user_id, category_id, db)

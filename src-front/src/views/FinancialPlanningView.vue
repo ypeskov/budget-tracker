@@ -1,167 +1,3 @@
-<template>
-  <div class="financial-planning-view container-fluid mt-4">
-    <div class="page-header mb-4">
-      <h1 class="page-title">
-        <i class="bi bi-graph-up-arrow"></i>
-        {{ $t('financialPlanning.title') }}
-      </h1>
-      <button class="btn btn-primary btn-lg" @click="showCreateModal">
-        <i class="bi bi-plus-circle"></i>
-        {{ $t('financialPlanning.createPlanned') }}
-      </button>
-    </div>
-
-    <!-- Loading state -->
-    <div v-if="store.loading" class="text-center py-5">
-      <div class="spinner-border" role="status">
-        <span class="visually-hidden">{{ $t('common.loading') }}</span>
-      </div>
-    </div>
-
-    <!-- Error state -->
-    <div v-else-if="store.error" class="alert alert-danger alert-dismissible fade show">
-      <i class="bi bi-exclamation-triangle"></i>
-      {{ store.error }}
-      <button type="button" class="btn-close" @click="store.clearError()"></button>
-    </div>
-
-    <!-- Main content -->
-    <div v-else>
-      <!-- Projection Settings -->
-      <div class="row mb-3">
-        <div class="col-12">
-          <div class="card settings-card">
-            <div class="card-body">
-              <div class="row align-items-end g-3">
-                <div class="col-md-3">
-                  <label class="form-label">{{ $t('financialPlanning.projectionEndDate') }}</label>
-                  <input
-                    type="date"
-                    class="form-control"
-                    v-model="projectionSettings.endDate"
-                    @change="onProjectionSettingsChange"
-                  />
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label">{{ $t('financialPlanning.projectionPeriod') }}</label>
-                  <select
-                    class="form-select"
-                    v-model="projectionSettings.period"
-                    @change="onProjectionSettingsChange"
-                  >
-                    <option value="daily">{{ $t('financialPlanning.periods.daily') }}</option>
-                    <option value="weekly">{{ $t('financialPlanning.periods.weekly') }}</option>
-                    <option value="monthly">{{ $t('financialPlanning.periods.monthly') }}</option>
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      id="showInactiveCheckbox"
-                      v-model="showInactive"
-                      @change="onShowInactiveChange"
-                    />
-                    <label class="form-check-label" for="showInactiveCheckbox">
-                      {{ $t('financialPlanning.showInactive') }}
-                      <span v-if="inactiveCount > 0" class="badge bg-secondary ms-1">{{ inactiveCount }}</span>
-                    </label>
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <button class="btn btn-outline-secondary w-100" @click="resetProjectionSettings">
-                    <i class="bi bi-arrow-clockwise"></i>
-                    {{ $t('financialPlanning.resetSettings') }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Top section: Chart and Statistics -->
-      <div class="row mb-4">
-        <!-- Balance Projection Chart -->
-        <div class="col-lg-7 mb-4">
-          <div class="card chart-card">
-            <div class="card-body">
-              <h5 class="card-title">
-                <i class="bi bi-graph-up"></i>
-                {{ $t('financialPlanning.balanceProjection') }}
-              </h5>
-              <BalanceProjectionChart
-                v-if="balanceProjection"
-                :projection-data="balanceProjection"
-                :current-balance="totalCurrentBalance"
-                :currency="balanceProjection?.baseCurrencyCode || baseCurrency"
-              />
-              <div v-else class="projection-placeholder">
-                <p class="text-muted">{{ $t('financialPlanning.loadingProjection') }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Statistics Panel -->
-        <div class="col-lg-5 mb-4">
-          <StatisticsPanel
-            :current-balance="totalCurrentBalance"
-            :projected-balance="projectedBalance"
-            :total-income="totalPlannedIncome"
-            :total-expenses="totalPlannedExpenses"
-            :income-count="incomeTransactionsCount"
-            :expenses-count="expenseTransactionsCount"
-            :currency="futureBalanceData?.baseCurrencyCode || baseCurrency"
-            :projection-end-date="projectionSettings.endDate"
-          />
-        </div>
-      </div>
-
-      <!-- Upcoming Transactions -->
-      <div class="row">
-        <div class="col-12">
-          <div class="card transactions-card">
-            <div class="card-header">
-              <h5 class="card-title mb-0">
-                <i class="bi bi-calendar-check"></i>
-                {{ $t('financialPlanning.upcomingTransactions') }}
-              </h5>
-            </div>
-            <div class="card-body">
-              <UpcomingTransactionsList
-                :transactions="store.upcomingOccurrences"
-                :currency="futureBalanceData?.baseCurrencyCode || baseCurrency"
-                @edit="editPlanned"
-                @delete="deletePlanned"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal for Create/Edit -->
-    <PlannedTransactionModal
-      v-model="showModal"
-      :transaction="selectedTransaction"
-      :loading="modalLoading"
-      @submit="handleModalSubmit"
-    />
-
-    <!-- Delete Confirmation Dialog -->
-    <ConfirmDialog
-      v-model="showDeleteConfirm"
-      :title="$t('financialPlanning.confirmDelete')"
-      :message="$t('financialPlanning.confirmDeleteMessage')"
-      :confirm-text="$t('common.delete')"
-      :cancel-text="$t('common.cancel')"
-      @confirm="confirmDelete"
-    />
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { usePlannedTransactionsStore } from '@/stores/plannedTransactions';
@@ -494,6 +330,172 @@ async function confirmDelete() {
 }
 
 </script>
+
+
+<template>
+  <div class="financial-planning-view container-fluid mt-4">
+    <div class="page-header mb-4">
+      <h1 class="page-title">
+        <i class="bi bi-graph-up-arrow"></i>
+        {{ $t('financialPlanning.title') }}
+      </h1>
+      <button class="btn btn-primary btn-lg" @click="showCreateModal">
+        <i class="bi bi-plus-circle"></i>
+        {{ $t('financialPlanning.createPlanned') }}
+      </button>
+    </div>
+
+    <!-- Loading state -->
+    <div v-if="store.loading" class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">{{ $t('common.loading') }}</span>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div v-else-if="store.error" class="alert alert-danger alert-dismissible fade show">
+      <i class="bi bi-exclamation-triangle"></i>
+      {{ store.error }}
+      <button type="button" class="btn-close" @click="store.clearError()"></button>
+    </div>
+
+    <!-- Main content -->
+    <div v-else>
+      <!-- Projection Settings -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="card settings-card">
+            <div class="card-body">
+              <div class="row align-items-end g-3">
+                <div class="col-md-3">
+                  <label class="form-label">{{ $t('financialPlanning.projectionEndDate') }}</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    v-model="projectionSettings.endDate"
+                    @change="onProjectionSettingsChange"
+                  />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">{{ $t('financialPlanning.projectionPeriod') }}</label>
+                  <select
+                    class="form-select"
+                    v-model="projectionSettings.period"
+                    @change="onProjectionSettingsChange"
+                  >
+                    <option value="daily">{{ $t('financialPlanning.periods.daily') }}</option>
+                    <option value="weekly">{{ $t('financialPlanning.periods.weekly') }}</option>
+                    <option value="monthly">{{ $t('financialPlanning.periods.monthly') }}</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="showInactiveCheckbox"
+                      v-model="showInactive"
+                      @change="onShowInactiveChange"
+                    />
+                    <label class="form-check-label" for="showInactiveCheckbox">
+                      {{ $t('financialPlanning.showInactive') }}
+                      <span v-if="inactiveCount > 0" class="badge bg-secondary ms-1">{{ inactiveCount }}</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <button class="btn btn-outline-secondary w-100" @click="resetProjectionSettings">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    {{ $t('financialPlanning.resetSettings') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top section: Chart and Statistics -->
+      <div class="row mb-4">
+        <!-- Balance Projection Chart -->
+        <div class="col-lg-7 mb-4">
+          <div class="card chart-card">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="bi bi-graph-up"></i>
+                {{ $t('financialPlanning.balanceProjection') }}
+              </h5>
+              <BalanceProjectionChart
+                v-if="balanceProjection"
+                :projection-data="balanceProjection"
+                :current-balance="totalCurrentBalance"
+                :currency="balanceProjection?.baseCurrencyCode || baseCurrency"
+              />
+              <div v-else class="projection-placeholder">
+                <p class="text-muted">{{ $t('financialPlanning.loadingProjection') }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics Panel -->
+        <div class="col-lg-5 mb-4">
+          <StatisticsPanel
+            :current-balance="totalCurrentBalance"
+            :projected-balance="projectedBalance"
+            :total-income="totalPlannedIncome"
+            :total-expenses="totalPlannedExpenses"
+            :income-count="incomeTransactionsCount"
+            :expenses-count="expenseTransactionsCount"
+            :currency="futureBalanceData?.baseCurrencyCode || baseCurrency"
+            :projection-end-date="projectionSettings.endDate"
+          />
+        </div>
+      </div>
+
+      <!-- Upcoming Transactions -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card transactions-card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="bi bi-calendar-check"></i>
+                {{ $t('financialPlanning.upcomingTransactions') }}
+              </h5>
+            </div>
+            <div class="card-body">
+              <UpcomingTransactionsList
+                :transactions="store.upcomingOccurrences"
+                :currency="futureBalanceData?.baseCurrencyCode || baseCurrency"
+                @edit="editPlanned"
+                @delete="deletePlanned"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Create/Edit -->
+    <PlannedTransactionModal
+      v-model="showModal"
+      :transaction="selectedTransaction"
+      :loading="modalLoading"
+      @submit="handleModalSubmit"
+    />
+
+    <!-- Delete Confirmation Dialog -->
+    <ConfirmDialog
+      v-model="showDeleteConfirm"
+      :title="$t('financialPlanning.confirmDelete')"
+      :message="$t('financialPlanning.confirmDeleteMessage')"
+      :confirm-text="$t('common.delete')"
+      :cancel-text="$t('common.cancel')"
+      @confirm="confirmDelete"
+    />
+  </div>
+</template>
+
 
 <style scoped>
 .financial-planning-view {

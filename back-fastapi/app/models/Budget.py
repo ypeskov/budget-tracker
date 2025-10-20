@@ -23,22 +23,14 @@ class Budget(Base):
     __tablename__ = 'budgets'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey('users.id', ondelete='CASCADE'), index=True
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
     name: Mapped[str] = mapped_column(String(200), index=True)
-    currency_id: Mapped[int] = mapped_column(
-        ForeignKey('currencies.id', ondelete='CASCADE'), index=True
-    )
+    currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'), index=True)
     target_amount: Mapped[Decimal] = mapped_column(default=0)
     collected_amount: Mapped[Decimal] = mapped_column(default=0)
-    period: Mapped[PeriodEnum] = mapped_column(
-        SqlAlchemyEnum(PeriodEnum), nullable=False
-    )
+    period: Mapped[PeriodEnum] = mapped_column(SqlAlchemyEnum(PeriodEnum), nullable=False)
     repeat: Mapped[bool] = mapped_column(default=False)
-    start_date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
+    start_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     included_categories: Mapped[str] = mapped_column(Text, nullable=True)
     comment: Mapped[str] = mapped_column(nullable=True)
@@ -46,15 +38,9 @@ class Budget(Base):
     user: Mapped[User] = relationship(backref="budgets", passive_deletes=True)
     currency: Mapped[Currency] = relationship(backref="budgets", passive_deletes=True)
 
-    is_deleted: Mapped[bool] = mapped_column(
-        default=False, nullable=False, server_default='f'
-    )
-    is_archived: Mapped[bool] = mapped_column(
-        default=False, nullable=False, server_default='f'
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
+    is_archived: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

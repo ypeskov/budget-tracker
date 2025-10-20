@@ -32,16 +32,12 @@ client = TestClient(app)
 
 
 def test_invalid_token_add_account():
-    response = client.post(
-        f'{accounts_path_prefix}/', json={}, headers={'auth-token': 'Invalid token'}
-    )
+    response = client.post(f'{accounts_path_prefix}/', json={}, headers={'auth-token': 'Invalid token'})
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_wrong_account_details(token):
-    response = client.post(
-        f'{accounts_path_prefix}/', json={}, headers={'auth-token': token}
-    )
+    response = client.post(f'{accounts_path_prefix}/', json={}, headers={'auth-token': token})
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -90,9 +86,7 @@ def test_get_invalid_account_details():
 
 @pytest.mark.parametrize("test_account", test_accounts_data)
 def test_add_get_account(test_account, token):
-    response_account = client.post(
-        f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token}
-    )
+    response_account = client.post(f'{accounts_path_prefix}/', json=test_account, headers={'auth-token': token})
     assert response_account.status_code == status.HTTP_200_OK
 
     account_details = response_account.json()
@@ -104,9 +98,7 @@ def test_add_get_account(test_account, token):
     assert 'openingDate' in account_details
     assert account_details['openingDate'] is not None
 
-    response = client.get(
-        f'{accounts_path_prefix}/{account_details["id"]}', headers={'auth-token': token}
-    )
+    response = client.get(f'{accounts_path_prefix}/{account_details["id"]}', headers={'auth-token': token})
     assert response.status_code == status.HTTP_200_OK
     account_details = response.json()
     assert 'id' in account_details
@@ -123,9 +115,7 @@ def test_add_get_account(test_account, token):
 
 
 def test_get_accounts_list(token, create_accounts):
-    response = client.get(
-        f'{accounts_path_prefix}/?includeHidden=false', headers={'auth-token': token}
-    )
+    response = client.get(f'{accounts_path_prefix}/?includeHidden=false', headers={'auth-token': token})
     assert response.status_code == status.HTTP_200_OK
     accounts_list = response.json()
 
@@ -142,30 +132,21 @@ def test_get_accounts_list(token, create_accounts):
     assert accounts_list[0]['openingDate'] is not None
 
     # check last account details in response
+    assert accounts_list[number_of_accounts - 1]['name'] == test_accounts_data[number_of_accounts - 1]['name']
     assert (
-        accounts_list[number_of_accounts - 1]['name']
-        == test_accounts_data[number_of_accounts - 1]['name']
-    )
-    assert (
-        accounts_list[number_of_accounts - 1]['currencyId']
-        == test_accounts_data[number_of_accounts - 1]['currencyId']
+        accounts_list[number_of_accounts - 1]['currencyId'] == test_accounts_data[number_of_accounts - 1]['currencyId']
     )
     assert (
         accounts_list[number_of_accounts - 1]['accountTypeId']
         == test_accounts_data[number_of_accounts - 1]['accountTypeId']
     )
-    assert (
-        accounts_list[number_of_accounts - 1]['balance']
-        == test_accounts_data[number_of_accounts - 1]['balance']
-    )
+    assert accounts_list[number_of_accounts - 1]['balance'] == test_accounts_data[number_of_accounts - 1]['balance']
     assert 'openingDate' in accounts_list[number_of_accounts - 1]
     assert accounts_list[number_of_accounts - 1]['openingDate'] is not None
 
 
 def test_all_account_types_exist(token):
-    response = client.get(
-        f'{accounts_path_prefix}/types/', headers={'auth-token': token}
-    )
+    response = client.get(f'{accounts_path_prefix}/types/', headers={'auth-token': token})
     assert response.status_code == status.HTTP_200_OK
     account_types = response.json()
 

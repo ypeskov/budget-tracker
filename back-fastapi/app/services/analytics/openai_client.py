@@ -39,9 +39,7 @@ class OpenAIClient:
 
         return None
 
-    async def analyze_expenses(
-        self, prompt: str, data: str, max_tokens: int | None = None
-    ) -> str | None:
+    async def analyze_expenses(self, prompt: str, data: str, max_tokens: int | None = None) -> str | None:
         messages: list[ChatCompletionMessageParam] | list[dict[str, str]] = [
             {
                 "role": "system",

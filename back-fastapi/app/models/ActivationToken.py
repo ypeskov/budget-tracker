@@ -13,13 +13,9 @@ class ActivationToken(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
     token: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
-    expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -31,6 +27,5 @@ class ActivationToken(Base):
 
     def __repr__(self):  # pragma: no cover
         return (
-            f'ActivationToken(id={self.id}, user_id={self.user_id}, token="{self.token}", '
-            f'created_at={self.created_at})'
+            f'ActivationToken(id={self.id}, user_id={self.user_id}, token="{self.token}", created_at={self.created_at})'
         )

@@ -20,22 +20,14 @@ class Account(Base):
     __tablename__ = 'accounts'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey('users.id', ondelete='CASCADE'), index=True
-    )
-    account_type_id: Mapped[int] = mapped_column(
-        ForeignKey('account_types.id', ondelete='CASCADE')
-    )
-    currency_id: Mapped[int] = mapped_column(
-        ForeignKey('currencies.id', ondelete='CASCADE')
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
+    account_type_id: Mapped[int] = mapped_column(ForeignKey('account_types.id', ondelete='CASCADE'))
+    currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
     initial_balance: Mapped[Decimal] = mapped_column(default=0)
     balance: Mapped[Decimal] = mapped_column(default=0)
     credit_limit: Mapped[Decimal] = mapped_column(nullable=True)
     name: Mapped[str] = mapped_column(String(ACCOUNT_NAME_MAX_LENGTH), index=True)
-    opening_date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    opening_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     comment: Mapped[str] = mapped_column(nullable=True)
     is_hidden: Mapped[bool] = mapped_column(default=False)
     show_in_reports: Mapped[bool] = mapped_column(default=True, nullable=True)
@@ -43,22 +35,12 @@ class Account(Base):
     user: Mapped[User] = relationship(backref="accounts", passive_deletes=True)
     account_type: Mapped[AccountType] = relationship()
     currency: Mapped[Currency] = relationship()
-    transactions: Mapped['Transaction'] = relationship(
-        back_populates='account', foreign_keys='Transaction.account_id'
-    )
+    transactions: Mapped['Transaction'] = relationship(back_populates='account', foreign_keys='Transaction.account_id')
 
-    archived_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    is_deleted: Mapped[bool] = mapped_column(
-        default=False, nullable=True, server_default='f'
-    )
-    is_archived: Mapped[bool] = mapped_column(
-        default=False, nullable=True, server_default='f'
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    archived_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
+    is_archived: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

@@ -51,9 +51,7 @@ def load_default_currencies(db: Session | None = None):
         existing = db.query(Currency).filter_by(id=currency_item.id).first()
         if not existing:
             # print(f'Adding currency: {currency_item}')
-            new_currency = Currency(
-                id=currency_item.id, code=currency_item.code, name=currency_item.name
-            )
+            new_currency = Currency(id=currency_item.id, code=currency_item.code, name=currency_item.name)
             db.add(new_currency)
 
     try:

@@ -15,9 +15,7 @@ class UserCategory(Base):
     __tablename__ = 'user_categories'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     name: Mapped[str] = mapped_column(nullable=False, index=True)
     parent_id: Mapped[int] = mapped_column(
         ForeignKey('user_categories.id', ondelete='CASCADE'), nullable=True, index=True
@@ -26,16 +24,10 @@ class UserCategory(Base):
 
     user: Mapped['User'] = relationship(back_populates="categories")
     parent: Mapped['UserCategory'] = relationship()
-    templates: Mapped[list['TransactionTemplate']] = relationship(
-        back_populates="category"
-    )
+    templates: Mapped[list['TransactionTemplate']] = relationship(back_populates="category")
 
-    is_deleted: Mapped[bool] = mapped_column(
-        default=False, nullable=True, server_default='f'
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=True, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )

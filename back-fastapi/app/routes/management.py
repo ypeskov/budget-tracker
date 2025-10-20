@@ -10,9 +10,7 @@ ic.configureOutput(includeContext=True)
 
 settings = Settings()
 
-router = APIRouter(
-    tags=['Management'], prefix='/management', dependencies=[Depends(check_token)]
-)
+router = APIRouter(tags=['Management'], prefix='/management', dependencies=[Depends(check_token)])
 
 
 @router.get('/backup/')
@@ -21,9 +19,7 @@ async def backup_db(request: Request):
     logger.info('Backup of the database is requested')
 
     if request.state.user['email'] not in settings.ADMINS_NOTIFICATION_EMAILS:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail='You are not authorized'
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You are not authorized')
 
     try:
         make_db_backup.delay()

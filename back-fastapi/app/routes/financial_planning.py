@@ -31,9 +31,7 @@ def calculate_future_balance(
     Returns total balance in base currency and breakdown by account.
     """
     try:
-        result = fp_service.calculate_future_balance(
-            balance_request, request.state.user['id'], db
-        )
+        result = fp_service.calculate_future_balance(balance_request, request.state.user['id'], db)
         return result
     except ValueError as e:
         logger.error(f"Validation error: {e}")
@@ -59,9 +57,7 @@ def get_balance_projection(
     Useful for visualizing balance trends over time.
     """
     try:
-        result = fp_service.get_balance_projection(
-            projection_request, request.state.user['id'], db
-        )
+        result = fp_service.get_balance_projection(projection_request, request.state.user['id'], db)
         return result
     except ValueError as e:
         logger.error(f"Validation error: {e}")

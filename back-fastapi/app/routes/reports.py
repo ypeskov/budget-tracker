@@ -56,9 +56,7 @@ def cash_flow(
         return result
     except AccessDenied as e:
         logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail='Access denied'
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Access denied')
     except Exception as e:
         logger.exception(e)
         raise HTTPException(
@@ -79,15 +77,11 @@ def balance_report(
         f"account_ids: {input_data.account_ids}, date: {input_data.balance_date}"
     )
     try:
-        result: list[dict] = get_balance_report(
-            request.state.user['id'], db, [], input_data.balance_date
-        )
+        result: list[dict] = get_balance_report(request.state.user['id'], db, [], input_data.balance_date)
         return result
     except AccessDenied as e:
         logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail='Access denied'
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Access denied')
     except Exception as e:
         logger.exception(e)
         raise HTTPException(
@@ -117,9 +111,7 @@ def balance_report_non_hidden(
         return result
     except AccessDenied as e:
         logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail='Access denied'
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Access denied')
     except Exception as e:
         logger.exception(e)
         raise HTTPException(
@@ -128,18 +120,14 @@ def balance_report_non_hidden(
         )
 
 
-@router.post(
-    '/expenses-by-categories/', response_model=list[ExpensesReportOutputItemSchema]
-)
+@router.post('/expenses-by-categories/', response_model=list[ExpensesReportOutputItemSchema])
 def expenses_by_categories(
     request: Request,
     input_data: ExpensesReportInputSchema,
     db: Session = Depends(get_db),
 ) -> dict:
     """Get all expenses within a given time period"""
-    logger.info(
-        f"Getting expenses by categories for user_id: {request.state.user['id']}"
-    )
+    logger.info(f"Getting expenses by categories for user_id: {request.state.user['id']}")
     try:
         result: dict = get_expenses_by_categories(
             request.state.user['id'],

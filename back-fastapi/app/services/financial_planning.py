@@ -36,12 +36,7 @@ def calculate_future_balance(
         FutureBalanceResponseSchema with projected balances
     """
     # Get user's base currency
-    user = (
-        db.query(User)
-        .options(joinedload(User.base_currency))
-        .filter(User.id == user_id)
-        .first()
-    )
+    user = db.query(User).options(joinedload(User.base_currency)).filter(User.id == user_id).first()
     if not user or not user.base_currency:
         raise ValueError("User base currency not set")
 
@@ -118,9 +113,7 @@ def calculate_future_balance(
         projected_balance_base = calc_amount(
             projected_balance_account_currency,
             account.currency.code,
-            request.target_date.date()
-            if hasattr(request.target_date, 'date')
-            else request.target_date,
+            request.target_date.date() if hasattr(request.target_date, 'date') else request.target_date,
             base_currency_code,
             db,
         )
@@ -166,9 +159,7 @@ def calculate_future_balance(
                 total_expenses_count += 1
 
     # Calculate total projected balance
-    total_projected_balance = (
-        total_current_balance + total_planned_income - total_planned_expenses
-    )
+    total_projected_balance = total_current_balance + total_planned_income - total_planned_expenses
 
     return FutureBalanceResponseSchema(
         target_date=request.target_date,
@@ -198,12 +189,7 @@ def get_balance_projection(
         BalanceProjectionResponseSchema with projection points
     """
     # Get user's base currency
-    user = (
-        db.query(User)
-        .options(joinedload(User.base_currency))
-        .filter(User.id == user_id)
-        .first()
-    )
+    user = db.query(User).options(joinedload(User.base_currency)).filter(User.id == user_id).first()
     if not user or not user.base_currency:
         raise ValueError("User base currency not set")
 

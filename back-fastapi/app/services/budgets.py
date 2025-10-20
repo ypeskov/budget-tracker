@@ -16,30 +16,20 @@ from app.services.errors import InvalidPeriod, NotFoundError
 ic.configureOutput(includeContext=True)
 
 
-def create_new_budget(
-    user_id: int, db: Session, budget_dto: NewBudgetInputSchema | EditBudgetInputSchema
-) -> Budget:
+def create_new_budget(user_id: int, db: Session, budget_dto: NewBudgetInputSchema | EditBudgetInputSchema) -> Budget:
     """Create new budget"""
     logger.info(f"Creating new budget for user_id: {user_id}, budget_dto: {budget_dto}")
 
     # Filter out categories that are not included in the user's categories
-    user_categories = (
-        db.query(UserCategory).filter(UserCategory.user_id == user_id).all()
-    )
-    included_categories = [
-        category.id
-        for category in user_categories
-        if category.id in budget_dto.categories
-    ]
+    user_categories = db.query(UserCategory).filter(UserCategory.user_id == user_id).all()
+    included_categories = [category.id for category in user_categories if category.id in budget_dto.categories]
     included_categories_str = ",".join(map(str, included_categories))
 
     try:
         # Check if it's an update operation
         if hasattr(budget_dto, "id") and budget_dto.id:
             budget: Budget | None = (
-                db.query(Budget)
-                .filter(Budget.id == budget_dto.id, Budget.user_id == user_id)
-                .one_or_none()
+                db.query(Budget).filter(Budget.id == budget_dto.id, Budget.user_id == user_id).one_or_none()
             )
             if budget is None:
                 raise NotFoundError(f"Budget with id {budget_dto.id} not found.")
@@ -57,9 +47,7 @@ def create_new_budget(
         budget.period = budget_dto.period
         budget.repeat = budget_dto.repeat
         budget.start_date = budget_dto.start_date
-        budget.end_date = budget_dto.end_date + timedelta(
-            days=1
-        )  # add 1 day to include the full end date
+        budget.end_date = budget_dto.end_date + timedelta(days=1)  # add 1 day to include the full end date
         budget.included_categories = included_categories_str
         budget.comment = str(budget_dto.comment)
 
@@ -76,9 +64,7 @@ def create_new_budget(
     return budget
 
 
-def update_budget(
-    user_id: int, db: Session, budget_dto: NewBudgetInputSchema | EditBudgetInputSchema
-) -> Budget:
+def update_budget(user_id: int, db: Session, budget_dto: NewBudgetInputSchema | EditBudgetInputSchema) -> Budget:
     """Update budget"""
     logger.info(f"Updating budget for user_id: {user_id}, budget_dto: {budget_dto.id}")  # type: ignore
     return create_new_budget(user_id, db, budget_dto)
@@ -100,9 +86,7 @@ def fill_budget_with_existing_transactions(db: Session, budget: Budget):
         .all()
     )
 
-    included_categories = [
-        int(category_id) for category_id in budget.included_categories.split(",")
-    ]
+    included_categories = [int(category_id) for category_id in budget.included_categories.split(",")]
 
     budget.collected_amount = Decimal(0)
     for transaction in transactions:
@@ -167,9 +151,7 @@ def get_user_budgets(user_id: int, db: Session, include: str = "all") -> list[Bu
 
     budgets: list[Budget] = budgets_query.all()  # type: ignore
     for budget in budgets:
-        budget.end_date -= timedelta(
-            days=1
-        )  # subtract 1 day to exclude the full end date stored in the database
+        budget.end_date -= timedelta(days=1)  # subtract 1 day to exclude the full end date stored in the database
 
     return budgets
 
@@ -178,11 +160,7 @@ def delete_budget(user_id: int, db: Session, budget_id: int):
     """Delete budget"""
     logger.info(f"Deleting budget with id: {budget_id}")
 
-    budget = (
-        db.query(Budget)
-        .filter(Budget.id == budget_id, Budget.user_id == user_id)
-        .one_or_none()
-    )
+    budget = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == user_id).one_or_none()
     if budget is None:
         raise NotFoundError(f"Budget with id {budget_id} not found.")
 
@@ -199,15 +177,9 @@ def archive_budget(user_id: int, db: Session, budget_id: int):
     logger.info(f"Archiving budget with id: {budget_id}")
 
     try:
-        budget = (
-            db.query(Budget)
-            .filter(Budget.id == budget_id, Budget.user_id == user_id)
-            .one_or_none()
-        )
+        budget = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == user_id).one_or_none()
     except Exception as e:
-        logger.exception(
-            f"Error archiving budget with id: {budget_id}, the error is: {e}"
-        )
+        logger.exception(f"Error archiving budget with id: {budget_id}, the error is: {e}")
         raise e
 
     if budget is None:
@@ -296,8 +268,6 @@ def create_copy_of_outdated_budget(db: Session, budget: Budget):
     db.commit()
     db.refresh(new_budget)
 
-    logger.info(
-        f"Created copy of outdated budget: {budget.id} as new budget: {new_budget.id}"
-    )
+    logger.info(f"Created copy of outdated budget: {budget.id} as new budget: {new_budget.id}")
 
     return new_budget

@@ -51,9 +51,7 @@ class UpdateAccountSchema(CreateAccountSchema):
     is_hidden: bool
     show_in_reports: bool
 
-    model_config = ConfigDict(
-        populate_by_name=True, from_attributes=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True, alias_generator=to_camel)
 
 
 class AccountResponseSchema(CreateAccountSchema):
@@ -67,9 +65,7 @@ class AccountResponseSchema(CreateAccountSchema):
         PlainSerializer(lambda x: float(x or 0), return_type=float, when_used='json'),
     ] = None
     archived_at: datetime | None = None
-    model_config = ConfigDict(
-        from_attributes=True, populate_by_name=True, alias_generator=to_camel
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 
 
 class AccountArchiveStatusSchema(BaseModel):

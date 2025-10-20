@@ -56,17 +56,13 @@ def copy_categories(
 
 
 def copy_all_categories(user_id: int, db: Session):
-    root_categories = (
-        db.query(DefaultCategory).filter(DefaultCategory.parent_id == None).all()
-    )  # noqa: E711
+    root_categories = db.query(DefaultCategory).filter(DefaultCategory.parent_id == None).all()  # noqa: E711
     for root_category in root_categories:
         copy_categories(root_category, user_id, db, None)
 
 
 def create_users(user_request: UserRegistration, db: Session, is_oauth: bool = False):
-    existing_user: User = (
-        db.query(User).filter(User.email == user_request.email).first()
-    )  # type: ignore
+    existing_user: User = db.query(User).filter(User.email == user_request.email).first()  # type: ignore
 
     if existing_user:
         raise HTTPException(
@@ -76,9 +72,7 @@ def create_users(user_request: UserRegistration, db: Session, is_oauth: bool = F
 
     currency: Currency = db.query(Currency).filter_by(code=DEFAULT_CURRENCY_CODE).one()  # type: ignore
 
-    hashed_password = bcrypt.hashpw(
-        user_request.password.encode('utf-8'), bcrypt.gensalt()
-    )
+    hashed_password = bcrypt.hashpw(user_request.password.encode('utf-8'), bcrypt.gensalt())
     new_user: User = User(
         email=cast(str, user_request.email),
         first_name=user_request.first_name,
@@ -116,9 +110,7 @@ def create_activation_token(user_id: int, db: Session):
     token = secrets.token_hex(ACTIVATION_TOKEN_LENGTH)
     expires_at = datetime.now(UTC) + timedelta(hours=ACTIVATION_TOKEN_EXPIRES_HOURS)
 
-    activation_token = ActivationToken(
-        user_id=user_id, token=token, expires_at=expires_at
-    )
+    activation_token = ActivationToken(user_id=user_id, token=token, expires_at=expires_at)
 
     db.add(activation_token)
     db.commit()
@@ -139,17 +131,11 @@ def get_jwt_token(user_login: UserLoginSchema, db: Session) -> Token:
     if not user.is_active:
         raise UserNotActivated
 
-    if not bcrypt.checkpw(
-        user_login.password.encode('utf-8'), user.password_hash.encode('utf-8')
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password"
-        )
+    if not bcrypt.checkpw(user_login.password.encode('utf-8'), user.password_hash.encode('utf-8')):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        _prepare_user_data(user), expires_delta=access_token_expires
-    )
+    access_token = create_access_token(_prepare_user_data(user), expires_delta=access_token_expires)
 
     return Token(access_token=access_token)
 
@@ -215,24 +201,16 @@ def activate_user(token: str, db: Session) -> bool:
     """
     Activate user by token.
     """
-    activation_token = (
-        db.query(ActivationToken).filter(ActivationToken.token == token).first()
-    )  # type: ignore
+    activation_token = db.query(ActivationToken).filter(ActivationToken.token == token).first()  # type: ignore
     if not activation_token:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Token not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token not found")
 
     if activation_token.expires_at < datetime.now(UTC):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Token expired"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token expired")
 
     user = db.query(User).filter(User.id == activation_token.user_id).first()  # type: ignore
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     user.is_active = True
     db.delete(activation_token)

@@ -22,24 +22,16 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(index=True, nullable=True)
     password_hash: Mapped[str] = mapped_column()
     is_active: Mapped[bool] = mapped_column(server_default='t', default=True)
-    base_currency_id: Mapped[int] = mapped_column(
-        ForeignKey('currencies.id', ondelete='CASCADE')
-    )
+    base_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id', ondelete='CASCADE'))
 
     base_currency: Mapped[Currency.Currency] = relationship()
-    categories: Mapped[list[UserCategory.UserCategory]] = relationship(
-        back_populates="user", passive_deletes=True
-    )
+    categories: Mapped[list[UserCategory.UserCategory]] = relationship(back_populates="user", passive_deletes=True)
     transaction_templates: Mapped[list['TransactionTemplate']] = relationship(
         'TransactionTemplate', back_populates='user'
     )
 
-    is_deleted: Mapped[bool] = mapped_column(
-        default=False, nullable=False, server_default='f'
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False, server_default='f')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

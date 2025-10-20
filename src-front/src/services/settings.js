@@ -17,7 +17,7 @@ export class SettingsService {
   }
 
   async saveUserSettings(settings = null) {
-    const saveUserSettingsUrl = `${settingsPrefixUrl}/`;
+    const saveUserSettingsUrl = `${settingsPrefixUrl}`;
     if (settings === null) {
       settings = toRaw(this.userService.userStore.settings);
     }

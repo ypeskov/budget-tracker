@@ -45,9 +45,7 @@ def is_cache_valid():
     """
     if not currency_cache["last_updated"]:
         return False
-    return (
-        datetime.now() - currency_cache["last_updated"]
-    ).total_seconds() <= 86400  # 24 hours
+    return (datetime.now() - currency_cache["last_updated"]).total_seconds() <= 86400  # 24 hours
 
 
 def fetch_exchange_rate_rows(db: Session, start_date: date):
@@ -77,9 +75,7 @@ def fill_exchange_rates(rows, start_date: date, end_date: date):
 
     while current_date <= end_date:
         current_date_str = current_date.isoformat()
-        last_rates = process_date(
-            rows, current_date, last_rates, rates, current_date_str
-        )
+        last_rates = process_date(rows, current_date, last_rates, rates, current_date_str)
         current_date += timedelta(days=1)
 
     return rates
@@ -128,9 +124,7 @@ def update_cache(rates):
     currency_cache["last_updated"] = datetime.now()
 
 
-def get_rate_with_fallback(
-    exchange_rates: dict, calc_date: date, currency_code: str
-) -> Decimal:
+def get_rate_with_fallback(exchange_rates: dict, calc_date: date, currency_code: str) -> Decimal:
     """
     Get the exchange rate for the given currency code and if absent, return the latest available rate.
     """
@@ -170,19 +164,13 @@ def calc_amount(
     exchange_rates = get_exchange_rates_for_year(db)
 
     # Get the exchange rate for the source currency
-    exchange_rate_HBCR = get_rate_with_fallback(
-        exchange_rates, calc_date, currency_code_from
-    )
+    exchange_rate_HBCR = get_rate_with_fallback(exchange_rates, calc_date, currency_code_from)
 
     # Get the exchange rate for the user's base currency
-    user_base_currency_rate = get_rate_with_fallback(
-        exchange_rates, calc_date, user_base_currency_code
-    )
+    user_base_currency_rate = get_rate_with_fallback(exchange_rates, calc_date, user_base_currency_code)
 
     # Perform the conversion
-    converted_amount = (
-        src_amount / Decimal(exchange_rate_HBCR) * Decimal(user_base_currency_rate)
-    )
+    converted_amount = src_amount / Decimal(exchange_rate_HBCR) * Decimal(user_base_currency_rate)
 
     return converted_amount
 
@@ -191,6 +179,4 @@ class ExchangeRateAbsentError(Exception):
     def __init__(self, currency_code: str, target_date: date):
         self.currency_code = currency_code
         self.date = target_date
-        super().__init__(
-            f"Exchange rate not found for {currency_code} for date {target_date}"
-        )
+        super().__init__(f"Exchange rate not found for {currency_code} for date {target_date}")
