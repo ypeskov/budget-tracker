@@ -56,7 +56,7 @@ def get_settings(request: Request, db: Session = Depends(get_db)):
         )
 
 
-@router.post('/')
+@router.post("")
 async def store_settings(request: Request, new_settings: UserSettingsSchema, db: Session = Depends(get_db)):
     """Create user settings"""
     try:

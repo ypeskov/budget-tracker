@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from icecream import ic
 from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
@@ -11,12 +10,10 @@ from app.models.User import User
 from app.models.UserSettings import UserSettings
 from app.services.CurrencyProcessor import calc_amount
 
-ic.configureOutput(includeContext=True)
-
 
 def get_languages(db: Session) -> list[Language]:
     try:
-        languages: list[Language] = db.query(Language).all()
+        languages: list[Language] = db.query(Language).all() # type: ignore
     except Exception as e:
         logger.exception(e)
         raise e
@@ -46,7 +43,7 @@ def get_user_settings(user_id: int, db: Session) -> UserSettings:
 
 def save_user_settings(user_id: int, settings: dict, db: Session) -> UserSettings:
     try:
-        user_settings: UserSettings = db.query(UserSettings).filter(UserSettings.user_id == user_id).one()
+        user_settings: UserSettings = db.query(UserSettings).filter(UserSettings.user_id == user_id).one() # type: ignore
         user_settings.settings = settings
         db.commit()
         db.refresh(user_settings)

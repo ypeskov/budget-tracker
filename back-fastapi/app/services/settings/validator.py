@@ -1,12 +1,9 @@
-from icecream import ic
-
+from .available_settings import existing_settings
 from .errors import (
     IncorrectSettingsTypeError,
     MissingSettingsKeyError,
     UnknownSettingsKeyError,
 )
-
-ic.configureOutput(includeContext=True)
 
 
 def validate_settings(template_json, input_json) -> None:
@@ -14,7 +11,7 @@ def validate_settings(template_json, input_json) -> None:
         raise IncorrectSettingsTypeError("template_json or input_json is not a dict")
 
     for key in input_json.keys():
-        if key not in template_json:
+        if key not in existing_settings:
             raise UnknownSettingsKeyError(key)
 
     for key in template_json.keys():

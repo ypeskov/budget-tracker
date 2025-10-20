@@ -18,45 +18,44 @@ from app.services.errors import AccessDenied
 
 
 def create_planned_transaction(
-    transaction_dto: CreatePlannedTransactionSchema, user_id: int, db: Session
+    pt_dto: CreatePlannedTransactionSchema, user_id: int, db: Session
 ) -> PlannedTransaction:
     """
     Create a new planned transaction.
     Amount is stored in user's base currency.
 
     Args:
-        transaction_dto: Schema with planned transaction data
+        pt_dto: Schema with planned transaction data
         user_id: ID of the user creating the transaction
         db: Database session
 
     Returns:
         Created PlannedTransaction instance
     """
-    # Get user's base currency
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user or not user.base_currency_id:
+
+    user: User | None = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise ValueError("User not found")
+    if not user.base_currency:
         raise ValueError("User base currency not set")
 
-    # Create planned transaction
     planned_transaction = PlannedTransaction(
         user_id=user_id,
         currency_id=user.base_currency_id,
-        amount=transaction_dto.amount,
-        label=transaction_dto.label,
-        notes=transaction_dto.notes,
-        is_income=transaction_dto.is_income,
-        planned_date=transaction_dto.planned_date,
-        is_recurring=transaction_dto.is_recurring,
-        recurrence_rule=transaction_dto.recurrence_rule.model_dump(mode='json')
-        if transaction_dto.recurrence_rule
-        else None,
+        amount=pt_dto.amount,
+        label=pt_dto.label,
+        notes=pt_dto.notes,
+        is_income=pt_dto.is_income,
+        planned_date=pt_dto.planned_date,
+        is_recurring=pt_dto.is_recurring,
+        recurrence_rule=pt_dto.recurrence_rule.model_dump(mode='json') if pt_dto.recurrence_rule else None,
     )
 
     db.add(planned_transaction)
     db.commit()
     db.refresh(planned_transaction)
 
-    logger.info(f"Created planned transaction {planned_transaction.id} for user {user_id}")
+    logger.debug(f"Created planned transaction {planned_transaction.id} for user {user_id}")
 
     return planned_transaction
 

@@ -23,11 +23,7 @@ router = APIRouter(
 )
 
 
-@router.post(
-    '/',
-    response_model=ResponsePlannedTransactionSchema,
-    status_code=status.HTTP_201_CREATED,
-)
+@router.post('/', response_model=ResponsePlannedTransactionSchema, status_code=status.HTTP_201_CREATED)
 def create_planned_transaction(
     request: Request, planned_transaction_dto: CreatePlannedTransactionSchema, db: Session = Depends(get_db)
 ):
