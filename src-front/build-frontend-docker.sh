@@ -26,6 +26,7 @@ EXAMPLES:
     $0 --push                   Build and push to Docker Hub
     $0 v1.2.3 --env=staging     Build with staging env and v1.2.3 tag
     $0 --env=staging --push     Build staging env and push to Docker Hub
+    $0 dev --env=dev --push     Build dev image container
 
 EOF
 }
