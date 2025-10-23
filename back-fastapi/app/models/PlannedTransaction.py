@@ -50,7 +50,6 @@ class PlannedTransaction(Base):
     #   "interval": 1,  # every N days/weeks/months/years
     #   "end_date": "2025-12-31T00:00:00Z",  # optional, ISO format
     #   "count": 10,  # optional, number of occurrences (exclusive with end_date)
-    #   "day_of_week": 1,  # optional, for weekly (0=Monday, 6=Sunday)
     #   "day_of_month": 15  # optional, for monthly
     # }
 

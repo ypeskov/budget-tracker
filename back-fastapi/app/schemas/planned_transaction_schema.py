@@ -22,7 +22,7 @@ class RecurrenceRuleSchema(BaseModel):
 
     Examples:
     - Daily: {"frequency": "daily", "interval": 1, "count": 30}
-    - Weekly on Monday: {"frequency": "weekly", "interval": 1, "day_of_week": 0, "end_date": "2025-12-31"}
+    - Weekly: {"frequency": "weekly", "interval": 1, "end_date": "2025-12-31"}
     - Monthly on 15th: {"frequency": "monthly", "interval": 1, "day_of_month": 15, "count": 12}
     - Yearly: {"frequency": "yearly", "interval": 1, "end_date": "2030-01-01"}
     """
@@ -35,7 +35,6 @@ class RecurrenceRuleSchema(BaseModel):
         ge=1,
         description="Optional number of occurrences (exclusive with end_date)",
     )
-    day_of_week: int | None = Field(None, ge=0, le=6, description="Day of week for weekly (0=Monday, 6=Sunday)")
     day_of_month: int | None = Field(None, ge=1, le=31, description="Day of month for monthly")
 
     @field_validator('end_date', 'count')
@@ -97,7 +96,7 @@ class ResponsePlannedTransactionSchema(BaseModel):
     is_income: bool
     planned_date: datetime
     is_recurring: bool
-    recurrence_rule: dict | None
+    recurrence_rule: RecurrenceRuleSchema | None
     is_executed: bool
     executed_transaction_id: int | None
     execution_date: datetime | None

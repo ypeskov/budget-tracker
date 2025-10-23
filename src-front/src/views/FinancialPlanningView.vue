@@ -1,13 +1,13 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { usePlannedTransactionsStore } from '@/stores/plannedTransactions';
-import { useAccountStore } from '@/stores/account';
-import { useCategoriesStore } from '@/stores/categories';
-import { useUserStore } from '@/stores/user';
-import { PlannedTransactionsService } from '@/services/plannedTransactions';
-import { AccountService } from '@/services/accounts';
-import { CategoriesService } from '@/services/categories';
-import { SettingsService } from '@/services/settings';
+import {computed, onMounted, ref} from 'vue';
+import {usePlannedTransactionsStore} from '@/stores/plannedTransactions';
+import {useAccountStore} from '@/stores/account';
+import {useCategoriesStore} from '@/stores/categories';
+import {useUserStore} from '@/stores/user';
+import {PlannedTransactionsService} from '@/services/plannedTransactions';
+import {AccountService} from '@/services/accounts';
+import {CategoriesService} from '@/services/categories';
+import {SettingsService} from '@/services/settings';
 import BalanceProjectionChart from '@/components/planning/BalanceProjectionChart.vue';
 import StatisticsPanel from '@/components/planning/StatisticsPanel.vue';
 import UpcomingTransactionsList from '@/components/planning/UpcomingTransactionsList.vue';
@@ -272,8 +272,7 @@ function showCreateModal() {
 
 async function editPlanned(plannedTransactionId) {
   try {
-    const transaction = await plannedTxService.getPlannedTransaction(plannedTransactionId);
-    selectedTransaction.value = transaction;
+    selectedTransaction.value = await plannedTxService.getPlannedTransaction(plannedTransactionId);
     showModal.value = true;
   } catch (error) {
     store.setError(error.message || 'Failed to load planned transaction');

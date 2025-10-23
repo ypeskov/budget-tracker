@@ -1,3 +1,136 @@
+<script setup>
+import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    required: true,
+  },
+  transaction: {
+    type: Object,
+    default: null,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const emit = defineEmits(['update:modelValue', 'submit']);
+
+const isEdit = computed(() => !!props.transaction?.id);
+
+const endConditionType = ref('endDate');
+
+const defaultForm = {
+  amount: 0,
+  label: '',
+  notes: '',
+  isIncome: false,
+  plannedDate: '',
+  isRecurring: false,
+  isActive: true,
+  recurrenceRule: {
+    frequency: 'monthly',
+    interval: 1,
+    endDate: null,
+    count: null,
+  },
+};
+
+const form = ref({ ...defaultForm });
+
+// Handle amount input with comma support
+function handleAmountInput(event) {
+  let value = event.target.value;
+  // Replace comma with dot for decimal
+  value = value.replace(',', '.');
+  event.target.value = value; // Update the input field directly
+  form.value.amount = parseFloat(value) || 0;
+}
+
+// Watch for transaction prop changes (for edit mode)
+watch(
+  () => props.transaction,
+  (newTransaction) => {
+    if (newTransaction) {
+      form.value = {
+        id: newTransaction.id,
+        amount: newTransaction.amount,
+        label: newTransaction.label,
+        notes: newTransaction.notes || '',
+        isIncome: newTransaction.isIncome,
+        plannedDate: newTransaction.plannedDate?.split('T')[0] || '',
+        isRecurring: newTransaction.isRecurring,
+        isActive: newTransaction.isActive !== undefined ? newTransaction.isActive : true,
+        recurrenceRule: {
+          frequency: newTransaction.recurrenceRule?.frequency || 'monthly',
+          interval: newTransaction.recurrenceRule?.interval || 1,
+          endDate: newTransaction.recurrenceRule?.endDate?.split('T')[0] || null,
+          count: newTransaction.recurrenceRule?.count || null,
+        },
+      };
+
+      // Set end condition type
+      if (newTransaction.recurrenceRule?.endDate) {
+        endConditionType.value = 'endDate';
+      } else if (newTransaction.recurrenceRule?.count) {
+        endConditionType.value = 'count';
+      }
+    } else {
+      resetForm();
+    }
+  },
+  { immediate: true }
+);
+
+function resetForm() {
+  form.value = { ...defaultForm };
+  endConditionType.value = 'endDate';
+}
+
+function closeModal() {
+  emit('update:modelValue', false);
+  setTimeout(resetForm, 300); // Wait for modal animation
+}
+
+function handleSubmit() {
+  // Prepare recurrence rule
+  const recurrenceRule = form.value.isRecurring
+    ? {
+        frequency: form.value.recurrenceRule.frequency,
+        interval: form.value.recurrenceRule.interval,
+        endDate: endConditionType.value === 'endDate' ? form.value.recurrenceRule.endDate : null,
+        count: endConditionType.value === 'count' ? form.value.recurrenceRule.count : null,
+      }
+    : null;
+
+  const data = {
+    ...form.value,
+    recurrenceRule,
+  };
+
+  emit('submit', data);
+}
+
+function getIntervalHint() {
+  const freq = form.value.recurrenceRule.frequency;
+  const interval = form.value.recurrenceRule.interval;
+
+  const hints = {
+    daily: t('financialPlanning.everyNDays', { n: interval }),
+    weekly: t('financialPlanning.everyNWeeks', { n: interval }),
+    monthly: t('financialPlanning.everyNMonths', { n: interval }),
+    yearly: t('financialPlanning.everyNYears', { n: interval }),
+  };
+
+  return hints[freq] || '';
+}
+</script>
+
 <template>
   <div
     class="modal fade"
@@ -51,10 +184,7 @@
             <div class="mb-3">
               <label class="form-label">{{ $t('message.amount') }} <span class="text-danger">*</span></label>
               <input
-                v-model="form.amount"
-                type="number"
-                step="0.01"
-                min="0"
+                :value="form.amount"
                 class="form-control"
                 required
                 @input="handleAmountInput"
@@ -222,138 +352,6 @@
   </div>
   <div v-if="modelValue" class="modal-backdrop fade show"></div>
 </template>
-
-<script setup>
-import { ref, computed, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
-
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    required: true,
-  },
-  transaction: {
-    type: Object,
-    default: null,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-const emit = defineEmits(['update:modelValue', 'submit']);
-
-const isEdit = computed(() => !!props.transaction?.id);
-
-const endConditionType = ref('endDate');
-
-const defaultForm = {
-  amount: 0,
-  label: '',
-  notes: '',
-  isIncome: false,
-  plannedDate: '',
-  isRecurring: false,
-  isActive: true,
-  recurrenceRule: {
-    frequency: 'monthly',
-    interval: 1,
-    endDate: null,
-    count: null,
-  },
-};
-
-const form = ref({ ...defaultForm });
-
-// Handle amount input with comma support
-function handleAmountInput(event) {
-  let value = event.target.value;
-  // Replace comma with dot for decimal
-  value = value.replace(',', '.');
-  form.value.amount = parseFloat(value) || 0;
-}
-
-// Watch for transaction prop changes (for edit mode)
-watch(
-  () => props.transaction,
-  (newTransaction) => {
-    if (newTransaction) {
-      form.value = {
-        id: newTransaction.id,
-        amount: newTransaction.amount,
-        label: newTransaction.label,
-        notes: newTransaction.notes || '',
-        isIncome: newTransaction.isIncome,
-        plannedDate: newTransaction.plannedDate?.split('T')[0] || '',
-        isRecurring: newTransaction.isRecurring,
-        isActive: newTransaction.isActive !== undefined ? newTransaction.isActive : true,
-        recurrenceRule: newTransaction.recurrenceRule || {
-          frequency: 'monthly',
-          interval: 1,
-          endDate: null,
-          count: null,
-        },
-      };
-
-      // Set end condition type
-      if (newTransaction.recurrenceRule?.endDate) {
-        endConditionType.value = 'endDate';
-      } else if (newTransaction.recurrenceRule?.count) {
-        endConditionType.value = 'count';
-      }
-    } else {
-      resetForm();
-    }
-  },
-  { immediate: true }
-);
-
-function resetForm() {
-  form.value = { ...defaultForm };
-  endConditionType.value = 'endDate';
-}
-
-function closeModal() {
-  emit('update:modelValue', false);
-  setTimeout(resetForm, 300); // Wait for modal animation
-}
-
-function handleSubmit() {
-  // Prepare recurrence rule
-  const recurrenceRule = form.value.isRecurring
-    ? {
-        frequency: form.value.recurrenceRule.frequency,
-        interval: form.value.recurrenceRule.interval,
-        endDate: endConditionType.value === 'endDate' ? form.value.recurrenceRule.endDate : null,
-        count: endConditionType.value === 'count' ? form.value.recurrenceRule.count : null,
-      }
-    : null;
-
-  const data = {
-    ...form.value,
-    recurrenceRule,
-  };
-
-  emit('submit', data);
-}
-
-function getIntervalHint() {
-  const freq = form.value.recurrenceRule.frequency;
-  const interval = form.value.recurrenceRule.interval;
-
-  const hints = {
-    daily: t('financialPlanning.everyNDays', { n: interval }),
-    weekly: t('financialPlanning.everyNWeeks', { n: interval }),
-    monthly: t('financialPlanning.everyNMonths', { n: interval }),
-    yearly: t('financialPlanning.everyNYears', { n: interval }),
-  };
-
-  return hints[freq] || '';
-}
-</script>
 
 <style scoped>
 .modal.show {
