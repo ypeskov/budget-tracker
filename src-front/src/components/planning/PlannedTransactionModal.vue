@@ -41,15 +41,19 @@ const defaultForm = {
   },
 };
 
+const amountInput = ref('');
+
 const form = ref({ ...defaultForm });
 
 // Handle amount input with comma support
 function handleAmountInput(event) {
-  let value = event.target.value;
-  // Replace comma with dot for decimal
-  value = value.replace(',', '.');
-  event.target.value = value; // Update the input field directly
-  form.value.amount = parseFloat(value) || 0;
+  let raw = event.target.value.replace(',', '.');
+  amountInput.value = raw;
+
+  const parsed = parseFloat(raw);
+  if (!isNaN(parsed)) {
+    form.value.amount = parsed;
+  }
 }
 
 // Watch for transaction prop changes (for edit mode)
@@ -73,6 +77,7 @@ watch(
           count: newTransaction.recurrenceRule?.count || null,
         },
       };
+      amountInput.value = String(newTransaction.amount ?? '');
 
       // Set end condition type
       if (newTransaction.recurrenceRule?.endDate) {
@@ -89,6 +94,7 @@ watch(
 
 function resetForm() {
   form.value = { ...defaultForm };
+  amountInput.value = '';
   endConditionType.value = 'endDate';
 }
 
@@ -184,7 +190,7 @@ function getIntervalHint() {
             <div class="mb-3">
               <label class="form-label">{{ $t('message.amount') }} <span class="text-danger">*</span></label>
               <input
-                :value="form.amount"
+                :value="amountInput"
                 class="form-control"
                 required
                 @input="handleAmountInput"

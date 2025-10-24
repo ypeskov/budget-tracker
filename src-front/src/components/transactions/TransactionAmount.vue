@@ -7,14 +7,19 @@ const emit = defineEmits(['amountChanged']);
 const amountInput = ref(null);
 defineExpose({ amountInput });
 
-function changeAmount($value) {
-  let value = $value.target.value;
-  value = value.replace(',', '.');
-  const updatedAmount = value;
-  emit('amountChanged', {
-    amountType: props.type,
-    amount: parseFloat(updatedAmount) || 0,
-  });
+const inputValue = ref(String(props.amount ?? ''));
+
+function changeAmount(event) {
+  let raw = event.target.value.replace(',', '.');
+  inputValue.value = raw;
+
+  const parsed = parseFloat(raw);
+  if (!isNaN(parsed)) {
+    emit('amountChanged', {
+      amountType: props.type,
+      amount: parsed,
+    });
+  }
 }
 </script>
 
@@ -25,13 +30,15 @@ function changeAmount($value) {
         <label for="amount" class="form-label">
           {{ label }}
         </label>
-        <input type="text"
-               ref="amountInput"
-               @input="changeAmount"
-               :value="amount"
-               class="form-control"
-               pattern="[0-9.]*"
-               inputmode="decimal" />
+        <input
+          type="text"
+          ref="amountInput"
+          @input="changeAmount"
+          :value="inputValue"
+          class="form-control"
+          pattern="[0-9.]*"
+          inputmode="decimal"
+        />
       </div>
       <div class="col-2 currency">{{ currentAccount?.currency?.code }}</div>
     </div>
