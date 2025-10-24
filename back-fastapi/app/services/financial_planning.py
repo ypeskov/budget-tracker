@@ -6,9 +6,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.logger_config import logger
-from app.models.Account import Account
 from app.models.PlannedTransaction import PlannedTransaction
 from app.models.User import User
+from app.services.accounts import get_user_accounts
 from app.schemas.planned_transaction_schema import (
     AccountBalanceProjectionSchema,
     BalanceProjectionPointSchema,
@@ -42,23 +42,19 @@ def calculate_future_balance(
 
     base_currency_code = user.base_currency.code
 
-    # Get accounts
-    accounts_query = (
-        select(Account)
-        .options(joinedload(Account.currency))
-        .filter(
-            Account.user_id == user_id,
-            Account.is_deleted == False,  # noqa: E712
-        )
+    # Get accounts using the same service as accounts endpoint for consistency
+    accounts = get_user_accounts(
+        user_id=user_id,
+        db=db,
+        include_deleted=False,
+        include_hidden=False,
+        include_archived=False,
+        archived_only=False,
     )
 
+    # Filter by specific account IDs if provided
     if request.account_ids:
-        accounts_query = accounts_query.filter(Account.id.in_(request.account_ids))
-    else:
-        # If no specific accounts requested, only include accounts shown in reports
-        accounts_query = accounts_query.filter(Account.show_in_reports == True)  # noqa: E712
-
-    accounts = list(db.execute(accounts_query).scalars().all())
+        accounts = [acc for acc in accounts if acc.id in request.account_ids]
 
     if not accounts:
         raise ValueError("No accounts found")
@@ -195,23 +191,19 @@ def get_balance_projection(
 
     base_currency_code = user.base_currency.code
 
-    # Get accounts
-    accounts_query = (
-        select(Account)
-        .options(joinedload(Account.currency))
-        .filter(
-            Account.user_id == user_id,
-            Account.is_deleted == False,  # noqa: E712
-        )
+    # Get accounts using the same service as accounts endpoint for consistency
+    accounts = get_user_accounts(
+        user_id=user_id,
+        db=db,
+        include_deleted=False,
+        include_hidden=False,
+        include_archived=False,
+        archived_only=False,
     )
 
+    # Filter by specific account IDs if provided
     if request.account_ids:
-        accounts_query = accounts_query.filter(Account.id.in_(request.account_ids))
-    else:
-        # If no specific accounts requested, only include accounts shown in reports
-        accounts_query = accounts_query.filter(Account.show_in_reports == True)  # noqa: E712
-
-    accounts = list(db.execute(accounts_query).scalars().all())
+        accounts = [acc for acc in accounts if acc.id in request.account_ids]
 
     if not accounts:
         raise ValueError("No accounts found")
@@ -236,42 +228,114 @@ def get_balance_projection(
 
     # Generate projection points based on period
     projection_points = []
-    current_date = request.start_date
-
-    # Determine step size based on period
-    if request.period == 'daily':
-        step = timedelta(days=1)
-    elif request.period == 'weekly':
-        step = timedelta(weeks=1)
-    elif request.period == 'monthly':
-        step = timedelta(days=30)  # Approximate
-    else:
-        step = timedelta(days=1)
 
     # Calculate initial balance
-    initial_balance = sum(
-        calc_amount(
+    initial_balance = Decimal(0)
+    for account in accounts:
+        balance_in_base = calc_amount(
             account.balance,
             account.currency.code,
-            current_date.date() if hasattr(current_date, 'date') else current_date,
+            request.start_date.date() if hasattr(request.start_date, 'date') else request.start_date,
             base_currency_code,
             db,
         )
-        for account in accounts
-    )
+        initial_balance += balance_in_base
 
     running_balance = initial_balance
 
-    while current_date <= request.end_date:
-        # Calculate income and expenses for this period
-        period_end = min(current_date + step, request.end_date)
+    # Helper function to get end of week (Sunday)
+    def get_week_end(date):
+        """Get the end of the week (Sunday) for the given date."""
+        days_until_sunday = (6 - date.weekday()) % 7
+        if days_until_sunday == 0:
+            days_until_sunday = 7
+        return date + timedelta(days=days_until_sunday)
+
+    # Helper function to get end of month
+    def get_month_end(date):
+        """Get the last day of the month for the given date."""
+        if date.month == 12:
+            next_month = date.replace(year=date.year + 1, month=1, day=1)
+        else:
+            next_month = date.replace(month=date.month + 1, day=1)
+        return next_month - timedelta(days=1)
+
+    # Generate date points based on period
+    date_points = []
+    current_date = request.start_date
+
+    if request.period == 'daily':
+        # For daily: just add each day
+        while current_date <= request.end_date:
+            date_points.append(current_date)
+            current_date = current_date + timedelta(days=1)
+
+    elif request.period == 'weekly':
+        # First point is current date
+        date_points.append(current_date)
+
+        # Find next Monday after current date
+        days_until_monday = (7 - current_date.weekday()) % 7
+        if days_until_monday == 0:
+            days_until_monday = 7
+        next_monday = current_date + timedelta(days=days_until_monday)
+
+        # Then add end of each week (Sunday)
+        current_date = next_monday
+        while current_date <= request.end_date:
+            week_end = get_week_end(current_date)
+            if week_end > request.end_date:
+                week_end = request.end_date
+            date_points.append(week_end)
+            current_date = week_end + timedelta(days=1)
+
+    elif request.period == 'monthly':
+        # First point is current date
+        date_points.append(current_date)
+
+        # Find first day of next month
+        if current_date.month == 12:
+            next_month_start = current_date.replace(year=current_date.year + 1, month=1, day=1)
+        else:
+            next_month_start = current_date.replace(month=current_date.month + 1, day=1)
+
+        # Then add end of each month
+        current_date = next_month_start
+        while current_date <= request.end_date:
+            month_end = get_month_end(current_date)
+            if month_end > request.end_date:
+                month_end = request.end_date
+            date_points.append(month_end)
+
+            # Move to first day of next month
+            if current_date.month == 12:
+                current_date = current_date.replace(year=current_date.year + 1, month=1, day=1)
+            else:
+                current_date = current_date.replace(month=current_date.month + 1, day=1)
+
+    # Now calculate balance for each date point
+    for i, point_date in enumerate(date_points):
+        # Calculate transactions from start (or previous point) to current point
+        if i == 0:
+            # For first point, start from the beginning of start_date (not current time)
+            period_start = request.start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            # For subsequent points, start from beginning of the day after previous point
+            prev_point = date_points[i - 1]
+            period_start = (prev_point + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+
+        period_end = point_date
+        # Ensure period_end includes the entire day (set to end of day)
+        if hasattr(period_end, 'replace'):
+            period_end = period_end.replace(hour=23, minute=59, second=59)
+
         period_income = Decimal(0)
         period_expenses = Decimal(0)
 
         for planned_tx in planned_transactions:
             occurrences = generate_occurrences(
                 planned_transaction=planned_tx,
-                start_date=current_date,
+                start_date=period_start,
                 end_date=period_end,
             )
 
@@ -296,16 +360,12 @@ def get_balance_projection(
 
         projection_points.append(
             BalanceProjectionPointSchema(
-                date=current_date,
+                date=point_date,
                 balance=running_balance,
                 income=period_income,
                 expenses=period_expenses,
             )
         )
-
-        current_date = period_end
-        if current_date == request.end_date:
-            break
 
     return BalanceProjectionResponseSchema(
         start_date=request.start_date,

@@ -26,6 +26,13 @@
           <div class="transaction-info">
             <div class="transaction-header">
               <span class="transaction-label">{{ transaction.label || $t('common.noLabel') }}</span>
+              <span
+                v-if="transaction.isRecurring"
+                class="recurring-badge"
+                :title="$t('financialPlanning.recurring')"
+              >
+                <i class="fa-solid fa-arrows-rotate"></i>
+              </span>
               <span v-if="transaction.isActive === false" class="inactive-badge">
                 <i class="bi bi-pause-circle"></i>
                 {{ $t('financialPlanning.inactive') }}
@@ -513,14 +520,23 @@ function formatCurrency(amount) {
 }
 
 .recurring-badge {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   background: #e7f1ff;
-  color: #004085;
-  padding: 0.125rem 0.5rem;
-  border-radius: 12px;
+  color: #0d6efd;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.recurring-badge:hover {
+  background: #0d6efd;
+  color: white;
+  transform: rotate(180deg) scale(1.1);
 }
 
 .inactive-badge {

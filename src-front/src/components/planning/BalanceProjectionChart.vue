@@ -59,12 +59,6 @@ function createChart() {
   const income = props.projectionData.projectionPoints?.map((point) => point.income) || [];
   const expenses = props.projectionData.projectionPoints?.map((point) => point.expenses) || [];
 
-  // Add current balance as first point
-  labels.unshift('Now');
-  balances.unshift(props.currentBalance);
-  income.unshift(0);
-  expenses.unshift(0);
-
   chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
@@ -164,12 +158,6 @@ function updateChart() {
   const balances = props.projectionData.projectionPoints?.map((point) => point.balance) || [];
   const income = props.projectionData.projectionPoints?.map((point) => point.income) || [];
   const expenses = props.projectionData.projectionPoints?.map((point) => point.expenses) || [];
-
-  // Add current balance as first point
-  labels.unshift('Now');
-  balances.unshift(props.currentBalance);
-  income.unshift(0);
-  expenses.unshift(0);
 
   chartInstance.data.labels = labels;
   chartInstance.data.datasets[0].data = balances;

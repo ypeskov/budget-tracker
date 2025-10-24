@@ -119,6 +119,7 @@ class PlannedTransactionOccurrenceSchema(BaseModel):
     is_income: bool
     label: str
     is_active: bool
+    is_recurring: bool
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
 

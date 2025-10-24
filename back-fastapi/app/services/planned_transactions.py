@@ -253,6 +253,7 @@ def generate_occurrences(
                     is_income=planned_transaction.is_income,
                     label=planned_transaction.label,
                     is_active=planned_transaction.is_active,
+                    is_recurring=planned_transaction.is_recurring,
                 )
             ]
         return []
@@ -297,6 +298,7 @@ def generate_occurrences(
                     is_income=planned_transaction.is_income,
                     label=planned_transaction.label,
                     is_active=planned_transaction.is_active,
+                    is_recurring=planned_transaction.is_recurring,
                 )
             )
 
