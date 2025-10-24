@@ -108,6 +108,14 @@ const props = defineProps({
     default: 'daily',
     validator: (value) => ['daily', 'weekly', 'monthly'].includes(value),
   },
+  startDate: {
+    type: String,
+    default: '',
+  },
+  endDate: {
+    type: String,
+    default: '',
+  },
 });
 
 defineEmits(['edit', 'delete']);
@@ -174,6 +182,32 @@ const groupedTransactions = computed(() => {
   now.setHours(0, 0, 0, 0);
   const today = new Date(now);
 
+  // Filter transactions by date range if filters are set
+  let filteredTransactions = props.transactions;
+
+  if (props.startDate || props.endDate) {
+    filteredTransactions = props.transactions.filter((tx) => {
+      const txDate = new Date(tx.occurrenceDate);
+      txDate.setHours(0, 0, 0, 0);
+
+      let passesFilter = true;
+
+      if (props.startDate) {
+        const startDate = new Date(props.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        passesFilter = passesFilter && txDate >= startDate;
+      }
+
+      if (props.endDate) {
+        const endDate = new Date(props.endDate);
+        endDate.setHours(0, 0, 0, 0);
+        passesFilter = passesFilter && txDate <= endDate;
+      }
+
+      return passesFilter;
+    });
+  }
+
   // Calculate week boundaries
   const currentWeekEnd = getWeekEnd(today);
   const nextWeekStart = new Date(currentWeekEnd);
@@ -190,7 +224,7 @@ const groupedTransactions = computed(() => {
   };
 
   // Group transactions
-  props.transactions.forEach((tx) => {
+  filteredTransactions.forEach((tx) => {
     const txDate = new Date(tx.occurrenceDate);
     txDate.setHours(0, 0, 0, 0);
 

@@ -33,6 +33,12 @@ const showDeleteConfirm = ref(false);
 const transactionToDelete = ref(null);
 const showInactive = ref(false);
 
+// Date filter state
+const dateFilter = ref({
+  startDate: '',
+  endDate: '',
+});
+
 // Projection settings
 const getDefaultEndDate = () => {
   // Check user settings first
@@ -328,6 +334,13 @@ async function confirmDelete() {
   }
 }
 
+function resetDateFilter() {
+  dateFilter.value = {
+    startDate: '',
+    endDate: '',
+  };
+}
+
 </script>
 
 
@@ -463,10 +476,45 @@ async function confirmDelete() {
               </h5>
             </div>
             <div class="card-body">
+              <!-- Date Filter -->
+              <div class="date-filter mb-4">
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-4">
+                    <label class="form-label">{{ $t('financialPlanning.startDate') }}</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      v-model="dateFilter.startDate"
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">{{ $t('financialPlanning.endDate') }}</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      v-model="dateFilter.endDate"
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <button
+                      class="btn btn-outline-secondary w-100"
+                      @click="resetDateFilter"
+                      :disabled="!dateFilter.startDate && !dateFilter.endDate"
+                    >
+                      <i class="bi bi-x-circle"></i>
+                      {{ $t('financialPlanning.resetFilter') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transactions List -->
               <UpcomingTransactionsList
                 :transactions="store.upcomingOccurrences"
                 :currency="futureBalanceData?.baseCurrencyCode || baseCurrency"
                 :period="projectionSettings.period"
+                :start-date="dateFilter.startDate"
+                :end-date="dateFilter.endDate"
                 @edit="editPlanned"
                 @delete="deletePlanned"
               />
@@ -587,6 +635,23 @@ async function confirmDelete() {
 
 .alert {
   border-radius: 12px;
+}
+
+.date-filter {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.date-filter .form-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.date-filter .form-control {
+  border-radius: 8px;
 }
 
 @media (max-width: 992px) {

@@ -239,7 +239,11 @@
     },
     "inNDays": "in {n} days",
     "inNMonths": "in {n} months",
-    "inNYears": "in {n} years"
+    "inNYears": "in {n} years",
+    "filterByDate": "Filter by date",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "resetFilter": "Reset Filter"
   },
   "common": {
     "loading": "Loading...",

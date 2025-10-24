@@ -239,7 +239,11 @@
     },
     "inNDays": "через {n} днів",
     "inNMonths": "через {n} місяців",
-    "inNYears": "через {n} років"
+    "inNYears": "через {n} років",
+    "filterByDate": "Фільтр по даті",
+    "startDate": "Дата початку",
+    "endDate": "Дата кінця",
+    "resetFilter": "Скинути фільтр"
   },
   "common": {
     "loading": "Завантаження...",
