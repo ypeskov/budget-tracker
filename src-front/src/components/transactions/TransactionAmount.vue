@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineExpose } from 'vue';
+import {ref, defineExpose, watch} from 'vue';
 
 const props = defineProps(['amount', 'currentAccount', 'label', 'type',]);
 const emit = defineEmits(['amountChanged']);
@@ -8,6 +8,14 @@ const amountInput = ref(null);
 defineExpose({ amountInput });
 
 const inputValue = ref(String(props.amount ?? ''));
+
+watch(
+  () => props.amount,
+  (newVal) => {
+    inputValue.value = String(newVal ?? '');
+  },
+  { immediate: true }
+);
 
 function changeAmount(event) {
   let raw = event.target.value.replace(',', '.');
