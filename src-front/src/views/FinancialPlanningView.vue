@@ -466,6 +466,7 @@ async function confirmDelete() {
               <UpcomingTransactionsList
                 :transactions="store.upcomingOccurrences"
                 :currency="futureBalanceData?.baseCurrencyCode || baseCurrency"
+                :period="projectionSettings.period"
                 @edit="editPlanned"
                 @delete="deletePlanned"
               />

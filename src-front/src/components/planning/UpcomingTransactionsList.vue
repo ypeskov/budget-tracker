@@ -59,6 +59,24 @@
           </div>
         </div>
       </div>
+
+      <!-- Group Totals -->
+      <div v-if="group.totals" class="group-totals">
+        <div class="totals-row">
+          <span class="totals-label">{{ $t('financialPlanning.total') }}:</span>
+          <div class="totals-amounts">
+            <span v-if="group.totals.income > 0" class="total-income">
+              +{{ formatCurrency(group.totals.income) }}
+            </span>
+            <span v-if="group.totals.expenses > 0" class="total-expenses">
+              -{{ formatCurrency(group.totals.expenses) }}
+            </span>
+            <span class="total-net" :class="{ positive: group.totals.net >= 0, negative: group.totals.net < 0 }">
+              {{ group.totals.net >= 0 ? '+' : '' }}{{ formatCurrency(group.totals.net) }}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -78,27 +96,93 @@ const props = defineProps({
     type: String,
     default: 'USD',
   },
+  period: {
+    type: String,
+    default: 'daily',
+    validator: (value) => ['daily', 'weekly', 'monthly'].includes(value),
+  },
 });
 
 defineEmits(['edit', 'delete']);
+
+// Helper functions
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+  return new Date(d.setDate(diff));
+}
+
+function getWeekEnd(date) {
+  const start = getWeekStart(date);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  return end;
+}
+
+function getMonthStart(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function getMonthEnd(date) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+}
+
+function formatPeriodTitle(startDate, endDate, period) {
+  const options = { month: 'short', day: 'numeric' };
+  const start = startDate.toLocaleDateString('en-US', options);
+  const end = endDate.toLocaleDateString('en-US', options);
+
+  if (period === 'daily') {
+    return startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
+  } else if (period === 'weekly') {
+    return `${start} - ${end}`;
+  } else if (period === 'monthly') {
+    return startDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+  return `${start} - ${end}`;
+}
+
+function calculateGroupTotal(transactions) {
+  let totalIncome = 0;
+  let totalExpenses = 0;
+
+  transactions.forEach(tx => {
+    if (tx.isIncome) {
+      totalIncome += parseFloat(tx.amount || 0);
+    } else {
+      totalExpenses += parseFloat(tx.amount || 0);
+    }
+  });
+
+  return {
+    income: totalIncome,
+    expenses: totalExpenses,
+    net: totalIncome - totalExpenses,
+  };
+}
 
 const groupedTransactions = computed(() => {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   const today = new Date(now);
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const nextWeek = new Date(now);
-  nextWeek.setDate(nextWeek.getDate() + 7);
 
+  // Calculate week boundaries
+  const currentWeekEnd = getWeekEnd(today);
+  const nextWeekStart = new Date(currentWeekEnd);
+  nextWeekStart.setDate(nextWeekStart.getDate() + 1);
+  const nextWeekEnd = getWeekEnd(nextWeekStart);
+
+  // Initialize groups
   const groups = {
     overdue: [],
     today: [],
-    tomorrow: [],
     thisWeek: [],
+    nextWeek: [],
     later: [],
   };
 
+  // Group transactions
   props.transactions.forEach((tx) => {
     const txDate = new Date(tx.occurrenceDate);
     txDate.setHours(0, 0, 0, 0);
@@ -107,10 +191,10 @@ const groupedTransactions = computed(() => {
       groups.overdue.push(tx);
     } else if (txDate.getTime() === today.getTime()) {
       groups.today.push(tx);
-    } else if (txDate.getTime() === tomorrow.getTime()) {
-      groups.tomorrow.push(tx);
-    } else if (txDate < nextWeek) {
+    } else if (txDate > today && txDate <= currentWeekEnd) {
       groups.thisWeek.push(tx);
+    } else if (txDate >= nextWeekStart && txDate <= nextWeekEnd) {
+      groups.nextWeek.push(tx);
     } else {
       groups.later.push(tx);
     }
@@ -118,17 +202,21 @@ const groupedTransactions = computed(() => {
 
   const result = [];
 
+  // Overdue
   if (groups.overdue.length > 0) {
+    const sorted = groups.overdue.sort((a, b) => new Date(a.occurrenceDate) - new Date(b.occurrenceDate));
     result.push({
       date: 'overdue',
       title: t('financialPlanning.overdue'),
       icon: 'bi bi-exclamation-triangle-fill',
       class: 'overdue',
       isOverdue: true,
-      transactions: groups.overdue.sort((a, b) => new Date(a.occurrenceDate) - new Date(b.occurrenceDate)),
+      transactions: sorted,
+      totals: calculateGroupTotal(sorted),
     });
   }
 
+  // Today
   if (groups.today.length > 0) {
     result.push({
       date: 'today',
@@ -137,44 +225,106 @@ const groupedTransactions = computed(() => {
       class: 'today',
       isOverdue: false,
       transactions: groups.today,
+      totals: calculateGroupTotal(groups.today),
     });
   }
 
-  if (groups.tomorrow.length > 0) {
-    result.push({
-      date: 'tomorrow',
-      title: t('financialPlanning.tomorrow'),
-      icon: 'bi bi-calendar',
-      class: 'tomorrow',
-      isOverdue: false,
-      transactions: groups.tomorrow,
-    });
-  }
-
+  // This Week (remaining days)
   if (groups.thisWeek.length > 0) {
+    const sorted = groups.thisWeek.sort((a, b) => new Date(a.occurrenceDate) - new Date(b.occurrenceDate));
     result.push({
       date: 'thisWeek',
       title: t('financialPlanning.thisWeek'),
       icon: 'bi bi-calendar-week',
       class: 'this-week',
       isOverdue: false,
-      transactions: groups.thisWeek.sort((a, b) => new Date(a.occurrenceDate) - new Date(b.occurrenceDate)),
+      transactions: sorted,
+      totals: calculateGroupTotal(sorted),
     });
   }
 
-  if (groups.later.length > 0) {
+  // Next Week
+  if (groups.nextWeek.length > 0) {
+    const sorted = groups.nextWeek.sort((a, b) => new Date(a.occurrenceDate) - new Date(b.occurrenceDate));
     result.push({
-      date: 'later',
-      title: t('financialPlanning.later'),
-      icon: 'bi bi-calendar-range',
-      class: 'later',
+      date: 'nextWeek',
+      title: t('financialPlanning.nextWeek'),
+      icon: 'bi bi-calendar-week',
+      class: 'next-week',
       isOverdue: false,
-      transactions: groups.later.sort((a, b) => new Date(a.occurrenceDate) - new Date(b.occurrenceDate)),
+      transactions: sorted,
+      totals: calculateGroupTotal(sorted),
+    });
+  }
+
+  // Later - split by period
+  if (groups.later.length > 0) {
+    const laterGroups = groupByPeriod(groups.later, nextWeekEnd, props.period);
+    laterGroups.forEach(group => {
+      result.push(group);
     });
   }
 
   return result;
 });
+
+function groupByPeriod(transactions, afterDate, period) {
+  const groups = new Map();
+
+  transactions.forEach(tx => {
+    const txDate = new Date(tx.occurrenceDate);
+    txDate.setHours(0, 0, 0, 0);
+
+    let periodKey;
+    let periodStart;
+    let periodEnd;
+
+    if (period === 'daily') {
+      periodKey = txDate.toISOString().split('T')[0];
+      periodStart = new Date(txDate);
+      periodEnd = new Date(txDate);
+    } else if (period === 'weekly') {
+      periodStart = getWeekStart(txDate);
+      periodEnd = getWeekEnd(txDate);
+      periodKey = periodStart.toISOString().split('T')[0];
+    } else if (period === 'monthly') {
+      periodStart = getMonthStart(txDate);
+      periodEnd = getMonthEnd(txDate);
+      periodKey = `${txDate.getFullYear()}-${txDate.getMonth()}`;
+    }
+
+    if (!groups.has(periodKey)) {
+      groups.set(periodKey, {
+        key: periodKey,
+        startDate: periodStart,
+        endDate: periodEnd,
+        transactions: [],
+      });
+    }
+
+    groups.get(periodKey).transactions.push(tx);
+  });
+
+  // Convert to array and sort by date
+  const result = Array.from(groups.values())
+    .sort((a, b) => a.startDate - b.startDate)
+    .map(group => {
+      const sorted = group.transactions.sort((a, b) => new Date(a.occurrenceDate) - new Date(b.occurrenceDate));
+      return {
+        date: group.key,
+        title: formatPeriodTitle(group.startDate, group.endDate, period),
+        icon: 'bi bi-calendar-range',
+        class: 'later',
+        isOverdue: false,
+        transactions: sorted,
+        totals: calculateGroupTotal(sorted),
+        startDate: group.startDate,
+        endDate: group.endDate,
+      };
+    });
+
+  return result;
+}
 
 function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -244,7 +394,59 @@ function formatCurrency(amount) {
   background: white;
   border: 1px solid #dee2e6;
   border-top: none;
+}
+
+.group-totals {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-top: 2px solid #adb5bd;
   border-radius: 0 0 8px 8px;
+  padding: 0.75rem 1rem;
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+.totals-label {
+  font-size: 0.875rem;
+  color: #495057;
+}
+
+.totals-amounts {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.total-income {
+  color: #198754;
+  font-size: 0.875rem;
+}
+
+.total-expenses {
+  color: #dc3545;
+  font-size: 0.875rem;
+}
+
+.total-net {
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  background: white;
+}
+
+.total-net.positive {
+  color: #198754;
+}
+
+.total-net.negative {
+  color: #dc3545;
 }
 
 .transaction-card {
