@@ -165,7 +165,10 @@ class CashFlowReportGenerator:
         else:
             # get start date 12 months ago in case of monthly report and 30 days ago in case of daily report
             if self.period == "monthly":
-                additional_filters.append(Transaction.date_time >= (datetime.now() - timedelta(days=365)))
+                # Start from the first day of the month 12 months ago
+                twelve_months_ago = datetime.now() - timedelta(days=365)
+                start_of_month = twelve_months_ago.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                additional_filters.append(Transaction.date_time >= start_of_month)
             elif self.period == "daily":
                 additional_filters.append(Transaction.date_time >= (datetime.now() - timedelta(days=30)))
 

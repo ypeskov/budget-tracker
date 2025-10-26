@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive, ref } from 'vue';
+import { computed, onBeforeMount, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 import { Bar } from 'vue-chartjs';
@@ -33,7 +33,7 @@ const chartData = reactive({
     },
   ],
 });
-let cashFlowReport = reactive({});
+const cashFlowReport = ref({});
 
 const chartOptions = reactive({
   responsive: true,
@@ -43,6 +43,27 @@ const chartOptions = reactive({
       beginAtZero: true,
     },
   },
+});
+
+// Computed totals for the summary row
+const totals = computed(() => {
+  let totalIncome = 0;
+  let totalExpenses = 0;
+  let totalNetFlow = 0;
+
+  if (cashFlowReport.value.totalIncome) {
+    for (let period in cashFlowReport.value.totalIncome) {
+      totalIncome += cashFlowReport.value.totalIncome[period] || 0;
+      totalExpenses += cashFlowReport.value.totalExpenses[period] || 0;
+      totalNetFlow += cashFlowReport.value.netFlow[period] || 0;
+    }
+  }
+
+  return {
+    income: totalIncome,
+    expenses: totalExpenses,
+    netFlow: totalNetFlow,
+  };
 });
 
 const startDate = ref('');
@@ -58,11 +79,12 @@ onBeforeMount(async () => {
 });
 
 async function updateChartData() {
-  clearChartData();
   await getReportData();
 }
 
 async function getReportData() {
+  clearChartData();
+
   const filters = {
     period: period.value,
   };
@@ -72,13 +94,13 @@ async function getReportData() {
   if (endDate.value !== '') {
     filters.endDate = endDate.value;
   }
-  cashFlowReport = await Services.reportsService.getReport('cashflow', filters);
+  cashFlowReport.value = await Services.reportsService.getReport('cashflow', filters);
 
-  for(let period in cashFlowReport.netFlow) {
+  for(let period in cashFlowReport.value.netFlow) {
     chartData.labels.push(period);
-    chartData.datasets[0].data.push(cashFlowReport.totalIncome[period]);
-    chartData.datasets[1].data.push(-1 * cashFlowReport.totalExpenses[period]);
-    chartData.datasets[2].data.push(cashFlowReport.netFlow[period]);
+    chartData.datasets[0].data.push(cashFlowReport.value.totalIncome[period]);
+    chartData.datasets[1].data.push(-1 * cashFlowReport.value.totalExpenses[period]);
+    chartData.datasets[2].data.push(cashFlowReport.value.netFlow[period]);
   }
 
   loaded.value = true;
@@ -185,6 +207,32 @@ async function changePeriod($event) {
         </span>
       </div>
     </div>
+
+    <!-- Totals row -->
+    <div class="table-row-grid totals-row">
+      <div class="cell">
+        <span class="th">{{ $t('message.total') }}</span>
+        <span class="val">{{ $t('message.total') }}</span>
+      </div>
+      <div class="cell right">
+        <span class="th">{{ $t('message.totalIncome') }}</span>
+        <span class="val">
+          {{ $n(totals.income, 'decimal') }} {{ cashFlowReport.currency }}
+        </span>
+      </div>
+      <div class="cell right">
+        <span class="th">{{ $t('message.totalExpenses') }}</span>
+        <span class="val">
+          {{ $n(totals.expenses, 'decimal') }} {{ cashFlowReport.currency }}
+        </span>
+      </div>
+      <div class="cell right">
+        <span class="th">{{ $t('message.netFlow') }}</span>
+        <span class="val">
+          {{ $n(totals.netFlow, 'decimal') }} {{ cashFlowReport.currency }}
+        </span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -208,6 +256,14 @@ async function changePeriod($event) {
   transition: background .15s;
 }
 .table-row-grid:hover { background: #f0f0f0; }
+
+.totals-row {
+  font-weight: 700;
+  border-top: 2px solid #000;
+  margin-top: 4px;
+  padding-top: 12px;
+}
+.totals-row:hover { background: transparent; }
 
 .cell { display: flex; align-items: center; gap: 8px; }
 .cell.right { justify-content: flex-end; }

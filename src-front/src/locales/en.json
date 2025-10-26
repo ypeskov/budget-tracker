@@ -93,7 +93,8 @@
     "searchTemplates": "Search templates",
     "collectedExpenses": "Collected expenses",
     "targetBudget": "Target budget",
-    "loading": "Loading"
+    "loading": "Loading",
+    "total": "Total"
   },
   "menu": {
     "home": "Home",

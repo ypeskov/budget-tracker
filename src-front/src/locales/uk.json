@@ -93,7 +93,8 @@
     "saveAsTemplate": "Зберегти як шаблон",
     "templates": "Шаблони",
     "searchTemplates": "Пошук шаблонів",
-    "loading": "Завантаження"
+    "loading": "Завантаження",
+    "total": "Разом"
   },
   "menu": {
     "home": "Початок",
