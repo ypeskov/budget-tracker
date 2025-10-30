@@ -156,7 +156,8 @@ function toggleArchiveConfirmation() {
       </div>
       <div class="form-group">
         <label for="balance">Balance:</label>
-        <input type="number" id="balance" v-model="balance" step="0.01" required>
+        <input type="number" id="balance" v-model="balance" step="0.01"
+               :readonly="!!props.accountDetails" required>
       </div>
       <div class="form-group">
         <label for="opening_date">Opening Date:</label>
@@ -239,6 +240,11 @@ textarea {
   border: 1px solid #ccc;
   width: 100%;
   box-sizing: border-box;
+}
+
+input[type="number"]:read-only {
+  background-color: #e9ecef;
+  cursor: not-allowed;
 }
 
 input[type="checkbox"] {

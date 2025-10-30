@@ -41,7 +41,7 @@ def add_account(account_dto: CreateAccountSchema, request: Request, db: Session 
         return create_account(account_dto, request.state.user['id'], db)
     except (InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount) as e:
         logger.exception(f'Error creating account: {e}')
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail='Failed to create account')
 
 
 @router.get('/', response_model=list[AccountResponseSchema] | None)
@@ -64,7 +64,7 @@ def get_accounts(
         return accounts
     except InvalidUser as e:
         logger.exception(f'Error getting user accounts: {e}')
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail='Failed to get user accounts')
 
 
 @router.put('/set-archive-status')
@@ -80,12 +80,13 @@ def archive_status(
     try:
         account = get_account_details(account_id, user_id, db)
     except (InvalidAccount, AccessDenied) as e:
+        logger.exception(f'Access denied or invalid account: {e}')
         raise HTTPException(status_code=401, detail='Access denied')
     try:
         return set_archive_status(account.id, is_archived, user_id, db)
     except (InvalidUser, InvalidAccount) as e:
         logger.exception(f'Error setting account archive status: {e}')
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail='Failed to set archive status')
 
 
 @router.get('/types/', response_model=list[AccountTypeResponseSchema] | None)
@@ -99,13 +100,13 @@ def get_account_info(account_id: int, request: Request, db: Session = Depends(ge
         return get_account_details(account_id, request.state.user['id'], db)
     except (InvalidAccount, AccessDenied) as e:
         logger.exception(f'Error getting account details: {e}')
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail='Failed to get account details')
     except NotFoundError as e:
         logger.exception(f'Error getting account details: {e}')
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail='Account not found')
     except Exception as e:
         logger.exception(f'Error getting account details: {e}')
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail='Internal server error')
 
 
 @router.put('/{account_id}', response_model=AccountResponseSchema)
@@ -116,18 +117,18 @@ def update_account(
     db: Session = Depends(get_db),
 ):
     account_dto.id = account_id
+
     try:
+        # Get current account and preserve its balance
+        existing_account = get_account_details(account_id, request.state.user['id'], db)
+        # Use current balance from DB, ignore balance from request
+        account_dto.balance = existing_account.balance
+
         acc = create_account(account_dto, request.state.user['id'], db)
-    except (
-        InvalidUser,
-        InvalidCurrency,
-        InvalidAccountType,
-        InvalidAccount,
-        AccessDenied,
-    ) as e:
+        return acc
+    except (InvalidUser, InvalidCurrency, InvalidAccountType, InvalidAccount, AccessDenied, NotFoundError) as e:
         logger.exception(f'Error updating account: {e}')
-        raise HTTPException(status_code=400, detail=str(e))
-    return acc
+        raise HTTPException(status_code=400, detail='Failed to update account')
 
 
 @router.delete('/{account_id}')
@@ -135,7 +136,7 @@ def delete_acc(account_id: int, request: Request, db: Session = Depends(get_db))
     try:
         delete_account(account_id, request.state.user['id'], db)
     except (InvalidAccount, AccessDenied) as e:
-        logger.exception(f'Error getting account details: {e}')
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.exception(f'Error deleting account: {e}')
+        raise HTTPException(status_code=400, detail='Failed to delete account')
 
     return {'deleted': True}

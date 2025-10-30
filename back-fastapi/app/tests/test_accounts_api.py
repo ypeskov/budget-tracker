@@ -162,9 +162,10 @@ def test_all_account_types_exist(token):
 
 def test_update_account(token, one_account):
     account = one_account
+    original_balance = account['balance']  # Save original balance
     account['name'] = 'Updated account'
     account['initialBalance'] = 100_999
-    account['balance'] = 100_999
+    account['balance'] = 100_999  # Try to update balance (should be ignored)
     account['comment'] = 'Updated comment'
     account['openingDate'] = '2023-12-28T23:00:00Z'
 
@@ -178,7 +179,8 @@ def test_update_account(token, one_account):
     updated_account = response.json()
     assert updated_account['accountTypeId'] == account['account_type_id']
     assert updated_account['name'] == account['name']
-    assert updated_account['balance'] == account['balance']
+    # Balance should NOT change - it should remain as original
+    assert updated_account['balance'] == original_balance
     assert updated_account['initialBalance'] == account['initialBalance']
     assert updated_account['comment'] == account['comment']
     assert updated_account['openingDate'] == account['openingDate']
