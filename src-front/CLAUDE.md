@@ -29,7 +29,7 @@ npm run format       # Format code with Prettier
 - **UI Framework**: Bootstrap 5
 - **Charts**: Chart.js + vue-chartjs
 - **Internationalization**: Vue I18n (English, Ukrainian)
-- **Icons**: Bootstrap Icons
+- **Icons**: Font Awesome 6 (use `fa-solid`, `fa-regular` classes)
 
 ### Project Structure
 

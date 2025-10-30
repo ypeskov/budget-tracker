@@ -6,13 +6,37 @@
     </div>
 
     <div v-for="group in groupedTransactions" :key="group.date" class="transaction-group">
-      <div class="group-header" :class="group.class">
+      <div
+        class="group-header"
+        :class="group.class"
+        @click="toggleGroup(group.date)"
+      >
+        <i class="collapse-icon fa-solid" :class="collapsedGroups[group.date] ? 'fa-circle-chevron-right' : 'fa-circle-chevron-down'"></i>
         <i :class="group.icon"></i>
         <span class="group-title">{{ group.title }}</span>
         <span class="group-count">{{ group.transactions.length }}</span>
       </div>
 
-      <div class="transactions-list">
+      <!-- Totals row (always visible) -->
+      <div v-if="group.totals" class="group-totals-summary" @click="toggleGroup(group.date)">
+        <div class="totals-row">
+          <span class="totals-label">{{ $t('financialPlanning.total') }}:</span>
+          <div class="totals-amounts">
+            <span v-if="group.totals.income > 0" class="total-income">
+              +{{ formatCurrency(group.totals.income) }}
+            </span>
+            <span v-if="group.totals.expenses > 0" class="total-expenses">
+              -{{ formatCurrency(group.totals.expenses) }}
+            </span>
+            <span class="total-net" :class="{ positive: group.totals.net >= 0, negative: group.totals.net < 0 }">
+              {{ group.totals.net >= 0 ? '+' : '' }}{{ formatCurrency(group.totals.net) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible transactions list -->
+      <div v-show="!collapsedGroups[group.date]" class="transactions-list">
         <div
           v-for="transaction in group.transactions"
           :key="`${transaction.plannedTransactionId}-${transaction.occurrenceDate}`"
@@ -66,30 +90,12 @@
           </div>
         </div>
       </div>
-
-      <!-- Group Totals -->
-      <div v-if="group.totals" class="group-totals">
-        <div class="totals-row">
-          <span class="totals-label">{{ $t('financialPlanning.total') }}:</span>
-          <div class="totals-amounts">
-            <span v-if="group.totals.income > 0" class="total-income">
-              +{{ formatCurrency(group.totals.income) }}
-            </span>
-            <span v-if="group.totals.expenses > 0" class="total-expenses">
-              -{{ formatCurrency(group.totals.expenses) }}
-            </span>
-            <span class="total-net" :class="{ positive: group.totals.net >= 0, negative: group.totals.net < 0 }">
-              {{ group.totals.net >= 0 ? '+' : '' }}{{ formatCurrency(group.totals.net) }}
-            </span>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -119,6 +125,14 @@ const props = defineProps({
 });
 
 defineEmits(['edit', 'delete']);
+
+// State for collapsed groups - all groups collapsed by default
+const collapsedGroups = reactive({});
+
+// Toggle group collapse state
+const toggleGroup = (groupDate) => {
+  collapsedGroups[groupDate] = !collapsedGroups[groupDate];
+};
 
 // Helper functions
 function getWeekStart(date) {
@@ -181,6 +195,8 @@ const groupedTransactions = computed(() => {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   const today = new Date(now);
+
+  // Initialize collapsed state for all groups
 
   // Filter transactions by date range if filters are set
   let filteredTransactions = props.transactions;
@@ -306,6 +322,13 @@ const groupedTransactions = computed(() => {
     });
   }
 
+  // Initialize collapsed state for new groups
+  result.forEach(group => {
+    if (!(group.date in collapsedGroups)) {
+      collapsedGroups[group.date] = true; // collapsed by default
+    }
+  });
+
   return result;
 });
 
@@ -406,6 +429,42 @@ function formatCurrency(amount) {
   border-radius: 8px 8px 0 0;
   font-weight: 600;
   font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.group-header:hover {
+  background: #e9ecef;
+}
+
+.group-header:hover .collapse-icon {
+  color: #0d6efd;
+  transform: scale(1.2);
+}
+
+.group-header.overdue:hover {
+  background: #ffe9a8;
+}
+
+.group-header.today:hover {
+  background: #b8dde4;
+}
+
+.group-header.tomorrow:hover {
+  background: #d1d3d5;
+}
+
+.collapse-icon {
+  font-size: 1.5rem;
+  color: #0d6efd;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.group-header:hover .collapse-icon {
+  color: #0a58ca;
+  transform: scale(1.3);
 }
 
 .group-header.overdue {
@@ -435,14 +494,22 @@ function formatCurrency(amount) {
   background: white;
   border: 1px solid #dee2e6;
   border-top: none;
+  border-radius: 0 0 8px 8px;
 }
 
-.group-totals {
+.group-totals-summary {
   background: #f8f9fa;
   border: 1px solid #dee2e6;
-  border-top: 2px solid #adb5bd;
+  border-top: none;
   border-radius: 0 0 8px 8px;
   padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.group-totals-summary:hover {
+  background: #e9ecef;
 }
 
 .totals-row {
