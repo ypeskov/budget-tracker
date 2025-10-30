@@ -113,7 +113,6 @@ async function updated() { await loadCats(); }
     :category="editableCat"
     :categories="catPool"
     @category-updated="updated"
-    @change-category-type="() => {}"
     :close-modal="closeEditor"
   />
 </template>

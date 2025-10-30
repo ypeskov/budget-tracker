@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, toRefs, ref } from 'vue';
+import { reactive, ref } from 'vue';
 import { useI18n }  from 'vue-i18n';
 import { Services } from '@/services/servicesConfig';
 import ModalWindow  from '@/components/utils/ModalWindow.vue';
@@ -24,8 +24,13 @@ const askDelete = ref(false);
 const categoryOptions = props.categories.map(c => ({ id: c.id, name: c.name }));
 
 async function save() {
-  const dto = { ...toRefs(state), name: state.name, isIncome: state.isIncome,
-                isDeleted: state.isDeleted, parentId: state.parentId || null };
+  const dto = {
+    id: state.id,
+    name: state.name,
+    isIncome: state.isIncome,
+    isDeleted: state.isDeleted,
+    parentId: state.parentId || null
+  };
   state.id ? await Services.categoriesService.updateCategory(dto)
            : await Services.categoriesService.createCategory(dto);
   emit('categoryUpdated'); props.closeModal();
@@ -261,13 +266,22 @@ async function reallyDelete() {
 .btn.danger       { color: #dc3545; border-color: #dc3545; }
 .btn.danger:hover { background: #dc3545; color: #fff; }
 
-:deep(.confirm-modal .modal-window) {
-  width: 360px;
-  max-width: 90vw;
+:deep(.modal-content) {
+  max-width: 680px;
+}
+
+:deep(.confirm-modal .modal-content) {
+  max-width: 360px;
+}
+
+@media (max-width: 768px) {
+  .ed-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 576px) {
-  .ed-grid { grid-template-columns: 1fr; }
   .ed-header .title { gap: 8px; }
+  :deep(.modal-content) {
+    width: 95%;
+  }
 }
 </style>
