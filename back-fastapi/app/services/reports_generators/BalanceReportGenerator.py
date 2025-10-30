@@ -2,12 +2,11 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from icecream import ic
-from sqlalchemy import and_, func
-from sqlalchemy.orm import Session, aliased
+from sqlalchemy import and_
+from sqlalchemy.orm import Session
 
 from app.models.Account import Account
 from app.models.Currency import Currency
-from app.models.Transaction import Transaction
 from app.models.User import User
 from app.services.CurrencyProcessor import calc_amount
 
@@ -37,44 +36,25 @@ class BalanceReportGenerator:
         )
 
     def prepare_raw_data(self) -> 'BalanceReportGenerator':
-        AccountAlias = aliased(Account)
-
         filters = [
-            Transaction.user_id == self.user_id,
-            Transaction.date_time < self.balance_date + timedelta(days=1),
+            Account.user_id == self.user_id,
         ]
 
         if self.account_ids:
-            filters.append(Transaction.account_id.in_(self.account_ids))
+            filters.append(Account.id.in_(self.account_ids))
         else:
-            filters.append(AccountAlias.show_in_reports == True)
-
-        subquery = (
-            self.db.query(
-                Transaction.account_id,
-                func.max(Transaction.date_time).label('max_date_time'),
-            )
-            .join(AccountAlias, AccountAlias.id == Transaction.account_id)
-            .filter(and_(*filters))
-            .group_by(Transaction.account_id)
-            .subquery()
-        )
+            filters.append(Account.show_in_reports == True)
 
         self.raw_results = (
             self.db.query(  # type: ignore
-                Transaction.account_id,
-                Transaction.new_balance,
+                Account.id,
+                Account.balance,
                 Account.name,
                 Account.show_in_reports,
                 Currency.code,
             )
-            .distinct(Transaction.account_id, Account.name, Currency.code)
-            .join(
-                subquery,
-                (Transaction.account_id == subquery.c.account_id) & (Transaction.date_time == subquery.c.max_date_time),
-            )
-            .join(Account, Account.id == Transaction.account_id)
             .join(Currency, Account.currency_id == Currency.id)
+            .filter(and_(*filters))
             .order_by(Account.name)
             .all()
         )
@@ -85,7 +65,7 @@ class BalanceReportGenerator:
         balance_data = []
         balance_date = self.balance_date
         for result in self.raw_results:  # type: ignore
-            balance = result.new_balance if result else 0
+            balance = result.balance if result else 0
             account_name = result.name if result else ''
             currency_code = result.code if result else ''
 
@@ -103,7 +83,7 @@ class BalanceReportGenerator:
 
             balance_data.append(
                 {
-                    "account_id": result.account_id,
+                    "account_id": result.id,
                     "account_name": account_name,
                     "currency_code": currency_code,
                     "balance": balance,
