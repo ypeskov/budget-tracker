@@ -26,7 +26,7 @@ class TestUserSettingsAPI:
     def test_store_settings_success(self, auth_headers):
         settings_data = {"language": "en", "theme": "light", "dateFormat": "DD/MM/YYYY"}
 
-        response = client.post("/settings/", json=settings_data, headers=auth_headers)
+        response = client.post("/settings", json=settings_data, headers=auth_headers)
 
         assert response.status_code in [
             200,
@@ -37,7 +37,7 @@ class TestUserSettingsAPI:
     def test_store_settings_invalid_key(self, auth_headers):
         settings_data = {"invalidKey": "value"}
 
-        response = client.post("/settings/", json=settings_data, headers=auth_headers)
+        response = client.post("/settings", json=settings_data, headers=auth_headers)
         assert response.status_code == 422
 
     def test_get_base_currency_success(self, auth_headers):
