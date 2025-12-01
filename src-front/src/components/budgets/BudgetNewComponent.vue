@@ -3,6 +3,7 @@ import { onBeforeMount, reactive, ref, watch } from 'vue';
 
 import ModalWindow from '@/components/utils/ModalWindow.vue';
 import CategoriesFilter from '@/components/filter/CategoriesFilter.vue';
+import CalculatorInput from '@/components/utilities/CalculatorInput.vue';
 import { processError } from '@/errors/errorHandlers';
 import { useCategoriesStore } from '@/stores/categories';
 import { Services } from '@/services/servicesConfig';
@@ -184,7 +185,12 @@ async function confirmArchiveBudget() {
 
         <div class="mb-3">
           <label for="target_amount" class="form-label">Target Amount</label>
-          <input type="number" class="form-control" id="target_amount" v-model="targetAmount" step="0.01" required>
+          <CalculatorInput
+            id="target_amount"
+            v-model="targetAmount"
+            :placeholder="'0.00'"
+            :min="0"
+          />
         </div>
 
         <div class="mb-3">

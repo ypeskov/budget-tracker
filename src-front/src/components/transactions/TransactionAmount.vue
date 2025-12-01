@@ -1,5 +1,6 @@
 <script setup>
 import {ref, defineExpose, watch} from 'vue';
+import CalculatorInput from '@/components/utilities/CalculatorInput.vue';
 
 const props = defineProps(['amount', 'currentAccount', 'label', 'type',]);
 const emit = defineEmits(['amountChanged']);
@@ -7,21 +8,20 @@ const emit = defineEmits(['amountChanged']);
 const amountInput = ref(null);
 defineExpose({ amountInput });
 
-const inputValue = ref(String(props.amount ?? ''));
+const inputValue = ref(props.amount ?? '');
 
 watch(
   () => props.amount,
   (newVal) => {
-    inputValue.value = String(newVal ?? '');
+    inputValue.value = newVal ?? '';
   },
   { immediate: true }
 );
 
-function changeAmount(event) {
-  let raw = event.target.value.replace(',', '.');
-  inputValue.value = raw;
+function changeAmount(newValue) {
+  inputValue.value = newValue;
 
-  const parsed = parseFloat(raw);
+  const parsed = parseFloat(newValue);
   if (!isNaN(parsed)) {
     emit('amountChanged', {
       amountType: props.type,
@@ -38,14 +38,12 @@ function changeAmount(event) {
         <label for="amount" class="form-label">
           {{ label }}
         </label>
-        <input
-          type="text"
+        <CalculatorInput
           ref="amountInput"
-          @input="changeAmount"
-          :value="inputValue"
-          class="form-control"
-          pattern="[0-9.]*"
-          inputmode="decimal"
+          v-model="inputValue"
+          @update:modelValue="changeAmount"
+          :placeholder="'0.00'"
+          :min="0"
         />
       </div>
       <div class="col-2 currency">{{ currentAccount?.currency?.code }}</div>

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import CalculatorInput from '@/components/utilities/CalculatorInput.vue';
 
 const { t } = useI18n();
 
@@ -45,12 +46,11 @@ const amountInput = ref('');
 
 const form = ref({ ...defaultForm });
 
-// Handle amount input with comma support
-function handleAmountInput(event) {
-  let raw = event.target.value.replace(',', '.');
-  amountInput.value = raw;
+// Handle amount input
+function handleAmountInput(newValue) {
+  amountInput.value = newValue;
 
-  const parsed = parseFloat(raw);
+  const parsed = parseFloat(newValue);
   if (!isNaN(parsed)) {
     form.value.amount = parsed;
   }
@@ -189,11 +189,11 @@ function getIntervalHint() {
             <!-- Amount -->
             <div class="mb-3">
               <label class="form-label">{{ $t('message.amount') }} <span class="text-danger">*</span></label>
-              <input
-                :value="amountInput"
-                class="form-control"
-                required
-                @input="handleAmountInput"
+              <CalculatorInput
+                v-model="amountInput"
+                @update:modelValue="handleAmountInput"
+                :placeholder="'0.00'"
+                :min="0"
               />
             </div>
 

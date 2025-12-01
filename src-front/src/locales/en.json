@@ -261,5 +261,8 @@
     "expense": "Expense",
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "calculator": {
+    "toggle": "Toggle calculator"
   }
 }
