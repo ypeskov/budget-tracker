@@ -206,7 +206,7 @@ const evaluateExpression = (expr) => {
     }
 
     // Use Function constructor for safer evaluation than eval
-    // eslint-disable-next-line no-new-func
+     
     const result = new Function(`'use strict'; return (${cleanExpr})`)();
 
     // Check if result is a valid number

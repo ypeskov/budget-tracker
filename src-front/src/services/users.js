@@ -155,4 +155,32 @@ export class UserService {
       throw e;
     }
   }
+
+  async changePassword(currentPassword, newPassword) {
+    const changePasswordPath = '/auth/change-password/';
+    const requestBody = {
+      currentPassword,
+      newPassword,
+    };
+
+    try {
+      const data = await request(
+        changePasswordPath,
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody),
+        },
+        { userService: this },
+        true,
+      );
+      return data;
+    } catch (e) {
+      if (e instanceof HttpError) {
+        console.error('Change password error:', e.message);
+      } else {
+        console.error('Unexpected error:', e);
+      }
+      throw e;
+    }
+  }
 }

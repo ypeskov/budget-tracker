@@ -3,8 +3,9 @@ import { ref } from 'vue';
 
 import LanguageSelector     from './LanguageSelector.vue';
 import BaseCurrencyManager  from './BaseCurrencyManager.vue';
+import ChangePassword       from './ChangePassword.vue';
 
-const tab = ref('lang');   // 'lang' | 'curr'
+const tab = ref('lang');   // 'lang' | 'curr' | 'password'
 </script>
 
 <template>
@@ -25,12 +26,20 @@ const tab = ref('lang');   // 'lang' | 'curr'
         <i class="fa-solid fa-money-bill-wave"></i>
         {{ $t('buttons.baseCurrency') }}
       </button>
+
+      <button class="btn btn-outline-primary"
+              :class="{ active: tab === 'password' }"
+              @click="tab = 'password'">
+        <i class="fa-solid fa-lock"></i>
+        {{ $t('buttons.changePassword') }}
+      </button>
     </nav>
 
     <!-- Active section -->
     <div class="profile-body">
-      <LanguageSelector    v-if="tab === 'lang'"  />
-      <BaseCurrencyManager v-else                />
+      <LanguageSelector    v-if="tab === 'lang'"     />
+      <BaseCurrencyManager v-else-if="tab === 'curr'" />
+      <ChangePassword      v-else-if="tab === 'password'" />
     </div>
   </div>
 </template>

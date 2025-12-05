@@ -99,7 +99,20 @@
     "templates": "Шаблони",
     "searchTemplates": "Пошук шаблонів",
     "loading": "Завантаження",
-    "total": "Разом"
+    "total": "Разом",
+    "changePassword": "Зміна пароля",
+    "currentPassword": "Поточний пароль",
+    "newPassword": "Новий пароль",
+    "confirmNewPassword": "Підтвердити новий пароль",
+    "enterCurrentPassword": "Введіть поточний пароль",
+    "enterNewPassword": "Введіть новий пароль",
+    "enterConfirmPassword": "Підтвердіть новий пароль",
+    "passwordChangedSuccessfully": "Пароль успішно змінено",
+    "currentPasswordIncorrect": "Поточний пароль невірний",
+    "passwordsDoNotMatch": "Паролі не співпадають",
+    "passwordTooShort": "Пароль має бути не менше 3 символів",
+    "newPasswordSameAsOld": "Новий пароль має відрізнятись від поточного",
+    "fillAllFields": "Будь ласка, заповніть усі поля"
   },
   "menu": {
     "home": "Початок",
@@ -146,7 +159,9 @@
     "showArchivedAccounts": "Показати архівовані рахунки",
     "restore": "Відновити",
     "archiveAccount": "Архівувати рахунок",
-    "templates": "Шаблони"
+    "templates": "Шаблони",
+    "changePassword": "Змінити пароль",
+    "changing": "Змінюю..."
   },
   "home": {
     "heroTitle": "Керуйте своїми фінансами без зусиль",

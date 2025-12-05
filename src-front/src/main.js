@@ -13,6 +13,7 @@ import router from './router';
 
 import enMessages from './locales/en.json';
 import ukMessages from './locales/uk.json';
+import ruMessages from './locales/ru.json';
 
 const i18n = createI18n({
   legacy: false,
@@ -21,6 +22,7 @@ const i18n = createI18n({
   messages: {
     en: enMessages,
     uk: ukMessages,
+    ru: ruMessages,
   },
   numberFormats: {
     en: {
@@ -38,6 +40,17 @@ const i18n = createI18n({
       currency: {
         style: 'currency',
         currency: 'UAH',
+      },
+      decimal: {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    },
+    ru: {
+      currency: {
+        style: 'currency',
+        currency: 'RUB',
       },
       decimal: {
         style: 'decimal',

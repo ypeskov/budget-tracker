@@ -31,3 +31,10 @@ class UserResponse(UserBase):
     last_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)
+
+
+class ChangePasswordSchema(BaseModel):
+    current_password: str = password_field
+    new_password: str = password_field
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=to_camel)

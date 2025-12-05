@@ -217,3 +217,24 @@ def activate_user(token: str, db: Session) -> bool:
     db.commit()
 
     return True
+
+
+def change_user_password(user_id: int, current_password: str, new_password: str, db: Session) -> bool:
+    """
+    Change user password.
+    """
+    user: User = db.query(User).filter(User.id == user_id).first()  # type: ignore
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    # Verify current password
+    if not bcrypt.checkpw(current_password.encode('utf-8'), user.password_hash.encode('utf-8')):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is incorrect")
+
+    # Hash and set new password
+    hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+    user.password_hash = hashed_password.decode('utf-8')
+
+    db.commit()
+
+    return True

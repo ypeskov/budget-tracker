@@ -11,9 +11,10 @@ from app.logger_config import logger
 from app.models.User import User
 from app.schemas.oauth_schema import OAuthToken
 from app.schemas.token_schema import Token
-from app.schemas.user_schema import UserLoginSchema, UserRegistration, UserResponse
+from app.schemas.user_schema import ChangePasswordSchema, UserLoginSchema, UserRegistration, UserResponse
 from app.services.auth import (
     activate_user,
+    change_user_password,
     create_users,
     get_jwt_token,
     login_or_register,
@@ -118,3 +119,25 @@ async def oauth(JWT: OAuthToken, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="No email provided")
 
     return token
+
+
+@router.post('/change-password/')
+def change_password(
+    password_data: ChangePasswordSchema,
+    user=Depends(check_token),
+    db: Session = Depends(get_db)
+):
+    try:
+        change_user_password(
+            user['id'],
+            password_data.current_password,
+            password_data.new_password,
+            db
+        )
+        return {"success": True, "message": "Password changed successfully"}
+    except HTTPException as e:
+        logger.error(f"Error while changing password for user {user['id']}: {e.detail}")
+        raise e
+    except Exception as e:
+        logger.exception(f"Error while changing password for user {user['id']}: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error. See logs for details")

@@ -99,7 +99,20 @@
     "collectedExpenses": "Collected expenses",
     "targetBudget": "Target budget",
     "loading": "Loading",
-    "total": "Total"
+    "total": "Total",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "enterCurrentPassword": "Enter your current password",
+    "enterNewPassword": "Enter your new password",
+    "enterConfirmPassword": "Confirm your new password",
+    "passwordChangedSuccessfully": "Password changed successfully",
+    "currentPasswordIncorrect": "Current password is incorrect",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 3 characters long",
+    "newPasswordSameAsOld": "New password must be different from the current password",
+    "fillAllFields": "Please fill in all fields"
   },
   "menu": {
     "home": "Home",
@@ -146,7 +159,9 @@
     "showArchivedAccounts": "Show archived accounts",
     "restore": "Restore",
     "archiveAccount": "Archive account",
-    "templates": "Templates"
+    "templates": "Templates",
+    "changePassword": "Change Password",
+    "changing": "Changing..."
   },
   "home": {
     "heroTitle": "Manage Your Finances Effortlessly",
