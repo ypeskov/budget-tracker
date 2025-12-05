@@ -112,32 +112,28 @@ function toggleArchivedAccounts(event) {
   <main>
     <div class="container">
       <div class="row">
-        <div class="col">
-          <label v-if="!showArchivedAccounts" class="btn btn-secondary">
+        <div class="col-auto me-auto">
+          <label v-if="!showArchivedAccounts" class="btn btn-secondary me-2">
             <input type="checkbox" @change="toggleHiddenAccounts">
             {{ $t('message.showHiddenAccounts') }}
           </label>
-        </div>
-        <div class="col">
           <label v-if="archivedAccounts.length > 0" class="btn btn-secondary">
             <input type="checkbox" @change="toggleArchivedAccounts">
             {{ $t('buttons.showArchivedAccounts') }}
           </label>
         </div>
-        <div class="col sub-menu">
+        <div class="col-auto sub-menu">
           <a href="javascript:void(0);"
              class="btn btn-secondary"
-             @click.prevent="showNewAccForm=!showNewAccForm">
-            <img src="/images/icons/new-icon.svg"
-                 :title="$t('message.newAccount')"
-                 :alt="$t('message.newAccount')" />
+             @click.prevent="showNewAccForm=!showNewAccForm"
+             :title="$t('message.newAccount')">
+            <span class="icon-text">✚</span>
           </a>
           <a href="javascript:void(0);"
              class="btn btn-secondary"
-             @click="updateAccountsList">
-            <img src="/images/icons/refresh-icon.svg"
-                 :title="$t('message.refresh')"
-                 :alt="$t('message.refresh')" />
+             @click="updateAccountsList"
+             :title="$t('message.refresh')">
+            <span class="icon-text">↻</span>
           </a>
         </div>
       </div>
@@ -161,5 +157,21 @@ function toggleArchivedAccounts(event) {
 </template>
 
 <style scoped lang="scss">
+@use '@/assets/main.scss' as *;
 
+.icon-text {
+  font-size: 0.95rem;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+label.btn {
+  margin-bottom: 0;
+}
 </style>
