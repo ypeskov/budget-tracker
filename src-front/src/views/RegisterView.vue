@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 
 import { Services } from '@/services/servicesConfig';
 import { GoogleLogin } from 'vue3-google-login';
+import UnauthHeader from '@/components/UnauthHeader.vue';
 
 const router = useRouter();
 const { t }  = useI18n();
@@ -15,9 +16,13 @@ const registerEmail    = ref('');
 const registerPassword = ref('');
 const errorMessage     = ref('');
 const showSuccess      = ref(false);
+const showPassword     = ref(false);
 
 const emailRef = ref(null);
-onMounted(() => emailRef.value?.focus());
+
+onMounted(() => {
+  emailRef.value?.focus();
+});
 
 async function submitRegistration() {
   errorMessage.value = '';
@@ -43,10 +48,16 @@ const callback = async (response) => {
     errorMessage.value = `Registration failed: ${err.message}`;
   }
 };
+
+function togglePasswordVisibility() {
+  showPassword.value = !showPassword.value;
+}
 </script>
 
 <template>
   <div class="login-page">
+    <UnauthHeader />
+
     <div class="box">
 
       <div class="left">
@@ -87,14 +98,22 @@ const callback = async (response) => {
             />
           </div>
 
-          <div class="field">
+          <div class="field password-field">
             <span><i class="fa fa-lock"></i></span>
             <input
-              type="password"
               v-model="registerPassword"
+              :type="showPassword ? 'text' : 'password'"
               :placeholder="t('message.enterPassword')"
               required
             />
+            <button
+              type="button"
+              class="toggle-password"
+              @click="togglePasswordVisibility"
+              :title="showPassword ? t('message.hidePassword') : t('message.showPassword')"
+            >
+              <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+            </button>
           </div>
 
           <button type="submit">{{ t('menu.register') }}</button>
@@ -127,3 +146,33 @@ const callback = async (response) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.password-field {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s;
+}
+
+.toggle-password:hover {
+  color: #333;
+}
+
+.toggle-password i {
+  font-size: 16px;
+}
+</style>

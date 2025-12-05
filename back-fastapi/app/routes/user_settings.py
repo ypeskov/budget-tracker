@@ -25,12 +25,12 @@ from app.services.user_settings import (
 
 ic.configureOutput(includeContext=True)
 
-router = APIRouter(tags=['Settings'], prefix='/settings', dependencies=[Depends(check_token)])
+router = APIRouter(tags=['Settings'], prefix='/settings')
 
 
-@router.get('/languages/', response_model=list[LanguageSchema])
+@router.get('/languages', response_model=list[LanguageSchema])
 def get_all_languages(request: Request, db: Session = Depends(get_db)):
-    """Get all languages"""
+    """Get all languages (public endpoint)"""
     try:
         languages = get_languages(db)
         return languages
@@ -42,7 +42,7 @@ def get_all_languages(request: Request, db: Session = Depends(get_db)):
         )
 
 
-@router.get('/')
+@router.get('/', dependencies=[Depends(check_token)])
 def get_settings(request: Request, db: Session = Depends(get_db)):
     """Get user settings"""
     try:
@@ -56,7 +56,7 @@ def get_settings(request: Request, db: Session = Depends(get_db)):
         )
 
 
-@router.post("")
+@router.post("", dependencies=[Depends(check_token)])
 async def store_settings(request: Request, new_settings: UserSettingsSchema, db: Session = Depends(get_db)):
     """Create user settings"""
     try:
@@ -89,7 +89,7 @@ async def store_settings(request: Request, new_settings: UserSettingsSchema, db:
         )
 
 
-@router.get('/base-currency/', response_model=CurrencyResponseSchema)
+@router.get('/base-currency/', response_model=CurrencyResponseSchema, dependencies=[Depends(check_token)])
 async def base_currency(request: Request, db: Session = Depends(get_db)):
     """Get user base currency"""
     try:
@@ -102,7 +102,7 @@ async def base_currency(request: Request, db: Session = Depends(get_db)):
         )
 
 
-@router.put('/base-currency/', response_model=CurrencyResponseSchema)
+@router.put('/base-currency/', response_model=CurrencyResponseSchema, dependencies=[Depends(check_token)])
 async def set_base_currency(request: Request, input_data: BaseCurrencyInputSchema, db: Session = Depends(get_db)):
     """Set user base currency"""
     try:

@@ -12,8 +12,8 @@ export class SettingsService {
   }
 
   async getLanguages() {
-    const languagesUrl = `${settingsPrefixUrl}/languages/`;
-    return await request(languagesUrl, {}, { userService: this.userService });
+    const languagesUrl = `${settingsPrefixUrl}/languages`;
+    return await request(languagesUrl, {}, { userService: this.userService }, false);
   }
 
   async saveUserSettings(settings = null) {

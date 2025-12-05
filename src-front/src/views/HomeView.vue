@@ -2,6 +2,7 @@
 import { RouterLink, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useI18n } from 'vue-i18n'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -41,6 +42,8 @@ const features = [
         </div>
 
         <div class="nav-right">
+          <LanguageSwitcher />
+
           <RouterLink
             v-if="!userStore.user.id"
             :to="{ name: 'login' }"
@@ -108,3 +111,11 @@ const features = [
     </footer>
   </div>
 </template>
+
+<style scoped>
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+</style>
