@@ -156,30 +156,27 @@ async function filterApplied(payload) {
         <span v-if="userStore.isLoggedIn">
           <RouterLink class="btn btn-secondary"
                       :to="{
-                      name: 'transactionNew', 
+                      name: 'transactionNew',
                       query: {
                         returnUrl: returnUrlName,
                         accountId: props.accountId,
                       }
-                    }">
-            <img src="/images/icons/new-icon.svg"
-                 :title="$t('message.new')"
-                 :alt="$t('message.new')" />
+                    }"
+                      :title="$t('message.new')">
+            <span class="icon-text">✚</span>
           </RouterLink>
         </span>
         <span>
           <a href="" class="btn" :class="{ 'active-filter btn-success': !reset, 'btn-secondary': reset }"
-             @click="toggleFilter">
-            <img src="/images/icons/filter-icon.svg"
-                 :title="$t('message.filter')"
-                 :alt="$t('message.filter')" />
+             @click="toggleFilter"
+             :title="$t('message.filter')">
+            <span class="icon-text">🔍</span>
             </a>
         </span>
         <span>
-          <a href="" class="btn btn-secondary" @click="reloadTransactions">
-            <img src="/images/icons/refresh-icon.svg"
-                 :title="$t('message.refresh')"
-                 :alt="$t('message.refresh')" />
+          <a href="" class="btn btn-secondary" @click="reloadTransactions"
+             :title="$t('message.refresh')">
+            <span class="icon-text">↻</span>
           </a>
         </span>
 
@@ -217,5 +214,17 @@ async function filterApplied(payload) {
 .loading {
   text-align: center;
   padding: 20px;
+}
+
+.icon-text {
+  font-size: 0.95rem;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.sub-menu .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
 }
 </style>
