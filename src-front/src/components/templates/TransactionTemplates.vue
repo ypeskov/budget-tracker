@@ -58,7 +58,7 @@ async function remove() {
     </div>
 
     <button
-      class="btn primary"
+      class="btn btn-primary"
       :disabled="!selectedTemplates.length"
       @click="remove"
     >

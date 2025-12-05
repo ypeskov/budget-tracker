@@ -44,7 +44,7 @@ async function updated() { await loadCats(); }
         </div>
       </div>
 
-      <button class="btn primary" @click="openEditor()">
+      <button class="btn btn-primary" @click="openEditor()">
         <i class="fa-solid fa-plus"></i>
         {{ t('buttons.addNewCategory') }}
       </button>

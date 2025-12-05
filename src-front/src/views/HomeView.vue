@@ -44,7 +44,7 @@ const features = [
           <RouterLink
             v-if="!userStore.user.id"
             :to="{ name: 'login' }"
-            class="btn primary"
+            class="btn btn-primary"
           >
             {{ t('menu.login') }}
           </RouterLink>
@@ -52,7 +52,7 @@ const features = [
           <RouterLink
             v-if="!userStore.user.id"
             :to="{ name: 'register' }"
-            class="btn outline"
+            class="btn btn-outline-primary"
           >
             {{ t('menu.register') }}
           </RouterLink>
@@ -60,7 +60,7 @@ const features = [
           <RouterLink
             v-else
             :to="{ name: 'accounts' }"
-            class="btn primary"
+            class="btn btn-primary"
           >
             {{ t('menu.dashboard') }}
           </RouterLink>
@@ -74,7 +74,7 @@ const features = [
         <p>{{ t('home.heroSubtitle') }}</p>
         <RouterLink
           :to="{ name: userStore.user.id ? 'accounts' : 'login' }"
-          class="btn primary cta"
+          class="btn btn-primary btn-cta"
         >
           {{
             userStore.user.id

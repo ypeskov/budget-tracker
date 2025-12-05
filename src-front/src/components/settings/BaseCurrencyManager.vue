@@ -54,7 +54,7 @@ const apply = async () => {
       </option>
     </select>
 
-    <button class="btn primary" @click="apply">
+    <button class="btn btn-primary" @click="apply">
       {{ t('buttons.apply') }}
     </button>
   </div>

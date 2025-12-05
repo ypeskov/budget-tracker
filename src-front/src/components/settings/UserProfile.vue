@@ -10,16 +10,16 @@ const tab = ref('lang');   // 'lang' | 'curr'
 <template>
   <div class="profile-wrapper">
 
-    <!-- ── локальное меню профиля ── -->
+    <!-- Profile local menu -->
     <nav class="profile-tabs">
-      <button class="btn outline"
+      <button class="btn btn-outline-primary"
               :class="{ active: tab === 'lang' }"
               @click="tab = 'lang'">
         <i class="fa-solid fa-language"></i>
         {{ $t('buttons.language') }}
       </button>
 
-      <button class="btn outline"
+      <button class="btn btn-outline-primary"
               :class="{ active: tab === 'curr' }"
               @click="tab = 'curr'">
         <i class="fa-solid fa-money-bill-wave"></i>
@@ -27,7 +27,7 @@ const tab = ref('lang');   // 'lang' | 'curr'
       </button>
     </nav>
 
-    <!-- ── активная секция ── -->
+    <!-- Active section -->
     <div class="profile-body">
       <LanguageSelector    v-if="tab === 'lang'"  />
       <BaseCurrencyManager v-else                />

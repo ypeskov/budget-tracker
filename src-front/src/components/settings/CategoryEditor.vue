@@ -62,7 +62,7 @@ async function reallyDelete() {
           <span v-if="state.id" class="muted">#{{ state.id }}</span>
         </div>
 
-        <button class="btn outline" @click="props.closeModal">
+        <button class="btn btn-outline-primary" @click="props.closeModal">
           {{ t('buttons.cancel') }}
         </button>
       </div>
@@ -81,7 +81,7 @@ async function reallyDelete() {
             <div class="segmented">
               <button
                 type="button"
-                class="btn outline"
+                class="btn btn-outline-primary"
                 :class="{ active: state.isIncome }"
                 @click="state.isIncome = true"
               >
@@ -90,7 +90,7 @@ async function reallyDelete() {
               </button>
               <button
                 type="button"
-                class="btn outline"
+                class="btn btn-outline-primary"
                 :class="{ active: !state.isIncome }"
                 @click="state.isIncome = false"
               >
@@ -135,13 +135,13 @@ async function reallyDelete() {
       </div>
 
       <div class="actions">
-        <button class="btn primary" @click="save">
+        <button class="btn btn-primary" @click="save">
           {{ t('buttons.save') }}
         </button>
 
         <button
           v-if="state.id"
-          class="btn outline danger"
+          class="btn btn-outline-danger"
           @click="promptDelete"
         >
           {{ t('buttons.delete') }}
@@ -161,10 +161,10 @@ async function reallyDelete() {
     <template #main>
       <p>{{ t('message.areYouSureWantDeleteCategory') }}</p>
       <div class="actions center">
-        <button class="btn outline" @click="askDelete = false">
+        <button class="btn btn-outline-primary" @click="askDelete = false">
           {{ t('buttons.cancel') }}
         </button>
-        <button class="btn danger" @click="reallyDelete">
+        <button class="btn btn-danger" @click="reallyDelete">
           {{ t('buttons.delete') }}
         </button>
       </div>

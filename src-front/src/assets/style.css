@@ -13,51 +13,165 @@ body {
   color: #000;
 }
 
-/* ---------- Buttons ---------- */
+/* ========================================================================== */
+/*  Button Enhancements - Modern Bootstrap 5 Extensions                      */
+/* ========================================================================== */
+
+/* --- Global Button Improvements --- */
 .btn {
-  display: inline-block;
-  padding: 8px 24px;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: background 0.2s;
-  cursor: pointer;
-  text-decoration: none;
-  text-align: center;
+  padding: 10px 28px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  border: none;
+  position: relative;
+  overflow: hidden;
 }
-.btn.primary {
-  background: #1e90ff;
-  color: #fff;
+
+/* Hover effects with elevation */
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Active state - pressed effect */
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Focus state for accessibility */
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.3);
+}
+
+/* Disabled state */
+.btn:disabled,
+.btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* --- Primary Button Enhancement --- */
+.btn-primary {
+  background: linear-gradient(135deg, #1e90ff 0%, #0077e6 100%);
   border: none;
 }
-.btn.primary:hover {
-  background: #007eeb;
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0077e6 0%, #0066cc 100%);
+  box-shadow: 0 6px 16px rgba(30, 144, 255, 0.4);
 }
-.btn.outline {
-  background: transparent;
+
+/* --- Outline Button Enhancement --- */
+.btn-outline-primary {
+  border: 2px solid #1e90ff;
   color: #1e90ff;
-  border: 1px solid #1e90ff;
+  background: transparent;
+  box-shadow: none;
 }
-.btn.outline:hover {
+
+.btn-outline-primary:hover {
   background: #1e90ff;
   color: #fff;
+  border-color: #1e90ff;
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
 }
-.btn.cta {
+
+/* --- Secondary Button Enhancement --- */
+.btn-secondary {
+  background: #6c757d;
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* --- Danger Button Enhancement --- */
+.btn-danger:hover {
+  box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+}
+
+/* --- Icon Buttons (special custom class) --- */
+.btn-icon {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: transparent;
+  color: #1e90ff;
+  box-shadow: none;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-icon i {
+  font-size: 18px;
+}
+
+.btn-icon:hover {
+  background: rgba(30, 144, 255, 0.12);
+  transform: translateY(-1px);
+  box-shadow: none;
+}
+
+.btn-icon:active {
+  transform: scale(0.95);
+}
+
+/* Icon button with outline variant */
+.btn-icon.btn-outline-primary {
+  border: 1px solid #1e90ff;
+  padding: 8px 12px;
+}
+
+.btn-icon.btn-outline-primary:hover {
+  background: #1e90ff;
+  color: #fff;
+  border-color: #1e90ff;
+}
+
+/* --- Button Sizes --- */
+.btn-sm {
+  padding: 6px 18px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+.btn-lg {
+  padding: 14px 36px;
+  font-size: 17px;
+  border-radius: 10px;
+}
+
+/* CTA variant (Call to Action) */
+.btn-cta {
   margin-top: 24px;
-  padding: 12px 36px;
-  font-size: 16px;
+  padding: 14px 36px;
+  font-size: 17px;
+  box-shadow: 0 4px 14px rgba(30, 144, 255, 0.3);
+}
+
+.btn-cta:hover {
+  box-shadow: 0 8px 24px rgba(30, 144, 255, 0.4);
 }
 
 /* ========================================================================== */
-/*  NAVBAR – единый для всех страниц                                          */
+/*  NAVBAR - Unified for all pages                                           */
 /* ========================================================================== */
 :root {
-  --nav-h-desktop: 80px;   /* высота шапки на десктопах */
-  --nav-h-mobile : 68px;   /* высота шапки на телефонах */
+  --nav-h-desktop: 80px;   /* navbar height on desktop */
+  --nav-h-mobile : 68px;   /* navbar height on mobile */
 }
 
-/* --- оболочка --- */
-.navbar,                 /* используется в приложении (AppShell)  */
-.nav {                   /* старая шапка «Home»                    */
+/* --- Navbar wrapper --- */
+.navbar,                 /* used in app (AppShell) */
+.nav {                   /* legacy Home navbar */
   height: var(--nav-h-desktop);
   background: #fff;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
@@ -65,12 +179,12 @@ body {
   align-items: center;
   z-index: 1;
   margin: 0;
-  padding: 0;            /* убираем прежние 20/40 px отступы */
+  padding: 0;
 }
 
-/* --- внутренний контейнер-выровнитель --- */
-.nav-inner,                         /* двухъярусная шапка */
-.nav > .container {                 /* шапка главной страницы */
+/* --- Inner container --- */
+.nav-inner,                         /* two-tier navbar */
+.nav > .container {                 /* home page navbar */
   width: 100%;
   max-width: 1200px;
   margin-inline: auto;
@@ -81,7 +195,7 @@ body {
   height: 100%;
 }
 
-/* --- группы элементов --- */
+/* --- Element groups --- */
 .nav-left,
 .nav-right,
 .logo {
@@ -90,7 +204,7 @@ body {
   gap: 8px;
 }
 
-/* логотип-иконка */
+/* Logo */
 .logo {
   font-size: 25px;
   font-weight: 700;
@@ -99,14 +213,14 @@ body {
 }
 .logo i { font-size: 22px; }
 
-/* таймер */
+/* Timer */
 .time {
   font-size: 17px;
   color: #6c757d;
   margin-right: 4px;
 }
 
-/* кнопки-иконки */
+/* Icon buttons (legacy - to be replaced) */
 .btn.icon {
   padding: 8px 18px;
   border: none;
@@ -120,7 +234,7 @@ body {
   border-radius: 4px;
 }
 
-/* outline-вариант (шестерёнка) */
+/* Outline variant (settings gear icon) */
 .btn.icon.outline {
   border: 1px solid #1e90ff;
   border-radius: 4px;
@@ -130,17 +244,17 @@ body {
   color: #fff;
 }
 
-/* активный роут */
+/* Active router link */
 .router-link-active i {
   color: #007eeb;
 }
 
-/* дополнительный отступ между кнопками, если нужно */
+/* Additional spacing between buttons if needed */
 .nav .btn + .btn {
   margin-left: 12px;
 }
 
-/* --- адаптив --- */
+/* --- Responsive --- */
 @media (max-width: 576px) {
   .navbar,
   .nav { height: var(--nav-h-mobile); }
@@ -284,7 +398,7 @@ body {
   flex-direction: column;
   overflow-x: hidden;
 }
-/* — Navigation (уже унифицирован через .nav) — */
+/* Navigation (already unified through .nav) */
 .nav .btn + .btn { margin-left: 12px; }
 
 /* ---- Hero ---- */
@@ -433,7 +547,7 @@ body {
 }
 
 /* ========================================================================== */
-/*  App-header (двухъярусная версия, где нужна)                               */
+/*  App-header (two-tier version where needed)                               */
 /* ========================================================================== */
 .app-header {
   background: #fff;
@@ -484,22 +598,19 @@ body {
 -------------------------------------------------- */
 .settings-page,
 .reports-page {
-  /* вместо 60px нижнего паддинга – 24px, да и то
-     только если контента реально много */
+  /* Reduced bottom padding to 24px instead of 60px */
   min-height: calc(100dvh - var(--nav-h-desktop));
-  padding-block: 40px 24px;         /* сверху 40, снизу 24 */
-
-  /* чтобы и на мобилках не появлялось */
+  padding-block: 40px 24px;         /* top 40, bottom 24 */
 }
 @media (max-width: 576px) {
   .settings-page,
   .reports-page {
     min-height: calc(100dvh - var(--nav-h-mobile));
-    padding-block: 24px 16px;       /* компактнее на телефоне */
+    padding-block: 24px 16px;       /* more compact on mobile */
   }
 }
 
-/* если у карточки был внешний margin-bottom (32px) — уберём у последней */
+/* Remove bottom margin from last section card */
 .section-card:last-child { margin-bottom: 0; }
 
 .split {
@@ -531,23 +642,31 @@ body {
   gap: 12px;
   width: 100%;
   text-align: left;
-  padding: 10px 16px;
+  padding: 12px 18px;
   background: transparent;
-  border: 1px solid #ced4da;
+  border: 2px solid #e5e7eb;
   color: #1e90ff;
-  transition: background 0.15s, color 0.15s;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: none;
 }
 .side-btn i { font-size: 18px; }
 
 .side-btn:hover {
-  background: rgba(30,144,255,0.1);
+  background: rgba(30,144,255,0.08);
+  border-color: #1e90ff;
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(30, 144, 255, 0.15);
 }
 
 .side-btn.active,
 .side-btn.active:hover {
-  background: #1e90ff;
+  background: linear-gradient(135deg, #1e90ff 0%, #0077e6 100%);
   color: #fff;
   border-color: #1e90ff;
+  transform: translateX(0);
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
 }
 
 /* ---------- CONTENT ---------- */
@@ -590,13 +709,13 @@ body {
 }
 
 .side-btn {
-  display: flex;              /* ➊ делаем flex-контейнером */
+  display: flex;
   align-items: center;
-  gap: 8px;                   /* ➋ читаемый отступ между <i> и текстом */
+  gap: 8px;                   /* spacing between icon and text */
 }
 
 /* --------------------------------------------------
-   Cat-UI (список категорий)
+   Cat-UI (categories list)
 -------------------------------------------------- */
 .cat-card { overflow: auto; }
 
@@ -618,45 +737,53 @@ body {
 .cat-list    { list-style: none; margin: 0; padding: 0; }
 .cat-item    { margin-bottom: 8px; }
 .cat-btn {
-  padding: 6px 16px;
+  padding: 8px 18px;
   background: #eaf4ff;
   color: #1e90ff;
-  border: none;
-  border-radius: 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   font-size: 14px;
-  transition: background .15s;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 3px rgba(30, 144, 255, 0.1);
 }
-.cat-btn:hover { background: #d6eaff; }
+.cat-btn:hover {
+  background: #d6eaff;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(30, 144, 255, 0.2);
+  border-color: #1e90ff;
+}
 
 .cat-sub  { list-style: none; margin: 6px 0 0 16px; padding: 0; }
 .cat-btn.sub {
   font-size: 13px;
   background: #f5f9ff;
+  padding: 6px 14px;
 }
 
-/* единый класс для всех выпадашек */
+/* Unified class for all dropdowns/selects */
 .select-input {
   width: 100%;
-  padding: 10px 32px 10px 12px;         /* 32px =  icon (12) + безопасный отступ (20) */
+  padding: 10px 32px 10px 12px;         /* 32px = icon (12) + safe spacing (20) */
   font-size: 14px;
   border: 1px solid #ced4da;
   border-radius: 4px;
   background-color: #fff;
 
-  /* убираем «родную» стрелку */
+  /* Remove native arrow */
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
 
-  /* аккуратная svg-стрелка цвета #6c757d (та же, что плейсхолдеры) */
+  /* Custom SVG arrow in #6c757d color */
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='%236c757d' d='M5 7l5 5 5-5'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-size: 12px 12px;
-  background-position: right 12px center;  /* ← ближе к тексту */
+  background-position: right 12px center;
 }
 select::-ms-expand { display: none; }      /* Edge/IE */
 
 .confirm-modal .modal-container,
-.confirm-modal .modal-window {     /* второй селектор — на случай другой разметки */
-  max-width: 380px;               /* компактнее обычного редактора */
+.confirm-modal .modal-window {     /* alternative selector for different markup */
+  max-width: 380px;               /* more compact than regular modal */
 }
