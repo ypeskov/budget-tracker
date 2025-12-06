@@ -362,6 +362,9 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
+
+// Expose input ref for parent component access
+defineExpose({ inputRef });
 </script>
 
 <style scoped>

@@ -224,8 +224,8 @@
       filterCategories();
 
       nextTick(() => {
-        if (amountComponent.value?.amountInput) {
-          const inputElement = amountComponent.value.amountInput;
+        if (amountComponent.value?.amountInput?.inputRef) {
+          const inputElement = amountComponent.value.amountInput.inputRef;
           inputElement.focus();
           inputElement.select();
         }
